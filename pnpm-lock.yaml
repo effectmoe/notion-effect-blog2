@@ -29,6 +29,9 @@ importers:
       fathom-client:
         specifier: ^3.4.1
         version: 3.7.2
+      katex:
+        specifier: ^0.16.22
+        version: 0.16.22
       ky:
         specifier: ^1.7.2
         version: 1.8.0
@@ -57,7 +60,7 @@ importers:
         specifier: ^1.181.0
         version: 1.235.6
       prismjs:
-        specifier: ^1.29.0
+        specifier: ^1.30.0
         version: 1.30.0
       react:
         specifier: ^18.2.0
