@@ -11,11 +11,20 @@ export interface PageError {
   statusCode: number
 }
 
+// メニュー項目の型定義
+export interface MenuItem {
+  id: string
+  title: string
+  url: string
+  isActive?: boolean
+}
+
 export interface PageProps {
   site?: Site
   recordMap?: ExtendedRecordMap
   pageId?: string
   error?: PageError
+  menuItems?: MenuItem[] // menuItemsプロパティを追加
 }
 
 export interface ExtendedTweetRecordMap extends ExtendedRecordMap {

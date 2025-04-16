@@ -44,6 +44,24 @@
   width: 640px;
 }
 
+/* ヘッダースペースを確保するスタイル */
+.notion {
+  /* ヘッダー分の高さを上部に追加 */
+  padding-top: 60px;
+}
+
+@media (max-width: 768px) {
+  .notion {
+    padding-top: 55px;
+  }
+}
+
+@media (max-width: 480px) {
+  .notion {
+    padding-top: 50px;
+  }
+}
+
 .footer {
   width: 100%;
   max-width: 1100px;

@@ -29,6 +29,7 @@ import { NotionPageHeader } from './NotionPageHeader'
 import { Page404 } from './Page404'
 import { PageAside } from './PageAside'
 import { PageHead } from './PageHead'
+import { Header } from './Header'
 import styles from './styles.module.css'
 
 // -----------------------------------------------------------------------------
@@ -156,7 +157,8 @@ export function NotionPage({
   site,
   recordMap,
   error,
-  pageId
+  pageId,
+  menuItems // 新しいプロパティを追加
 }: types.PageProps) {
   const router = useRouter()
   const lite = useSearchParam('lite')
@@ -265,6 +267,9 @@ export function NotionPage({
 
       {isLiteMode && <BodyClassName className='notion-lite' />}
       {isDarkMode && <BodyClassName className='dark-mode' />}
+
+      {/* カスタムヘッダーを追加 */}
+      <Header menuItems={menuItems} />
 
       <NotionRenderer
         bodyClassName={cs(
