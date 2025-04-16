@@ -230,6 +230,7 @@ export function NotionPage({
   React.useEffect(() => {
     document.body.classList.add('no-notion-tabs');
     
+<<<<<<< HEAD
     // 緑枠のWhat's Newを削除（DOMが読み込まれた後）
     if (site && pageId && site.rootNotionPageId && pageId === site.rootNotionPageId) {
       setTimeout(() => {
@@ -261,6 +262,13 @@ export function NotionPage({
       document.body.classList.remove('no-notion-tabs');
     };
   }, [pageId, site]);
+=======
+    return () => {
+      document.body.classList.remove('no-notion-tabs');
+    };
+  }, []);
+>>>>>>> parent of bf07dc0 (1)
+
   // ナビゲーションメニュー項目を取得
   const navigationMenuItems = React.useMemo(() => 
     site ? getNavigationMenuItems(site) : [], [site]
