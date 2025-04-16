@@ -11,32 +11,22 @@ export const getStaticProps = async () => {
     // NotionデータベースからMenuがtrueの項目を取得
     const menuItems = await getMenuItems()
     
-<<<<<<< HEAD
-<<<<<<< HEAD
     // What's Newアイテムを取得 - 実際のデータベースから取得
     let whatsNewItems = [];
     try {
       // 正しいデータベースIDを使用
-      whatsNewItems = await getWhatsNewItems(WHATS_NEW_DATABASE_ID)
-      console.log('Fetched WhatsNew items:', whatsNewItems.length)
+      // 注：実際に使用する場合はデータベースIDを正しく設定してください
+      // const WHATS_NEW_DATABASE_ID = 'your-database-id-here'
+      // whatsNewItems = await getWhatsNewItems(WHATS_NEW_DATABASE_ID)
+      // console.log('Fetched WhatsNew items:', whatsNewItems.length)
+      
+      // 開発用サンプルデータ
+      whatsNewItems = getSampleWhatsNewItems()
     } catch (error) {
       console.error('Error fetching WhatsNew items:', error)
       // エラー時はサンプルデータを使用
       whatsNewItems = getSampleWhatsNewItems()
     }
-=======
-    // What's Newアイテムを取得
-    // 実際のデータベース方式（後でコメントアウトを解除して使用）
-=======
-    // What's Newアイテムを取得 (実際のデータベースID設定前はサンプルデータを使用)
-    // 実際に使用する場合は下のようにデータベースIDを指定
->>>>>>> parent of f0db49e (1)
-    // const whatsNewDatabaseId = 'your-database-id-here'
-    // const whatsNewItems = await getWhatsNewItems(whatsNewDatabaseId)
-    
-    // 開発用サンプルデータ
-    const whatsNewItems = getSampleWhatsNewItems()
->>>>>>> parent of bf07dc0 (1)
     
     // propsにmenuItemsとwhatsNewItemsを追加
     return { 
