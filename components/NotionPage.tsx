@@ -243,7 +243,7 @@ export function NotionPage({
                 collection.textContent?.includes('2025.04.01') ||
                 collection.textContent?.includes('Webサイトニューアル');
               if (isDateContent) {
-                collection.style.display = 'none';
+                (collection as HTMLElement).style.display = 'none';
                 console.log('Hidden duplicate What\'s New element');
               }
             });
