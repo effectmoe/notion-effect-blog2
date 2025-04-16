@@ -31,81 +31,52 @@ const WhatsNewSimple: React.FC<WhatsNewSimpleProps> = ({
 
   return (
     <div className="whats-new-simple-container">
-      <h3 className="whats-new-simple-title">📋 What's New</h3>
       <div className="whats-new-simple-list">
         {sortedItems.map((item) => (
-          <Link href={`/${item.slug}`} key={item.id} className="whats-new-simple-item">
-            <div className="whats-new-simple-date">
-              {format(new Date(item.date), 'yyyy.MM.dd', { locale: ja })}
-            </div>
-            <div className="whats-new-simple-content">
+          <div key={item.id} className="whats-new-simple-item">
+            <div className="whats-new-simple-date-title">
               {item.icon && <span className="whats-new-simple-icon">{item.icon}</span>}
-              {item.title}
+              {format(new Date(item.date), 'yyyy.MM.dd')} | {item.title}
             </div>
-          </Link>
+          </div>
         ))}
       </div>
       
       <style jsx>{`
         .whats-new-simple-container {
-          margin: 1.5rem 0;
-          background-color: #fcfcfc;
-          border-radius: 8px;
-          padding: 1rem;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
-        
-        .whats-new-simple-title {
-          font-size: 1.2rem;
-          font-weight: 600;
-          margin-bottom: 0.75rem;
-          color: #333;
+          margin: 0;
+          padding: 0.5rem;
+          border: 1px solid #95c066;
+          border-radius: 4px;
+          background-color: #fff;
+          max-width: 500px;
         }
         
         .whats-new-simple-list {
           display: flex;
           flex-direction: column;
-          gap: 0.5rem;
         }
         
         .whats-new-simple-item {
           display: flex;
-          align-items: baseline;
-          text-decoration: none;
-          color: inherit;
-          transition: color 0.2s;
+          flex-direction: column;
           padding: 0.25rem 0;
         }
         
-        .whats-new-simple-item:hover {
-          color: #6366f1;
-        }
-        
-        .whats-new-simple-date {
-          font-size: 0.9rem;
-          color: #666;
-          min-width: 6.5rem;
-        }
-        
-        .whats-new-simple-content {
+        .whats-new-simple-date-title {
           font-size: 0.95rem;
           display: flex;
           align-items: center;
-          gap: 0.25rem;
+          color: #333;
         }
         
         .whats-new-simple-icon {
-          margin-right: 0.25rem;
+          margin-right: 0.5rem;
         }
         
         @media (max-width: 640px) {
-          .whats-new-simple-item {
-            flex-direction: column;
-            gap: 0.25rem;
-          }
-          
-          .whats-new-simple-date {
-            min-width: auto;
+          .whats-new-simple-container {
+            max-width: 100%;
           }
         }
       `}</style>

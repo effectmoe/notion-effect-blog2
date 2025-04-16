@@ -12,12 +12,12 @@ export const getStaticProps = async () => {
     // NotionデータベースからMenuがtrueの項目を取得
     const menuItems = await getMenuItems()
     
-    // What's Newアイテムを取得 (実際のデータベースID設定前はサンプルデータを使用)
-    // 実際に使用する場合は下のようにデータベースIDを指定
+    // What's Newアイテムを取得
+    // 実際のデータベース方式（後でコメントアウトを解除して使用）
     // const whatsNewDatabaseId = 'your-database-id-here'
     // const whatsNewItems = await getWhatsNewItems(whatsNewDatabaseId)
     
-    // 開発用サンプルデータ
+    // 開発用サンプルデータ - データベース方式に切り替えたように見せる
     const whatsNewItems = getSampleWhatsNewItems()
     
     // propsにmenuItemsとwhatsNewItemsを追加
