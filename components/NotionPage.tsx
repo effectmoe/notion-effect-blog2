@@ -230,10 +230,36 @@ export function NotionPage({
   React.useEffect(() => {
     document.body.classList.add('no-notion-tabs');
     
+    // 緑枠のWhat's Newを削除（DOMが読み込まれた後）
+    if (pageId === site.rootNotionPageId) {
+      setTimeout(() => {
+        // 複数回試行して確実に削除する
+        const removeGreenFrame = () => {
+          const collections = document.querySelectorAll('.notion-collection-row');
+          if (collections && collections.length > 0) {
+            collections.forEach(collection => {
+              // 緑枠のWhat's Newかどうかを判定して削除
+              const isDateContent = collection.textContent?.includes('2025.04.07') || 
+                collection.textContent?.includes('2025.04.01');
+              if (isDateContent) {
+                collection.remove();
+              }
+            });
+            console.log('Removed duplicate What\'s New elements');
+          }
+        };
+
+        // ロード直後と少し遅延させた後の両方で実行
+        removeGreenFrame();
+        setTimeout(removeGreenFrame, 1000);
+        setTimeout(removeGreenFrame, 2000);
+      }, 100);
+    }
+    
     return () => {
       document.body.classList.remove('no-notion-tabs');
     };
-  }, []);
+  }, [pageId, site.rootNotionPageId]);
 
   // ナビゲーションメニュー項目を取得
   const navigationMenuItems = React.useMemo(() => 
@@ -331,11 +357,13 @@ export function NotionPage({
       {/* Notionレンダラー - 内部のヘッダーをnullに設定したので、カスタムヘッダーを外に配置 */}
       <Header menuItems={(menuItems && menuItems.length > 0) ? menuItems : navigationMenuItems} />
 
-      {/* What's Newブロック - トップページでのみ表示 */}
+      {/* What's Newブロック - トップページでのみ表示 + データベースID指定 */}
       {pageId === site.rootNotionPageId && whatsNewItems && whatsNewItems.length > 0 && (
-        <div className="mx-auto my-4" style={{ maxWidth: '500px' }}>
+        <div id="whats-new-container" className="mx-auto my-4" style={{ maxWidth: '100%', textAlign: 'center' }}>
           <h2 className="text-3xl font-bold text-center mb-8">☕ Welcome to CafeKinesi</h2>
-          <WhatsNewSimple items={whatsNewItems} max={5} />
+          <div style={{ display: 'inline-block', maxWidth: '500px', width: '100%', textAlign: 'left' }}>
+            <WhatsNewSimple items={whatsNewItems} max={5} />
+          </div>
         </div>
       )}
 
