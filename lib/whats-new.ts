@@ -1,6 +1,6 @@
 import { notion } from './notion-api';
 import type { WhatsNewItem } from '@/components/WhatsNew';
-import { getNotionPageProperty } from 'notion-utils';
+import { getPageProperty } from 'notion-utils';
 import * as config from './config';
 
 /**
