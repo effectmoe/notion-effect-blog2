@@ -8,32 +8,32 @@ export const notionViews: ViewTab[] = [
     name: 'すべて', 
     path: '/', 
     // メインページID（site.config.tsのrootNotionPageIdと同じ）
-    pageId: '1d7b802cb0c680fd84b4f669f3f1160f'
+    pageId: '1ceb802cb0c680f29369dba86095fb38'
   },
   { 
     id: 'blog', 
     name: 'ブログ', 
     path: '/view/blog',
     // ブログカテゴリのビューID（Notionで作成したビューのID）
-    pageId: '1d7b802cb0c680fd84b4f669f3f1160f?v=1d7b802cb0c680b38c25000cd94246a7' // What's Newデータベースのビュー
+    pageId: '1ceb802cb0c680f29369dba86095fb38?v=xxxxxxxxxxxx' // 実際のビューIDに置き換え
   },
   { 
     id: 'website', 
     name: 'Webサイト', 
     path: '/view/website',
-    pageId: '1d7b802cb0c680fd84b4f669f3f1160f?v=1d7b802cb0c680b38c25000cd94246a7' // What's Newデータベースのビュー
+    pageId: '1ceb802cb0c680f29369dba86095fb38?v=xxxxxxxxxxxx' // 実際のビューIDに置き換え
   },
   { 
     id: 'profile', 
     name: 'プロフィール', 
     path: '/view/profile',
-    pageId: '1d7b802cb0c680fd84b4f669f3f1160f?v=1d7b802cb0c680b38c25000cd94246a7' // What's Newデータベースのビュー
+    pageId: '1ceb802cb0c680f29369dba86095fb38?v=xxxxxxxxxxxx' // 実際のビューIDに置き換え
   },
   { 
     id: 'new', 
     name: '新着順', 
     path: '/view/new',
-    pageId: '1d7b802cb0c680fd84b4f669f3f1160f?v=1d7b802cb0c680b38c25000cd94246a7' // What's Newデータベースのビュー
+    pageId: '1ceb802cb0c680f29369dba86095fb38?v=xxxxxxxxxxxx' // 実際のビューIDに置き換え
   }
 ];
 

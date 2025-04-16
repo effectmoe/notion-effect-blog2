@@ -12,8 +12,6 @@ import 'styles/global.css'
 import 'styles/notion.css'
 // global style overrides for prism theme (optional)
 import 'styles/prism-theme.css'
-// WhatsNew component styles
-import 'styles/whats-new.css'
 
 import type { AppProps } from 'next/app'
 import * as Fathom from 'fathom-client'

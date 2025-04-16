@@ -37,6 +37,3 @@ yarn-error.log*
 
 # vercel
 .vercel
-
-# temporary files
-/temp
