@@ -156,18 +156,13 @@ const propertyTextValue = (
 // ナビゲーションメニュー項目
 const getNavigationMenuItems = (site: types.Site) => {
   // デフォルトのメニュー項目
-  const defaultMenuItems = []
-  
-  // サイト設定に基づくメニュー項目（例：カスタムナビゲーションリンク）
-  if (site?.navigationStyle === 'custom' && site?.navigationLinks?.length) {
-    const customItems = site.navigationLinks.map((link, index) => ({
-      id: `nav-${index}`,
-      title: link.title,
-      url: link.url || `/page/${link.pageId}`
-    }))
-    
-    return [...defaultMenuItems, ...customItems]
-  }
+  const defaultMenuItems = [
+    {
+      id: 'home',
+      title: 'ホーム',
+      url: '/'
+    }
+  ]
   
   return defaultMenuItems
 }
