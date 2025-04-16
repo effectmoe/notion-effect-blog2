@@ -63,9 +63,41 @@
   display: none;
 }
 
+/* What's New セクション用のスタイル上書き */
+/* 通常のギャラリーのタイトルサイズ */
 .notion-gallery-grid .notion-page-title-text {
   font-size: 2em;
   white-space: unset;
+}
+
+/* What's Newセクションのタイトルサイズを小さく */
+.notion-collection-header-title:has(span:contains("What's New")) ~ .notion-gallery-grid .notion-page-title-text,
+.notion-collection-header-title:has(span:contains("What")) ~ .notion-gallery-grid .notion-page-title-text,
+.notion-collection-header-title:has(span:contains("New")) ~ .notion-gallery-grid .notion-page-title-text {
+  font-size: 0.95rem !important;
+  line-height: 1.4 !important;
+  font-weight: 500 !important;
+  -webkit-background-clip: initial !important;
+  -webkit-text-fill-color: #333 !important;
+  background: transparent !important;
+}
+
+/* What's Newセクションのプロパティスタイル */
+.notion-collection-header-title:has(span:contains("What's New")) ~ .notion-gallery-grid .notion-property-select,
+.notion-collection-header-title:has(span:contains("What")) ~ .notion-gallery-grid .notion-property-select,
+.notion-collection-header-title:has(span:contains("New")) ~ .notion-gallery-grid .notion-property-select {
+  font-size: 0.7rem !important;
+  padding: 0.15rem 0.5rem !important;
+  border-radius: 4px !important;
+  margin-right: 0.5rem !important;
+}
+
+/* What's Newセクションの日付スタイル */
+.notion-collection-header-title:has(span:contains("What's New")) ~ .notion-gallery-grid .notion-property-date,
+.notion-collection-header-title:has(span:contains("What")) ~ .notion-gallery-grid .notion-property-date,
+.notion-collection-header-title:has(span:contains("New")) ~ .notion-gallery-grid .notion-property-date {
+  font-size: 0.75rem !important;
+  color: #666 !important;
 }
 
 .notion-gallery-grid .notion-collection-card-property {
@@ -605,6 +637,32 @@
   background: rgba(255, 255, 255, 0.05);
 }
 
+/* What's New 見出しタイトルの大きさを調整 */
+.notion-collection-header-title {
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+/* What's New 見出しタイトルの大きさを小さく */
+.notion-collection-header-title:has(span:contains("What's New")),
+.notion-collection-header-title:has(span:contains("What")),
+.notion-collection-header-title:has(span:contains("New")) {
+  font-size: 1.1rem !important;
+  font-weight: 600 !important;
+  display: flex !important;
+  align-items: center !important;
+  margin-bottom: 0.5rem !important;
+}
+
+/* What's New 見出しにアイコンを追加 */
+.notion-collection-header-title:has(span:contains("What's New"))::before,
+.notion-collection-header-title:has(span:contains("What"))::before,
+.notion-collection-header-title:has(span:contains("New"))::before {
+  content: "📋";
+  margin-right: 0.5rem;
+  font-size: 1.1rem;
+}
+
 /* デバイス別のメディアクエリ設定 */
 /* PC標準 (1025px〜1439px) */
 @media only screen and (min-width: 1025px) and (max-width: 1439px) {
@@ -659,5 +717,12 @@
   
   .notion-gallery-grid .notion-page-title-text {
     font-size: 1.5em; /* スマートフォン用のフォントサイズ縮小 */
+  }
+  
+  /* スマートフォンでのWhat's New項目のタイトルをさらに小さく */
+  .notion-collection-header-title:has(span:contains("What's New")) ~ .notion-gallery-grid .notion-page-title-text,
+  .notion-collection-header-title:has(span:contains("What")) ~ .notion-gallery-grid .notion-page-title-text,
+  .notion-collection-header-title:has(span:contains("New")) ~ .notion-gallery-grid .notion-page-title-text {
+    font-size: 0.85rem !important;
   }
 }
