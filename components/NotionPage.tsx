@@ -231,7 +231,7 @@ export function NotionPage({
     document.body.classList.add('no-notion-tabs');
     
     // 緑枠のWhat's Newを削除（DOMが読み込まれた後）
-    if (pageId === site.rootNotionPageId) {
+    if (site && pageId && site.rootNotionPageId && pageId === site.rootNotionPageId) {
       setTimeout(() => {
         // 複数回試行して確実に削除する
         const removeGreenFrame = () => {
@@ -240,12 +240,13 @@ export function NotionPage({
             collections.forEach(collection => {
               // 緑枠のWhat's Newかどうかを判定して削除
               const isDateContent = collection.textContent?.includes('2025.04.07') || 
-                collection.textContent?.includes('2025.04.01');
+                collection.textContent?.includes('2025.04.01') ||
+                collection.textContent?.includes('Webサイトニューアル');
               if (isDateContent) {
-                collection.remove();
+                collection.style.display = 'none';
+                console.log('Hidden duplicate What\'s New element');
               }
             });
-            console.log('Removed duplicate What\'s New elements');
           }
         };
 
@@ -259,7 +260,7 @@ export function NotionPage({
     return () => {
       document.body.classList.remove('no-notion-tabs');
     };
-  }, [pageId, site.rootNotionPageId]);
+  }, [pageId, site]);
 
   // ナビゲーションメニュー項目を取得
   const navigationMenuItems = React.useMemo(() => 
