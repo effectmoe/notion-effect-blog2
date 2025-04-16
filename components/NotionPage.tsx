@@ -230,6 +230,7 @@ export function NotionPage({
   React.useEffect(() => {
     document.body.classList.add('no-notion-tabs');
     
+<<<<<<< HEAD
     // 緑枠のWhat's Newを削除（DOMが読み込まれた後）
     if (site && pageId && site.rootNotionPageId && pageId === site.rootNotionPageId) {
       setTimeout(() => {
@@ -261,6 +262,12 @@ export function NotionPage({
       document.body.classList.remove('no-notion-tabs');
     };
   }, [pageId, site]);
+=======
+    return () => {
+      document.body.classList.remove('no-notion-tabs');
+    };
+  }, []);
+>>>>>>> parent of bf07dc0 (1)
 
   // ナビゲーションメニュー項目を取得
   const navigationMenuItems = React.useMemo(() => 
@@ -358,13 +365,11 @@ export function NotionPage({
       {/* Notionレンダラー - 内部のヘッダーをnullに設定したので、カスタムヘッダーを外に配置 */}
       <Header menuItems={(menuItems && menuItems.length > 0) ? menuItems : navigationMenuItems} />
 
-      {/* What's Newブロック - トップページでのみ表示 + データベースID指定 */}
+      {/* What's Newブロック - トップページでのみ表示 */}
       {pageId === site.rootNotionPageId && whatsNewItems && whatsNewItems.length > 0 && (
-        <div id="whats-new-container" className="mx-auto my-4" style={{ maxWidth: '100%', textAlign: 'center' }}>
+        <div className="mx-auto my-4" style={{ maxWidth: '500px' }}>
           <h2 className="text-3xl font-bold text-center mb-8">☕ Welcome to CafeKinesi</h2>
-          <div style={{ display: 'inline-block', maxWidth: '500px', width: '100%', textAlign: 'left' }}>
-            <WhatsNewSimple items={whatsNewItems} max={5} />
-          </div>
+          <WhatsNewSimple items={whatsNewItems} max={5} />
         </div>
       )}
 
