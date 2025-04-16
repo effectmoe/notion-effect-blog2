@@ -2,7 +2,10 @@ import { NotionPage } from '@/components/NotionPage'
 import { domain } from '@/lib/config'
 import { resolveNotionPage } from '@/lib/resolve-notion-page'
 import { getMenuItems } from '@/lib/menu-utils'
-import { notionViews } from '@/lib/notion-views'
+import { getSampleWhatsNewItems, getWhatsNewItems } from '@/lib/whats-new'
+
+// 正しいデータベースID
+const WHATS_NEW_DATABASE_ID = '1d7b802cb0c680fd84b4f669f3f1160f'
 
 export const getStaticProps = async () => {
   try {
@@ -11,11 +14,24 @@ export const getStaticProps = async () => {
     // NotionデータベースからMenuがtrueの項目を取得
     const menuItems = await getMenuItems()
     
-    // propsにmenuItemsを追加
+    // What's Newアイテムを取得 - 実際のデータベースから取得
+    let whatsNewItems = [];
+    try {
+      // 正しいデータベースIDを使用
+      whatsNewItems = await getWhatsNewItems(WHATS_NEW_DATABASE_ID)
+      console.log('Fetched WhatsNew items:', whatsNewItems.length)
+    } catch (error) {
+      console.error('Error fetching WhatsNew items:', error)
+      // エラー時はサンプルデータを使用
+      whatsNewItems = getSampleWhatsNewItems()
+    }
+    
+    // propsにmenuItemsとwhatsNewItemsを追加
     return { 
       props: {
         ...props,
-        menuItems
+        menuItems,
+        whatsNewItems
       }, 
       revalidate: 10 
     }
