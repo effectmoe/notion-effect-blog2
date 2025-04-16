@@ -27,12 +27,21 @@ import {
   posthogConfig,
   posthogId
 } from '@/lib/config'
+import { getMenuItemsForStaticProps } from '@/lib/menu-utils'
 
 if (!isServer) {
   bootstrap()
 }
 
-export default function App({ Component, pageProps }: AppProps) {
+// カスタムAppPropsの型定義を追加
+type CustomAppProps = AppProps & {
+  pageProps: {
+    menuItems?: any[]
+    [key: string]: any
+  }
+}
+
+export default function App({ Component, pageProps }: CustomAppProps) {
   const router = useRouter()
 
   React.useEffect(() => {
@@ -61,5 +70,35 @@ export default function App({ Component, pageProps }: AppProps) {
     }
   }, [router.events])
 
+  // menuItemsが存在しない場合は空の配列を渡す
   return <Component {...pageProps} />
+}
+
+// サーバーサイドでメニュー項目を取得
+App.getInitialProps = async (appContext: any) => {
+  // 元のgetInitialPropsを実行
+  const appProps = appContext.Component.getInitialProps
+    ? await appContext.Component.getInitialProps(appContext.ctx)
+    : {}
+
+  // Notionからメニュー項目を取得
+  try {
+    const menuItems = await getMenuItemsForStaticProps()
+    
+    // メニュー項目をページProps全体に追加
+    return {
+      pageProps: {
+        ...appProps,
+        menuItems
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching menu items:', error)
+    return {
+      pageProps: {
+        ...appProps,
+        menuItems: []
+      }
+    }
+  }
 }

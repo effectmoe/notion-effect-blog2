@@ -1,7 +1,19 @@
 import * as config from './config'
+import { notion } from './notion-api'
+import { getPageProperty } from 'notion-utils'
 
-// ハードコードされたメニュー項目の定義
-const MENU_ITEMS = [
+// メニュー項目の型定義
+export type MenuItem = {
+  id: string
+  title: string
+  url: string
+  icon?: string
+  emoji?: string
+  isActive?: boolean
+}
+
+// フォールバック用のハードコードされたメニュー項目
+const FALLBACK_MENU_ITEMS: MenuItem[] = [
   {
     id: 'home',
     title: 'ホーム',
@@ -19,15 +31,104 @@ const MENU_ITEMS = [
   }
 ]
 
-// 代替のメニュー項目取得関数
-export async function getMenuItems() {
+// Notionデータベースからメニュー項目を取得する関数
+export async function getMenuItems(): Promise<MenuItem[]> {
   try {
-    // 静的なメニュー項目を返す
-    return MENU_ITEMS
+    // rootNotionPageIdを取得
+    const rootNotionPageId = process.env.NOTION_PAGE_ID || config.rootNotionPageId
+    if (!rootNotionPageId) {
+      console.error('Root notion page ID not found')
+      return FALLBACK_MENU_ITEMS
+    }
+
+    // NotionデータベースのページデータをAPI経由で取得
+    const pageData = await notion.getPage(rootNotionPageId)
+    if (!pageData) {
+      console.error('Failed to get page data')
+      return FALLBACK_MENU_ITEMS
+    }
+
+    // ブロックデータからデータベースのブロックを見つける
+    const blocks = Object.values(pageData.block)
+    
+    // データベースのブロックを見つける (collection_viewがある場合はデータベース)
+    const collectionBlocks = blocks.filter(block => 
+      block.value?.type === 'collection_view' || 
+      block.value?.type === 'collection_view_page'
+    )
+    
+    if (collectionBlocks.length === 0) {
+      console.error('No collection blocks found')
+      return FALLBACK_MENU_ITEMS
+    }
+
+    // 各コレクションブロックからレコードを取得
+    const menuItems: MenuItem[] = []
+
+    // 各コレクションブロックを処理
+    for (const block of collectionBlocks) {
+      const collectionId = block.value?.collection_id
+      const collection = pageData.collection?.[collectionId]
+      
+      if (!collection) continue
+
+      // コレクションのスキーマからMenuプロパティを探す
+      const menuPropertyId = Object.entries(collection.value?.schema || {}).find(
+        ([, prop]: [string, any]) => prop.name === 'Menu'
+      )?.[0]
+
+      if (!menuPropertyId) continue
+
+      // このコレクションのすべてのページを取得
+      const pageIds = Object.keys(pageData.block).filter(id => {
+        const blockValue = pageData.block[id]?.value
+        return blockValue?.parent_id === collectionId && blockValue?.type === 'page'
+      })
+
+      // ページごとにMenuプロパティをチェック
+      for (const pageId of pageIds) {
+        const block = pageData.block[pageId]?.value
+        if (!block) continue
+
+        // Menuプロパティの値を取得
+        const menuValue = getPageProperty(block, menuPropertyId, pageData)
+        
+        // Menuプロパティがtrueの場合のみ処理
+        if (menuValue === 'Yes' || menuValue === 'True' || menuValue === '✓') {
+          // ページタイトルを取得
+          const titleProp = getPageProperty(block, 'title', pageData) as string
+          
+          // タイトルが空の場合はスキップ
+          if (!titleProp) continue
+
+          // ページIDからURLを生成（IDをそのまま使用するシンプルな方法）
+          const url = `/${pageId.replace(/-/g, '')}`
+
+          // メニュー項目を追加
+          menuItems.push({
+            id: pageId,
+            title: titleProp,
+            url: url,
+            icon: block.format?.page_icon || '',
+            emoji: block.format?.page_icon || ''
+          })
+        }
+      }
+    }
+
+    // 少なくとも「ホーム」は常に表示
+    if (menuItems.length === 0 || !menuItems.some(item => item.url === '/')) {
+      menuItems.unshift({
+        id: 'home',
+        title: 'ホーム',
+        url: '/'
+      })
+    }
+
+    return menuItems
   } catch (error) {
-    console.error('Error with menu items:', error)
-    // エラーが発生した場合は空の配列を返す
-    return []
+    console.error('Error fetching menu items from Notion:', error)
+    return FALLBACK_MENU_ITEMS
   }
 }
 
