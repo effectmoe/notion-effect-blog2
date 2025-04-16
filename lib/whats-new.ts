@@ -12,25 +12,25 @@ export async function getWhatsNewItems(databaseId: string): Promise<WhatsNewItem
   try {
     // Notionの非公式APIで直接データベースにアクセスする場合
     const recordMap = await notion.getPage(databaseId);
-    
+
     // コレクションを取得
     const collections = Object.values(recordMap.collection);
     if (!collections.length) {
       console.error('No collections found');
       return [];
     }
-    
+
     // コレクションビューを取得
     const collectionViewIds = Object.keys(recordMap.collection_view);
     if (!collectionViewIds.length) {
       console.error('No collection views found');
       return [];
     }
-    
+
     const items: WhatsNewItem[] = [];
     const collectionId = collections[0].value.id;
     const collectionViewId = collectionViewIds[0];
-    
+
     // コレクションのクエリ結果を取得
     const collectionData = await notion.getCollectionData(
       collectionId,
@@ -40,14 +40,14 @@ export async function getWhatsNewItems(databaseId: string): Promise<WhatsNewItem
         loadContentCover: false
       }
     );
-    
+
     // ブロックマップからページ情報を取得
     const blockIds = collectionData.result.blockIds;
-    
+
     for (const blockId of blockIds) {
       const block = recordMap.block[blockId]?.value;
       if (!block) continue;
-      
+
       try {
         // プロパティから各種情報を取得
         const title = getPageProperty('Name', block, recordMap);
@@ -56,17 +56,24 @@ export async function getWhatsNewItems(databaseId: string): Promise<WhatsNewItem
         const slug = getPageProperty('Slug', block, recordMap) || blockId;
         const category = getPageProperty('Category', block, recordMap);
         const excerpt = getPageProperty('Excerpt', block, recordMap);
-        
+
         // 日付文字列をパース
         let date = new Date();
         if (dateStr) {
           try {
-            date = new Date(dateStr);
+            // 文字列型かどうかを確認
+            if (typeof dateStr === 'string') {
+              date = new Date(dateStr);
+            } else if (dateStr instanceof Date) {
+              date = dateStr;
+            } else if (typeof dateStr === 'number') {
+              date = new Date(dateStr);
+            }
           } catch (err) {
             console.error('Error parsing date:', dateStr, err);
           }
         }
-        
+
         items.push({
           id: blockId,
           title: title || 'Untitled',
@@ -80,7 +87,7 @@ export async function getWhatsNewItems(databaseId: string): Promise<WhatsNewItem
         console.error('Error processing block:', blockId, error);
       }
     }
-    
+
     return items;
   } catch (error) {
     console.error('Error fetching WhatsNew items:', error);
