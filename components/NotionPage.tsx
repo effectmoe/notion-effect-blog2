@@ -29,7 +29,6 @@ import { NotionPageHeader } from './NotionPageHeader'
 import { Page404 } from './Page404'
 import { PageAside } from './PageAside'
 import { PageHead } from './PageHead'
-import { Header } from './Header'
 import styles from './styles.module.css'
 
 // -----------------------------------------------------------------------------
@@ -153,32 +152,12 @@ const propertyTextValue = (
   return defaultFn()
 }
 
-// ナビゲーションメニュー項目
-const getNavigationMenuItems = (site: types.Site) => {
-  // デフォルトのメニュー項目 - ホームは削除
-  const defaultMenuItems = []
-  
-  // サイト設定に基づくメニュー項目（例：カスタムナビゲーションリンク）
-  if (site?.navigationStyle === 'custom' && site?.navigationLinks?.length) {
-    const customItems = site.navigationLinks.map((link, index) => ({
-      id: `nav-${index}`,
-      title: link.title,
-      url: link.url || `/page/${link.pageId}`
-    }))
-    
-    return [...defaultMenuItems, ...customItems]
-  }
-  
-  return defaultMenuItems
-}
-
 export function NotionPage({
   site,
   recordMap,
   error,
-  pageId,
-  menuItems // Notionデータベースからのメニューアイテムを受け取る
-}: types.PageProps & { menuItems?: any[] }) {
+  pageId
+}: types.PageProps) {
   const router = useRouter()
   const lite = useSearchParam('lite')
 
@@ -192,27 +171,12 @@ export function NotionPage({
       Pdf,
       Modal,
       Tweet,
-      // Notionのデフォルトヘッダーをカスタムヘッダーとして使う
-      Header: () => null, // ヘッダーを非表示にする
+      Header: NotionPageHeader,
       propertyLastEditedTimeValue,
       propertyTextValue,
       propertyDateValue
     }),
     []
-  )
-
-  // ボディにNoNotionTabsクラスを追加
-  React.useEffect(() => {
-    document.body.classList.add('no-notion-tabs');
-    
-    return () => {
-      document.body.classList.remove('no-notion-tabs');
-    };
-  }, []);
-
-  // ナビゲーションメニュー項目を取得
-  const navigationMenuItems = React.useMemo(() => 
-    site ? getNavigationMenuItems(site) : [], [site]
   )
 
   // lite mode is for oembed
@@ -301,39 +265,31 @@ export function NotionPage({
 
       {isLiteMode && <BodyClassName className='notion-lite' />}
       {isDarkMode && <BodyClassName className='dark-mode' />}
-      <BodyClassName className='no-notion-tabs' />
 
-      {/* Notionレンダラー - 内部のヘッダーをnullに設定したので、カスタムヘッダーを外に配置 */}
-      <Header menuItems={(menuItems && menuItems.length > 0) ? menuItems : navigationMenuItems} />
-
-      <div className={styles.notionPageContainer}>
-        <NotionRenderer
-          bodyClassName={cs(
-            styles.notion,
-            'no-notion-tabs',
-            pageId === site.rootNotionPageId && 'index-page'
-          )}
-          darkMode={isDarkMode}
-          components={components}
-          recordMap={recordMap}
-          rootPageId={site.rootNotionPageId}
-          rootDomain={site.domain}
-          fullPage={!isLiteMode}
-          previewImages={!!recordMap.preview_images}
-          showCollectionViewDropdown={false}
-          showTableOfContents={showTableOfContents}
-          minTableOfContentsItems={minTableOfContentsItems}
-          defaultPageIcon={config.defaultPageIcon}
-          defaultPageCover={config.defaultPageCover}
-          defaultPageCoverPosition={config.defaultPageCoverPosition}
-          mapPageUrl={siteMapPageUrl}
-          mapImageUrl={mapImageUrl}
-          searchNotion={config.isSearchEnabled ? searchNotion : null}
-          pageAside={pageAside}
-          footer={footer}
-          className="no-notion-tabs"
-        />
-      </div>
+      <NotionRenderer
+        bodyClassName={cs(
+          styles.notion,
+          pageId === site.rootNotionPageId && 'index-page'
+        )}
+        darkMode={isDarkMode}
+        components={components}
+        recordMap={recordMap}
+        rootPageId={site.rootNotionPageId}
+        rootDomain={site.domain}
+        fullPage={!isLiteMode}
+        previewImages={!!recordMap.preview_images}
+        showCollectionViewDropdown={false}
+        showTableOfContents={showTableOfContents}
+        minTableOfContentsItems={minTableOfContentsItems}
+        defaultPageIcon={config.defaultPageIcon}
+        defaultPageCover={config.defaultPageCover}
+        defaultPageCoverPosition={config.defaultPageCoverPosition}
+        mapPageUrl={siteMapPageUrl}
+        mapImageUrl={mapImageUrl}
+        searchNotion={config.isSearchEnabled ? searchNotion : null}
+        pageAside={pageAside}
+        footer={footer}
+      />
 
       <GitHubShareButton />
     </>
