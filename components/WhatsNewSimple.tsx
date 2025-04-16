@@ -46,10 +46,10 @@ const WhatsNewSimple: React.FC<WhatsNewSimpleProps> = ({
         .whats-new-simple-container {
           margin: 0;
           padding: 0.5rem;
-          border: 1px solid #95c066;
           border-radius: 4px;
-          background-color: #fff;
+          background-color: #fcfcfc;
           max-width: 500px;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
         
         .whats-new-simple-list {
