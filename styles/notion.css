@@ -14,6 +14,10 @@
 
 .notion-frame {
   padding: 0;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .notion-page {
@@ -47,6 +51,8 @@
   max-width: 1100px;
   margin: 0 auto;
   overflow-x: auto;
+  display: flex;
+  justify-content: center;
 }
 
 .notion-nav-header-rhs {
@@ -230,25 +236,25 @@
   position: relative;
   transition: unset;
   opacity: 1;
-  border-bottom-width: 0.1rem;
+  border-bottom-width: 0.05rem;
   background: transparent;
   background-origin: border-box;
   background-repeat: no-repeat;
   background-position: 50% 100%;
-  background-size: 0 0.1rem;
+  background-size: 0 0.05rem;
 }
 
 .notion-link:focus,
 .notion-link:hover {
   border-bottom-color: transparent;
 
-  background-image: linear-gradient(90.68deg, #b439df 0.26%, #e5337e 102.37%);
+  background-image: linear-gradient(90.68deg, rgba(180, 57, 223, 0.6) 0.26%, rgba(229, 51, 126, 0.6) 102.37%);
   background-repeat: no-repeat;
   background-position: 0 100%;
-  background-size: 100% 0.1rem;
+  background-size: 100% 0.05rem;
 
   transition-property: background-position, background-size;
-  transition-duration: 300ms;
+  transition-duration: 400ms;
 }
 
 .notion-red_background,
@@ -381,7 +387,7 @@
 }
 
 .notion-bookmark:hover {
-  border-image: linear-gradient(90.68deg, #b439df 0.26%, #e5337e 102.37%);
+  border-image: linear-gradient(90.68deg, rgba(180, 57, 223, 0.6) 0.26%, rgba(229, 51, 126, 0.6) 102.37%);
   border-image-slice: 1;
 }
 
@@ -405,8 +411,204 @@
   color: var(--fg-color-2);
 }
 
-.notion-equation.notion-equation-block{
+.notion-equation.notion-equation-block {
   align-items: center;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding: 1em;
+  margin: 1em 0;
+  overflow-x: auto;
+  font-size: 1.2em;
+  background-color: rgba(249, 250, 251, 0.8);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease-in-out;
+}
+
+.dark-mode .notion-equation.notion-equation-block {
+  background-color: rgba(17, 24, 39, 0.6);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* インライン数式のスタイル改善 */
+.notion-equation.notion-equation-inline {
+  padding: 0 3px;
+  vertical-align: middle;
+  font-size: 1.1em;
+}
+
+/* ホバー時の効果 */
+.notion-equation.notion-equation-block:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background-color: rgba(249, 250, 251, 1);
+}
+
+.dark-mode .notion-equation.notion-equation-block:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  background-color: rgba(17, 24, 39, 0.8);
+}
+
+/* PDFビューアーの改善スタイル */
+.notion-pdf {
+  width: 100%;
+  height: auto;
+  min-height: 600px;
+  border-radius: 12px;
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  margin: 2em 0;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(229, 231, 235, 0.5);
+  background-color: white;
+}
+
+/* PDFビューアーにホバー効果を追加 */
+.notion-pdf:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+/* PDF上部にPDFを示すバッジを追加 */
+.notion-pdf::before {
+  content: "PDF";
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: rgba(217, 119, 6, 0.9);
+  color: white;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 4px;
+  z-index: 1;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* ダークモード対応 */
+.dark-mode .notion-pdf {
+  border-color: rgba(55, 65, 81, 0.5);
+  background-color: rgba(31, 41, 55, 1);
+}
+
+.dark-mode .notion-pdf:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* モバイル端末の場合はPDFビューアーの高さを調整 */
+@media only screen and (max-width: 767px) {
+  .notion-pdf {
+    min-height: 400px;
+  }
+  
+  /* モバイルでは変形効果を抑える */
+  .notion-pdf:hover {
+    transform: translateY(-1px);
+  }
+}
+
+/* コレクションビュー改善スタイル */
+.notion-collection-view-tabs {
+  margin: 1.5em 0 1em;
+  border-bottom: 1px solid rgba(55, 53, 47, 0.16);
+  padding-bottom: 0.5em;
+  position: relative;
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+.notion-collection-view-tabs::-webkit-scrollbar {
+  display: none; /* Chrome/Safari/Opera */
+}
+
+.notion-collection-view-tabs-content {
+  display: flex;
+  align-items: center;
+  padding-bottom: 2px;
+}
+
+.notion-collection-view-tabs-content button {
+  padding: 6px 12px;
+  border-radius: 4px;
+  margin-right: 8px;
+  transition: all 180ms ease-in-out;
+  background: transparent;
+  border: 1px solid transparent;
+  font-size: 0.95em;
+}
+
+.notion-collection-view-tabs-content button:hover {
+  background: rgba(55, 53, 47, 0.08);
+  transform: translateY(-1px);
+}
+
+.notion-collection-view-tabs-content button.active {
+  background: rgba(55, 53, 47, 0.16);
+  font-weight: 500;
+  border: 1px solid rgba(55, 53, 47, 0.1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.dark-mode .notion-collection-view-tabs {
+  border-bottom-color: rgba(255, 255, 255, 0.13);
+}
+
+.dark-mode .notion-collection-view-tabs-content button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode .notion-collection-view-tabs-content button.active {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* テーブルビューの改善 */
+.notion-table {
+  border-radius: 5px;
+  overflow: hidden;
+  border: 1px solid rgba(55, 53, 47, 0.16);
+}
+
+.notion-table-view {
+  margin-top: 1em;
+}
+
+.notion-table-header {
+  background: rgba(247, 246, 243, 0.8);
+  font-weight: 600;
+  padding: 8px 16px;
+}
+
+.dark-mode .notion-table-header {
+  background: rgba(48, 47, 45, 0.8);
+}
+
+.notion-table-header-cell {
+  padding: 8px 12px;
+}
+
+.notion-table-cell {
+  padding: 8px 12px;
+  font-size: 0.9em;
+}
+
+.notion-table-row {
+  border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+  transition: background 120ms ease-in;
+}
+
+.notion-table-row:last-child {
+  border-bottom: none;
+}
+
+.notion-table-row:hover {
+  background: rgba(55, 53, 47, 0.03);
+}
+
+.dark-mode .notion-table-row:hover {
+  background: rgba(255, 255, 255, 0.05);
 }
 
 /* デバイス別のメディアクエリ設定 */
