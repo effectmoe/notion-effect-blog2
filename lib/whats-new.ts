@@ -1,0 +1,143 @@
+import { notion } from './notion-api';
+import type { WhatsNewItem } from '@/components/WhatsNew';
+import { getNotionPageProperty } from 'notion-utils';
+import * as config from './config';
+
+/**
+ * WhatsNewアイテムをNotionデータベースから取得する
+ * @param databaseId 取得するデータベースのID
+ * @returns WhatsNewItemの配列
+ */
+export async function getWhatsNewItems(databaseId: string): Promise<WhatsNewItem[]> {
+  try {
+    // Notionの非公式APIで直接データベースにアクセスする場合
+    const recordMap = await notion.getPage(databaseId);
+    
+    // コレクションを取得
+    const collections = Object.values(recordMap.collection);
+    if (!collections.length) {
+      console.error('No collections found');
+      return [];
+    }
+    
+    // コレクションビューを取得
+    const collectionViewIds = Object.keys(recordMap.collection_view);
+    if (!collectionViewIds.length) {
+      console.error('No collection views found');
+      return [];
+    }
+    
+    const items: WhatsNewItem[] = [];
+    const collectionId = collections[0].value.id;
+    const collectionViewId = collectionViewIds[0];
+    
+    // コレクションのクエリ結果を取得
+    const collectionData = await notion.getCollectionData(
+      collectionId,
+      collectionViewId,
+      {
+        type: 'table',
+        loadContentCover: false
+      }
+    );
+    
+    // ブロックマップからページ情報を取得
+    const blockIds = collectionData.result.blockIds;
+    
+    for (const blockId of blockIds) {
+      const block = recordMap.block[blockId]?.value;
+      if (!block) continue;
+      
+      try {
+        // プロパティから各種情報を取得
+        const title = getNotionPageProperty('Name', block, recordMap);
+        const dateStr = getNotionPageProperty('Date', block, recordMap);
+        const icon = block.format?.page_icon || '📄';
+        const slug = getNotionPageProperty('Slug', block, recordMap) || blockId;
+        const category = getNotionPageProperty('Category', block, recordMap);
+        const excerpt = getNotionPageProperty('Excerpt', block, recordMap);
+        
+        // 日付文字列をパース
+        let date = new Date();
+        if (dateStr) {
+          try {
+            date = new Date(dateStr);
+          } catch (err) {
+            console.error('Error parsing date:', dateStr, err);
+          }
+        }
+        
+        items.push({
+          id: blockId,
+          title: title || 'Untitled',
+          date: date.toISOString(),
+          slug: slug,
+          icon,
+          category,
+          excerpt
+        });
+      } catch (error) {
+        console.error('Error processing block:', blockId, error);
+      }
+    }
+    
+    return items;
+  } catch (error) {
+    console.error('Error fetching WhatsNew items:', error);
+    return [];
+  }
+}
+
+/**
+ * サンプルのWhatsNewアイテムを生成する（デモ用）
+ * @returns WhatsNewItemの配列
+ */
+export function getSampleWhatsNewItems(): WhatsNewItem[] {
+  return [
+    {
+      id: '1',
+      date: '2025-04-07',
+      title: 'Webサイトニューアルしました',
+      slug: 'website-renewal',
+      icon: '🎉',
+      category: '更新情報',
+      excerpt: 'Webサイトをリニューアルしました。新しいデザインと機能をぜひご利用ください。'
+    },
+    {
+      id: '2',
+      date: '2025-04-01',
+      title: 'プロフィール更新しました',
+      slug: 'profile-update',
+      icon: '👤',
+      category: '更新情報',
+      excerpt: 'プロフィールページを更新しました。最新の情報をご確認ください。'
+    },
+    {
+      id: '3',
+      date: '2025-03-15',
+      title: '新メニューを追加しました',
+      slug: 'new-menu',
+      icon: '🍵',
+      category: 'メニュー',
+      excerpt: '春の新メニューが登場しました。季節の素材を使った特別なメニューをぜひお試しください。'
+    },
+    {
+      id: '4',
+      date: '2025-03-01',
+      title: '営業時間変更のお知らせ',
+      slug: 'business-hours-change',
+      icon: '⏰',
+      category: 'お知らせ',
+      excerpt: '4月より営業時間が変更になります。詳細はこちらをご確認ください。'
+    },
+    {
+      id: '5',
+      date: '2025-02-14',
+      title: 'バレンタインイベント開催',
+      slug: 'valentine-event',
+      icon: '❤️',
+      category: 'イベント',
+      excerpt: 'バレンタインデー特別イベントを開催しました。たくさんのご参加ありがとうございました。'
+    }
+  ];
+}
