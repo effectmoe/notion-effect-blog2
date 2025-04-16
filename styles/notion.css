@@ -64,141 +64,106 @@
 }
 
 /* =================== */
-/* What's Newセクションのスタイリッシュなデザイン */
+/* What's Newセクションのシンプルモダンデザイン */
 /* =================== */
 
-/* What's Newヘッダー */
+/* What's Newセクション全体のスタイリング */
 .notion-collection-header-title {
-  font-size: 1.2rem;
-  display: flex;
-  align-items: center;
-  margin-bottom: 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
   color: #555;
   letter-spacing: 0.5px;
-  font-weight: 500;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
 }
 
-/* What's New見出しのアイコン装飾 */
+/* What's Newのアイコン装飾 */
 .notion-collection-header-title:before {
-  content: "📰";
+  content: "📝";
   margin-right: 0.5rem;
-  font-size: 1.2rem;
+  font-size: 1rem;
 }
 
-/* テーブルビューを隠す */
+/* テーブルビューを非表示 */
 .notion-table-view {
   display: none !important;
 }
 
-/* What's New リストビュースタイリング */
+/* What's Newリストをシンプルにする */
+.notion-collection-view {
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+
 .notion-list-view {
   border: none !important;
   background: transparent !important;
-  margin-top: 0 !important;
-}
-
-/* リストアイテムのスタイリング */
-.notion-list-item {
-  margin-bottom: 0.75rem !important;
-  border-radius: 8px !important;
-  padding: 0.75rem 1rem !important;
-  background: #f9f9fb !important;
-  transition: all 0.2s ease-in-out !important;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04) !important;
-  border-left: 3px solid #8367c7 !important;
-  overflow: hidden !important;
-}
-
-/* リストアイテムのホバー効果 */
-.notion-list-item:hover {
-  background: #f5f5f9 !important;
-  box-shadow: 0 3px 6px rgba(0,0,0,0.07) !important;
-  transform: translateY(-2px) !important;
-}
-
-/* リスト本体の余白調整 */
-.notion-list-body {
-  padding: 0 !important;
   margin: 0 !important;
+  padding: 0 !important;
 }
 
-/* プロパティのテキストサイズ調整 */
-.notion-property {
+/* リストアイテム全体のスタイリング */
+.notion-list-item {
+  border: none !important;
+  background: transparent !important;
+  margin-bottom: 0 !important;
+  padding: 0.5rem 0 !important;
+  transition: none !important;
+  box-shadow: none !important;
+}
+
+/* リストの枠を追加 */
+.notion-list-view {
+  border: 1px solid #eee !important;
+  border-radius: 6px !important;
+  padding: 1rem !important;
+  background: #fafafa !important;
+}
+
+/* リストアイテムのレイアウト */
+.notion-list-item-body {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  white-space: nowrap !important;
+}
+
+/* 日付スタイル */
+.notion-property-date {
   font-size: 0.85rem !important;
-  line-height: 1.5 !important;
+  color: #666 !important;
+  margin-right: 0.5rem !important;
+  min-width: 5.5rem !important;
+}
+
+/* 区切り線スタイル */
+.notion-list-item-body:after {
+  content: "|";
+  margin: 0 0.5rem;
+  color: #ddd;
 }
 
 /* タイトルのスタイリング */
 .notion-page-title-text {
-  font-size: 0.95rem !important;
-  font-weight: 500 !important;
+  font-size: 0.9rem !important;
+  font-weight: 400 !important;
   color: #333 !important;
   background: none !important;
   -webkit-background-clip: initial !important;
   -webkit-text-fill-color: #333 !important;
-  line-height: 1.4 !important;
-  margin-bottom: 0.35rem !important;
 }
 
-/* カテゴリタグのスタイリング */
+/* カテゴリタグを非表示（スクリーンショットに合わせるため） */
 .notion-property-select {
-  font-size: 0.7rem !important;
-  padding: 0.15rem 0.6rem !important;
-  border-radius: 12px !important;
-  background-color: #f0eafb !important;
-  color: #8367c7 !important;
-  font-weight: 500 !important;
-  letter-spacing: 0.5px !important;
-  text-transform: uppercase !important;
-  display: inline-block !important;
-  margin-right: 0.5rem !important;
-  border: none !important;
-}
-
-/* 日付のスタイリング */
-.notion-property-date {
-  font-size: 0.75rem !important;
-  color: #888 !important;
-  font-weight: 400 !important;
-}
-
-/* What's New リストアイテムのレイアウト */
-.notion-list-item-body {
-  display: flex !important;
-  flex-direction: row !important;
-  justify-content: space-between !important;
-  align-items: center !important;
-}
-
-/* リストアイテムのプロパティコンテナ */
-.notion-list-item-property {
-  margin-bottom: 0 !important;
-}
-
-/* リストアイテムのタイトル */
-.notion-list-item-title {
-  flex: 1 !important;
-  margin-right: 1rem !important;
-}
-
-/* リストアイテムのアイコン */
-.notion-page-icon-inline {
-  margin-right: 0.5rem !important;
+  display: none !important;
 }
 
 /* ダークモード対応 */
-.dark-mode .notion-list-item {
+.dark-mode .notion-list-view {
   background: #1f1f24 !important;
-  border-left: 3px solid #a78bfa !important;
-}
-
-.dark-mode .notion-list-item:hover {
-  background: #2a2a30 !important;
-}
-
-.dark-mode .notion-property-select {
-  background-color: #372e4d !important;
-  color: #c4b5fd !important;
+  border-color: #333 !important;
 }
 
 .dark-mode .notion-page-title-text {
@@ -208,6 +173,32 @@
 
 .dark-mode .notion-property-date {
   color: #aaa !important;
+}
+
+.dark-mode .notion-list-item-body:after {
+  color: #444;
+}
+
+/* モバイル対応 */
+@media only screen and (max-width: 767px) {
+  .notion-list-item-body {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    white-space: normal !important;
+  }
+  
+  .notion-property-date {
+    margin-right: 0 !important;
+  }
+  
+  .notion-list-item-body:after {
+    display: none !important;
+  }
+  
+  .notion-page-title-text {
+    font-size: 0.85rem !important;
+  }
 }
 
 /* 通常のギャラリーのタイトルサイズ */
@@ -808,28 +799,10 @@
   .notion-gallery-grid .notion-page-title-text {
     font-size: 1.5em; /* スマートフォン用のフォントサイズ縮小 */
   }
-  
-  /* スマートフォンでのWhat's New項目のタイトルをさらに小さく */
-  .notion-list-view .notion-page-title-text {
-    font-size: 0.85rem !important;
-  }
-  
-  /* モバイルでのリストアイテムのレイアウト調整 */
-  .notion-list-item-body {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-  }
-  
-  .notion-list-item-property {
-    margin-top: 0.25rem !important;
-  }
 }
 
-/* リストビューの区切り線を追加 */
-.notion-list-view:after {
-  content: "";
-  display: block;
-  height: 1px;
-  margin: 1.5rem 0;
-  background: linear-gradient(to right, transparent, #e0e0e0, transparent);
+/* 赤枠部分のスタイル（スクリーンショットに合わせる） */
+.notion-list-view {
+  border: 1px solid #ff0000 !important;
+  max-width: 460px !important;
 }
