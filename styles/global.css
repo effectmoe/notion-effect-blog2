@@ -60,3 +60,17 @@ body {
 ::-webkit-scrollbar-track {           
     background-color: var(--bg-color);
 }
+
+/* 左上の緑枠のWhat's Newを非表示にする */
+.notion-collection-row-value {
+    display: none !important;
+}
+
+/* トップページの緑枠を削除 */
+.notion-collection-row {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}

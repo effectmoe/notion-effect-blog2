@@ -1,0 +1,95 @@
+/* WhatsNewコンポーネント用のグローバルスタイル */
+
+/* カンタム類のスタイル再定義 */
+.whats-new-container,
+.whats-new-simple-container {
+  font-family: var(--notion-font);
+  transition: all 0.3s ease;
+}
+
+/* フィルターボタン */
+.filter-btn {
+  font-size: 0.8rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.filter-btn:hover:not(.active) {
+  background-color: rgba(99, 102, 241, 0.1);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+/* アイテムのアニメーション */
+.whats-new-item, 
+.whats-new-simple-item {
+  position: relative;
+  overflow: hidden;
+}
+
+.whats-new-item::after,
+.whats-new-simple-item::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background-color: rgba(99, 102, 241, 0.6);
+  transition: width 0.4s ease-in-out;
+}
+
+.whats-new-item:hover::after,
+.whats-new-simple-item:hover::after {
+  width: 100%;
+}
+
+/* モバイルレスポンシブ調整 */
+@media (max-width: 640px) {
+  .whats-new-container,
+  .whats-new-simple-container {
+    font-size: 0.9rem;
+  }
+  
+  .whats-new-title,
+  .whats-new-simple-title {
+    font-size: 1.1rem;
+  }
+}
+
+/* ダークモード対応 */
+.dark-mode .whats-new-container,
+.dark-mode .whats-new-simple-container {
+  background-color: #1a1b20;
+  color: #e4e4e7;
+}
+
+.dark-mode .whats-new-date,
+.dark-mode .whats-new-simple-date {
+  color: #9ca3af;
+}
+
+.dark-mode .whats-new-title,
+.dark-mode .whats-new-simple-title {
+  color: #f1f5f9;
+}
+
+.dark-mode .filter-btn {
+  border-color: #374151;
+  color: #d1d5db;
+}
+
+.dark-mode .filter-btn:hover:not(.active) {
+  background-color: rgba(99, 102, 241, 0.2);
+}
+
+.dark-mode .whats-new-item:hover,
+.dark-mode .whats-new-simple-item:hover {
+  background-color: #2d2e35;
+}
+
+.dark-mode .whats-new-excerpt {
+  color: #d1d5db;
+}
+
+.dark-mode .whats-new-item.expanded {
+  background-color: #2d2e35;
+}
