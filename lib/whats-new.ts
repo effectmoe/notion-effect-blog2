@@ -74,14 +74,31 @@ export async function getWhatsNewItems(databaseId: string): Promise<WhatsNewItem
           }
         }
 
+        // titleの型変換を追加
+        let titleStr = 'Untitled';
+        if (title) {
+          if (typeof title === 'string') {
+            titleStr = title;
+          } else if (typeof title === 'number') {
+            titleStr = String(title);
+          } else if (Array.isArray(title)) {
+            titleStr = title.join(', ');
+          } else if (typeof title === 'object') {
+            titleStr = JSON.stringify(title);
+          } else {
+            titleStr = String(title);
+          }
+        }
+
+        // items.push() の部分も修正
         items.push({
           id: blockId,
-          title: title || 'Untitled',
+          title: titleStr,
           date: date.toISOString(),
-          slug: slug,
+          slug: typeof slug === 'string' ? slug : blockId,
           icon,
-          category,
-          excerpt
+          category: typeof category === 'string' ? category : undefined,
+          excerpt: typeof excerpt === 'string' ? excerpt : undefined
         });
       } catch (error) {
         console.error('Error processing block:', blockId, error);
