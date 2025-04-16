@@ -70,7 +70,8 @@ export function HeaderImpl({ menuItems = DEFAULT_MENU_ITEMS }: HeaderProps) {
     try {
       console.log('検索リクエスト送信:', { query: searchQuery.trim() })
       
-      const response = await fetch('/api/search-notion', {
+      // 公式Notion APIを使用した検索エンドポイントを使用する
+      const response = await fetch('/api/direct-search', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -278,73 +279,80 @@ export function HeaderImpl({ menuItems = DEFAULT_MENU_ITEMS }: HeaderProps) {
                 {searchResults.map((result: any) => {
                   console.log('検索結果レンダリング:', result);
                   
-                  // NotionのIDを抽出
-                  const id = result.id || result.blockId || result.page?.id || '';
-                  
-                  // Notionの検索結果からタイトルを抽出
-                  let title = '';
-                  
-                  // 標準的なNotionの結果構造
-                  if (result.properties?.title) {
-                    // データベースアイテムの場合
-                    const titleProp = result.properties.title;
-                    if (Array.isArray(titleProp)) {
-                      title = titleProp.map((t: any) => t[0]).join('');
-                    } else if (titleProp.title) {
-                      title = titleProp.title.map((t: any) => t.plain_text).join('');
-                    }
-                  } else if (result.title) {
-                    // ページの場合
-                    if (Array.isArray(result.title)) {
-                      title = result.title.map((t: any) => t[0]).join('');
-                    } else {
-                      title = result.title;
-                    }
-                  }
-                  // APIによって返される特別な構造
-                  else if (result.page?.title) {
-                    title = result.page.title;
-                  } else if (result.value?.properties?.title) {
-                    // ブロック結果の場合
-                    const titleProp = result.value.properties.title;
-                    if (Array.isArray(titleProp)) {
-                      title = titleProp.flat().join('');
-                    }
-                  }
-                  
-                  // 説明を抽出
-                  let description = '';
-                  if (result.description) {
-                    description = result.description;
-                  } else if (result.page?.description) {
-                    description = result.page.description;
-                  }
-                  
+                  // Notion APIの結果からデータを抽出
+                  const id = result.id;
                   if (!id) {
                     console.warn('検索結果にIDがありません:', result);
-                    return null; // IDがない結果はスキップ
+                    return null;
                   }
+                  
+                  // 公式APIのページオブジェクトからタイトルを取得する
+                  let title = '';
+                  let description = '';
+                  
+                  // 公式APIの構造の場合
+                  if (result.object === 'page') {
+                    // ページのタイトル取得試行
+                    if (result.properties && result.properties.title) {
+                      const titleProp = result.properties.title;
+                      if (titleProp.title && Array.isArray(titleProp.title)) {
+                        title = titleProp.title.map(t => t.plain_text || '').join('');
+                      }
+                    }
+                    // ページの親がデータベースの場合
+                    else if (result.parent && result.parent.database_id) {
+                      // このページには他の方法でタイトルを取得する必要がある
+                      title = '無題のページ'; // デフォルト
+                    }
+                  } 
+                  // 旧APIや他の形式の互換性
+                  else {
+                    if (result.properties?.title) {
+                      const titleProp = result.properties.title;
+                      if (Array.isArray(titleProp)) {
+                        title = titleProp.map((t: any) => t[0]).join('');
+                      } else if (titleProp.title) {
+                        title = titleProp.title.map((t: any) => t.plain_text).join('');
+                      }
+                    } else if (result.title) {
+                      if (Array.isArray(result.title)) {
+                        title = result.title.map((t: any) => t[0]).join('');
+                      } else {
+                        title = result.title;
+                      }
+                    }
+                  }
+                  
+                  // 最終的にタイトルの安全確保
+                  if (!title || title.trim() === '') {
+                    title = 'Notionページ';
+                  }
+                  
+                  // 結果と一緒に提供されるURLを使用する
+                  const url = result.url || `/${id}`;
                   
                   return (
                     <li key={id} className={styles.searchResultItem}>
-                      <Link 
-                        href={`/${id.replace(/-/g, '')}`} 
+                      <a 
+                        href={url} 
                         className={styles.searchResultLink}
                         onClick={() => {
-                          setIsSearchVisible(false)
-                          setSearchQuery('')
-                          setSearchResults([])
+                          setIsSearchVisible(false);
+                          setSearchQuery('');
+                          setSearchResults([]);
                         }}
+                        target="_blank"
+                        rel="noopener noreferrer"
                       >
                         <div className={styles.searchResultTitle}>
-                          {title || '無題のページ'}
+                          {title}
                         </div>
                         {description && (
                           <div className={styles.searchResultDescription}>
                             {description}
                           </div>
                         )}
-                      </Link>
+                      </a>
                     </li>
                   );
                 })}
