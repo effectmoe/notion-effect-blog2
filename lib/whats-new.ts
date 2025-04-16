@@ -53,7 +53,7 @@ export async function getWhatsNewItems(databaseId: string): Promise<WhatsNewItem
         const title = getPageProperty('Name', block, recordMap);
         const dateStr = getPageProperty('Date', block, recordMap);
         const icon = block.format?.page_icon || '📄';
-        onst slug = getPageProperty('Slug', block, recordMap) || blockId;
+        const slug = getPageProperty('Slug', block, recordMap) || blockId;
         const category = getPageProperty('Category', block, recordMap);
         const excerpt = getPageProperty('Excerpt', block, recordMap);
         
