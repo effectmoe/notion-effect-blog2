@@ -268,28 +268,55 @@ export function HeaderImpl({ menuItems = DEFAULT_MENU_ITEMS }: HeaderProps) {
             <div className={styles.searchResults}>
               <h3 className={styles.searchResultsTitle}>検索結果 ({searchResults.length}件)</h3>
               <ul className={styles.searchResultsList}>
-                {searchResults.map((result: any) => (
-                  <li key={result.id} className={styles.searchResultItem}>
-                    <Link 
-                      href={`/${result.id}`} 
-                      className={styles.searchResultLink}
-                      onClick={() => {
-                        setIsSearchVisible(false)
-                        setSearchQuery('')
-                        setSearchResults([])
-                      }}
-                    >
-                      <div className={styles.searchResultTitle}>
-                        {result.title || 'No Title'}
-                      </div>
-                      {result.description && (
-                        <div className={styles.searchResultDescription}>
-                          {result.description}
+                {searchResults.map((result: any) => {
+                  // Notionの検索結果からタイトルを抽出
+                  let title = '';
+                  if (result.properties?.title) {
+                    // データベースアイテムの場合
+                    const titleProp = result.properties.title;
+                    if (Array.isArray(titleProp)) {
+                      title = titleProp.map((t: any) => t[0]).join('');
+                    } else if (titleProp.title) {
+                      title = titleProp.title.map((t: any) => t.plain_text).join('');
+                    }
+                  } else if (result.title) {
+                    // ページの場合
+                    if (Array.isArray(result.title)) {
+                      title = result.title.map((t: any) => t[0]).join('');
+                    } else {
+                      title = result.title;
+                    }
+                  }
+                  
+                  // 説明を抽出
+                  let description = '';
+                  if (result.description) {
+                    description = result.description;
+                  }
+                  
+                  return (
+                    <li key={result.id || result.blockId} className={styles.searchResultItem}>
+                      <Link 
+                        href={`/${result.id || result.blockId}`} 
+                        className={styles.searchResultLink}
+                        onClick={() => {
+                          setIsSearchVisible(false)
+                          setSearchQuery('')
+                          setSearchResults([])
+                        }}
+                      >
+                        <div className={styles.searchResultTitle}>
+                          {title || '無題のページ'}
                         </div>
-                      )}
-                    </Link>
-                  </li>
-                ))}
+                        {description && (
+                          <div className={styles.searchResultDescription}>
+                            {description}
+                          </div>
+                        )}
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           )}

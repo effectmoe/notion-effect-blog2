@@ -1,17 +1,21 @@
 import ExpiryMap from 'expiry-map'
 import pMemoize from 'p-memoize'
+import { SearchParams, SearchResults } from 'notion-types' // オリジナルの型をインポート
 
 import type * as types from './types'
 import { api } from './config'
 
+// オリジナルの型を使用したタイプエイリアス
+type SearchNotionFn = (params: SearchParams) => Promise<SearchResults>
+
 export const searchNotion = pMemoize(searchNotionImpl, {
   cacheKey: (args) => args[0]?.query,
   cache: new ExpiryMap(10_000)
-})
+}) as SearchNotionFn // 型キャストを追加
 
 async function searchNotionImpl(
   params: types.SearchParams | { query: string }
-): Promise<types.SearchResults> {
+): Promise<SearchResults> { // 戻り値の型を修正
   // クエリのロギング
   console.log('Client search query:', params.query)
 
@@ -51,10 +55,10 @@ async function searchNotionImpl(
     .then((results) => {
       // 結果のロギング
       console.log(`Client received ${results.results?.length || 0} results for query: ${params.query}`)
-      return results
+      return results as SearchResults // 型キャスト
     })
     .catch((err) => {
       console.error('Search request failed:', err)
-      return { results: [], total: 0, recordMap: { block: {} } } as types.SearchResults
+      return { results: [], total: 0, recordMap: { block: {} } } as SearchResults
     })
 }

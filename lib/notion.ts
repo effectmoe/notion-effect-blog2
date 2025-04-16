@@ -81,9 +81,9 @@ export async function search(params: SearchParams | { query: string }): Promise<
       requireEditPermissions: false,
       includePublicPagesWithoutExplicitAccess: true,
       ancestorIds: [process.env.NOTION_PAGE_ID]
-    },
+    } as any,
     limit: 50
-  };
+  } as SearchParams;
   
   // クエリがない場合や短すぎる場合は空の結果を返す
   if (!searchParams.query || searchParams.query.trim().length < 2) {
@@ -98,48 +98,8 @@ export async function search(params: SearchParams | { query: string }): Promise<
   try {
     const results = await notion.search(searchParams);
     
-    // 結果を適切な形式に変換
-    const formattedResults = {
-      ...results,
-      results: results.results.map((result: any) => {
-        // ブロックタイプやフォーマットによって適切にタイトルと説明を抽出
-        let title = '';
-        let description = '';
-        
-        if (result.properties?.title) {
-          // データベースアイテムの場合
-          const titleProp = result.properties.title;
-          if (Array.isArray(titleProp)) {
-            title = titleProp.map((t: any) => t[0]).join('');
-          } else if (titleProp.title) {
-            title = titleProp.title.map((t: any) => t.plain_text).join('');
-          }
-        } else if (result.title) {
-          // ページの場合
-          if (Array.isArray(result.title)) {
-            title = result.title.map((t: any) => t[0]).join('');
-          } else {
-            title = result.title;
-          }
-        }
-        
-        // 説明を取得（存在する場合）
-        if (result.description) {
-          description = result.description;
-        }
-        
-        return {
-          id: result.id,
-          title: title || '無題',
-          description,
-          url: result.url,
-          icon: result.icon
-        };
-      })
-    };
-    
-    console.log(`Found ${formattedResults.results?.length || 0} results for query: ${searchParams.query}`);
-    return formattedResults as SearchResults;
+    // Notionのオリジナル型に合わせて返す
+    return results as SearchResults;
   } catch (err) {
     console.error('Search error:', err);
     return { results: [], total: 0, recordMap: { block: {} } } as SearchResults;
