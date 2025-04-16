@@ -2,7 +2,7 @@ import { siteConfig } from './lib/site-config'
 
 export default siteConfig({
   // the site's root Notion page (required)
-  rootNotionPageId: '1ceb802cb0c680f29369dba86095fb38',
+  rootNotionPageId: '1d7b802cb0c680fd84b4f669f3f1160f',
 
   // if you want to restrict pages to a single notion workspace (optional)
   // (this should be a Notion ID; see the docs for how to extract this)
@@ -10,7 +10,7 @@ export default siteConfig({
 
   // basic site info (required)
   name: 'カフェキネシ',
-  domain: 'nextjs-notion-starter-kit.transitivebullsh.it',
+  domain: 'notion-effect-blog.vercel.app',
   author: '©cafekinesi',
 
   // open graph metadata (optional)

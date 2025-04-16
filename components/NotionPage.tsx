@@ -30,6 +30,8 @@ import { Page404 } from './Page404'
 import { PageAside } from './PageAside'
 import { PageHead } from './PageHead'
 import { Header } from './Header'
+import { WhatsNew } from './WhatsNew'
+import WhatsNewSimple from './WhatsNewSimple'
 import styles from './styles.module.css'
 
 // -----------------------------------------------------------------------------
@@ -196,8 +198,12 @@ export function NotionPage({
   recordMap,
   error,
   pageId,
-  menuItems // Notionデータベースからのメニューアイテムを受け取る
-}: types.PageProps & { menuItems?: any[] }) {
+  menuItems, // Notionデータベースからのメニューアイテムを受け取る
+  whatsNewItems // What's Newアイテムを受け取る
+}: types.PageProps & { 
+  menuItems?: any[],
+  whatsNewItems?: Array<any>
+}) {
   const router = useRouter()
   const lite = useSearchParam('lite')
 
@@ -224,10 +230,44 @@ export function NotionPage({
   React.useEffect(() => {
     document.body.classList.add('no-notion-tabs');
     
+<<<<<<< HEAD
+    // 緑枠のWhat's Newを削除（DOMが読み込まれた後）
+    if (site && pageId && site.rootNotionPageId && pageId === site.rootNotionPageId) {
+      setTimeout(() => {
+        // 複数回試行して確実に削除する
+        const removeGreenFrame = () => {
+          const collections = document.querySelectorAll('.notion-collection-row');
+          if (collections && collections.length > 0) {
+            collections.forEach(collection => {
+              // 緑枠のWhat's Newかどうかを判定して削除
+              const isDateContent = collection.textContent?.includes('2025.04.07') || 
+                collection.textContent?.includes('2025.04.01') ||
+                collection.textContent?.includes('Webサイトニューアル');
+              if (isDateContent) {
+                (collection as HTMLElement).style.display = 'none';
+                console.log('Hidden duplicate What\'s New element');
+              }
+            });
+          }
+        };
+
+        // ロード直後と少し遅延させた後の両方で実行
+        removeGreenFrame();
+        setTimeout(removeGreenFrame, 1000);
+        setTimeout(removeGreenFrame, 2000);
+      }, 100);
+    }
+    
+    return () => {
+      document.body.classList.remove('no-notion-tabs');
+    };
+  }, [pageId, site]);
+=======
     return () => {
       document.body.classList.remove('no-notion-tabs');
     };
   }, []);
+>>>>>>> parent of bf07dc0 (1)
 
   // ナビゲーションメニュー項目を取得
   const navigationMenuItems = React.useMemo(() => 
@@ -324,6 +364,17 @@ export function NotionPage({
 
       {/* Notionレンダラー - 内部のヘッダーをnullに設定したので、カスタムヘッダーを外に配置 */}
       <Header menuItems={(menuItems && menuItems.length > 0) ? menuItems : navigationMenuItems} />
+
+      {/* What's Newブロック - トップページでのみ表示 */}
+      {pageId === site.rootNotionPageId && whatsNewItems && whatsNewItems.length > 0 && (
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-2">
+          {/* 発展バージョン（コメントアウト） */}
+          {/* <WhatsNew items={whatsNewItems} max={5} showExcerpt={true} /> */}
+          
+          {/* シンプルバージョン */}
+          <WhatsNewSimple items={whatsNewItems} max={5} />
+        </div>
+      )}
 
       <div className={styles.notionPageContainer}>
         <NotionRenderer
