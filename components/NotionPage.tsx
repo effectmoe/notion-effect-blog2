@@ -30,6 +30,7 @@ import { Page404 } from './Page404'
 import { PageAside } from './PageAside'
 import { PageHead } from './PageHead'
 import { Header } from './Header'
+import WhatsNewStyling from './WhatsNewStyling'
 import styles from './styles.module.css'
 
 // -----------------------------------------------------------------------------
@@ -326,6 +327,9 @@ export function NotionPage({
       <Header menuItems={(menuItems && menuItems.length > 0) ? menuItems : navigationMenuItems} />
 
       <div className={styles.notionPageContainer}>
+        {/* What's New セクションのスタイリングコンポーネント */}
+        <WhatsNewStyling />
+
         <NotionRenderer
           bodyClassName={cs(
             styles.notion,
