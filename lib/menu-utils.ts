@@ -51,10 +51,11 @@ export async function getMenuItems(): Promise<MenuItem[]> {
     // ブロックデータからデータベースのブロックを見つける
     const blocks = Object.values(pageData.block)
     
-    // データベースのブロックを見つける (collection_viewがある場合はデータベース)
+    // データベースのブロックを見つける
     const collectionBlocks = blocks.filter(block => 
-      block.value?.type === 'collection_view' || 
-      block.value?.type === 'collection_view_page'
+      (block.value?.type === 'collection_view' || 
+      block.value?.type === 'collection_view_page') &&
+      block.value?.collection_id // collection_idプロパティが存在するブロックのみをフィルタリング
     )
     
     if (collectionBlocks.length === 0) {
@@ -67,7 +68,10 @@ export async function getMenuItems(): Promise<MenuItem[]> {
 
     // 各コレクションブロックを処理
     for (const block of collectionBlocks) {
-      const collectionId = block.value?.collection_id
+      // 型アサーションを使用してTypeScriptのエラーを回避
+      // collection_idが存在することがすでにフィルタリングされている
+      const blockValue = block.value as any
+      const collectionId = blockValue.collection_id
       const collection = pageData.collection?.[collectionId]
       
       if (!collection) continue
@@ -87,31 +91,36 @@ export async function getMenuItems(): Promise<MenuItem[]> {
 
       // ページごとにMenuプロパティをチェック
       for (const pageId of pageIds) {
-        const block = pageData.block[pageId]?.value
-        if (!block) continue
+        const blockValue = pageData.block[pageId]?.value as any
+        if (!blockValue) continue
 
-        // Menuプロパティの値を取得
-        const menuValue = getPageProperty(block, menuPropertyId, pageData)
-        
-        // Menuプロパティがtrueの場合のみ処理
-        if (menuValue === 'Yes' || menuValue === 'True' || menuValue === '✓') {
-          // ページタイトルを取得
-          const titleProp = getPageProperty(block, 'title', pageData) as string
+        try {
+          // Menuプロパティの値を取得
+          const menuValue = getPageProperty(blockValue, menuPropertyId, pageData)
           
-          // タイトルが空の場合はスキップ
-          if (!titleProp) continue
+          // Menuプロパティがtrueの場合のみ処理
+          if (menuValue === 'Yes' || menuValue === 'True' || menuValue === '✓') {
+            // ページタイトルを取得
+            const titleProp = getPageProperty(blockValue, 'title', pageData) as string
+            
+            // タイトルが空の場合はスキップ
+            if (!titleProp) continue
 
-          // ページIDからURLを生成（IDをそのまま使用するシンプルな方法）
-          const url = `/${pageId.replace(/-/g, '')}`
+            // ページIDからURLを生成（IDをそのまま使用するシンプルな方法）
+            const url = `/${pageId.replace(/-/g, '')}`
 
-          // メニュー項目を追加
-          menuItems.push({
-            id: pageId,
-            title: titleProp,
-            url: url,
-            icon: block.format?.page_icon || '',
-            emoji: block.format?.page_icon || ''
-          })
+            // メニュー項目を追加
+            menuItems.push({
+              id: pageId,
+              title: titleProp,
+              url: url,
+              icon: blockValue.format?.page_icon || '',
+              emoji: blockValue.format?.page_icon || ''
+            })
+          }
+        } catch (err) {
+          console.error(`Error processing page ${pageId}:`, err)
+          continue
         }
       }
     }
