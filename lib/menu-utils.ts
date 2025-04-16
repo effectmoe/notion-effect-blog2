@@ -1,6 +1,34 @@
 import * as config from './config'
 import { notion } from './notion-api'
-import { getPageProperty } from 'notion-utils'
+
+// プロパティ値を取得する独自関数
+function getPropertyValue(block: any, propertyName: string, recordMap: any): any {
+  if (!block || !recordMap) return null
+  
+  try {
+    // タイトルの場合は特別な処理
+    if (propertyName === 'title') {
+      const titleElements = block.properties?.title
+      if (Array.isArray(titleElements) && titleElements.length > 0) {
+        return titleElements.map(t => t[0]).join('')
+      }
+      return ''
+    }
+    
+    // 通常のプロパティ
+    if (block.properties && propertyName in block.properties) {
+      const prop = block.properties[propertyName]
+      if (Array.isArray(prop) && prop.length > 0) {
+        return prop.map(p => p[0]).join('')
+      }
+    }
+    
+    return null
+  } catch (err) {
+    console.error('Error getting property value:', err)
+    return null
+  }
+}
 
 // メニュー項目の型定義
 export type MenuItem = {
@@ -96,12 +124,12 @@ export async function getMenuItems(): Promise<MenuItem[]> {
 
         try {
           // Menuプロパティの値を取得
-          const menuValue = getPageProperty(blockValue, menuPropertyId, pageData)
+          const menuValue = getPropertyValue(blockValue, menuPropertyId, pageData)
           
           // Menuプロパティがtrueの場合のみ処理
           if (menuValue === 'Yes' || menuValue === 'True' || menuValue === '✓') {
             // ページタイトルを取得
-            const titleProp = getPageProperty(blockValue, 'title', pageData) as string
+            const titleProp = getPropertyValue(blockValue, 'title', pageData) as string
             
             // タイトルが空の場合はスキップ
             if (!titleProp) continue
