@@ -50,12 +50,12 @@ export async function getWhatsNewItems(databaseId: string): Promise<WhatsNewItem
       
       try {
         // プロパティから各種情報を取得
-        const title = getNotionPageProperty('Name', block, recordMap);
-        const dateStr = getNotionPageProperty('Date', block, recordMap);
+        const title = getPageProperty('Name', block, recordMap);
+        const dateStr = getPageProperty('Date', block, recordMap);
         const icon = block.format?.page_icon || '📄';
-        const slug = getNotionPageProperty('Slug', block, recordMap) || blockId;
-        const category = getNotionPageProperty('Category', block, recordMap);
-        const excerpt = getNotionPageProperty('Excerpt', block, recordMap);
+        onst slug = getPageProperty('Slug', block, recordMap) || blockId;
+        const category = getPageProperty('Category', block, recordMap);
+        const excerpt = getPageProperty('Excerpt', block, recordMap);
         
         // 日付文字列をパース
         let date = new Date();
