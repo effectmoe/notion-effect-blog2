@@ -405,8 +405,106 @@
   color: var(--fg-color-2);
 }
 
-.notion-equation.notion-equation-block{
+.notion-equation.notion-equation-block {
   align-items: center;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding: 8px 0;
+  overflow-x: auto;
+  font-size: 1.2em;
+}
+
+/* PDFビューアーの改善スタイル */
+.notion-pdf {
+  width: 100%;
+  height: auto;
+  min-height: 600px;
+  border-radius: 8px;
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  margin: 2em 0;
+}
+
+/* モバイル端末の場合はPDFビューアーの高さを調整 */
+@media only screen and (max-width: 767px) {
+  .notion-pdf {
+    min-height: 400px;
+  }
+}
+
+/* コレクションビュー改善スタイル */
+.notion-collection-view-tabs {
+  margin: 1em 0;
+  border-bottom: 1px solid rgba(55, 53, 47, 0.16);
+  padding-bottom: 0.5em;
+}
+
+.notion-collection-view-tabs-content button {
+  padding: 6px 10px;
+  border-radius: 3px;
+  margin-right: 8px;
+  transition: background 120ms ease-in;
+}
+
+.notion-collection-view-tabs-content button:hover {
+  background: rgba(55, 53, 47, 0.08);
+}
+
+.notion-collection-view-tabs-content button.active {
+  background: rgba(55, 53, 47, 0.16);
+  font-weight: 500;
+}
+
+.dark-mode .notion-collection-view-tabs-content button.active {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+/* テーブルビューの改善 */
+.notion-table {
+  border-radius: 5px;
+  overflow: hidden;
+  border: 1px solid rgba(55, 53, 47, 0.16);
+}
+
+.notion-table-view {
+  margin-top: 1em;
+}
+
+.notion-table-header {
+  background: rgba(247, 246, 243, 0.8);
+  font-weight: 600;
+  padding: 8px 16px;
+}
+
+.dark-mode .notion-table-header {
+  background: rgba(48, 47, 45, 0.8);
+}
+
+.notion-table-header-cell {
+  padding: 8px 12px;
+}
+
+.notion-table-cell {
+  padding: 8px 12px;
+  font-size: 0.9em;
+}
+
+.notion-table-row {
+  border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+  transition: background 120ms ease-in;
+}
+
+.notion-table-row:last-child {
+  border-bottom: none;
+}
+
+.notion-table-row:hover {
+  background: rgba(55, 53, 47, 0.03);
+}
+
+.dark-mode .notion-table-row:hover {
+  background: rgba(255, 255, 255, 0.05);
 }
 
 /* デバイス別のメディアクエリ設定 */

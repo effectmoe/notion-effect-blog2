@@ -36,60 +36,84 @@ import styles from './styles.module.css'
 // dynamic imports for optional components
 // -----------------------------------------------------------------------------
 
+// コードブロックコンポーネント - 改良版
 const Code = dynamic(() =>
   import('react-notion-x/build/third-party/code').then(async (m) => {
     // add / remove any prism syntaxes here
     await Promise.allSettled([
+      // 必須の基本言語
       import('prismjs/components/prism-markup-templating.js'),
       import('prismjs/components/prism-markup.js'),
+      
+      // 人気のある言語
       import('prismjs/components/prism-bash.js'),
+      import('prismjs/components/prism-javascript.js'),
+      import('prismjs/components/prism-typescript.js'),
+      import('prismjs/components/prism-python.js'),
+      import('prismjs/components/prism-java.js'),
+      import('prismjs/components/prism-css.js'),
+      import('prismjs/components/prism-go.js'),
+      import('prismjs/components/prism-rust.js'),
+      import('prismjs/components/prism-jsx.js'),
+      import('prismjs/components/prism-tsx.js'),
+      import('prismjs/components/prism-yaml.js'),
+      import('prismjs/components/prism-json.js'),
+      import('prismjs/components/prism-markdown.js'),
+      import('prismjs/components/prism-sql.js'),
+      
+      // その他の言語も含める
       import('prismjs/components/prism-c.js'),
       import('prismjs/components/prism-cpp.js'),
       import('prismjs/components/prism-csharp.js'),
       import('prismjs/components/prism-docker.js'),
-      import('prismjs/components/prism-java.js'),
       import('prismjs/components/prism-js-templates.js'),
       import('prismjs/components/prism-coffeescript.js'),
       import('prismjs/components/prism-diff.js'),
       import('prismjs/components/prism-git.js'),
-      import('prismjs/components/prism-go.js'),
       import('prismjs/components/prism-graphql.js'),
       import('prismjs/components/prism-handlebars.js'),
       import('prismjs/components/prism-less.js'),
       import('prismjs/components/prism-makefile.js'),
-      import('prismjs/components/prism-markdown.js'),
       import('prismjs/components/prism-objectivec.js'),
       import('prismjs/components/prism-ocaml.js'),
-      import('prismjs/components/prism-python.js'),
       import('prismjs/components/prism-reason.js'),
-      import('prismjs/components/prism-rust.js'),
       import('prismjs/components/prism-sass.js'),
       import('prismjs/components/prism-scss.js'),
       import('prismjs/components/prism-solidity.js'),
-      import('prismjs/components/prism-sql.js'),
       import('prismjs/components/prism-stylus.js'),
       import('prismjs/components/prism-swift.js'),
       import('prismjs/components/prism-wasm.js'),
-      import('prismjs/components/prism-yaml.js')
+      
+      // HTMLテンプレート言語
+      import('prismjs/components/prism-ejs.js'),
+      import('prismjs/components/prism-handlebars.js'),
+      import('prismjs/components/prism-pug.js')
     ])
     return m.Code
   })
 )
 
+// データベースビューコンポーネント
 const Collection = dynamic(() =>
   import('react-notion-x/build/third-party/collection').then(
     (m) => m.Collection
   )
 )
+
+// 数式コンポーネント
 const Equation = dynamic(() =>
   import('react-notion-x/build/third-party/equation').then((m) => m.Equation)
 )
+
+// PDFビューアーコンポーネント - SSRを無効化
 const Pdf = dynamic(
   () => import('react-notion-x/build/third-party/pdf').then((m) => m.Pdf),
   {
     ssr: false
   }
 )
+
+// モーダルコンポーネント - SSRを無効化
 const Modal = dynamic(
   () =>
     import('react-notion-x/build/third-party/modal').then((m) => {
