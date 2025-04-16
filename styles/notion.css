@@ -63,27 +63,151 @@
   display: none;
 }
 
-/* WhatsNewセクション - タイトルサイズの直接修正 */
-/* 「What's New」セクション内のタイトル要素 */
-span.notion-page-title-text {
+/* =================== */
+/* What's Newセクションのスタイリッシュなデザイン */
+/* =================== */
+
+/* What's Newヘッダー */
+.notion-collection-header-title {
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  color: #555;
+  letter-spacing: 0.5px;
+  font-weight: 500;
+}
+
+/* What's New見出しのアイコン装飾 */
+.notion-collection-header-title:before {
+  content: "📰";
+  margin-right: 0.5rem;
+  font-size: 1.2rem;
+}
+
+/* テーブルビューを隠す */
+.notion-table-view {
+  display: none !important;
+}
+
+/* What's New リストビュースタイリング */
+.notion-list-view {
+  border: none !important;
+  background: transparent !important;
+  margin-top: 0 !important;
+}
+
+/* リストアイテムのスタイリング */
+.notion-list-item {
+  margin-bottom: 0.75rem !important;
+  border-radius: 8px !important;
+  padding: 0.75rem 1rem !important;
+  background: #f9f9fb !important;
+  transition: all 0.2s ease-in-out !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04) !important;
+  border-left: 3px solid #8367c7 !important;
+  overflow: hidden !important;
+}
+
+/* リストアイテムのホバー効果 */
+.notion-list-item:hover {
+  background: #f5f5f9 !important;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.07) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* リスト本体の余白調整 */
+.notion-list-body {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* プロパティのテキストサイズ調整 */
+.notion-property {
+  font-size: 0.85rem !important;
+  line-height: 1.5 !important;
+}
+
+/* タイトルのスタイリング */
+.notion-page-title-text {
   font-size: 0.95rem !important;
-  line-height: 1.4 !important;
   font-weight: 500 !important;
+  color: #333 !important;
+  background: none !important;
   -webkit-background-clip: initial !important;
   -webkit-text-fill-color: #333 !important;
-  background: transparent !important;
+  line-height: 1.4 !important;
+  margin-bottom: 0.35rem !important;
 }
 
-/* notion-list-viewクラスに対するスタイリング */
-.notion-list-view {
-  font-size: 0.95rem !important;
+/* カテゴリタグのスタイリング */
+.notion-property-select {
+  font-size: 0.7rem !important;
+  padding: 0.15rem 0.6rem !important;
+  border-radius: 12px !important;
+  background-color: #f0eafb !important;
+  color: #8367c7 !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.5px !important;
+  text-transform: uppercase !important;
+  display: inline-block !important;
+  margin-right: 0.5rem !important;
+  border: none !important;
 }
 
-/* 「What's New」ヘッダータイトル */
-span[data-content="What's New"],
-span[data-content="What' New"] {
-  font-size: 1.1rem !important;
-  font-weight: 600 !important;
+/* 日付のスタイリング */
+.notion-property-date {
+  font-size: 0.75rem !important;
+  color: #888 !important;
+  font-weight: 400 !important;
+}
+
+/* What's New リストアイテムのレイアウト */
+.notion-list-item-body {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+}
+
+/* リストアイテムのプロパティコンテナ */
+.notion-list-item-property {
+  margin-bottom: 0 !important;
+}
+
+/* リストアイテムのタイトル */
+.notion-list-item-title {
+  flex: 1 !important;
+  margin-right: 1rem !important;
+}
+
+/* リストアイテムのアイコン */
+.notion-page-icon-inline {
+  margin-right: 0.5rem !important;
+}
+
+/* ダークモード対応 */
+.dark-mode .notion-list-item {
+  background: #1f1f24 !important;
+  border-left: 3px solid #a78bfa !important;
+}
+
+.dark-mode .notion-list-item:hover {
+  background: #2a2a30 !important;
+}
+
+.dark-mode .notion-property-select {
+  background-color: #372e4d !important;
+  color: #c4b5fd !important;
+}
+
+.dark-mode .notion-page-title-text {
+  color: #e1e1e1 !important;
+  -webkit-text-fill-color: #e1e1e1 !important;
+}
+
+.dark-mode .notion-property-date {
+  color: #aaa !important;
 }
 
 /* 通常のギャラリーのタイトルサイズ */
@@ -686,27 +810,26 @@ span[data-content="What' New"] {
   }
   
   /* スマートフォンでのWhat's New項目のタイトルをさらに小さく */
-  span.notion-page-title-text {
+  .notion-list-view .notion-page-title-text {
     font-size: 0.85rem !important;
+  }
+  
+  /* モバイルでのリストアイテムのレイアウト調整 */
+  .notion-list-item-body {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+  
+  .notion-list-item-property {
+    margin-top: 0.25rem !important;
   }
 }
 
-/* スクリーンショットに基づいた追加の修正 */
-/* .notion-list-item-body, .notion-list-item-titleなどの要素を対象 */
-.notion-list-item-body {
-  font-size: 0.95rem !important;
-}
-
-/* What's New リストの特定のクラスに基づく修正 */
-.notion-list-body {
-  font-size: 0.95rem !important;
-}
-
-/* スクリーンショットで見た特定のセレクタに基づく修正 */
-/* spanのnotion-page-title-text 要素のフォントサイズを小さく */
-.notion-page-title span.notion-page-title-text {
-  font-size: 0.95rem !important;
-  background: none !important;
-  -webkit-background-clip: initial !important;
-  -webkit-text-fill-color: #333 !important;
+/* リストビューの区切り線を追加 */
+.notion-list-view:after {
+  content: "";
+  display: block;
+  height: 1px;
+  margin: 1.5rem 0;
+  background: linear-gradient(to right, transparent, #e0e0e0, transparent);
 }
