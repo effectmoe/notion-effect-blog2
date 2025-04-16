@@ -68,6 +68,8 @@ export function HeaderImpl({ menuItems = DEFAULT_MENU_ITEMS }: HeaderProps) {
     setIsSearching(true)
     
     try {
+      console.log('検索リクエスト送信:', { query: searchQuery.trim() })
+      
       const response = await fetch('/api/search-notion', {
         method: 'POST',
         headers: {
@@ -81,8 +83,13 @@ export function HeaderImpl({ menuItems = DEFAULT_MENU_ITEMS }: HeaderProps) {
       }
       
       const results = await response.json()
-      setSearchResults(results.results || [])
-      console.log('検索結果:', results)
+      console.log('検索結果の詳細:', results)
+      console.log('検索結果の項目数:', results.results?.length || 0)
+      console.log('検索結果の構造:', JSON.stringify(results, null, 2))
+      
+      // results.resultsが配列であることを確認
+      const searchResultsArray = Array.isArray(results.results) ? results.results : []
+      setSearchResults(searchResultsArray)
     } catch (error) {
       console.error('検索エラー:', error)
       setSearchResults([])
@@ -269,8 +276,15 @@ export function HeaderImpl({ menuItems = DEFAULT_MENU_ITEMS }: HeaderProps) {
               <h3 className={styles.searchResultsTitle}>検索結果 ({searchResults.length}件)</h3>
               <ul className={styles.searchResultsList}>
                 {searchResults.map((result: any) => {
+                  console.log('検索結果レンダリング:', result);
+                  
+                  // NotionのIDを抽出
+                  const id = result.id || result.blockId || result.page?.id || '';
+                  
                   // Notionの検索結果からタイトルを抽出
                   let title = '';
+                  
+                  // 標準的なNotionの結果構造
                   if (result.properties?.title) {
                     // データベースアイテムの場合
                     const titleProp = result.properties.title;
@@ -287,17 +301,34 @@ export function HeaderImpl({ menuItems = DEFAULT_MENU_ITEMS }: HeaderProps) {
                       title = result.title;
                     }
                   }
+                  // APIによって返される特別な構造
+                  else if (result.page?.title) {
+                    title = result.page.title;
+                  } else if (result.value?.properties?.title) {
+                    // ブロック結果の場合
+                    const titleProp = result.value.properties.title;
+                    if (Array.isArray(titleProp)) {
+                      title = titleProp.flat().join('');
+                    }
+                  }
                   
                   // 説明を抽出
                   let description = '';
                   if (result.description) {
                     description = result.description;
+                  } else if (result.page?.description) {
+                    description = result.page.description;
+                  }
+                  
+                  if (!id) {
+                    console.warn('検索結果にIDがありません:', result);
+                    return null; // IDがない結果はスキップ
                   }
                   
                   return (
-                    <li key={result.id || result.blockId} className={styles.searchResultItem}>
+                    <li key={id} className={styles.searchResultItem}>
                       <Link 
-                        href={`/${result.id || result.blockId}`} 
+                        href={`/${id.replace(/-/g, '')}`} 
                         className={styles.searchResultLink}
                         onClick={() => {
                           setIsSearchVisible(false)

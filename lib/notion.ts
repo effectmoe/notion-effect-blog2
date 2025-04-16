@@ -71,18 +71,31 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
 }
 
 export async function search(params: SearchParams | { query: string }): Promise<SearchResults> {
+  // 環境変数の確認
+  console.log('NOTION_PAGE_ID:', process.env.NOTION_PAGE_ID);
+  console.log('rootNotionPageId:', process.env.NOTION_ROOT_PAGE_ID || 'not set');
+  
+  // 検索パラメータの設定
+  // ancestorIdは必ず文字列を渡すようにする
+  const rootId = process.env.NOTION_PAGE_ID || '';
+  
   const searchParams: SearchParams = {
     query: params.query,
-    ancestorId: process.env.NOTION_PAGE_ID,
+    ancestorId: rootId,
     filters: {
       isDeletedOnly: false,
       excludeTemplates: true,
       isNavigableOnly: false,    // falseに変更して検索範囲を広げる
       requireEditPermissions: false,
       includePublicPagesWithoutExplicitAccess: true,
-      ancestorIds: [process.env.NOTION_PAGE_ID]
+      // ancestorIdsは検索範囲を広げるため一時的にコメントアウト
+      // ancestorIds: rootId ? [rootId] : undefined
     } as any,
-    limit: 50
+    sort: {
+      field: 'relevance',
+      direction: 'desc'
+    },
+    limit: 100 // 検索結果を増やす
   } as SearchParams;
   
   // クエリがない場合や短すぎる場合は空の結果を返す
@@ -93,15 +106,48 @@ export async function search(params: SearchParams | { query: string }): Promise<
   // クエリをトリム
   searchParams.query = searchParams.query.trim();
   
-  console.log('Search params:', JSON.stringify(searchParams, null, 2));
+  console.log('検索パラメータ詳細:', JSON.stringify(searchParams, null, 2));
   
   try {
+    console.log('Notion API search実行...');
     const results = await notion.search(searchParams);
     
-    // Notionのオリジナル型に合わせて返す
+    console.log('検索結果概要:', {
+      resultsCount: results?.results?.length || 0,
+      totalCount: results?.total || 0
+    });
+    
+    if (results?.results?.length === 0) {
+      console.log('検索結果が見つかりませんでした。検索クエリ:', params.query);
+      console.log('ancestorIdを外して再検索を試みます...');
+      
+      // ancestorIdを外して再検索
+      const searchParamsWithoutAncestor = {
+        ...searchParams,
+        ancestorId: undefined,
+        filters: {
+          ...searchParams.filters,
+          ancestorIds: undefined
+        } as any
+      };
+      
+      try {
+        const fallbackResults = await notion.search(searchParamsWithoutAncestor);
+        console.log('ancestorIdなしの検索結果:', {
+          resultsCount: fallbackResults?.results?.length || 0,
+          totalCount: fallbackResults?.total || 0
+        });
+        
+        return fallbackResults as SearchResults;
+      } catch (fallbackErr) {
+        console.error('ancestorIdなしの検索エラー:', fallbackErr);
+        return results as SearchResults;
+      }
+    }
+    
     return results as SearchResults;
   } catch (err) {
-    console.error('Search error:', err);
+    console.error('Notion検索エラー:', err);
     return { results: [], total: 0, recordMap: { block: {} } } as SearchResults;
   }
 }

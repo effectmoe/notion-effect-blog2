@@ -54,7 +54,15 @@ async function searchNotionImpl(
     .then((res) => res.json())
     .then((results) => {
       // 結果のロギング
-      console.log(`Client received ${results.results?.length || 0} results for query: ${params.query}`)
+      console.log('Search API Response:', JSON.stringify(results, null, 2));
+      console.log(`Client received ${results.results?.length || 0} results for query: ${params.query}`);
+      
+      // results.resultsが配列でなければ初期化
+      if (!Array.isArray(results.results)) {
+        console.warn('Search results is not an array, initializing empty array');
+        results.results = [];
+      }
+      
       return results as SearchResults // 型キャスト
     })
     .catch((err) => {
