@@ -1,12 +1,24 @@
 import { NotionPage } from '@/components/NotionPage'
 import { domain } from '@/lib/config'
 import { resolveNotionPage } from '@/lib/resolve-notion-page'
+import { getMenuItems } from '@/lib/menu-utils'
+import { notionViews } from '@/lib/notion-views'
 
 export const getStaticProps = async () => {
   try {
     const props = await resolveNotionPage(domain)
-
-    return { props, revalidate: 10 }
+    
+    // NotionデータベースからMenuがtrueの項目を取得
+    const menuItems = await getMenuItems()
+    
+    // propsにmenuItemsを追加
+    return { 
+      props: {
+        ...props,
+        menuItems
+      }, 
+      revalidate: 10 
+    }
   } catch (err) {
     console.error('page error', domain, err)
 
