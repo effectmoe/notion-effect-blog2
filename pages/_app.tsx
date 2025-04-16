@@ -12,6 +12,8 @@ import 'styles/global.css'
 import 'styles/notion.css'
 // global style overrides for prism theme (optional)
 import 'styles/prism-theme.css'
+// WhatsNew component styles
+import 'styles/whats-new.css'
 
 import type { AppProps } from 'next/app'
 import * as Fathom from 'fathom-client'
@@ -28,6 +30,7 @@ import {
   posthogId
 } from '@/lib/config'
 import { getMenuItemsForStaticProps } from '@/lib/menu-utils'
+import FontStyler from '@/components/FontStyler'
 
 if (!isServer) {
   bootstrap()
@@ -70,8 +73,13 @@ export default function App({ Component, pageProps }: CustomAppProps) {
     }
   }, [router.events])
 
-  // menuItemsが存在しない場合は空の配列を渡す
-  return <Component {...pageProps} />
+  // FontStylerコンポーネントを追加してフォントをカスタマイズ
+  return (
+    <>
+      <FontStyler />
+      <Component {...pageProps} />
+    </>
+  )
 }
 
 // サーバーサイドでメニュー項目を取得
