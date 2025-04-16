@@ -12,6 +12,7 @@ export const getStaticProps = async () => {
     const menuItems = await getMenuItems()
     
 <<<<<<< HEAD
+<<<<<<< HEAD
     // What's Newアイテムを取得 - 実際のデータベースから取得
     let whatsNewItems = [];
     try {
@@ -26,10 +27,14 @@ export const getStaticProps = async () => {
 =======
     // What's Newアイテムを取得
     // 実際のデータベース方式（後でコメントアウトを解除して使用）
+=======
+    // What's Newアイテムを取得 (実際のデータベースID設定前はサンプルデータを使用)
+    // 実際に使用する場合は下のようにデータベースIDを指定
+>>>>>>> parent of f0db49e (1)
     // const whatsNewDatabaseId = 'your-database-id-here'
     // const whatsNewItems = await getWhatsNewItems(whatsNewDatabaseId)
     
-    // 開発用サンプルデータ - データベース方式に切り替えたように見せる
+    // 開発用サンプルデータ
     const whatsNewItems = getSampleWhatsNewItems()
 >>>>>>> parent of bf07dc0 (1)
     

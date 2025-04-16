@@ -123,14 +123,45 @@ export function getSampleWhatsNewItems(): WhatsNewItem[] {
       date: '2025-04-07',
       title: 'Webサイトニューアルしました',
       slug: 'website-renewal',
-      icon: '📝'
+      icon: '🎉',
+      category: '更新情報',
+      excerpt: 'Webサイトをリニューアルしました。新しいデザインと機能をぜひご利用ください。'
     },
     {
       id: '2',
       date: '2025-04-01',
       title: 'プロフィール更新しました',
       slug: 'profile-update',
-      icon: '📝'
+      icon: '👤',
+      category: '更新情報',
+      excerpt: 'プロフィールページを更新しました。最新の情報をご確認ください。'
+    },
+    {
+      id: '3',
+      date: '2025-03-15',
+      title: '新メニューを追加しました',
+      slug: 'new-menu',
+      icon: '🍵',
+      category: 'メニュー',
+      excerpt: '春の新メニューが登場しました。季節の素材を使った特別なメニューをぜひお試しください。'
+    },
+    {
+      id: '4',
+      date: '2025-03-01',
+      title: '営業時間変更のお知らせ',
+      slug: 'business-hours-change',
+      icon: '⏰',
+      category: 'お知らせ',
+      excerpt: '4月より営業時間が変更になります。詳細はこちらをご確認ください。'
+    },
+    {
+      id: '5',
+      date: '2025-02-14',
+      title: 'バレンタインイベント開催',
+      slug: 'valentine-event',
+      icon: '❤️',
+      category: 'イベント',
+      excerpt: 'バレンタインデー特別イベントを開催しました。たくさんのご参加ありがとうございました。'
     }
   ];
 }

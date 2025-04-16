@@ -367,13 +367,15 @@ export function NotionPage({
 
       {/* What's Newブロック - トップページでのみ表示 */}
       {pageId === site.rootNotionPageId && whatsNewItems && whatsNewItems.length > 0 && (
-        <div className="mx-auto my-4" style={{ maxWidth: '500px' }}>
-          <h2 className="text-3xl font-bold text-center mb-8">☕ Welcome to CafeKinesi</h2>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-2">
+          {/* 発展バージョン（コメントアウト） */}
+          {/* <WhatsNew items={whatsNewItems} max={5} showExcerpt={true} /> */}
+          
+          {/* シンプルバージョン */}
           <WhatsNewSimple items={whatsNewItems} max={5} />
         </div>
       )}
 
-      {/* Notionレンダラーの中に配置する */}
       <div className={styles.notionPageContainer}>
         <NotionRenderer
           bodyClassName={cs(
