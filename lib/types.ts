@@ -75,3 +75,40 @@ export interface NotionPageInfo {
   authorImage: string
   detail: string
 }
+
+export interface SearchParams {
+  query: string
+  ancestorId?: string
+  filters?: {
+    isDeletedOnly?: boolean
+    excludeTemplates?: boolean
+    isNavigableOnly?: boolean
+    requireEditPermissions?: boolean
+    includePublicPagesWithoutExplicitAccess?: boolean
+    ancestorIds?: string[]
+    [key: string]: any
+  }
+  sort?: {
+    field: string
+    direction: 'asc' | 'desc'
+  }
+  limit?: number
+  searchUrlOverride?: string
+}
+
+export interface SearchResults {
+  results: Array<{
+    id: string
+    title: string
+    description?: string
+    url?: string
+    icon?: string
+    [key: string]: any
+  }>
+  total: number
+  recordMap: {
+    block: Record<string, any>
+    [key: string]: any
+  }
+  hasMore?: boolean
+}

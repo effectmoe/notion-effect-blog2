@@ -10,18 +10,24 @@ export const searchNotion = pMemoize(searchNotionImpl, {
 })
 
 async function searchNotionImpl(
-  params: types.SearchParams
+  params: types.SearchParams | { query: string }
 ): Promise<types.SearchResults> {
   // クエリのロギング
   console.log('Client search query:', params.query)
-  
-  // 検索パラメータの調整
-  if (!params.ancestorId && api.notionPageId) {
-    params.ancestorId = api.notionPageId
-  }
-  
-  // 複数のポイントでエラーの可能性を回避するために型アサーションを使用
-  const searchParams = params as any;
+
+  // 検索パラメータの標準化
+  const searchParams: types.SearchParams = {
+    query: params.query,
+    ancestorId: api.notionPageId,
+    filters: {
+      isDeletedOnly: false,
+      excludeTemplates: true,
+      isNavigableOnly: false,
+      requireEditPermissions: false,
+      includePublicPagesWithoutExplicitAccess: true
+    },
+    limit: 20
+  };
   
   return fetch(api.searchNotion, {
     method: 'POST',

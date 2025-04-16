@@ -36,6 +36,9 @@ export function HeaderImpl({ menuItems = DEFAULT_MENU_ITEMS }: HeaderProps) {
   const [hasMounted, setHasMounted] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [isSearchVisible, setIsSearchVisible] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState([])
+  const [isSearching, setIsSearching] = useState(false)
 
   // マウント状態の確認
   useEffect(() => {
@@ -53,6 +56,47 @@ export function HeaderImpl({ menuItems = DEFAULT_MENU_ITEMS }: HeaderProps) {
     window.addEventListener('resize', checkIsMobile)
     return () => window.removeEventListener('resize', checkIsMobile)
   }, [])
+  
+  // 検索実行関数
+  const handleSearch = async (e) => {
+    e?.preventDefault()
+    
+    if (!searchQuery || searchQuery.trim().length < 2) {
+      return
+    }
+    
+    setIsSearching(true)
+    
+    try {
+      const response = await fetch('/api/search-notion', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ query: searchQuery.trim() })
+      })
+      
+      if (!response.ok) {
+        throw new Error(`検索リクエストに失敗しました: ${response.status}`)
+      }
+      
+      const results = await response.json()
+      setSearchResults(results.results || [])
+      console.log('検索結果:', results)
+    } catch (error) {
+      console.error('検索エラー:', error)
+      setSearchResults([])
+    } finally {
+      setIsSearching(false)
+    }
+  }
+  
+  // Enterキーで検索実行
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch(e)
+    }
+  }
 
   // スクロール検出用のイベントリスナー
   useEffect(() => {
@@ -200,12 +244,62 @@ export function HeaderImpl({ menuItems = DEFAULT_MENU_ITEMS }: HeaderProps) {
         isSearchVisible ? styles.searchVisible : styles.searchHidden
       )}>
         <div className={styles.searchContainer}>
-          <input 
-            type="text" 
-            className={styles.searchInput} 
-            placeholder="検索..."
-            aria-label="検索"
-          />
+          <form onSubmit={handleSearch} className={styles.searchForm}>
+            <input 
+              type="text" 
+              className={styles.searchInput} 
+              placeholder="検索..."
+              aria-label="検索"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleKeyDown}
+            />
+            <button 
+              type="submit" 
+              className={styles.searchButton}
+              disabled={isSearching || !searchQuery.trim()}
+            >
+              {isSearching ? '検索中...' : '検索'}
+            </button>
+          </form>
+          
+          {/* 検索結果 */}
+          {searchResults.length > 0 && (
+            <div className={styles.searchResults}>
+              <h3 className={styles.searchResultsTitle}>検索結果 ({searchResults.length}件)</h3>
+              <ul className={styles.searchResultsList}>
+                {searchResults.map((result: any) => (
+                  <li key={result.id} className={styles.searchResultItem}>
+                    <Link 
+                      href={`/${result.id}`} 
+                      className={styles.searchResultLink}
+                      onClick={() => {
+                        setIsSearchVisible(false)
+                        setSearchQuery('')
+                        setSearchResults([])
+                      }}
+                    >
+                      <div className={styles.searchResultTitle}>
+                        {result.title || 'No Title'}
+                      </div>
+                      {result.description && (
+                        <div className={styles.searchResultDescription}>
+                          {result.description}
+                        </div>
+                      )}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          
+          {/* 検索結果がない場合のメッセージ */}
+          {searchQuery.trim().length > 1 && searchResults.length === 0 && !isSearching && (
+            <div className={styles.noResults}>
+              検索結果が見つかりませんでした
+            </div>
+          )}
         </div>
       </div>
 

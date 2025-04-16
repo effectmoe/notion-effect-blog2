@@ -70,43 +70,76 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
   return recordMap
 }
 
-export async function search(params: SearchParams): Promise<SearchResults> {
-  // rootNotionPageIdがなければ追加
-  if (!params.ancestorId) {
-    params.ancestorId = process.env.NOTION_PAGE_ID
-  }
-  
-  // 検索フィルタの最適化
-  // 型エラーを回避するために型アサーションを使用
-  params.filters = {
-    ...(params.filters || {}),
-    isDeletedOnly: false,
-    excludeTemplates: true,
-    isNavigableOnly: false,    // falseに変更して検索範囲を広げる
-    requireEditPermissions: false,
-  } as any;  // 型アサーションを使用
-  
-  // 必要なカスタムプロパティを追加
-  (params.filters as any).includePublicPagesWithoutExplicitAccess = true;
-  (params.filters as any).ancestorIds = [process.env.NOTION_PAGE_ID];
+export async function search(params: SearchParams | { query: string }): Promise<SearchResults> {
+  const searchParams: SearchParams = {
+    query: params.query,
+    ancestorId: process.env.NOTION_PAGE_ID,
+    filters: {
+      isDeletedOnly: false,
+      excludeTemplates: true,
+      isNavigableOnly: false,    // falseに変更して検索範囲を広げる
+      requireEditPermissions: false,
+      includePublicPagesWithoutExplicitAccess: true,
+      ancestorIds: [process.env.NOTION_PAGE_ID]
+    },
+    limit: 50
+  };
   
   // クエリがない場合や短すぎる場合は空の結果を返す
-  if (!params.query || params.query.trim().length < 2) {
+  if (!searchParams.query || searchParams.query.trim().length < 2) {
     return { results: [], total: 0, recordMap: { block: {} } } as SearchResults
   }
 
-  // 検索クエリの前処理（必要に応じてコメントアウト解除）
-  // params.query = params.query.trim();
+  // クエリをトリム
+  searchParams.query = searchParams.query.trim();
   
-  // 検索結果の最大数を指定
-  params.limit = params.limit || 50;  // デフォルトより多くの結果を取得
-  
-  console.log('Search params:', JSON.stringify(params, null, 2));
+  console.log('Search params:', JSON.stringify(searchParams, null, 2));
   
   try {
-    const results = await notion.search(params);
-    console.log(`Found ${results.results?.length || 0} results for query: ${params.query}`);
-    return results;
+    const results = await notion.search(searchParams);
+    
+    // 結果を適切な形式に変換
+    const formattedResults = {
+      ...results,
+      results: results.results.map((result: any) => {
+        // ブロックタイプやフォーマットによって適切にタイトルと説明を抽出
+        let title = '';
+        let description = '';
+        
+        if (result.properties?.title) {
+          // データベースアイテムの場合
+          const titleProp = result.properties.title;
+          if (Array.isArray(titleProp)) {
+            title = titleProp.map((t: any) => t[0]).join('');
+          } else if (titleProp.title) {
+            title = titleProp.title.map((t: any) => t.plain_text).join('');
+          }
+        } else if (result.title) {
+          // ページの場合
+          if (Array.isArray(result.title)) {
+            title = result.title.map((t: any) => t[0]).join('');
+          } else {
+            title = result.title;
+          }
+        }
+        
+        // 説明を取得（存在する場合）
+        if (result.description) {
+          description = result.description;
+        }
+        
+        return {
+          id: result.id,
+          title: title || '無題',
+          description,
+          url: result.url,
+          icon: result.icon
+        };
+      })
+    };
+    
+    console.log(`Found ${formattedResults.results?.length || 0} results for query: ${searchParams.query}`);
+    return formattedResults as SearchResults;
   } catch (err) {
     console.error('Search error:', err);
     return { results: [], total: 0, recordMap: { block: {} } } as SearchResults;
