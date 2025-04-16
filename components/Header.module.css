@@ -356,7 +356,9 @@
 }
 
 .mobileNavLink {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 0.8rem;
   color: inherit;
   text-decoration: none;
@@ -364,6 +366,13 @@
   font-weight: 500;
   transition: all 0.2s;
   border-radius: 8px;
+}
+
+/* メニュー項目のエモジ */
+.menuItemEmoji {
+  display: inline-block;
+  margin-right: 8px;
+  font-size: 1.2rem;
 }
 
 .mobileNavLink:hover {

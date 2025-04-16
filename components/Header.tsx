@@ -12,16 +12,10 @@ import cs from 'classnames'
 import * as config from '@/lib/config'
 import { useDarkMode } from '@/lib/use-dark-mode'
 import styles from './Header.module.css'
+import { MenuItem } from '@/lib/menu-utils'
 import { notionViews } from '@/lib/notion-views'
 
-// ナビゲーションリンクの型定義
-type MenuItem = {
-  id: string
-  title: string
-  url: string
-}
-
-// notionViewsからメニュー項目に変換
+// notionViewsからフォールバック用メニュー項目を生成
 const DEFAULT_MENU_ITEMS: MenuItem[] = notionViews.map(view => ({
   id: view.id,
   title: view.name,
@@ -33,6 +27,8 @@ type HeaderProps = {
 }
 
 export function HeaderImpl({ menuItems = DEFAULT_MENU_ITEMS }: HeaderProps) {
+  // menuItemsがundefinedの場合はDEFAULT_MENU_ITEMSを使用する
+  const items = menuItems?.length ? menuItems : DEFAULT_MENU_ITEMS;
   const router = useRouter()
   const [menuOpen, setMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
@@ -220,7 +216,7 @@ export function HeaderImpl({ menuItems = DEFAULT_MENU_ITEMS }: HeaderProps) {
       )}>
         <nav className={styles.mobileNav}>
           <ul className={styles.mobileNavList}>
-            {menuItems.map((item) => (
+            {items.map((item) => (
               <li key={item.id} className={styles.mobileNavItem}>
                 <Link 
                   href={item.url} 
@@ -230,6 +226,9 @@ export function HeaderImpl({ menuItems = DEFAULT_MENU_ITEMS }: HeaderProps) {
                   )}
                   onClick={handleMenuItemClick}
                 >
+                  {item.emoji && (
+                    <span className={styles.menuItemEmoji}>{item.emoji}</span>
+                  )}
                   {item.title}
                 </Link>
               </li>
