@@ -176,6 +176,14 @@
   text-align: center;
 }
 
+/* タイトルフォント設定の強制適用 */
+.notion-page-title-text {
+  font-family: 'Shippori Mincho', serif !important;
+}
+
+/* Googleフォントの直接インポート */
+@import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;700&display=swap');
+
 .notion-collection-row {
   padding-bottom: 1em;
 }
