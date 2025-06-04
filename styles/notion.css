@@ -670,32 +670,29 @@
   }
 }
 
-/* リストビューでの重複タイトルプロパティを非表示にする - 修正版 */
+/* リストビューでの重複タイトルプロパティを非表示にする - 最終修正版 */
 
-/* リストアイテムのタイトル部分は必ず表示 */
+/* メインのタイトルブロックは必ず表示 */
 .notion-list-item-title {
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
+  position: relative !important;
+  z-index: 1 !important;
 }
 
-/* リストアイテム内のプロパティ部分のみでタイトルプロパティを非表示 */
+/* リストアイテム内のプロパティ部分のタイトルのみを非表示 */
 .notion-list-item-body .notion-property.notion-property-title {
   display: none !important;
 }
 
-/* プロパティコンテナ内のタイトルのみ非表示 */
-.notion-list-item .notion-list-item-property.notion-property-title {
+/* プロパティコンテナ内のタイトルプロパティのみ非表示 */
+.notion-list-item-body .notion-list-item-property .notion-property-title {
   display: none !important;
 }
 
-/* プロパティセクション内のタイトルのみ非表示（より具体的） */
-.notion-list-item .notion-list-item-body > .notion-list-item-property:has(.notion-property-title) {
-  display: none !important;
-}
-
-/* タイトルプロパティを含む要素のみ非表示（メインタイトルは除外） */
-.notion-list-item-body [class*="property"][class*="title"]:not(.notion-list-item-title) {
+/* プロパティセクション内のタイトルのみ非表示（has()セレクタ使用） */
+.notion-list-item-body > .notion-list-item-property:has(.notion-property-title) {
   display: none !important;
 }
 
@@ -784,10 +781,17 @@
 }
 
 /* More specific targeting for title properties in list items */
-.notion-collection-list .notion-property-title,
-.notion-list-collection .notion-property-title,
-.notion-list-item-property[class*="title"] {
+/* プロパティとしてのタイトルのみを非表示（メインタイトルは除外） */
+.notion-collection-list .notion-list-item-body .notion-property-title,
+.notion-list-collection .notion-list-item-body .notion-property-title {
   display: none !important;
+}
+
+/* メインのタイトルブロックは常に表示 */
+.notion-list-item .notion-list-item-title {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 /* Ensure title column is hidden in list view headers */
