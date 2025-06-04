@@ -815,3 +815,24 @@ a.notion-list-item.notion-page-link:not(:has(.notion-list-item-title)) {
   font-size: 14px;
   color: var(--fg-color-3);
 }
+
+/* Last Edited Timeプロパティを使用して日付を表示（数式の代替） */
+.notion-property-last_edited_time {
+  font-size: 14px;
+  color: var(--fg-color-3);
+}
+
+/* Last Edited Timeの時間部分を隠す */
+.notion-property-last_edited_time span {
+  display: inline-block;
+  position: relative;
+  /* 日付部分のみ表示するため幅を制限 */
+  max-width: 120px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* ダークモード対応 */
+.dark-mode .notion-property-last_edited_time span {
+  max-width: 120px;
+}

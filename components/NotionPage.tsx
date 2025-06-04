@@ -197,7 +197,7 @@ export function NotionPage({
   const router = useRouter()
   const lite = useSearchParam('lite')
   
-  // useEffectを使用して空のリンクを非表示にする
+  // useEffectを使用して空のリンクを非表示にし、プロパティを調査する
   React.useEffect(() => {
     // 空のnotion-page-linkを削除する関数
     const removeEmptyLinks = () => {
@@ -212,6 +212,7 @@ export function NotionPage({
         }
       })
     }
+    
     
     // 初回実行
     removeEmptyLinks()
