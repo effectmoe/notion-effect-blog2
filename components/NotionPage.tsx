@@ -281,12 +281,27 @@ export function NotionPage({
       })
     }
     
+    // 空のnotion-page-linkを削除する関数
+    const removeEmptyLinks = () => {
+      const emptyLinks = document.querySelectorAll('a.notion-list-item.notion-page-link')
+      
+      emptyLinks.forEach((link) => {
+        // リンク内にnotion-list-item-titleが存在しない場合は削除
+        if (!link.querySelector('.notion-list-item-title')) {
+          link.style.display = 'none'
+          link.setAttribute('data-hidden', 'true')
+        }
+      })
+    }
+    
     // 初回実行
     formatDates()
+    removeEmptyLinks()
     
     // DOMの変更を監視
     const observer = new MutationObserver(() => {
       formatDates()
+      removeEmptyLinks()
     })
     
     observer.observe(document.body, {
