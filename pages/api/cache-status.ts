@@ -17,6 +17,10 @@ export default async function handler(
       cache: {
         totalItems: stats.totalKeys,
         totalSize: `${(stats.totalSize / 1024).toFixed(2)} KB`,
+        hitRate: stats.hitRate,
+        hits: stats.hits,
+        misses: stats.misses,
+        sets: stats.sets,
         items: stats.items.map(item => ({
           key: item.key,
           size: `${(item.size / 1024).toFixed(2)} KB`,

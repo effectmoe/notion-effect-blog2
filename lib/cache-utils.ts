@@ -8,6 +8,11 @@ interface CacheItem<T> {
 class CacheManager {
   private cache: Map<string, CacheItem<any>> = new Map()
   private timers: Map<string, NodeJS.Timeout> = new Map()
+  private stats = {
+    hits: 0,
+    misses: 0,
+    sets: 0
+  }
 
   // デフォルトのTTL（30分）
   private defaultTTL = 30 * 60 * 1000
@@ -25,6 +30,9 @@ class CacheManager {
       ttl: actualTTL
     })
     
+    // 統計を更新
+    this.stats.sets++
+    
     // 自動削除タイマーを設定
     const timer = setTimeout(() => {
       this.delete(key)
@@ -37,6 +45,7 @@ class CacheManager {
     const item = this.cache.get(key)
     
     if (!item) {
+      this.stats.misses++
       return null
     }
     
@@ -44,9 +53,11 @@ class CacheManager {
     const now = Date.now()
     if (now - item.timestamp > item.ttl) {
       this.delete(key)
+      this.stats.misses++
       return null
     }
     
+    this.stats.hits++
     return item.data as T
   }
 
@@ -60,6 +71,8 @@ class CacheManager {
     this.timers.forEach(timer => clearTimeout(timer))
     this.timers.clear()
     this.cache.clear()
+    // 統計をリセット
+    this.stats = { hits: 0, misses: 0, sets: 0 }
   }
 
   private clearTimer(key: string): void {
@@ -83,10 +96,18 @@ class CacheManager {
       }
     })
     
+    const hitRate = this.stats.hits + this.stats.misses > 0
+      ? (this.stats.hits / (this.stats.hits + this.stats.misses) * 100).toFixed(2)
+      : '0.00'
+    
     return {
       totalKeys: keys.length,
       items: sizes,
-      totalSize: sizes.reduce((sum, item) => sum + item.size, 0)
+      totalSize: sizes.reduce((sum, item) => sum + item.size, 0),
+      hits: this.stats.hits,
+      misses: this.stats.misses,
+      sets: this.stats.sets,
+      hitRate: `${hitRate}%`
     }
   }
 }
