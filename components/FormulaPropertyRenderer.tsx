@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { notionHybrid } from '@/lib/notion-api'
+import { notionHybrid } from '@/lib/notion-api-hybrid'
 
 interface FormulaPropertyRendererProps {
   pageId: string
