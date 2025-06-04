@@ -141,9 +141,13 @@ const propertyLastEditedTimeValue = (
   defaultFn: () => React.ReactNode
 ) => {
   if (pageHeader && block?.last_edited_time) {
-    return `Last updated ${formatDate(block?.last_edited_time, {
-      month: 'long'
-    })}`
+    // 日付のみを表示（時間を除外）
+    const date = new Date(block.last_edited_time)
+    const year = date.getFullYear()
+    const month = date.toLocaleDateString('en-US', { month: 'long' })
+    const day = date.getDate()
+    
+    return `Last updated ${month} ${day}, ${year}`
   }
 
   return defaultFn()
@@ -175,6 +179,34 @@ const propertyTextValue = (
   }
 
   return defaultFn()
+}
+
+// カスタム日付フォーマッター（全ての日付プロパティに適用）
+const formatDateOnly = (dateString: number | string) => {
+  const date = new Date(dateString)
+  const year = date.getFullYear()
+  const month = date.toLocaleDateString('en-US', { month: 'long' })
+  const day = date.getDate()
+  
+  return `${month} ${day}, ${year}`
+}
+
+// 汎用的な日付プロパティフォーマッター
+const propertyFormatters = {
+  date: ({ data, defaultFn }: any) => {
+    if (data?.[0]?.[1]?.[0]?.[1]?.start_date) {
+      return formatDateOnly(data[0][1][0][1].start_date)
+    }
+    
+    // デフォルトの日付表示も時間を除外
+    const result = defaultFn()
+    if (typeof result === 'string' && result.match(/\d{1,2}:\d{2}/)) {
+      // 時間パターンが含まれている場合は除外
+      return result.replace(/\s+\d{1,2}:\d{2}(\s*(AM|PM))?/gi, '')
+    }
+    
+    return result
+  }
 }
 
 // ナビゲーションメニュー項目
