@@ -1,0 +1,32 @@
+{
+  "output": {
+    "filePath": "repomix-ui-components.xml",
+    "style": "xml",
+    "compress": true,
+    "removeComments": false,
+    "outputShowLineNumbers": true
+  },
+  "include": [
+    "**/components/**/*.tsx",
+    "**/components/**/*.jsx",
+    "**/components/**/*.css",
+    "**/styles/**/*.css",
+    "**/lib/font-customizer/**/*",
+    "**/lib/use-dark-mode.ts",
+    "**/lib/menu-utils.ts"
+  ],
+  "ignore": {
+    "customPatterns": [
+      "**/node_modules/**",
+      "**/.next/**",
+      "**/dist/**",
+      "**/build/**",
+      "**/*.log",
+      "**/coverage/**",
+      "**/.git/**",
+      "**/repomix*.xml",
+      "**/*summary.md",
+      "**/temp/**"
+    ]
+  }
+}

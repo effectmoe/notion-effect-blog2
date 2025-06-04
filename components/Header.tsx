@@ -14,6 +14,7 @@ import { useDarkMode } from '@/lib/use-dark-mode'
 import styles from './Header.module.css'
 import { MenuItem } from '@/lib/menu-utils'
 import { notionViews } from '@/lib/notion-views'
+import HamburgerMenu from './HamburgerMenu'
 
 // notionViewsからフォールバック用メニュー項目を生成
 const DEFAULT_MENU_ITEMS: MenuItem[] = notionViews.map(view => ({
@@ -231,18 +232,7 @@ export function HeaderImpl({ menuItems = DEFAULT_MENU_ITEMS }: HeaderProps) {
           )}
 
           {/* ハンバーガーメニューボタン（常に表示） */}
-          <button 
-            className={styles.mobileMenuButton} 
-            onClick={toggleMenu}
-            aria-label={menuOpen ? 'メニューを閉じる' : 'メニューを開く'}
-            aria-expanded={menuOpen}
-          >
-            <div className={`${styles.hamburgerIcon} ${menuOpen ? styles.open : ''}`}>
-              <span></span>
-              <span></span>
-              <span></span>
-            </div>
-          </button>
+          <HamburgerMenu menuItems={items} currentPath={router.pathname} />
         </div>
       </div>
 
@@ -370,7 +360,7 @@ export function HeaderImpl({ menuItems = DEFAULT_MENU_ITEMS }: HeaderProps) {
       </div>
 
       {/* モバイルメニュー（常に表示） */}
-      <div className={cs(
+      {/* <div className={cs(
         styles.mobileMenu,
         menuOpen ? styles.mobileMenuOpen : styles.mobileMenuClosed
       )}>
@@ -395,7 +385,7 @@ export function HeaderImpl({ menuItems = DEFAULT_MENU_ITEMS }: HeaderProps) {
             ))}
           </ul>
         </nav>
-      </div>
+      </div> */}
     </header>
   )
 }

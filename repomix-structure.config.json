@@ -1,0 +1,41 @@
+{
+  "output": {
+    "filePath": "repomix-structure.xml",
+    "style": "xml",
+    "compress": true,
+    "removeComments": false,
+    "includeEmptyDirectories": true,
+    "outputShowLineNumbers": false
+  },
+  "include": [
+    "**/README.md",
+    "**/readme.md",
+    "**/package.json",
+    "**/.env.example",
+    "**/tsconfig.json",
+    "**/next.config.js",
+    "**/site.config.ts",
+    "**/lib/site-config.ts",
+    "**/lib/types.ts",
+    "**/pages/index.tsx",
+    "**/pages/_app.tsx",
+    "**/pages/[pageId].tsx",
+    "**/components/NotionPage.tsx",
+    "**/components/Header.tsx",
+    "**/components/Footer.tsx"
+  ],
+  "ignore": {
+    "customPatterns": [
+      "**/node_modules/**",
+      "**/.next/**",
+      "**/dist/**",
+      "**/build/**",
+      "**/*.log",
+      "**/coverage/**",
+      "**/.git/**",
+      "**/repomix*.xml",
+      "**/*summary.md",
+      "**/temp/**"
+    ]
+  }
+}
