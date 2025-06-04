@@ -389,7 +389,7 @@ export function NotionPage({
       </div>
 
       <GitHubShareButton />
-      <FormulaPropertyDebug />
+      <FormulaPropertyDebug recordMap={recordMap} />
     </>
   )
 }

@@ -1,9 +1,25 @@
-import React, { useState } from 'react'
-import { useNotionContext } from 'react-notion-x'
+import React, { useState, useEffect } from 'react'
+import { ExtendedRecordMap } from 'notion-types'
 
-export const FormulaPropertyDebug: React.FC = () => {
-  const { recordMap } = useNotionContext()
+interface FormulaPropertyDebugProps {
+  recordMap?: ExtendedRecordMap
+}
+
+export const FormulaPropertyDebug: React.FC<FormulaPropertyDebugProps> = ({ recordMap: propRecordMap }) => {
   const [showDebug, setShowDebug] = useState(false)
+  const [recordMap, setRecordMap] = useState<ExtendedRecordMap | null>(null)
+  
+  useEffect(() => {
+    // windowオブジェクトから直接取得を試みる
+    if (typeof window !== 'undefined') {
+      const notionData = (window as any).__NEXT_DATA__?.props?.pageProps?.recordMap
+      if (notionData) {
+        setRecordMap(notionData)
+      } else if (propRecordMap) {
+        setRecordMap(propRecordMap)
+      }
+    }
+  }, [propRecordMap])
   
   const getPageIds = () => {
     const pageIds: string[] = []
