@@ -62,7 +62,6 @@ export default class MyDocument extends Document {
             <Main />
 
             <NextScript />
-            <script src="/inject-formula.js" defer />
           </body>
         </Html>
       </IconContext.Provider>

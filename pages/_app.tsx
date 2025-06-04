@@ -29,6 +29,7 @@ import {
 } from '@/lib/config'
 import { getMenuItemsForStaticProps } from '@/lib/menu-utils'
 import FontStyler from '@/components/FontStyler'
+import { fillFormulaProperties } from '@/lib/fill-formula-properties'
 
 if (!isServer) {
   bootstrap()
@@ -54,6 +55,11 @@ export default function App({ Component, pageProps }: CustomAppProps) {
       if (posthogId) {
         posthog.capture('$pageview')
       }
+      
+      // ページ遷移時に数式プロパティを入力
+      if (!isServer) {
+        fillFormulaProperties()
+      }
     }
 
     if (fathomId) {
@@ -65,6 +71,11 @@ export default function App({ Component, pageProps }: CustomAppProps) {
     }
 
     router.events.on('routeChangeComplete', onRouteChangeComplete)
+    
+    // 初回読み込み時にも実行
+    if (!isServer) {
+      fillFormulaProperties()
+    }
 
     return () => {
       router.events.off('routeChangeComplete', onRouteChangeComplete)
