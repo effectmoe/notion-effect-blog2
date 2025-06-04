@@ -10,6 +10,7 @@ export default withBundleAnalyzer({
   eslint: {
     ignoreDuringBuilds: true, // ビルド時のESLintエラーを無視
   },
+  reactStrictMode: false, // ハイドレーションエラーを軽減
   staticPageGenerationTimeout: 300,
   images: {
     remotePatterns: [
