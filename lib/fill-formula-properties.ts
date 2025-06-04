@@ -27,6 +27,7 @@ export function fillFormulaProperties() {
   async function fillEmptyFormulas() {
     // すべての数式プロパティ要素を探す
     const formulaElements = document.querySelectorAll('.notion-property-formula');
+    console.log('[Formula] 見つかった数式要素:', formulaElements.length);
     
     for (const element of formulaElements) {
       // すでに値がある場合はスキップ
@@ -55,13 +56,23 @@ export function fillFormulaProperties() {
         currentElement = currentElement.parentElement;
       }
       
-      if (!pageId) continue;
+      if (!pageId) {
+        console.log('[Formula] ページIDが見つかりません:', element);
+        continue;
+      }
+      
+      console.log('[Formula] ページID取得:', pageId);
       
       // 数式プロパティの値を取得して設定
       const value = await fetchFormulaValue(pageId);
+      console.log('[Formula] 取得した値:', value);
+      
       if (value) {
         element.textContent = value;
         element.classList.add('formula-filled');
+        console.log('[Formula] 値を設定しました:', element);
+      } else {
+        console.log('[Formula] 値が取得できませんでした');
       }
     }
   }

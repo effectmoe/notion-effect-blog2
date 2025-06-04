@@ -68,7 +68,12 @@ export const FormulaPropertyDebug: React.FC<FormulaPropertyDebugProps> = ({ reco
       zIndex: 9999,
       maxWidth: '300px'
     }}>
-      <button onClick={() => setShowDebug(!showDebug)}>
+      <button onClick={() => {
+        setShowDebug(!showDebug);
+        // デバッグ情報をコンソールに出力
+        console.log('RecordMap:', recordMap);
+        console.log('Pages found:', pageIds);
+      }}>
         Debug Info ({pageIds.length} pages)
       </button>
       
