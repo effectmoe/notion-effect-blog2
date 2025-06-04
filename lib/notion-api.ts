@@ -1,4 +1,5 @@
 import { NotionAPI } from 'notion-client'
+import { notionHybrid } from './notion-api-hybrid'
 
 // 認証情報のログ出力（実際の値は表示されません）
 console.log('Notion API設定状況:');
@@ -11,3 +12,6 @@ export const notion = new NotionAPI({
   activeUser: process.env.NOTION_ACTIVE_USER || undefined,
   userTimeZone: 'Asia/Tokyo' // タイムゾーンを設定
 })
+
+// ハイブリッドAPIもエクスポート
+export { notionHybrid }
