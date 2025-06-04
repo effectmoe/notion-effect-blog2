@@ -4,6 +4,8 @@ import { generateFontCSS, loadFontSettingsFromLocalStorage } from '../lib/font-c
 import { fontSettings as defaultSettings } from '../lib/font-customizer/font-settings';
 
 export const FontStyler = () => {
+  // ハイドレーションエラーを防ぐため、クライアントサイドでのみ動作するようにする
+  const [hasMounted, setHasMounted] = useState(false);
   const [settings, setSettings] = useState(defaultSettings);
   
   useEffect(() => {
@@ -41,10 +43,11 @@ export const FontStyler = () => {
     };
     
     loadSettings();
+    setHasMounted(true);
   }, []);
   
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined' || !hasMounted) return;
     
     // 既存のスタイルタグを探す
     let styleTag = document.getElementById('custom-font-styles');

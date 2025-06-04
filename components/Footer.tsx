@@ -21,7 +21,7 @@ import styles from './styles.module.css'
 export function FooterImpl() {
   const [hasMounted, setHasMounted] = React.useState(false)
   const { isDarkMode, toggleDarkMode } = useDarkMode()
-  const currentYear = new Date().getFullYear()
+  const [currentYear, setCurrentYear] = React.useState(2025) // デフォルト値を設定
 
   const onToggleDarkMode = React.useCallback(
     (e) => {
@@ -33,6 +33,7 @@ export function FooterImpl() {
 
   React.useEffect(() => {
     setHasMounted(true)
+    setCurrentYear(new Date().getFullYear())
   }, [])
 
   return (

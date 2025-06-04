@@ -35,6 +35,7 @@ export function HeaderImpl({ menuItems = DEFAULT_MENU_ITEMS }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false)
   const { isDarkMode, toggleDarkMode } = useDarkMode()
   const [hasMounted, setHasMounted] = useState(false)
+  // SSRとクライアントで一致させるため、初期値はfalse（デスクトップ）とする
   const [isMobile, setIsMobile] = useState(false)
   const [isSearchVisible, setIsSearchVisible] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
