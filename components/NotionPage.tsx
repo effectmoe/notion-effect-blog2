@@ -253,13 +253,14 @@ export function NotionPage({
   )
 
   // ボディにNoNotionTabsクラスを追加
-  React.useEffect(() => {
-    document.body.classList.add('no-notion-tabs');
-    
-    return () => {
-      document.body.classList.remove('no-notion-tabs');
-    };
-  }, []);
+  // BodyClassNameコンポーネントを使用するため、直接操作は削除
+  // React.useEffect(() => {
+  //   document.body.classList.add('no-notion-tabs');
+  //   
+  //   return () => {
+  //     document.body.classList.remove('no-notion-tabs');
+  //   };
+  // }, []);
 
   // ナビゲーションメニュー項目を取得
   const navigationMenuItems = React.useMemo(() => 
