@@ -140,16 +140,7 @@ const propertyLastEditedTimeValue = (
   { block, pageHeader },
   defaultFn: () => React.ReactNode
 ) => {
-  if (pageHeader && block?.last_edited_time) {
-    // 日付のみを表示（時間を除外）、日本語形式
-    const date = new Date(block.last_edited_time)
-    const year = date.getFullYear()
-    const month = date.getMonth() + 1 // 0-based なので +1
-    const day = date.getDate()
-    
-    return `${year}年${month}月${day}日`
-  }
-
+  // Last Updatedプロパティは使用しないため、デフォルトの処理に任せる
   return defaultFn()
 }
 
@@ -181,54 +172,6 @@ const propertyTextValue = (
   return defaultFn()
 }
 
-// カスタム日付フォーマッター（全ての日付プロパティに適用）
-const formatDateOnly = (dateString: number | string) => {
-  const date = new Date(dateString)
-  const year = date.getFullYear()
-  const month = date.toLocaleDateString('en-US', { month: 'long' })
-  const day = date.getDate()
-  
-  return `${month} ${day}, ${year}`
-}
-
-// 汎用的な日付プロパティフォーマッター
-const propertyFormatters = {
-  date: ({ data, defaultFn }: any) => {
-    if (data?.[0]?.[1]?.[0]?.[1]?.start_date) {
-      return formatDateOnly(data[0][1][0][1].start_date)
-    }
-    
-    // デフォルトの日付表示も時間を除外
-    const result = defaultFn()
-    if (typeof result === 'string' && result.match(/\d{1,2}:\d{2}/)) {
-      // 時間パターンが含まれている場合は除外
-      return result.replace(/\s+\d{1,2}:\d{2}(\s*(AM|PM))?/gi, '')
-    }
-    
-    return result
-  }
-}
-
-// カスタムプロパティコンポーネント（last_edited_timeプロパティ用）
-const CustomPropertyComponent = React.memo(function CustomPropertyComponent(props: any) {
-  const { schema, data } = props
-  
-  // last_edited_timeプロパティの場合
-  if (schema?.type === 'last_edited_time' && data) {
-    const dateValue = data?.[0]?.[1]?.[0]?.[1]?.start_date || data
-    if (dateValue) {
-      const date = new Date(dateValue)
-      const year = date.getFullYear()
-      const month = date.getMonth() + 1
-      const day = date.getDate()
-      
-      return <span>{year}年{month}月{day}日</span>
-    }
-  }
-  
-  // その他のプロパティはデフォルト処理
-  return null
-})
 
 // ナビゲーションメニュー項目
 const getNavigationMenuItems = (site: types.Site) => {
@@ -254,48 +197,8 @@ export function NotionPage({
   const router = useRouter()
   const lite = useSearchParam('lite')
   
-  // Last Updatedプロパティの日付フォーマットを変更
+  // useEffectを使用して空のリンクを非表示にする
   React.useEffect(() => {
-    const formatDates = () => {
-      // より広範囲なセレクタで日付要素を取得
-      const dateElements = document.querySelectorAll('.notion-property-last_edited_time, .notion-property-last_edited_time span, span.notion-property-last_edited_time')
-      
-      dateElements.forEach((element) => {
-        const htmlElement = element as HTMLElement
-        
-        // すでにフォーマット済みの場合はスキップ
-        if (htmlElement.getAttribute('data-formatted') === 'true') {
-          return
-        }
-        
-        const dateText = htmlElement.textContent || ''
-        
-        // "Apr 27, 2025 09:23 AM" または "Apr 27, 2025 06:23 PM" のような形式をパース
-        const dateMatch = dateText.match(/(\w+)\s+(\d+),\s+(\d{4})(?:\s+\d{1,2}:\d{2}\s*(?:AM|PM)?)?/i)
-        if (dateMatch) {
-          const [_, monthStr, dayStr, yearStr] = dateMatch
-          const monthMap: { [key: string]: number } = {
-            'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6,
-            'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12,
-            'January': 1, 'February': 2, 'March': 3, 'April': 4, 'May': 5, 'June': 6,
-            'July': 7, 'August': 8, 'September': 9, 'October': 10, 'November': 11, 'December': 12
-          }
-          
-          const month = monthMap[monthStr]
-          if (month) {
-            const formattedDate = `${yearStr}年${month}月${dayStr}日`
-            htmlElement.textContent = formattedDate
-            htmlElement.setAttribute('data-formatted', 'true')
-            
-            // 親要素にも属性を設定
-            if (htmlElement.parentElement) {
-              htmlElement.parentElement.setAttribute('data-formatted', 'true')
-            }
-          }
-        }
-      })
-    }
-    
     // 空のnotion-page-linkを削除する関数
     const removeEmptyLinks = () => {
       const emptyLinks = document.querySelectorAll('a.notion-list-item.notion-page-link')
@@ -310,35 +213,12 @@ export function NotionPage({
       })
     }
     
-    // 処理を実行する関数
-    const applyFormatting = () => {
-      formatDates()
-      removeEmptyLinks()
-    }
-    
-    // 初回実行（少し遅延を入れて確実に要素が読み込まれるのを待つ）
-    applyFormatting()
-    setTimeout(applyFormatting, 100)
-    setTimeout(applyFormatting, 500)
-    setTimeout(applyFormatting, 1000)
+    // 初回実行
+    removeEmptyLinks()
     
     // DOMの変更を監視
-    const observer = new MutationObserver((mutations) => {
-      // 日付要素が追加された場合のみ処理
-      const hasDateElements = mutations.some(mutation => {
-        return Array.from(mutation.addedNodes).some(node => {
-          if (node.nodeType === Node.ELEMENT_NODE) {
-            const element = node as Element
-            return element.classList?.contains('notion-property-last_edited_time') ||
-                   element.querySelector?.('.notion-property-last_edited_time')
-          }
-          return false
-        })
-      })
-      
-      if (hasDateElements) {
-        setTimeout(applyFormatting, 50)
-      }
+    const observer = new MutationObserver(() => {
+      removeEmptyLinks()
     })
     
     observer.observe(document.body, {
