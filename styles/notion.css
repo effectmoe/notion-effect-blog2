@@ -827,13 +827,18 @@ a.notion-list-item.notion-page-link:not(:has(.notion-list-item-title)) {
   display: inline-block;
   overflow: hidden;
   white-space: nowrap;
+  max-width: 100px; /* 日付部分のみ表示 */
+  text-overflow: ellipsis;
 }
 
-/* クライアントサイドでのみ適用されるスタイル */
-@media screen {
-  .notion-property-last_edited_time {
-    max-width: 85px; /* 日付部分のみ表示 */
-  }
+/* リストビューでの調整 */
+.notion-list-view .notion-property-last_edited_time {
+  max-width: 85px;
+}
+
+/* テーブルビューでの調整 */
+.notion-table-view .notion-property-last_edited_time {
+  max-width: 100px;
 }
 
 /* Enhanced Collection Component Styles */
