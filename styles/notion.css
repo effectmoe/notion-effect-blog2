@@ -188,6 +188,7 @@
   padding-bottom: 1em;
 }
 
+/* ページプロパティのヘッダーは非表示にするが、プロパティ自体は表示 */
 .notion-collection-page-properties .notion-collection-column-title {
   display: none;
 }
@@ -826,46 +827,80 @@ a.notion-list-item.notion-page-link:blank {
   display: none !important;
 }
 
-/* Last Updatedプロパティを非表示にする */
-.notion-property-last_edited_time {
+/* Last Updatedプロパティのみを非表示（最終更新日数式は表示） */
+/* .notion-property-last_edited_time {
   display: none !important;
-}
+} */
 
-/* last_edited_timeプロパティを含む要素全体を非表示 */
-.notion-list-item-property:has(.notion-property-last_edited_time) {
+/* last_edited_timeプロパティを含む要素全体を非表示 - 一時的にコメントアウト */
+/* .notion-list-item-property:has(.notion-property-last_edited_time) {
   display: none !important;
-}
+} */
 
-/* 数式プロパティを表示（最終更新日など） */
-.notion-property-formula {
-  display: inline-block !important;
-  font-size: 14px;
-  color: var(--fg-color-3);
-  visibility: visible !important;
-}
-
-/* 数式プロパティを含む要素も表示 */
-.notion-list-item-property:has(.notion-property-formula) {
-  display: block !important;
-  visibility: visible !important;
-}
-
-/* リストアイテム内の数式プロパティを確実に表示 */
-.notion-list-item .notion-property-formula {
-  display: inline-block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-
-/* 一時的にすべてのプロパティを表示（デバッグ用） */
+/* すべてのプロパティを表示 */
 .notion-list-item-property {
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
-  /* border: 1px solid red !important; */
 }
 
-/* タイトルプロパティは引き続き非表示 */
+/* タイトルプロパティのみ非表示 */
+.notion-list-item-property:has(.notion-property-title) {
+  display: none !important;
+}
+
+/* 数式プロパティと日付プロパティを確実に表示 */
+.notion-property-formula,
+.notion-property-date,
+.notion-property-last_edited_time {
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* 数式・日付プロパティを含む親要素も表示 */
+.notion-list-item-property:has(.notion-property-formula),
+.notion-list-item-property:has(.notion-property-date) {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* プロパティの内部要素も表示 */
+.notion-property-formula span,
+.notion-property-date span,
+.notion-property-formula div,
+.notion-property-date div {
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* リストビューのプロパティ値を確実に表示 */
+.notion-list-item-body .notion-list-item-property {
+  display: block !important;
+  visibility: visible !important;
+}
+
+/* プロパティラベルとバリューを表示 */
+.notion-list-item-property-title,
+.notion-list-item-property-value {
+  display: inline-block !important;
+  visibility: visible !important;
+}
+
+/* 特定のプロパティタイプを表示（数式、日付、テキスト等） */
+.notion-property[class*="formula"],
+.notion-property[class*="date"],
+.notion-property[class*="text"],
+.notion-property[class*="number"] {
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* タイトルプロパティのみ非表示を維持 */
+.notion-property.notion-property-title,
 .notion-list-item-property:has(.notion-property-title) {
   display: none !important;
 }
