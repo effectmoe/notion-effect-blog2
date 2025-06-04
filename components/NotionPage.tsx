@@ -288,8 +288,9 @@ export function NotionPage({
       emptyLinks.forEach((link) => {
         // リンク内にnotion-list-item-titleが存在しない場合は削除
         if (!link.querySelector('.notion-list-item-title')) {
-          link.style.display = 'none'
-          link.setAttribute('data-hidden', 'true')
+          const anchorElement = link as HTMLAnchorElement
+          anchorElement.style.display = 'none'
+          anchorElement.setAttribute('data-hidden', 'true')
         }
       })
     }
