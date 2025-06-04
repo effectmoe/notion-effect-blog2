@@ -35,6 +35,7 @@ export default async function handler(
       propertyName,
       formulaValue,
       allProperties: properties ? Object.keys(properties) : [],
+      properties: properties, // 全プロパティデータを返す
       debug: {
         hasOfficialAPI: !!process.env.NOTION_API_SECRET,
         timestamp: new Date().toISOString()
