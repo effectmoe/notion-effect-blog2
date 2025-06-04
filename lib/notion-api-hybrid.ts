@@ -1,11 +1,11 @@
 import { NotionAPI } from 'notion-client'
-import { Client as OfficialNotionClient } from '@notionhq/client'
+import { Client } from '@notionhq/client'
 import { ExtendedRecordMap } from 'notion-types'
 
 // 公式APIと非公式APIを統合するハイブリッドクライアント
 export class NotionHybridAPI {
   private unofficialClient: NotionAPI
-  private officialClient: OfficialNotionClient | null = null
+  private officialClient: Client | null = null
   private hasOfficialAPI: boolean = false
 
   constructor() {
@@ -20,7 +20,7 @@ export class NotionHybridAPI {
     // 公式APIクライアント（トークンがある場合のみ初期化）
     if (process.env.NOTION_API_SECRET) {
       console.log('Notion Hybrid API: 公式APIクライアントを初期化中...')
-      this.officialClient = new OfficialNotionClient({
+      this.officialClient = new Client({
         auth: process.env.NOTION_API_SECRET,
         timeZone: 'Asia/Tokyo'
       })
