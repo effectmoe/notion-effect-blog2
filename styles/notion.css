@@ -822,24 +822,18 @@ a.notion-list-item.notion-page-link:not(:has(.notion-list-item-title)) {
   color: var(--fg-color-3);
 }
 
-/* Last Edited Timeの時間部分を隠す */
+/* Last Edited Timeの時間部分を隠す - より安全なアプローチ */
 .notion-property-last_edited_time {
   display: inline-block;
-  position: relative;
-  max-width: 85px; /* 日付部分のみ表示 */
   overflow: hidden;
   white-space: nowrap;
 }
 
-/* より積極的なアプローチ：擬似要素で時間部分を隠す */
-.notion-list-item-property .notion-property-last_edited_time::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: 50%;
-  background: linear-gradient(to right, transparent 0%, var(--bg-color) 30%);
+/* クライアントサイドでのみ適用されるスタイル */
+@media screen {
+  .notion-property-last_edited_time {
+    max-width: 85px; /* 日付部分のみ表示 */
+  }
 }
 
 /* Enhanced Collection Component Styles */

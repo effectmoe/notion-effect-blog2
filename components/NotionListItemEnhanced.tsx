@@ -15,9 +15,19 @@ export const NotionListItemEnhanced: React.FC<NotionListItemEnhancedProps> = ({
   formulaPropertyName = '最終更新日'
 }) => {
   const { recordMap } = useNotionContext()
+  const [isMounted, setIsMounted] = React.useState(false)
+  
+  React.useEffect(() => {
+    setIsMounted(true)
+  }, [])
   
   // ブロックIDの正規化
   const normalizedId = blockId.replace(/-/g, '')
+  
+  // サーバーサイドでは何も表示しない
+  if (!isMounted) {
+    return null
+  }
   
   return (
     <>

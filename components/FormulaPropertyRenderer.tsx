@@ -17,8 +17,17 @@ export const FormulaPropertyRenderer: React.FC<FormulaPropertyRendererProps> = (
 }) => {
   const [value, setValue] = useState<string>(defaultValue)
   const [isLoading, setIsLoading] = useState(true)
+  const [isMounted, setIsMounted] = useState(false)
+
+  // クライアントサイドでのみマウントされたことを検知
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   useEffect(() => {
+    // クライアントサイドでのみ実行
+    if (!isMounted) return
+
     const fetchFormulaValue = async () => {
       try {
         const formulaValue = await notionHybrid.getFormulaPropertyValue(pageId, propertyName)
@@ -42,10 +51,11 @@ export const FormulaPropertyRenderer: React.FC<FormulaPropertyRendererProps> = (
     if (pageId) {
       fetchFormulaValue()
     }
-  }, [pageId, propertyName])
+  }, [pageId, propertyName, isMounted])
 
-  if (isLoading) {
-    return <span className={className}>...</span>
+  // サーバーサイドレンダリング時は初期値を表示
+  if (!isMounted || isLoading) {
+    return <span className={className}>{defaultValue || '...'}</span>
   }
 
   return <span className={className}>{value}</span>
