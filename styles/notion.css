@@ -842,3 +842,48 @@ a.notion-list-item.notion-page-link:not(:has(.notion-list-item-title)) {
   background: linear-gradient(to right, transparent 0%, var(--bg-color) 30%);
 }
 
+/* Enhanced Collection Component Styles */
+.notion-collection-loading {
+  padding: 8px 16px;
+  color: var(--fg-color-2);
+  font-size: 14px;
+  text-align: center;
+  opacity: 0.6;
+}
+
+/* Formula Property Styles */
+.notion-property-formula {
+  color: var(--fg-color-1);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.notion-collection-view .notion-property-formula {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Database View Formula Property Styling */
+.notion-table-view .notion-property-formula {
+  padding: 6px 8px;
+}
+
+.notion-list-view .notion-property-formula {
+  color: var(--fg-color-3);
+  margin-left: 4px;
+}
+
+.notion-gallery-view .notion-property-formula {
+  font-size: 12px;
+  color: var(--fg-color-3);
+  margin-top: 4px;
+}
+
+/* Board View Formula Styling */
+.notion-board-view .notion-property-formula {
+  font-size: 12px;
+  color: var(--fg-color-3);
+  margin-top: 2px;
+}
+

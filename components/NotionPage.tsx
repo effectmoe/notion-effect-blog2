@@ -140,7 +140,15 @@ const propertyLastEditedTimeValue = (
   { block, pageHeader },
   defaultFn: () => React.ReactNode
 ) => {
-  // Last Updatedプロパティは使用しないため、デフォルトの処理に任せる
+  // Last Updatedプロパティの日付部分のみ表示（時間を隠す）
+  if (pageHeader || block?.last_edited_time) {
+    const lastEditedTime = block?.last_edited_time
+    if (lastEditedTime) {
+      const date = new Date(lastEditedTime)
+      const formatted = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`
+      return <span className="notion-property-last_edited_time_formatted">{formatted}</span>
+    }
+  }
   return defaultFn()
 }
 
