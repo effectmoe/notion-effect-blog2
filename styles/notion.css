@@ -669,3 +669,136 @@
     font-size: 1.5em; /* スマートフォン用のフォントサイズ縮小 */
   }
 }
+
+/* リストビューでの重複タイトルプロパティを非表示にする - 改善版 */
+
+/* リストアイテム内の重複するタイトルプロパティを非表示 */
+.notion-list-item .notion-property.notion-property-title {
+  display: none !important;
+}
+
+/* より具体的なセレクタで確実に非表示にする */
+.notion-list-body .notion-list-item .notion-property-title {
+  display: none !important;
+}
+
+/* リスト内のプロパティとしてのタイトルを非表示 */
+.notion-list-item .notion-list-item-property.notion-property-title {
+  display: none !important;
+}
+
+/* モダンブラウザ向け: has()セレクタを使用してより確実に非表示 */
+.notion-list-item:has(.notion-list-item-title) .notion-property-title {
+  display: none !important;
+}
+
+/* リストビューでのタイトル列ヘッダーも非表示にする */
+.notion-list-view .notion-property-title {
+  display: none !important;
+}
+
+/* コレクションリスト内でのタイトルプロパティを非表示 */
+.notion-collection-list .notion-property-title {
+  display: none !important;
+}
+
+/* リストアイテムのタイトル部分は表示を維持 */
+.notion-list-item-title {
+  display: block !important;
+}
+
+/* リストアイテムのスタイリング改善 */
+.notion-list-item {
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+.dark-mode .notion-list-item {
+  border-bottom-color: rgba(255, 255, 255, 0.094);
+}
+
+.notion-list-item:last-child {
+  border-bottom: none;
+}
+
+/* リストアイテムタイトルのスタイリング */
+.notion-list-item-title {
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+/* リストビュー全体のレイアウト調整 */
+.notion-list-body {
+  display: block;
+}
+
+/* コレクションヘッダーでタイトル列を非表示 */
+.notion-collection-header .notion-collection-column-title:has(.notion-property-title) {
+  display: none !important;
+}
+
+/* 古いブラウザ向けフォールバック */
+.notion-collection-header .notion-collection-column-title[data-property="title"] {
+  display: none !important;
+}
+
+/* List view customizations to remove duplicate title - existing rules kept for compatibility */
+.notion-list-view .notion-list-item-property .notion-property-title {
+  display: none !important;
+}
+
+/* Hide the property container that contains title property */
+.notion-list-view .notion-list-item-property:has(.notion-property-title) {
+  display: none !important;
+}
+
+/* Fallback for browsers that don't support :has() */
+.notion-list-view .notion-list-item-body .notion-property.notion-property-title {
+  display: none !important;
+}
+
+/* Target parent of title property */
+.notion-list-view .notion-list-item-body > div:has(.notion-property-title) {
+  display: none !important;
+}
+
+/* Ensure the main title in list items is visible */
+.notion-list-view .notion-list-item-title {
+  display: block !important;
+}
+
+/* Hide title in collection headers for list views */
+.notion-list-view .notion-collection-table-head .notion-collection-column-title span:first-child:empty + span {
+  display: none !important;
+}
+
+/* Adjust list item layout for better appearance without duplicate title */
+.notion-list-view .notion-list-item {
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+.notion-list-view .notion-list-item-body {
+  margin-top: 4px;
+  gap: 12px;
+}
+
+/* Dark mode adjustments for list view */
+.dark-mode .notion-list-view .notion-list-item {
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+/* More specific targeting for title properties in list items */
+.notion-collection-list .notion-property-title,
+.notion-list-collection .notion-property-title,
+.notion-list-item-property[class*="title"] {
+  display: none !important;
+}
+
+/* Ensure title column is hidden in list view headers */
+.notion-collection-list th:has(.notion-property-title),
+.notion-collection-list .notion-collection-column-title:has(span:contains("Title")),
+.notion-collection-list .notion-collection-column-title:has(span:contains("title")) {
+  display: none !important;
+}
