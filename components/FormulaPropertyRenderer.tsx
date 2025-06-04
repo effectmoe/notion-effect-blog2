@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react'
-import { notionHybrid } from '@/lib/notion-api-hybrid'
+import React from 'react'
+import dynamic from 'next/dynamic'
 
 interface FormulaPropertyRendererProps {
   pageId: string
@@ -8,57 +8,18 @@ interface FormulaPropertyRendererProps {
   defaultValue?: string
 }
 
-// フォーミュラプロパティを表示するためのコンポーネント
-export const FormulaPropertyRenderer: React.FC<FormulaPropertyRendererProps> = ({
-  pageId,
-  propertyName,
-  className = '',
-  defaultValue = ''
-}) => {
-  const [value, setValue] = useState<string>(defaultValue)
-  const [isLoading, setIsLoading] = useState(true)
-  const [isMounted, setIsMounted] = useState(false)
-
-  // クライアントサイドでのみマウントされたことを検知
-  useEffect(() => {
-    setIsMounted(true)
-  }, [])
-
-  useEffect(() => {
-    // クライアントサイドでのみ実行
-    if (!isMounted) return
-
-    const fetchFormulaValue = async () => {
-      try {
-        const formulaValue = await notionHybrid.getFormulaPropertyValue(pageId, propertyName)
-        if (formulaValue) {
-          // 日付形式の場合、日本語形式に変換
-          if (formulaValue.match(/^\d{4}-\d{2}-\d{2}/)) {
-            const date = new Date(formulaValue)
-            const formattedDate = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`
-            setValue(formattedDate)
-          } else {
-            setValue(formulaValue)
-          }
-        }
-      } catch (error) {
-        console.error('フォーミュラプロパティの取得エラー:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    if (pageId) {
-      fetchFormulaValue()
-    }
-  }, [pageId, propertyName, isMounted])
-
-  // サーバーサイドレンダリング時は初期値を表示
-  if (!isMounted || isLoading) {
-    return <span className={className}>{defaultValue || '...'}</span>
+// 内部コンポーネント（クライアントサイドのみ）
+const FormulaPropertyInner = dynamic(
+  () => import('./FormulaPropertyInner'),
+  { 
+    ssr: false,
+    loading: () => <span>...</span>
   }
+)
 
-  return <span className={className}>{value}</span>
+// フォーミュラプロパティを表示するためのコンポーネント
+export const FormulaPropertyRenderer: React.FC<FormulaPropertyRendererProps> = (props) => {
+  return <FormulaPropertyInner {...props} />
 }
 
 export default FormulaPropertyRenderer
