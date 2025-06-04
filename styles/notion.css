@@ -822,73 +822,12 @@ a.notion-list-item.notion-page-link:not(:has(.notion-list-item-title)) {
   color: var(--fg-color-3);
 }
 
-/* Last Edited Timeの時間部分を隠す - 改善版 */
+/* Last Edited Timeの時間部分を隠す */
 .notion-property-last_edited_time {
-  /* コンテナの設定 */
-  display: inline-flex;
-  align-items: center;
-  overflow: hidden;
-}
-
-/* 日付部分のみ表示 - より具体的なセレクタ */
-.notion-property-last_edited_time > span {
   display: inline-block;
   position: relative;
-  /* 日付部分のみ表示するため幅を制限 */
-  max-width: 10em; /* emベースで言語に対応 */
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis; /* 省略記号を追加 */
-}
-
-/* タイムスタンプの時間部分を視覚的に隠す */
-.notion-property-last_edited_time::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: 50%;
-  background: linear-gradient(to right, transparent, var(--bg-color) 20%);
-  pointer-events: none;
-}
-
-/* モバイル対応 */
-@media (max-width: 768px) {
-  .notion-property-last_edited_time > span {
-    max-width: 8em; /* モバイルでは幅を縮小 */
-  }
-}
-
-/* ダークモード対応 */
-.dark-mode .notion-property-last_edited_time::after {
-  background: linear-gradient(to right, transparent, var(--bg-color-dark, #191919) 20%);
-}
-
-/* 代替アプローチ: Flexboxを使用した時間部分の非表示 */
-.notion-property-last_edited_time-alternative {
-  /* フォントサイズベースのアプローチ */
-  font-size: 0;
-}
-
-.notion-property-last_edited_time-alternative > span {
-  font-size: 14px;
-  /* 最初の10文字（日付部分）のみ表示 */
-  display: inline-block;
-  max-width: 10ch;
-  overflow: hidden;
-}
-
-/* より精密な制御: CSS Grid を使用 */
-.notion-property-last_edited_time-grid {
-  display: grid;
-  grid-template-columns: minmax(0, max-content);
-  overflow: hidden;
-}
-
-.notion-property-last_edited_time-grid > span {
-  /* 日付フォーマットに基づいて調整 */
-  max-width: clamp(8em, 10em, 12em);
+  max-width: 120px;
   overflow: hidden;
   white-space: nowrap;
 }
+
