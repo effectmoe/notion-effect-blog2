@@ -135,6 +135,35 @@ export class NotionHybridAPI {
       const page = await this.officialClient.pages.retrieve({ page_id: pageId })
       const properties = page.properties as any
       
+      // 最終更新日の特別処理 - Last Updatedプロパティから直接日付を取得してJSTに変換
+      if (propertyName === '最終更新日') {
+        for (const [key, prop] of Object.entries(properties)) {
+          const property = prop as any
+          if (property.type === 'last_edited_time' && property.last_edited_time) {
+            const date = new Date(property.last_edited_time)
+            
+            // JSTで日付をフォーマット
+            const options: Intl.DateTimeFormatOptions = {
+              year: 'numeric',
+              month: 'numeric', 
+              day: 'numeric',
+              timeZone: 'Asia/Tokyo'
+            }
+            const formatter = new Intl.DateTimeFormat('ja-JP', options)
+            const parts = formatter.formatToParts(date)
+            
+            let year = '', month = '', day = ''
+            for (const part of parts) {
+              if (part.type === 'year') year = part.value
+              if (part.type === 'month') month = part.value
+              if (part.type === 'day') day = part.value
+            }
+            
+            return `${year}年${month}月${day}日`
+          }
+        }
+      }
+      
       // プロパティ名で検索
       for (const [key, prop] of Object.entries(properties)) {
         const property = prop as any
@@ -147,11 +176,22 @@ export class NotionHybridAPI {
             const dateStr = formulaValue.date.start
             const date = new Date(dateStr)
             
-            // JST (UTC+9) で日付を取得
-            const jstDate = new Date(date.getTime() + (9 * 60 * 60 * 1000))
-            const year = jstDate.getUTCFullYear()
-            const month = jstDate.getUTCMonth() + 1
-            const day = jstDate.getUTCDate()
+            // JSTで日付をフォーマット
+            const options: Intl.DateTimeFormatOptions = {
+              year: 'numeric',
+              month: 'numeric', 
+              day: 'numeric',
+              timeZone: 'Asia/Tokyo'
+            }
+            const formatter = new Intl.DateTimeFormat('ja-JP', options)
+            const parts = formatter.formatToParts(date)
+            
+            let year = '', month = '', day = ''
+            for (const part of parts) {
+              if (part.type === 'year') year = part.value
+              if (part.type === 'month') month = part.value
+              if (part.type === 'day') day = part.value
+            }
             
             return `${year}年${month}月${day}日`
           }
