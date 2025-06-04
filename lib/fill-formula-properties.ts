@@ -2,6 +2,9 @@
 
 export function fillFormulaProperties() {
   if (typeof window === 'undefined') return;
+  
+  // グローバルに公開
+  (window as any).fillFormulaProperties = fillFormulaProperties;
 
   const formulaCache = new Map<string, any>();
 
