@@ -827,15 +827,21 @@ a.notion-list-item.notion-page-link:blank {
   display: none !important;
 }
 
-/* Last Updatedプロパティのみを非表示（最終更新日数式は表示） */
-/* .notion-property-last_edited_time {
-  display: none !important;
-} */
+/* 数式プロパティ（最終更新日など）を確実に表示 */
+.notion-property-formula {
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  font-size: 14px;
+  color: var(--fg-color-3);
+}
 
-/* last_edited_timeプロパティを含む要素全体を非表示 - 一時的にコメントアウト */
-/* .notion-list-item-property:has(.notion-property-last_edited_time) {
-  display: none !important;
-} */
+/* 数式プロパティを含む要素も表示 */
+.notion-list-item-property:has(.notion-property-formula) {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
 
 /* すべてのプロパティを表示 */
 .notion-list-item-property {
@@ -844,26 +850,9 @@ a.notion-list-item.notion-page-link:blank {
   opacity: 1 !important;
 }
 
-/* タイトルプロパティのみ非表示 */
+/* タイトルプロパティを含む要素は非表示（メインタイトルは別） */
 .notion-list-item-property:has(.notion-property-title) {
   display: none !important;
-}
-
-/* 数式プロパティと日付プロパティを確実に表示 */
-.notion-property-formula,
-.notion-property-date,
-.notion-property-last_edited_time {
-  display: inline-block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-
-/* 数式・日付プロパティを含む親要素も表示 */
-.notion-list-item-property:has(.notion-property-formula),
-.notion-list-item-property:has(.notion-property-date) {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
 }
 
 /* プロパティの内部要素も表示 */
@@ -899,8 +888,25 @@ a.notion-list-item.notion-page-link:blank {
   opacity: 1 !important;
 }
 
-/* タイトルプロパティのみ非表示を維持 */
-.notion-property.notion-property-title,
-.notion-list-item-property:has(.notion-property-title) {
+/* メインのタイトル（notion-list-item-title）は必ず表示 */
+.notion-list-item-title {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+}
+
+/* プロパティとしてのタイトルのみ非表示（メインタイトルは除外） */
+.notion-list-item-body .notion-property.notion-property-title {
+  display: none !important;
+}
+
+/* Last Updated（最終更新日時）プロパティを非表示 */
+.notion-property-last_edited_time {
+  display: none !important;
+}
+
+.notion-list-item-property:has(.notion-property-last_edited_time) {
   display: none !important;
 }
