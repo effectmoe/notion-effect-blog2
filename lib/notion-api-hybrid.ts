@@ -143,7 +143,17 @@ export class NotionHybridAPI {
           if (formulaValue?.type === 'string') {
             return formulaValue.string
           } else if (formulaValue?.type === 'date' && formulaValue.date) {
-            return formulaValue.date.start
+            // 日付型の場合、日本のタイムゾーンで適切にフォーマット
+            const dateStr = formulaValue.date.start
+            const date = new Date(dateStr)
+            
+            // JST (UTC+9) で日付を取得
+            const jstDate = new Date(date.getTime() + (9 * 60 * 60 * 1000))
+            const year = jstDate.getUTCFullYear()
+            const month = jstDate.getUTCMonth() + 1
+            const day = jstDate.getUTCDate()
+            
+            return `${year}年${month}月${day}日`
           }
         }
       }
