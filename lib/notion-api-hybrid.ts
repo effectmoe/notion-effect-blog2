@@ -102,7 +102,15 @@ export class NotionHybridAPI {
 
   // 署名付きURLの取得（非公式APIを使用）
   async getSignedFileUrls(urls: string[]): Promise<any> {
-    return await this.unofficialClient.getSignedFileUrls(urls)
+    // SignedUrlRequest型に変換
+    const requests = urls.map(url => ({
+      url,
+      permissionRecord: {
+        table: 'block',
+        id: url
+      }
+    }))
+    return await this.unofficialClient.getSignedFileUrls(requests as any)
   }
 
   // フォーミュラプロパティの値を取得する特別なメソッド
