@@ -1,6 +1,13 @@
 import { NotionAPI } from 'notion-client'
-const { Client } = require('@notionhq/client')
 import { ExtendedRecordMap } from 'notion-types'
+
+// 動的インポートで@notionhq/clientを読み込む
+let Client: any = null
+try {
+  Client = require('@notionhq/client').Client
+} catch (error) {
+  console.warn('Failed to load @notionhq/client:', error)
+}
 
 // 公式APIと非公式APIを統合するハイブリッドクライアント
 export class NotionHybridAPI {
@@ -18,13 +25,17 @@ export class NotionHybridAPI {
     })
 
     // 公式APIクライアント（トークンがある場合のみ初期化）
-    if (process.env.NOTION_API_SECRET) {
+    if (process.env.NOTION_API_SECRET && Client) {
       console.log('Notion Hybrid API: 公式APIクライアントを初期化中...')
-      this.officialClient = new Client({
-        auth: process.env.NOTION_API_SECRET,
-        timeZone: 'Asia/Tokyo'
-      })
-      this.hasOfficialAPI = true
+      try {
+        this.officialClient = new Client({
+          auth: process.env.NOTION_API_SECRET,
+          timeZone: 'Asia/Tokyo'
+        })
+        this.hasOfficialAPI = true
+      } catch (error) {
+        console.error('公式APIクライアントの初期化に失敗:', error)
+      }
     } else {
       console.log('Notion Hybrid API: 公式APIトークンが未設定のため、非公式APIのみ使用')
     }
