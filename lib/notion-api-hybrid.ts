@@ -126,11 +126,12 @@ export class NotionHybridAPI {
       
       // プロパティ名で検索
       for (const [key, prop] of Object.entries(properties)) {
-        if (prop.type === 'formula' && key === propertyName) {
-          const formulaValue = prop.formula
-          if (formulaValue.type === 'string') {
+        const property = prop as any
+        if (property.type === 'formula' && key === propertyName) {
+          const formulaValue = property.formula
+          if (formulaValue?.type === 'string') {
             return formulaValue.string
-          } else if (formulaValue.type === 'date' && formulaValue.date) {
+          } else if (formulaValue?.type === 'date' && formulaValue.date) {
             return formulaValue.date.start
           }
         }
