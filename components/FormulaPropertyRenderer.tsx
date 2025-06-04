@@ -1,4 +1,5 @@
 import React from 'react'
+import dynamic from 'next/dynamic'
 
 interface FormulaPropertyRendererProps {
   pageId: string
@@ -7,16 +8,18 @@ interface FormulaPropertyRendererProps {
   defaultValue?: string
 }
 
-// 一時的に無効化 - 数式プロパティの代わりに固定テキストを表示
-export const FormulaPropertyRenderer: React.FC<FormulaPropertyRendererProps> = ({
-  pageId,
-  propertyName,
-  className = '',
-  defaultValue = ''
-}) => {
-  // 数式プロパティ機能を一時的に無効化
-  // エラーが解決したら、FormulaPropertyRenderer.tsx.backup から復元してください
-  return null
+// 内部コンポーネント（クライアントサイドのみ）
+const FormulaPropertyInner = dynamic(
+  () => import('./FormulaPropertyInner'),
+  { 
+    ssr: false,
+    loading: () => <span>...</span>
+  }
+)
+
+// フォーミュラプロパティを表示するためのコンポーネント
+export const FormulaPropertyRenderer: React.FC<FormulaPropertyRendererProps> = (props) => {
+  return <FormulaPropertyInner {...props} />
 }
 
 export default FormulaPropertyRenderer
