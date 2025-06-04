@@ -671,29 +671,18 @@
   }
 }
 
-/* リストビューでの重複タイトルプロパティを非表示にする - 最終修正版 */
+/* リストビューでの重複タイトルプロパティを非表示にする */
 
-/* メインのタイトルブロックは必ず表示 */
+/* メインのタイトルブロックは表示を維持 */
 .notion-list-item-title {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  position: relative !important;
-  z-index: 1 !important;
+  display: block;
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 500;
 }
 
-/* リストアイテム内のプロパティ部分のタイトルのみを非表示 */
-.notion-list-item-body .notion-property.notion-property-title {
-  display: none !important;
-}
-
-/* プロパティコンテナ内のタイトルプロパティのみ非表示 */
-.notion-list-item-body .notion-list-item-property .notion-property-title {
-  display: none !important;
-}
-
-/* プロパティセクション内のタイトルのみ非表示（has()セレクタ使用） */
-.notion-list-item-body > .notion-list-item-property:has(.notion-property-title) {
+/* プロパティとしてのタイトルが重複して表示される場合のみ非表示 */
+.notion-list-item:has(.notion-list-item-title) .notion-list-item-body .notion-property-title {
   display: none !important;
 }
 
@@ -795,28 +784,8 @@
   opacity: 1 !important;
 }
 
-/* 空のnotion-page-linkを非表示にする */
-.notion-list-item.notion-page-link:empty {
-  display: none !important;
-}
-
-/* 内容が空白のみのnotion-page-linkも非表示 */
-.notion-list-item.notion-page-link:not(:has(*)) {
-  display: none !important;
-}
-
-/* より確実に空のリンクを非表示にする */
-a.notion-list-item.notion-page-link {
-  min-height: 0;
-}
-
-a.notion-list-item.notion-page-link:empty,
-a.notion-list-item.notion-page-link:blank {
-  display: none !important;
-}
-
-/* 子要素を持たないnotion-page-linkを非表示 */
-.notion-collection-list a.notion-page-link:not(:has(.notion-list-item-title)) {
+/* 空のリンク要素を非表示 */
+a.notion-list-item.notion-page-link:not(:has(.notion-list-item-title)) {
   display: none !important;
 }
 
@@ -827,86 +796,22 @@ a.notion-list-item.notion-page-link:blank {
   display: none !important;
 }
 
-/* 数式プロパティ（最終更新日など）を確実に表示 */
+/* Notionのデフォルト表示設定を尊重し、最小限のカスタマイズのみ行う */
+
+/* プロパティのスタイリング（表示/非表示はNotionの設定に従う） */
+.notion-list-item-property {
+  /* 表示の強制はしない */
+  margin-right: 12px;
+}
+
+/* 数式プロパティのスタイル（表示される場合のみ適用） */
 .notion-property-formula {
-  display: inline-block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
   font-size: 14px;
   color: var(--fg-color-3);
 }
 
-/* 数式プロパティを含む要素も表示 */
-.notion-list-item-property:has(.notion-property-formula) {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-
-/* すべてのプロパティを表示 */
-.notion-list-item-property {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-
-/* タイトルプロパティを含む要素は非表示（メインタイトルは別） */
-.notion-list-item-property:has(.notion-property-title) {
-  display: none !important;
-}
-
-/* プロパティの内部要素も表示 */
-.notion-property-formula span,
-.notion-property-date span,
-.notion-property-formula div,
-.notion-property-date div {
-  display: inline-block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-
-/* リストビューのプロパティ値を確実に表示 */
-.notion-list-item-body .notion-list-item-property {
-  display: block !important;
-  visibility: visible !important;
-}
-
-/* プロパティラベルとバリューを表示 */
-.notion-list-item-property-title,
-.notion-list-item-property-value {
-  display: inline-block !important;
-  visibility: visible !important;
-}
-
-/* 特定のプロパティタイプを表示（数式、日付、テキスト等） */
-.notion-property[class*="formula"],
-.notion-property[class*="date"],
-.notion-property[class*="text"],
-.notion-property[class*="number"] {
-  display: inline-block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-
-/* メインのタイトル（notion-list-item-title）は必ず表示 */
-.notion-list-item-title {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  font-size: 16px !important;
-  font-weight: 500 !important;
-}
-
-/* プロパティとしてのタイトルのみ非表示（メインタイトルは除外） */
-.notion-list-item-body .notion-property.notion-property-title {
-  display: none !important;
-}
-
-/* Last Updated（最終更新日時）プロパティを非表示 */
-.notion-property-last_edited_time {
-  display: none !important;
-}
-
-.notion-list-item-property:has(.notion-property-last_edited_time) {
-  display: none !important;
+/* 日付プロパティのスタイル（表示される場合のみ適用） */
+.notion-property-date {
+  font-size: 14px;
+  color: var(--fg-color-3);
 }
