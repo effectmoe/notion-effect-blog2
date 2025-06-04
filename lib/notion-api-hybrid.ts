@@ -1,11 +1,11 @@
 import { NotionAPI } from 'notion-client'
-import { Client } from '@notionhq/client'
+const { Client } = require('@notionhq/client')
 import { ExtendedRecordMap } from 'notion-types'
 
 // 公式APIと非公式APIを統合するハイブリッドクライアント
 export class NotionHybridAPI {
   private unofficialClient: NotionAPI
-  private officialClient: Client | null = null
+  private officialClient: any = null
   private hasOfficialAPI: boolean = false
 
   constructor() {
