@@ -141,13 +141,13 @@ const propertyLastEditedTimeValue = (
   defaultFn: () => React.ReactNode
 ) => {
   if (pageHeader && block?.last_edited_time) {
-    // 日付のみを表示（時間を除外）
+    // 日付のみを表示（時間を除外）、日本語形式
     const date = new Date(block.last_edited_time)
     const year = date.getFullYear()
-    const month = date.toLocaleDateString('en-US', { month: 'long' })
+    const month = date.getMonth() + 1 // 0-based なので +1
     const day = date.getDate()
     
-    return `Last updated ${month} ${day}, ${year}`
+    return `${year}年${month}月${day}日`
   }
 
   return defaultFn()
@@ -209,6 +209,27 @@ const propertyFormatters = {
   }
 }
 
+// カスタムプロパティコンポーネント（last_edited_timeプロパティ用）
+const CustomPropertyComponent = React.memo(function CustomPropertyComponent(props: any) {
+  const { schema, data } = props
+  
+  // last_edited_timeプロパティの場合
+  if (schema?.type === 'last_edited_time' && data) {
+    const dateValue = data?.[0]?.[1]?.[0]?.[1]?.start_date || data
+    if (dateValue) {
+      const date = new Date(dateValue)
+      const year = date.getFullYear()
+      const month = date.getMonth() + 1
+      const day = date.getDate()
+      
+      return <span>{year}年{month}月{day}日</span>
+    }
+  }
+  
+  // その他のプロパティはデフォルト処理
+  return null
+})
+
 // ナビゲーションメニュー項目
 const getNavigationMenuItems = (site: types.Site) => {
   // デフォルトのメニュー項目
@@ -232,6 +253,49 @@ export function NotionPage({
 }: types.PageProps & { menuItems?: any[] }) {
   const router = useRouter()
   const lite = useSearchParam('lite')
+  
+  // Last Updatedプロパティの日付フォーマットを変更
+  React.useEffect(() => {
+    const formatDates = () => {
+      const dateElements = document.querySelectorAll('.notion-property-last_edited_time span')
+      
+      dateElements.forEach((element) => {
+        const dateText = element.textContent || ''
+        
+        // "Apr 27, 2025 09:23 AM" のような形式をパース
+        const dateMatch = dateText.match(/(\w+)\s+(\d+),\s+(\d{4})/)
+        if (dateMatch) {
+          const [_, monthStr, dayStr, yearStr] = dateMatch
+          const monthMap: { [key: string]: number } = {
+            'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6,
+            'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12
+          }
+          
+          const month = monthMap[monthStr]
+          if (month) {
+            const formattedDate = `${yearStr}年${month}月${dayStr}日`
+            element.textContent = formattedDate
+            element.parentElement?.setAttribute('data-formatted', 'true')
+          }
+        }
+      })
+    }
+    
+    // 初回実行
+    formatDates()
+    
+    // DOMの変更を監視
+    const observer = new MutationObserver(() => {
+      formatDates()
+    })
+    
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    })
+    
+    return () => observer.disconnect()
+  }, [recordMap])
 
   const components = React.useMemo<Partial<NotionComponents>>(
     () => ({

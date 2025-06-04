@@ -794,6 +794,31 @@
   opacity: 1 !important;
 }
 
+/* 空のnotion-page-linkを非表示にする */
+.notion-list-item.notion-page-link:empty {
+  display: none !important;
+}
+
+/* 内容が空白のみのnotion-page-linkも非表示 */
+.notion-list-item.notion-page-link:not(:has(*)) {
+  display: none !important;
+}
+
+/* より確実に空のリンクを非表示にする */
+a.notion-list-item.notion-page-link {
+  min-height: 0;
+}
+
+a.notion-list-item.notion-page-link:empty,
+a.notion-list-item.notion-page-link:blank {
+  display: none !important;
+}
+
+/* 子要素を持たないnotion-page-linkを非表示 */
+.notion-collection-list a.notion-page-link:not(:has(.notion-list-item-title)) {
+  display: none !important;
+}
+
 /* Ensure title column is hidden in list view headers */
 .notion-collection-list th:has(.notion-property-title),
 .notion-collection-list .notion-collection-column-title:has(span:contains("Title")),
@@ -801,37 +826,22 @@
   display: none !important;
 }
 
-/* Last Updatedプロパティの時間を非表示にする */
-/* Notionの日付フォーマット: "October 25, 2023 12:34 PM" のような形式から時間部分を隠す */
-.notion-property-last_edited_time time,
-.notion-property-last_edited_time .notion-property-date {
-  /* 時間部分を含む可能性のあるテキストを処理 */
-  display: inline-block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* 時間部分を視覚的に非表示にする（より確実な方法） */
-.notion-property-last_edited_time time::after {
-  content: '';
-  position: absolute;
-  background: var(--bg-color);
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: 60%; /* 時間部分をカバー */
-  pointer-events: none;
-}
-
-/* より安全な方法: CSSで日付のみ表示するようにフォーマット */
-.notion-collection .notion-property-last_edited_time {
+/* Last Updatedプロパティの時間を非表示にして日本語表記にする */
+.notion-property-last_edited_time {
   position: relative;
 }
 
-/* 日付と時間の間にある空白文字以降を非表示 */
-.notion-property[class*="last_edited_time"] span {
+/* フォーマット済みの日付表示 */
+.notion-property-last_edited_time[data-formatted] span {
+  font-size: 14px;
+  color: var(--fg-color);
+}
+
+/* JavaScriptが適用されるまでの一時的な対応 */
+.notion-property-last_edited_time:not([data-formatted]) span {
+  /* 時間部分を切り捨てるため、幅を制限 */
   display: inline-block;
-  max-width: 150px; /* 日付部分のみが収まる幅 */
+  max-width: 120px;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
