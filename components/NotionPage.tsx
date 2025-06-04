@@ -257,25 +257,40 @@ export function NotionPage({
   // Last Updatedプロパティの日付フォーマットを変更
   React.useEffect(() => {
     const formatDates = () => {
-      const dateElements = document.querySelectorAll('.notion-property-last_edited_time span')
+      // より広範囲なセレクタで日付要素を取得
+      const dateElements = document.querySelectorAll('.notion-property-last_edited_time, .notion-property-last_edited_time span, span.notion-property-last_edited_time')
       
       dateElements.forEach((element) => {
-        const dateText = element.textContent || ''
+        const htmlElement = element as HTMLElement
         
-        // "Apr 27, 2025 09:23 AM" のような形式をパース
-        const dateMatch = dateText.match(/(\w+)\s+(\d+),\s+(\d{4})/)
+        // すでにフォーマット済みの場合はスキップ
+        if (htmlElement.getAttribute('data-formatted') === 'true') {
+          return
+        }
+        
+        const dateText = htmlElement.textContent || ''
+        
+        // "Apr 27, 2025 09:23 AM" または "Apr 27, 2025 06:23 PM" のような形式をパース
+        const dateMatch = dateText.match(/(\w+)\s+(\d+),\s+(\d{4})(?:\s+\d{1,2}:\d{2}\s*(?:AM|PM)?)?/i)
         if (dateMatch) {
           const [_, monthStr, dayStr, yearStr] = dateMatch
           const monthMap: { [key: string]: number } = {
             'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6,
-            'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12
+            'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12,
+            'January': 1, 'February': 2, 'March': 3, 'April': 4, 'May': 5, 'June': 6,
+            'July': 7, 'August': 8, 'September': 9, 'October': 10, 'November': 11, 'December': 12
           }
           
           const month = monthMap[monthStr]
           if (month) {
             const formattedDate = `${yearStr}年${month}月${dayStr}日`
-            element.textContent = formattedDate
-            element.parentElement?.setAttribute('data-formatted', 'true')
+            htmlElement.textContent = formattedDate
+            htmlElement.setAttribute('data-formatted', 'true')
+            
+            // 親要素にも属性を設定
+            if (htmlElement.parentElement) {
+              htmlElement.parentElement.setAttribute('data-formatted', 'true')
+            }
           }
         }
       })
@@ -295,14 +310,35 @@ export function NotionPage({
       })
     }
     
-    // 初回実行
-    formatDates()
-    removeEmptyLinks()
-    
-    // DOMの変更を監視
-    const observer = new MutationObserver(() => {
+    // 処理を実行する関数
+    const applyFormatting = () => {
       formatDates()
       removeEmptyLinks()
+    }
+    
+    // 初回実行（少し遅延を入れて確実に要素が読み込まれるのを待つ）
+    applyFormatting()
+    setTimeout(applyFormatting, 100)
+    setTimeout(applyFormatting, 500)
+    setTimeout(applyFormatting, 1000)
+    
+    // DOMの変更を監視
+    const observer = new MutationObserver((mutations) => {
+      // 日付要素が追加された場合のみ処理
+      const hasDateElements = mutations.some(mutation => {
+        return Array.from(mutation.addedNodes).some(node => {
+          if (node.nodeType === Node.ELEMENT_NODE) {
+            const element = node as Element
+            return element.classList?.contains('notion-property-last_edited_time') ||
+                   element.querySelector?.('.notion-property-last_edited_time')
+          }
+          return false
+        })
+      })
+      
+      if (hasDateElements) {
+        setTimeout(applyFormatting, 50)
+      }
     })
     
     observer.observe(document.body, {
