@@ -1,5 +1,6 @@
 import { NotionAPI } from 'notion-client'
 import { ExtendedRecordMap } from 'notion-types'
+import { cacheManager, CacheKeys, CacheTTL } from './cache-utils'
 
 // 動的インポートで@notionhq/clientを読み込む
 let Client: any = null
@@ -43,7 +44,23 @@ export class NotionHybridAPI {
 
   // ページデータの取得（非公式APIを使用）
   async getPage(pageId: string): Promise<ExtendedRecordMap> {
-    return await this.unofficialClient.getPage(pageId)
+    // キャッシュをチェック
+    const cacheKey = CacheKeys.recordMap(pageId)
+    const cached = cacheManager.get<ExtendedRecordMap>(cacheKey)
+    
+    if (cached) {
+      // console.log(`[Cache Hit] RecordMap for page ${pageId}`)
+      return cached
+    }
+    
+    // キャッシュミスの場合、APIから取得
+    // console.log(`[Cache Miss] Fetching RecordMap for page ${pageId}`)
+    const recordMap = await this.unofficialClient.getPage(pageId)
+    
+    // キャッシュに保存（30分）
+    cacheManager.set(cacheKey, recordMap, CacheTTL.MEDIUM)
+    
+    return recordMap
   }
 
   // データベースプロパティの取得（公式APIを優先的に使用）
@@ -131,9 +148,21 @@ export class NotionHybridAPI {
       return null
     }
 
+    // キャッシュをチェック
+    const cacheKey = CacheKeys.formula(pageId, propertyName)
+    const cached = cacheManager.get<string>(cacheKey)
+    
+    if (cached) {
+      // console.log(`[Cache Hit] Formula ${propertyName} for page ${pageId}`)
+      return cached
+    }
+
     try {
+      // console.log(`[Cache Miss] Fetching formula ${propertyName} for page ${pageId}`)
       const page = await this.officialClient.pages.retrieve({ page_id: pageId })
       const properties = page.properties as any
+      
+      let result: string | null = null
       
       // 最終更新日の特別処理 - Last Updatedプロパティから直接日付を取得してJSTに変換
       if (propertyName === '最終更新日') {
@@ -159,44 +188,55 @@ export class NotionHybridAPI {
               if (part.type === 'day') day = part.value
             }
             
-            return `${year}年${month}月${day}日`
+            result = `${year}年${month}月${day}日`
+            break
           }
         }
       }
       
-      // プロパティ名で検索
-      for (const [key, prop] of Object.entries(properties)) {
-        const property = prop as any
-        if (property.type === 'formula' && key === propertyName) {
-          const formulaValue = property.formula
-          if (formulaValue?.type === 'string') {
-            return formulaValue.string
-          } else if (formulaValue?.type === 'date' && formulaValue.date) {
-            // 日付型の場合、日本のタイムゾーンで適切にフォーマット
-            const dateStr = formulaValue.date.start
-            const date = new Date(dateStr)
-            
-            // JSTで日付をフォーマット
-            const options: Intl.DateTimeFormatOptions = {
-              year: 'numeric',
-              month: 'numeric', 
-              day: 'numeric',
-              timeZone: 'Asia/Tokyo'
+      // プロパティ名で検索（最終更新日の特別処理で見つからなかった場合）
+      if (!result) {
+        for (const [key, prop] of Object.entries(properties)) {
+          const property = prop as any
+          if (property.type === 'formula' && key === propertyName) {
+            const formulaValue = property.formula
+            if (formulaValue?.type === 'string') {
+              result = formulaValue.string
+            } else if (formulaValue?.type === 'date' && formulaValue.date) {
+              // 日付型の場合、日本のタイムゾーンで適切にフォーマット
+              const dateStr = formulaValue.date.start
+              const date = new Date(dateStr)
+              
+              // JSTで日付をフォーマット
+              const options: Intl.DateTimeFormatOptions = {
+                year: 'numeric',
+                month: 'numeric', 
+                day: 'numeric',
+                timeZone: 'Asia/Tokyo'
+              }
+              const formatter = new Intl.DateTimeFormat('ja-JP', options)
+              const parts = formatter.formatToParts(date)
+              
+              let year = '', month = '', day = ''
+              for (const part of parts) {
+                if (part.type === 'year') year = part.value
+                if (part.type === 'month') month = part.value
+                if (part.type === 'day') day = part.value
+              }
+              
+              result = `${year}年${month}月${day}日`
             }
-            const formatter = new Intl.DateTimeFormat('ja-JP', options)
-            const parts = formatter.formatToParts(date)
-            
-            let year = '', month = '', day = ''
-            for (const part of parts) {
-              if (part.type === 'year') year = part.value
-              if (part.type === 'month') month = part.value
-              if (part.type === 'day') day = part.value
-            }
-            
-            return `${year}年${month}月${day}日`
+            break
           }
         }
       }
+      
+      // 結果をキャッシュに保存
+      if (result) {
+        cacheManager.set(cacheKey, result, CacheTTL.LONG)
+      }
+      
+      return result
     } catch (error) {
       console.error(`フォーミュラプロパティ "${propertyName}" の取得エラー:`, error)
     }
