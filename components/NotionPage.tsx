@@ -198,6 +198,8 @@ export function NotionPage({
   const lite = useSearchParam('lite')
   
   // useEffectを使用して空のリンクを非表示にし、プロパティを調査する
+  // ハイドレーションエラーを避けるため、一時的にコメントアウト
+  /*
   React.useEffect(() => {
     // 空のnotion-page-linkを削除する関数
     const removeEmptyLinks = () => {
@@ -229,6 +231,7 @@ export function NotionPage({
     
     return () => observer.disconnect()
   }, [recordMap])
+  */
 
   const components = React.useMemo<Partial<NotionComponents>>(
     () => ({

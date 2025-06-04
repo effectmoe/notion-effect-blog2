@@ -826,7 +826,7 @@ a.notion-list-item.notion-page-link:not(:has(.notion-list-item-title)) {
 .notion-property-last_edited_time {
   display: inline-block;
   position: relative;
-  max-width: 120px;
+  max-width: 85px; /* 日付部分のみ表示 */
   overflow: hidden;
   white-space: nowrap;
 }
