@@ -150,11 +150,13 @@
 }
 
 .resultTitle {
+  display: block;
   font-weight: 600;
   margin-bottom: 0.25rem;
 }
 
 .resultCategory {
+  display: block;
   font-size: 0.85rem;
   color: #777;
 }

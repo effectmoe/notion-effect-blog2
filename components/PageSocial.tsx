@@ -98,11 +98,11 @@ export function PageSocial() {
           target='_blank'
           rel='noopener noreferrer'
         >
-          <div className={styles.actionBg}>
-            <div className={`${styles.actionBgPane} bgPane`} />
-          </div>
+          <span className={styles.actionBg}>
+            <span className={`${styles.actionBgPane} bgPane`} />
+          </span>
 
-          <div className={styles.actionBg}>{action.icon}</div>
+          <span className={styles.actionBg}>{action.icon}</span>
         </a>
       ))}
     </div>

@@ -112,8 +112,8 @@ const SimplifiedSearch: React.FC<SimplifiedSearchProps> = ({ isVisible, onClose 
                     className={styles.resultLink}
                     onClick={onClose}
                   >
-                    <div className={styles.resultTitle}>{page.title}</div>
-                    <div className={styles.resultCategory}>{page.category}</div>
+                    <span className={styles.resultTitle}>{page.title}</span>
+                    <span className={styles.resultCategory}>{page.category}</span>
                   </Link>
                 </li>
               ))}

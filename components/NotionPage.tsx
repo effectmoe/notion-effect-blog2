@@ -6,7 +6,7 @@ import { useRouter } from 'next/router'
 import { type PageBlock } from 'notion-types'
 import { formatDate, getBlockTitle, getPageProperty } from 'notion-utils'
 import * as React from 'react'
-import BodyClassName from 'react-body-classname'
+// Removed BodyClassName to avoid hydration issues
 import {
   type NotionComponents,
   NotionRenderer,
@@ -20,7 +20,6 @@ import * as config from '@/lib/config'
 import { mapImageUrl } from '@/lib/map-image-url'
 import { getCanonicalPageUrl, mapPageUrl } from '@/lib/map-page-url'
 import { searchNotion } from '@/lib/search-notion'
-import { useDarkMode } from '@/lib/use-dark-mode'
 
 import { Footer } from './Footer'
 import { GitHubShareButton } from './GitHubShareButton'
@@ -31,6 +30,7 @@ import { PageAside } from './PageAside'
 import { PageHead } from './PageHead'
 import { Header } from './Header'
 import { FormulaPropertyDebug } from './FormulaPropertyDebug'
+import { CustomPageLink } from './CustomPageLink'
 import styles from './styles.module.css'
 
 // -----------------------------------------------------------------------------
@@ -197,6 +197,29 @@ export function NotionPage({
 }: types.PageProps & { menuItems?: any[] }) {
   const router = useRouter()
   const lite = useSearchParam('lite')
+  const [mounted, setMounted] = React.useState(false)
+  
+  // lite mode is for oembed
+  const isLiteMode = lite === 'true'
+  
+  
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+  
+  // Apply body classes after mount
+  React.useEffect(() => {
+    if (!mounted) return
+    
+    if (isLiteMode) {
+      document.body.classList.add('notion-lite')
+    }
+    document.body.classList.add('no-notion-tabs')
+    
+    return () => {
+      document.body.classList.remove('notion-lite', 'no-notion-tabs')
+    }
+  }, [mounted, isLiteMode])
   
   // useEffectを使用して空のリンクを非表示にし、プロパティを調査する
   // ハイドレーションエラーを避けるため、一時的にコメントアウト
@@ -248,7 +271,9 @@ export function NotionPage({
       Header: () => null, // ヘッダーを非表示にする
       propertyLastEditedTimeValue,
       propertyTextValue,
-      propertyDateValue
+      propertyDateValue,
+      // Override PageLink to fix div-in-anchor hydration error
+      PageLink: CustomPageLink as any
     }),
     []
   )
@@ -267,11 +292,6 @@ export function NotionPage({
   const navigationMenuItems = React.useMemo(() => 
     site ? getNavigationMenuItems(site) : [], [site]
   )
-
-  // lite mode is for oembed
-  const isLiteMode = lite === 'true'
-
-  const { isDarkMode } = useDarkMode()
 
   const siteMapPageUrl = React.useMemo(() => {
     const params: any = {}
@@ -319,13 +339,16 @@ export function NotionPage({
     recordMap
   })
 
-  if (!config.isServer) {
-    // add important objects to the window global for easy debugging
-    const g = window as any
-    g.pageId = pageId
-    g.recordMap = recordMap
-    g.block = block
-  }
+  // デバッグ用のグローバル変数設定をuseEffectに移動
+  React.useEffect(() => {
+    if (!config.isServer) {
+      // add important objects to the window global for easy debugging
+      const g = window as any
+      g.pageId = pageId
+      g.recordMap = recordMap
+      g.block = block
+    }
+  }, [pageId, recordMap, block])
 
   const canonicalPageUrl =
     !config.isDev && getCanonicalPageUrl(site, recordMap)(pageId)
@@ -352,9 +375,7 @@ export function NotionPage({
         url={canonicalPageUrl}
       />
 
-      {isLiteMode && <BodyClassName className='notion-lite' />}
-      {isDarkMode && <BodyClassName className='dark-mode' />}
-      <BodyClassName className='no-notion-tabs' />
+      {/* All body class modifications moved to useEffect to avoid hydration issues */}
 
       {/* Notionレンダラー - 内部のヘッダーをnullに設定したので、カスタムヘッダーを外に配置 */}
       <Header menuItems={(menuItems && menuItems.length > 0) ? menuItems : navigationMenuItems} />
@@ -366,7 +387,6 @@ export function NotionPage({
             'no-notion-tabs',
             pageId === site.rootNotionPageId && 'index-page'
           )}
-          darkMode={isDarkMode}
           components={components}
           recordMap={recordMap}
           rootPageId={site.rootNotionPageId}
@@ -389,7 +409,7 @@ export function NotionPage({
       </div>
 
       <GitHubShareButton />
-      <FormulaPropertyDebug recordMap={recordMap} />
+      {mounted && <FormulaPropertyDebug recordMap={recordMap} />}
     </>
   )
 }

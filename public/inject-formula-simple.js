@@ -63,13 +63,16 @@
     });
   }
   
-  // ページ読み込み完了後に実行
+  // ページ読み込み完了後に実行 - ハイドレーション後まで待つ
+  // Increased delay to ensure hydration is complete
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
-      setTimeout(fillFormulas, 2000);
+      // React hydrationが完了するまで待つ
+      setTimeout(fillFormulas, 5000);
     });
   } else {
-    setTimeout(fillFormulas, 2000);
+    // 既にロード済みの場合も、hydrationを考慮して待つ
+    setTimeout(fillFormulas, 5000);
   }
   
   // ページ遷移を監視
@@ -78,7 +81,7 @@
     const url = location.href;
     if (url !== lastUrl) {
       lastUrl = url;
-      setTimeout(fillFormulas, 2000);
+      setTimeout(fillFormulas, 5000);
     }
   }).observe(document.body, { subtree: true, childList: true });
   

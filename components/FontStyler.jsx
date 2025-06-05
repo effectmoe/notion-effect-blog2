@@ -6,26 +6,30 @@ import { fontSettings as defaultSettings } from '../lib/font-customizer/font-set
 export const FontStyler = () => {
   // ハイドレーションエラーを防ぐため、クライアントサイドでのみ動作するようにする
   const [hasMounted, setHasMounted] = useState(false);
-  const [settings, setSettings] = useState(defaultSettings);
   
   useEffect(() => {
-    // サーバーサイドレンダリング時には実行しない
-    if (typeof window === 'undefined') return;
+    setHasMounted(true);
+  }, []);
+  
+  useEffect(() => {
+    if (!hasMounted) return;
     
     // 設定を読み込む関数
-    const loadSettings = async () => {
+    const loadAndApplySettings = async () => {
+      let finalSettings = defaultSettings;
+      
       try {
         // 最初にAPIから設定を読み込もうとする
         const response = await fetch('/api/font-settings');
         
         if (response.ok) {
           const data = await response.json();
-          setSettings(data);
+          finalSettings = data;
         } else {
           // APIが失敗したらローカルストレージから読み込む
           const loadedSettings = loadFontSettingsFromLocalStorage();
           if (loadedSettings) {
-            setSettings(loadedSettings);
+            finalSettings = loadedSettings;
           }
         }
       } catch (error) {
@@ -34,35 +38,30 @@ export const FontStyler = () => {
         try {
           const loadedSettings = loadFontSettingsFromLocalStorage();
           if (loadedSettings) {
-            setSettings(loadedSettings);
+            finalSettings = loadedSettings;
           }
         } catch (e) {
           console.error('ローカルストレージからの読み込みに失敗しました', e);
         }
       }
+      
+      // 既存のスタイルタグを探す
+      let styleTag = document.getElementById('custom-font-styles');
+      
+      // なければ作成
+      if (!styleTag) {
+        styleTag = document.createElement('style');
+        styleTag.id = 'custom-font-styles';
+        document.head.appendChild(styleTag);
+      }
+      
+      // CSSを生成して適用
+      const css = generateFontCSS(finalSettings);
+      styleTag.innerHTML = css;
     };
     
-    loadSettings();
-    setHasMounted(true);
-  }, []);
-  
-  useEffect(() => {
-    if (typeof window === 'undefined' || !hasMounted) return;
-    
-    // 既存のスタイルタグを探す
-    let styleTag = document.getElementById('custom-font-styles');
-    
-    // なければ作成
-    if (!styleTag) {
-      styleTag = document.createElement('style');
-      styleTag.id = 'custom-font-styles';
-      document.head.appendChild(styleTag);
-    }
-    
-    // CSSを生成して適用
-    const css = generateFontCSS(settings);
-    styleTag.innerHTML = css;
-  }, [settings]);
+    loadAndApplySettings();
+  }, [hasMounted]);
 
   return null; // このコンポーネントはUIを持たない
 };

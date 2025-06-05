@@ -17,6 +17,7 @@ const HeaderMenu: React.FC<HeaderMenuProps> = ({ menuItems }) => {
   const router = useRouter()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
 
   // 現在のページに基づいてアクティブなメニュー項目を判断
   const isActive = (url: string) => {
@@ -28,6 +29,7 @@ const HeaderMenu: React.FC<HeaderMenuProps> = ({ menuItems }) => {
 
   // ウィンドウサイズの変更を監視してモバイル表示を判断
   useEffect(() => {
+    setIsMounted(true)
     const checkIsMobile = () => {
       setIsMobile(window.innerWidth < 768)
     }
@@ -55,6 +57,28 @@ const HeaderMenu: React.FC<HeaderMenuProps> = ({ menuItems }) => {
     if (isMobile) {
       setIsMenuOpen(false)
     }
+  }
+
+  // ハイドレーションエラーを防ぐため、マウント前はデスクトップ版を表示
+  if (!isMounted) {
+    return (
+      <nav className={styles.headerNav}>
+        <div className={`${styles.menuContainer} ${styles.desktopMenu}`}>
+          <ul className={styles.menuList}>
+            {menuItems.map((item) => (
+              <li key={item.id} className={styles.menuItem}>
+                <Link 
+                  href={item.url}
+                  className={`${styles.menuLink} ${isActive(item.url) ? styles.active : ''}`}
+                >
+                  {item.title}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </nav>
+    )
   }
 
   return (

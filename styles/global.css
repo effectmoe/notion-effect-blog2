@@ -21,6 +21,18 @@ body {
   overflow-x: hidden;
 }
 
+/* Apply dark mode styles based on data attribute to prevent hydration errors */
+[data-theme='dark'] body {
+  background-color: var(--bg-color);
+  color: var(--fg-color);
+}
+
+/* Support for the BodyClassName component */
+body.dark-mode {
+  background-color: var(--bg-color);
+  color: var(--fg-color);
+}
+
 .static-tweet blockquote {
   margin: 0;
   margin-block-start: 0;

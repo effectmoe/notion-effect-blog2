@@ -1,0 +1,875 @@
+This file is a merged representation of a subset of the codebase, containing specifically included files and files not matching ignore patterns, combined into a single document by Repomix.
+The content has been processed where content has been compressed (code blocks are separated by ⋮---- delimiter).
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Only files matching these patterns are included: **/lib/notion-api-hybrid.ts, **/lib/cache-utils.ts, **/pages/api/test-formula.ts, **/public/inject-formula-simple.js, **/components/NotionPage.tsx, **/lib/notion.ts, **/lib/notion-api.ts, **/lib/config.ts, **/lib/site-config.ts, **/types.ts, **/lib/types.ts, **/.env.example, **/package.json, **/next.config.js, **/tsconfig.json
+- Files matching these patterns are excluded: **/node_modules/**, **/.next/**, **/dist/**, **/build/**, **/*.test.*, **/*.spec.*, **/coverage/**, **/.git/**, **/*.log, **/*.lock, **/repomix-structure.xml, **/repomix-notion-integration.xml, **/repomix-ui-components.xml, **/repomix*.xml
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Content has been compressed - code blocks are separated by ⋮---- delimiter
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+components/
+  NotionPage.tsx
+lib/
+  cache-utils.ts
+  config.ts
+  notion-api-hybrid.ts
+  notion-api.ts
+  notion.ts
+  site-config.ts
+  types.ts
+pages/
+  api/
+    test-formula.ts
+public/
+  inject-formula-simple.js
+.env.example
+next.config.js
+package.json
+tsconfig.json
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="lib/config.ts">
+/**
+ * Site-wide app configuration.
+ *
+ * This file pulls from the root "site.config.ts" as well as environment variables
+ * for optional depenencies.
+ */
+import { parsePageId } from 'notion-utils'
+import { type PostHogConfig } from 'posthog-js'
+⋮----
+import { getEnv, getSiteConfig } from './get-config-value'
+import { type NavigationLink } from './site-config'
+import {
+  type NavigationStyle,
+  type PageUrlOverridesInverseMap,
+  type PageUrlOverridesMap,
+  type Site
+} from './types'
+⋮----
+// if you want to restrict pages to a single notion workspace (optional)
+⋮----
+// general site config
+⋮----
+// social accounts
+⋮----
+export const getMastodonHandle = (): string | null =>
+⋮----
+// Since Mastodon is decentralized, handles include the instance domain name.
+// e.g. @example@mastodon.social
+⋮----
+// default notion values for site-wide consistency (optional; may be overridden on a per-page basis)
+⋮----
+// Optional whether or not to enable support for LQIP preview images
+⋮----
+// Optional whether or not to include the Notion ID in page URLs or just use slugs
+⋮----
+// Optional site search
+⋮----
+// ----------------------------------------------------------------------------
+⋮----
+// Optional redis instance for persisting preview images
+⋮----
+// (if you want to enable redis, only REDIS_HOST and REDIS_PASSWORD are required)
+// we recommend that you store these in a local `.env` file
+⋮----
+// ----------------------------------------------------------------------------
+⋮----
+notionPageId: process.env.NOTION_PAGE_ID  // NOTION_PAGE_IDを追加
+⋮----
+// ----------------------------------------------------------------------------
+⋮----
+function cleanPageUrlMap(
+  pageUrlMap: PageUrlOverridesMap,
+  {
+    label
+  }: {
+    label: string
+  }
+): PageUrlOverridesMap
+⋮----
+function invertPageUrlOverrides(
+  pageUrlOverrides: PageUrlOverridesMap
+): PageUrlOverridesInverseMap
+</file>
+
+<file path="lib/site-config.ts">
+export interface SiteConfig {
+  rootNotionPageId: string
+  rootNotionSpaceId?: string
+
+  name: string
+  domain: string
+  author: string
+  description?: string
+  language?: string
+
+  twitter?: string
+  github?: string
+  linkedin?: string
+  newsletter?: string
+  youtube?: string
+  zhihu?: string
+  mastodon?: string
+  instagram?: string
+  facebook?: string
+
+  defaultPageIcon?: string | null
+  defaultPageCover?: string | null
+  defaultPageCoverPosition?: number | null
+
+  isPreviewImageSupportEnabled?: boolean
+  isTweetEmbedSupportEnabled?: boolean
+  isRedisEnabled?: boolean
+  isSearchEnabled?: boolean
+
+  includeNotionIdInUrls?: boolean
+  pageUrlOverrides?: types.PageUrlOverridesMap
+  pageUrlAdditions?: types.PageUrlOverridesMap
+
+  navigationStyle?: types.NavigationStyle
+  navigationLinks?: Array<NavigationLink>
+}
+⋮----
+export interface NavigationLink {
+  title: string
+  pageId?: string
+  url?: string
+}
+⋮----
+export const siteConfig = (config: SiteConfig): SiteConfig =>
+</file>
+
+<file path="tsconfig.json">
+{
+  "compilerOptions": {
+    "target": "es2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "moduleDetection": "force",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "baseUrl": ".",
+    "typeRoots": ["./node_modules/@types"],
+    "incremental": true,
+    "paths": {
+      "@/components/*": ["components/*"],
+      "@/lib/*": ["lib/*"],
+      "@/styles/*": ["styles/*"]
+    }
+  },
+  "exclude": ["node_modules"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "site.config.ts"]
+}
+</file>
+
+<file path="lib/types.ts">
+import { type ParsedUrlQuery } from 'node:querystring'
+⋮----
+import { type ExtendedRecordMap, type PageMap } from 'notion-types'
+⋮----
+export type NavigationStyle = 'default' | 'custom'
+⋮----
+export interface PageError {
+  message?: string
+  statusCode: number
+}
+⋮----
+export interface PageProps {
+  site?: Site
+  recordMap?: ExtendedRecordMap
+  pageId?: string
+  error?: PageError
+}
+⋮----
+export interface ExtendedTweetRecordMap extends ExtendedRecordMap {
+  tweets: Record<string, any>
+}
+⋮----
+export interface Params extends ParsedUrlQuery {
+  pageId: string
+}
+⋮----
+export interface Site {
+  name: string
+  domain: string
+
+  rootNotionPageId: string
+  rootNotionSpaceId: string
+
+  // settings
+  html?: string
+  fontFamily?: string
+  darkMode?: boolean
+  previewImages?: boolean
+
+  // opengraph metadata
+  description?: string
+  image?: string
+}
+⋮----
+// settings
+⋮----
+// opengraph metadata
+⋮----
+export interface SiteMap {
+  site: Site
+  pageMap: PageMap
+  canonicalPageMap: CanonicalPageMap
+}
+⋮----
+export interface CanonicalPageMap {
+  [canonicalPageId: string]: string
+}
+⋮----
+export interface PageUrlOverridesMap {
+  // maps from a URL path to the notion page id the page should be resolved to
+  // (this overrides the built-in URL path generation for these pages)
+  [pagePath: string]: string
+}
+⋮----
+// maps from a URL path to the notion page id the page should be resolved to
+// (this overrides the built-in URL path generation for these pages)
+⋮----
+export interface PageUrlOverridesInverseMap {
+  // maps from a notion page id to the URL path the page should be resolved to
+  // (this overrides the built-in URL path generation for these pages)
+  [pageId: string]: string
+}
+⋮----
+// maps from a notion page id to the URL path the page should be resolved to
+// (this overrides the built-in URL path generation for these pages)
+⋮----
+export interface NotionPageInfo {
+  pageId: string
+  title: string
+  image: string
+  imageObjectPosition: string
+  author: string
+  authorImage: string
+  detail: string
+}
+⋮----
+export interface SearchParams {
+  query: string
+  ancestorId?: string
+  filters?: {
+    isDeletedOnly?: boolean
+    excludeTemplates?: boolean
+    isNavigableOnly?: boolean
+    requireEditPermissions?: boolean
+    includePublicPagesWithoutExplicitAccess?: boolean
+    ancestorIds?: string[]
+    [key: string]: any
+  }
+  sort?: {
+    field: string
+    direction: 'asc' | 'desc'
+  }
+  limit?: number
+  searchUrlOverride?: string
+}
+⋮----
+export interface SearchResults {
+  results: Array<{
+    id: string
+    title: string
+    description?: string
+    url?: string
+    icon?: string
+    [key: string]: any
+  }>
+  total: number
+  recordMap: {
+    block: Record<string, any>
+    [key: string]: any
+  }
+  hasMore?: boolean
+}
+</file>
+
+<file path="public/inject-formula-simple.js">
+// シンプルな数式プロパティ挿入スクリプト
+⋮----
+console.log('[Formula Script] Loading...');
+⋮----
+async function fillFormulas() {
+const elements = document.querySelectorAll('.notion-property-formula');
+console.log('[Formula Script] Found elements:', elements.length);
+⋮----
+// recordMapから情報を取得
+⋮----
+console.log('[Formula Script] No recordMap found');
+⋮----
+// タイトルでページを検索する関数
+function findPageByTitle(title) {
+for (const [blockId, blockData] of Object.entries(recordMap.block)) {
+⋮----
+// 各リストアイテムを処理
+const listItems = document.querySelectorAll('.notion-list-item');
+⋮----
+listItems.forEach(async (item, index) => {
+const link = item.querySelector('a');
+const title = link?.textContent?.trim();
+const formulaEl = item.querySelector('.notion-property-formula');
+⋮----
+if (title && formulaEl && !formulaEl.textContent.trim()) {
+// タイトルでページを検索
+const pageId = findPageByTitle(title);
+⋮----
+const response = await fetch(`/api/test-formula?pageId=${pageId.replace(/-/g, '')}`);
+const data = await response.json();
+⋮----
+formulaEl.classList.add('formula-filled');
+console.log('[Formula Script] Set value:', data.formulaValue);
+⋮----
+console.error('[Formula Script] Error:', err);
+⋮----
+// ページ読み込み完了後に実行
+⋮----
+document.addEventListener('DOMContentLoaded', () => {
+setTimeout(fillFormulas, 2000);
+⋮----
+// ページ遷移を監視
+⋮----
+new MutationObserver(() => {
+⋮----
+}).observe(document.body, { subtree: true, childList: true });
+⋮----
+// グローバルに公開
+</file>
+
+<file path=".env.example">
+# ------------------------------------------------------------------------------
+# This is an example .env file.
+#
+# All of these environment vars must be defined either in your environment or in
+# a local .env file in order to run this app.
+#
+# @see https://github.com/rolodato/dotenv-safe for more details.
+# ------------------------------------------------------------------------------
+
+# Optional (for Notion API authentication)
+# Get your integration token from https://www.notion.so/my-integrations
+#NOTION_API_SECRET=
+
+# Optional (for fathom analytics)
+#NEXT_PUBLIC_FATHOM_ID=
+
+# Optional (for PostHog analytics)
+#NEXT_PUBLIC_POSTHOG_ID=
+
+# Optional (for rendering tweets more efficiently)
+#TWITTER_ACCESS_TOKEN=
+
+# Optional (for persisting preview images to redis)
+# NOTE: if you want to enable redis, only REDIS_HOST and REDIS_PASSWORD are required
+# NOTE: don't forget to set isRedisEnabled to true in the site.config.ts file
+#REDIS_HOST=
+#REDIS_PASSWORD=
+#REDIS_USER='default'
+#REDIS_NAMESPACE='preview-images'
+</file>
+
+<file path="next.config.js">
+const withBundleAnalyzer = bundleAnalyzer({
+⋮----
+export default withBundleAnalyzer({
+⋮----
+ignoreDuringBuilds: true, // ビルド時のESLintエラーを無視
+⋮----
+reactStrictMode: false, // ハイドレーションエラーを軽減
+⋮----
+webpack: (config, _context) => {
+// Workaround for ensuring that `react` and `react-dom` resolve correctly
+// when using a locally-linked version of `react-notion-x`.
+// @see https://github.com/vercel/next.js/issues/50391
+const dirname = path.dirname(fileURLToPath(import.meta.url))
+config.resolve.alias.react = path.resolve(dirname, 'node_modules/react')
+config.resolve.alias['react-dom'] = path.resolve(
+⋮----
+// See https://react-tweet.vercel.app/next#troubleshooting
+</file>
+
+<file path="lib/cache-utils.ts">
+// キャッシュユーティリティ
+interface CacheItem<T> {
+  data: T
+  timestamp: number
+  ttl: number // Time to live in milliseconds
+}
+⋮----
+ttl: number // Time to live in milliseconds
+⋮----
+class CacheManager
+⋮----
+// デフォルトのTTL（30分）
+⋮----
+set<T>(key: string, data: T, ttl?: number): void
+⋮----
+// 既存のタイマーをクリア
+⋮----
+// キャッシュに保存
+⋮----
+// 統計を更新
+⋮----
+// 自動削除タイマーを設定
+⋮----
+get<T>(key: string): T | null
+⋮----
+// 有効期限チェック
+⋮----
+delete(key: string): void
+⋮----
+clear(): void
+⋮----
+// すべてのタイマーをクリア
+⋮----
+// 統計をリセット
+⋮----
+private clearTimer(key: string): void
+⋮----
+// キャッシュの統計情報
+getStats()
+⋮----
+// グローバルシングルトンインスタンス
+// Next.jsのホットリロードでも永続化するように global に保存
+⋮----
+// キャッシュキー生成ヘルパー
+⋮----
+// TTL定数
+⋮----
+SHORT: 5 * 60 * 1000,      // 5分
+MEDIUM: 30 * 60 * 1000,     // 30分
+LONG: 60 * 60 * 1000,       // 1時間
+VERY_LONG: 24 * 60 * 60 * 1000  // 24時間
+</file>
+
+<file path="pages/api/test-formula.ts">
+import { NextApiRequest, NextApiResponse } from 'next'
+import { notionHybrid } from '@/lib/notion-api-hybrid'
+⋮----
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+)
+⋮----
+// ページIDの正規化
+⋮----
+// ページプロパティを取得
+⋮----
+// フォーミュラプロパティの値を取得
+⋮----
+properties: properties, // 全プロパティデータを返す
+</file>
+
+<file path="lib/notion-api.ts">
+import { NotionAPI } from 'notion-client'
+⋮----
+// 認証情報のログ出力（実際の値は表示されません）
+⋮----
+authToken: process.env.NOTION_API_SECRET,  // 認証トークンを追加
+⋮----
+userTimeZone: 'Asia/Tokyo' // タイムゾーンを設定
+</file>
+
+<file path="lib/notion.ts">
+import {
+  type ExtendedRecordMap,
+  type SearchParams,
+  type SearchResults
+} from 'notion-types'
+import { mergeRecordMaps } from 'notion-utils'
+import pMap from 'p-map'
+import pMemoize from 'p-memoize'
+⋮----
+import {
+  isPreviewImageSupportEnabled,
+  navigationLinks,
+  navigationStyle
+} from './config'
+import { getTweetsMap } from './get-tweets'
+import { notion } from './notion-api'
+import { getPreviewImageMap } from './preview-images'
+⋮----
+export async function getPage(pageId: string): Promise<ExtendedRecordMap>
+⋮----
+// ensure that any pages linked to in the custom navigation header have
+// their block info fully resolved in the page record map so we know
+// the page title, slug, etc.
+⋮----
+export async function search(params: SearchParams |
+⋮----
+// 環境変数の確認
+⋮----
+// 検索パラメータの設定
+// ancestorIdは必ず文字列を渡すようにする
+⋮----
+isNavigableOnly: false,    // falseに変更して検索範囲を広げる
+⋮----
+// ancestorIdsは検索範囲を広げるため一時的にコメントアウト
+// ancestorIds: rootId ? [rootId] : undefined
+⋮----
+limit: 100 // 検索結果を増やす
+⋮----
+// クエリがない場合や短すぎる場合は空の結果を返す
+⋮----
+// クエリをトリム
+⋮----
+// ancestorIdを外して再検索
+</file>
+
+<file path="package.json">
+{
+  "name": "nextjs-notion-starter-kit",
+  "version": "2.0.0",
+  "private": true,
+  "description": "The perfect starter kit for building beautiful websites with Next.js and Notion.",
+  "author": "Travis Fischer <travis@transitivebullsh.it>",
+  "repository": "transitive-bullshit/nextjs-notion-starter-kit",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "deploy": "vercel deploy",
+    "deps:upgrade": "[ -z $GITHUB_ACTIONS ] && pnpm up -L notion-client notion-types notion-utils react-notion-x || echo 'Skipping deps:update on CI'",
+    "deps:link": "[ -z $GITHUB_ACTIONS ] && run-s deps:link:* || echo 'Skipping deps:update on CI'",
+    "deps:unlink": "[ -z $GITHUB_ACTIONS ] && pnpm add notion-client notion-types notion-utils react-notion-x || echo 'Skipping deps:update on CI'",
+    "deps:link:notion-types": "pnpm link ../react-notion-x/packages/notion-types",
+    "deps:link:notion-utils": "pnpm link ../react-notion-x/packages/notion-utils",
+    "deps:link:notion-client": "pnpm link ../react-notion-x/packages/notion-client",
+    "deps:link:react-notion-x": "pnpm link ../react-notion-x/packages/react-notion-x",
+    "analyze": "cross-env ANALYZE=true next build",
+    "analyze:server": "cross-env BUNDLE_ANALYZE=server next build",
+    "analyze:browser": "cross-env BUNDLE_ANALYZE=browser next build",
+    "test": "run-p test:*",
+    "test:lint": "eslint .",
+    "test:prettier": "prettier '**/*.{js,jsx,ts,tsx}' --check"
+  },
+  "dependencies": {
+    "@fisch0920/use-dark-mode": "^2.4.0",
+    "@keyvhq/core": "^1.6.9",
+    "@keyvhq/redis": "^1.6.10",
+    "@notionhq/client": "^3.1.3",
+    "@react-icons/all-files": "^4.1.0",
+    "classnames": "^2.5.1",
+    "date-fns": "^4.1.0",
+    "expiry-map": "^2.0.0",
+    "fathom-client": "^3.4.1",
+    "framer-motion": "^12.7.3",
+    "katex": "^0.16.22",
+    "ky": "^1.7.2",
+    "lqip-modern": "^2.2.1",
+    "next": "^15.0.3",
+    "notion-client": "^7.1.3",
+    "notion-types": "^7.1.3",
+    "notion-utils": "^7.1.3",
+    "p-map": "^7.0.2",
+    "p-memoize": "^7.1.1",
+    "posthog-js": "^1.181.0",
+    "prismjs": "^1.30.0",
+    "react": "^18.2.0",
+    "react-body-classname": "^1.3.1",
+    "react-dom": "^18.2.0",
+    "react-notion-x": "^7.2.3",
+    "react-tweet": "^3.2.1",
+    "react-use": "^17.4.2",
+    "rss": "^1.2.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.24.0",
+    "@fisch0920/eslint-config": "^1.4.0",
+    "@next/bundle-analyzer": "^15.0.2",
+    "@next/eslint-plugin-next": "^15.3.0",
+    "@types/node": "^22.8.6",
+    "@types/react": "^18.0.21",
+    "@typescript-eslint/eslint-plugin": "^8.29.1",
+    "@typescript-eslint/parser": "^8.29.1",
+    "cross-env": "^7.0.2",
+    "eslint": "^8.57.1",
+    "npm-run-all2": "^7.0.1",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3"
+  },
+  "overrides": {
+    "cacheable-request": {
+      "keyv": "npm:@keyvhq/core@~1.6.6"
+    }
+  }
+}
+</file>
+
+<file path="lib/notion-api-hybrid.ts">
+import { NotionAPI } from 'notion-client'
+import { ExtendedRecordMap } from 'notion-types'
+import { cacheManager, CacheKeys, CacheTTL } from './cache-utils'
+⋮----
+// 動的インポートで@notionhq/clientを読み込む
+⋮----
+// 公式APIと非公式APIを統合するハイブリッドクライアント
+export class NotionHybridAPI
+⋮----
+constructor()
+⋮----
+// 非公式APIクライアント（常に初期化）
+⋮----
+// 公式APIクライアント（トークンがある場合のみ初期化）
+⋮----
+// ページデータの取得（非公式APIを使用）
+async getPage(pageId: string): Promise<ExtendedRecordMap>
+⋮----
+// キャッシュをチェック
+⋮----
+// console.log(`[Cache Hit] RecordMap for page ${pageId}`)
+⋮----
+// キャッシュミスの場合、APIから取得
+// console.log(`[Cache Miss] Fetching RecordMap for page ${pageId}`)
+⋮----
+// キャッシュに保存（30分）
+⋮----
+// データベースプロパティの取得（公式APIを優先的に使用）
+async getDatabaseProperties(databaseId: string): Promise<any>
+⋮----
+// 非公式APIフォールバック
+⋮----
+// データベースのアイテム取得（公式APIを優先的に使用）
+async getDatabaseItems(databaseId: string, options?: any): Promise<any>
+⋮----
+// 非公式APIフォールバック - 通常のgetPageを使用
+⋮----
+// ページプロパティの取得（公式APIを優先的に使用）
+async getPageProperties(pageId: string): Promise<any>
+⋮----
+// 非公式APIフォールバック
+⋮----
+// 検索機能（非公式APIを使用）
+async search(params: any): Promise<any>
+⋮----
+// 署名付きURLの取得（非公式APIを使用）
+async getSignedFileUrls(urls: string[]): Promise<any>
+⋮----
+// SignedUrlRequest型に変換
+⋮----
+// フォーミュラプロパティの値を取得する特別なメソッド
+async getFormulaPropertyValue(pageId: string, propertyName: string): Promise<string | null>
+⋮----
+// キャッシュをチェック
+⋮----
+// console.log(`[Cache Hit] Formula ${propertyName} for page ${pageId}`)
+⋮----
+// console.log(`[Cache Miss] Fetching formula ${propertyName} for page ${pageId}`)
+⋮----
+// 最終更新日の特別処理 - Last Updatedプロパティから直接日付を取得してJSTに変換
+⋮----
+// JSTで日付をフォーマット
+⋮----
+// プロパティ名で検索（最終更新日の特別処理で見つからなかった場合）
+⋮----
+// 日付型の場合、日本のタイムゾーンで適切にフォーマット
+⋮----
+// JSTで日付をフォーマット
+⋮----
+// 結果をキャッシュに保存
+⋮----
+// シングルトンインスタンスをエクスポート
+</file>
+
+<file path="components/NotionPage.tsx">
+import cs from 'classnames'
+import dynamic from 'next/dynamic'
+import Image from 'next/legacy/image'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
+import { type PageBlock } from 'notion-types'
+import { formatDate, getBlockTitle, getPageProperty } from 'notion-utils'
+⋮----
+import BodyClassName from 'react-body-classname'
+import {
+  type NotionComponents,
+  NotionRenderer,
+  useNotionContext
+} from 'react-notion-x'
+import { EmbeddedTweet, TweetNotFound, TweetSkeleton } from 'react-tweet'
+import { useSearchParam } from 'react-use'
+⋮----
+import { mapImageUrl } from '@/lib/map-image-url'
+import { getCanonicalPageUrl, mapPageUrl } from '@/lib/map-page-url'
+import { searchNotion } from '@/lib/search-notion'
+import { useDarkMode } from '@/lib/use-dark-mode'
+⋮----
+import { Footer } from './Footer'
+import { GitHubShareButton } from './GitHubShareButton'
+import { Loading } from './Loading'
+import { NotionPageHeader } from './NotionPageHeader'
+import { Page404 } from './Page404'
+import { PageAside } from './PageAside'
+import { PageHead } from './PageHead'
+import { Header } from './Header'
+import { FormulaPropertyDebug } from './FormulaPropertyDebug'
+import styles from './styles.module.css'
+⋮----
+// -----------------------------------------------------------------------------
+// dynamic imports for optional components
+// -----------------------------------------------------------------------------
+⋮----
+// コードブロックコンポーネント - 改良版
+⋮----
+// add / remove any prism syntaxes here
+⋮----
+// 必須の基本言語
+⋮----
+// 人気のある言語
+⋮----
+// その他の言語も含める
+⋮----
+// HTMLテンプレート言語
+⋮----
+// データベースビューコンポーネント
+⋮----
+// 数式コンポーネント
+⋮----
+// PDFビューアーコンポーネント - SSRを無効化
+⋮----
+// モーダルコンポーネント - SSRを無効化
+⋮----
+function Tweet(
+⋮----
+const propertyLastEditedTimeValue = (
+  { block, pageHeader },
+  defaultFn: () => React.ReactNode
+) =>
+⋮----
+// ハイドレーションエラーを避けるため、デフォルトの処理を使用
+⋮----
+const propertyDateValue = (
+  { data, schema, pageHeader },
+  defaultFn: () => React.ReactNode
+) =>
+⋮----
+const propertyTextValue = (
+  { schema, pageHeader },
+  defaultFn: () => React.ReactNode
+) =>
+⋮----
+// ナビゲーションメニュー項目
+const getNavigationMenuItems = (site: types.Site) =>
+⋮----
+// デフォルトのメニュー項目
+⋮----
+menuItems // Notionデータベースからのメニューアイテムを受け取る
+⋮----
+// useEffectを使用して空のリンクを非表示にし、プロパティを調査する
+// ハイドレーションエラーを避けるため、一時的にコメントアウト
+/*
+  React.useEffect(() => {
+    // 空のnotion-page-linkを削除する関数
+    const removeEmptyLinks = () => {
+      const emptyLinks = document.querySelectorAll('a.notion-list-item.notion-page-link')
+      
+      emptyLinks.forEach((link) => {
+        // リンク内にnotion-list-item-titleが存在しない場合は削除
+        if (!link.querySelector('.notion-list-item-title')) {
+          const anchorElement = link as HTMLAnchorElement
+          anchorElement.style.display = 'none'
+          anchorElement.setAttribute('data-hidden', 'true')
+        }
+      })
+    }
+    
+    
+    // 初回実行
+    removeEmptyLinks()
+    
+    // DOMの変更を監視
+    const observer = new MutationObserver(() => {
+      removeEmptyLinks()
+    })
+    
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    })
+    
+    return () => observer.disconnect()
+  }, [recordMap])
+  */
+⋮----
+// Notionのデフォルトヘッダーをカスタムヘッダーとして使わない
+Header: () => null, // ヘッダーを非表示にする
+⋮----
+// ボディにNoNotionTabsクラスを追加
+// BodyClassNameコンポーネントを使用するため、直接操作は削除
+// React.useEffect(() => {
+//   document.body.classList.add('no-notion-tabs');
+//
+//   return () => {
+//     document.body.classList.remove('no-notion-tabs');
+//   };
+// }, []);
+⋮----
+// ナビゲーションメニュー項目を取得
+⋮----
+// lite mode is for oembed
+⋮----
+// const isRootPage =
+//   parsePageId(block?.id) === parsePageId(site?.rootNotionPageId)
+⋮----
+// add important objects to the window global for easy debugging
+⋮----
+{/* Notionレンダラー - 内部のヘッダーをnullに設定したので、カスタムヘッダーを外に配置 */}
+</file>
+
+</files>

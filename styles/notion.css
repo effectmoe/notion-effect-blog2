@@ -7,6 +7,22 @@
  * places to add some flare.
  */
 
+/* Custom PageLink styling to fix hydration error */
+.notion-page-link[role="link"] {
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+
+.notion-page-link[role="link"]:hover {
+  background-color: rgba(55, 53, 47, 0.08);
+}
+
+.notion-page-link[role="link"]:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
 .notion {
   --notion-max-width: 720px;
   --notion-header-height: 54px;
@@ -57,6 +73,64 @@
   grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
   grid-gap: 2vmin;
   gap: 2vmin;
+}
+
+/* 右カラム内のギャラリービュー対応 */
+.notion-column .notion-gallery-grid {
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-gap: 1.5vmin;
+  gap: 1.5vmin;
+}
+
+/* 右カラム内のギャラリーカードの高さ調整 */
+.notion-column .notion-collection-card-cover {
+  height: 180px;
+}
+
+/* 右カラム内のタイトルサイズ調整 */
+.notion-column .notion-gallery-grid .notion-page-title-text {
+  font-size: 1.4em;
+}
+
+/* 右カラム内のプロパティテキストサイズ調整 */
+.notion-column .notion-gallery-grid .notion-property-text {
+  font-size: 12px;
+}
+
+/* 右カラム内のカードボディ調整 */
+.notion-column .notion-collection-card-body {
+  padding: 8px;
+}
+
+/* 右カラムの幅に応じてギャラリーグリッドを最適化 */
+/* メディアクエリベースの実装（ハイドレーションエラー対策） */
+
+/* モバイル画面での右カラムギャラリー調整 */
+@media only screen and (max-width: 600px) {
+  .notion-column .notion-gallery-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    grid-gap: 1vmin;
+    gap: 1vmin;
+  }
+  
+  .notion-column .notion-collection-card-cover {
+    height: 100px;
+  }
+  
+  .notion-column .notion-gallery-grid .notion-page-title-text {
+    font-size: 1.1em;
+  }
+}
+
+/* さらに小さい画面では1カラム */
+@media only screen and (max-width: 400px) {
+  .notion-column .notion-gallery-grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .notion-column .notion-collection-card-cover {
+    height: 150px;
+  }
 }
 
 .notion-gallery-grid .notion-page-icon-inline {
@@ -626,6 +700,15 @@
   .notion-collection-card-cover {
     height: 240px; /* 少し小さめにして3つ並べても見やすくする */
   }
+  
+  /* 右カラム内のギャラリービュー */
+  .notion-column .notion-gallery-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
+  
+  .notion-column .notion-collection-card-cover {
+    height: 160px;
+  }
 }
 
 /* 大型PC (1440px以上) */
@@ -639,6 +722,15 @@
   .notion-collection-card-cover {
     height: 220px; /* さらに少し小さめに */
   }
+  
+  /* 右カラム内のギャラリービュー */
+  .notion-column .notion-gallery-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
+  
+  .notion-column .notion-collection-card-cover {
+    height: 180px;
+  }
 }
 
 /* タブレット (768px〜1024px) */
@@ -651,6 +743,15 @@
   
   .notion-collection-card-cover {
     height: 320px; /* タブレット用の高さ調整 */
+  }
+  
+  /* 右カラム内のギャラリービュー */
+  .notion-column .notion-gallery-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
+  
+  .notion-column .notion-collection-card-cover {
+    height: 140px;
   }
 }
 
@@ -669,6 +770,19 @@
   .notion-gallery-grid .notion-page-title-text {
     font-size: 1.5em; /* スマートフォン用のフォントサイズ縮小 */
   }
+  
+  /* 右カラム内のギャラリービュー - モバイルでは通常2カラムレイアウトが1カラムになることが多い */
+  .notion-column .notion-gallery-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+  
+  .notion-column .notion-collection-card-cover {
+    height: 120px;
+  }
+  
+  .notion-column .notion-gallery-grid .notion-page-title-text {
+    font-size: 1.2em;
+  }
 }
 
 /* リストビューでの重複タイトルプロパティを非表示にする */
@@ -682,7 +796,8 @@
 }
 
 /* プロパティとしてのタイトルが重複して表示される場合のみ非表示 */
-.notion-list-item:has(.notion-list-item-title) .notion-list-item-body .notion-property-title {
+/* :has()セレクタを使わない代替実装（ハイドレーションエラー対策） */
+.notion-list-item .notion-list-item-body .notion-property-title {
   display: none !important;
 }
 
@@ -715,7 +830,8 @@
 }
 
 /* コレクションヘッダーでタイトル列を非表示（ヘッダーのみ） */
-.notion-collection-header .notion-collection-column-title:has(.notion-property-title) {
+/* :has()セレクタを使わない代替実装 */
+.notion-collection-header .notion-collection-column-title .notion-property-title {
   display: none !important;
 }
 
@@ -730,7 +846,8 @@
 }
 
 /* Hide the property container that contains title property */
-.notion-list-view .notion-list-item-property:has(.notion-property-title) {
+/* :has()セレクタを使わない代替実装 */
+.notion-list-view .notion-list-item-property .notion-property-title {
   display: none !important;
 }
 
@@ -739,10 +856,7 @@
   display: none !important;
 }
 
-/* Target parent of title property */
-.notion-list-view .notion-list-item-body > div:has(.notion-property-title) {
-  display: none !important;
-}
+/* Target parent of title property - removed :has() selector */
 
 /* Ensure the main title in list items is visible */
 .notion-list-view .notion-list-item-title {
@@ -784,15 +898,15 @@
   opacity: 1 !important;
 }
 
-/* 空のリンク要素を非表示 */
-a.notion-list-item.notion-page-link:not(:has(.notion-list-item-title)) {
-  display: none !important;
-}
+/* 空のリンク要素を非表示 - :has()セレクタを使わない */
+/* JavaScript側で処理するか、別の方法で対応 */
 
 /* Ensure title column is hidden in list view headers */
-.notion-collection-list th:has(.notion-property-title),
-.notion-collection-list .notion-collection-column-title:has(span:contains("Title")),
-.notion-collection-list .notion-collection-column-title:has(span:contains("title")) {
+/* :has()セレクタを使わない代替実装 */
+.notion-collection-list .notion-collection-column-title[data-property="title"] {
+  display: none !important;
+}
+.notion-collection-list .notion-property-title {
   display: none !important;
 }
 

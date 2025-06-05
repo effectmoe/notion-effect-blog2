@@ -28,30 +28,12 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
   currentPath = '/'
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
 
   // アクティブなメニュー項目を設定
   const items = menuItems.map(item => ({
     ...item,
     isActive: currentPath === item.url
   }));
-
-  // ウィンドウサイズによるモバイル判定
-  useEffect(() => {
-    const checkIfMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-
-    // 初期チェック
-    checkIfMobile();
-
-    // リサイズイベント
-    window.addEventListener('resize', checkIfMobile);
-    
-    return () => {
-      window.removeEventListener('resize', checkIfMobile);
-    };
-  }, []);
 
   // メニュー開閉の切り替え
   const toggleMenu = () => {
@@ -76,45 +58,29 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
 
   return (
     <nav className={styles.hamburgerMenu}>
-      {isMobile ? (
-        <>
-          <button 
-            className={`${styles.hamburgerButton} ${isOpen ? styles.open : ''}`}
-            onClick={toggleMenu}
-            aria-label="メニュー"
-            aria-expanded={isOpen}
+      <button 
+        className={`${styles.hamburgerButton} ${isOpen ? styles.open : ''}`}
+        onClick={toggleMenu}
+        aria-label="メニュー"
+        aria-expanded={isOpen}
+      >
+        <span className={styles.hamburgerIcon}></span>
+        <span className={styles.hamburgerIcon}></span>
+        <span className={styles.hamburgerIcon}></span>
+      </button>
+      
+      <div className={`${styles.mobileMenu} ${isOpen ? styles.open : ''}`}>
+        {items.map(item => (
+          <Link 
+            key={item.id} 
+            href={item.url}
+            className={`${styles.menuItem} ${item.isActive ? styles.active : ''}`}
+            onClick={() => setIsOpen(false)}
           >
-            <span className={styles.hamburgerIcon}></span>
-            <span className={styles.hamburgerIcon}></span>
-            <span className={styles.hamburgerIcon}></span>
-          </button>
-          
-          <div className={`${styles.mobileMenu} ${isOpen ? styles.open : ''}`}>
-            {items.map(item => (
-              <Link 
-                key={item.id} 
-                href={item.url}
-                className={`${styles.menuItem} ${item.isActive ? styles.active : ''}`}
-                onClick={() => setIsOpen(false)}
-              >
-                {item.title}
-              </Link>
-            ))}
-          </div>
-        </>
-      ) : (
-        <div className={styles.desktopMenu}>
-          {items.map(item => (
-            <Link 
-              key={item.id} 
-              href={item.url}
-              className={`${styles.menuItem} ${item.isActive ? styles.active : ''}`}
-            >
-              {item.title}
-            </Link>
-          ))}
-        </div>
-      )}
+            {item.title}
+          </Link>
+        ))}
+      </div>
     </nav>
   );
 };

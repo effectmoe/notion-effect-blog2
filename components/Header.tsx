@@ -4,13 +4,10 @@ import { useRouter } from 'next/router'
 import { FaGithub } from '@react-icons/all-files/fa/FaGithub'
 import { FaInstagram } from '@react-icons/all-files/fa/FaInstagram'
 import { FaFacebook } from '@react-icons/all-files/fa/FaFacebook'
-import { IoMoonSharp } from '@react-icons/all-files/io5/IoMoonSharp'
-import { IoSunnyOutline } from '@react-icons/all-files/io5/IoSunnyOutline'
 import { IoSearchOutline } from '@react-icons/all-files/io5/IoSearchOutline'
 import cs from 'classnames'
 
 import * as config from '@/lib/config'
-import { useDarkMode } from '@/lib/use-dark-mode'
 import styles from './Header.module.css'
 import { MenuItem } from '@/lib/menu-utils'
 import { notionViews } from '@/lib/notion-views'
@@ -33,31 +30,10 @@ export function HeaderImpl({ menuItems = DEFAULT_MENU_ITEMS }: HeaderProps) {
   const router = useRouter()
   const [menuOpen, setMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  const { isDarkMode, toggleDarkMode } = useDarkMode()
-  const [hasMounted, setHasMounted] = useState(false)
-  // SSRとクライアントで一致させるため、初期値はfalse（デスクトップ）とする
-  const [isMobile, setIsMobile] = useState(false)
   const [isSearchVisible, setIsSearchVisible] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState([])
   const [isSearching, setIsSearching] = useState(false)
-
-  // マウント状態の確認
-  useEffect(() => {
-    setHasMounted(true)
-    
-    // 画面サイズのチェック
-    const checkIsMobile = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
-    
-    // 初期チェック
-    checkIsMobile()
-    
-    // リサイズイベントリスナーを設定
-    window.addEventListener('resize', checkIsMobile)
-    return () => window.removeEventListener('resize', checkIsMobile)
-  }, [])
   
   // 検索実行関数
   const handleSearch = async (e) => {
@@ -118,14 +94,6 @@ export function HeaderImpl({ menuItems = DEFAULT_MENU_ITEMS }: HeaderProps) {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // ダークモード切り替え
-  const onToggleDarkMode = React.useCallback(
-    (e) => {
-      e.preventDefault()
-      toggleDarkMode()
-    },
-    [toggleDarkMode]
-  )
 
   // 現在のページに基づいてアクティブなメニュー項目を判断
   const isActive = (url: string) => {
@@ -170,8 +138,7 @@ export function HeaderImpl({ menuItems = DEFAULT_MENU_ITEMS }: HeaderProps) {
     <header 
       className={cs(
         styles.header, 
-        scrolled && styles.headerScrolled,
-        isDarkMode && styles.darkHeader
+        scrolled && styles.headerScrolled
       )}
     >
       <div className={styles.headerContent}>
@@ -196,16 +163,6 @@ export function HeaderImpl({ menuItems = DEFAULT_MENU_ITEMS }: HeaderProps) {
             <IoSearchOutline size={22} />
           </button>
 
-          {/* ダークモード切り替えボタン */}
-          {hasMounted && (
-            <button 
-              className={styles.iconButton} 
-              onClick={onToggleDarkMode}
-              aria-label={isDarkMode ? 'ライトモードに切り替え' : 'ダークモードに切り替え'}
-            >
-              {isDarkMode ? <IoSunnyOutline size={22} /> : <IoMoonSharp size={22} />}
-            </button>
-          )}
 
           {/* SNSリンク */}
           {config.instagram && (
@@ -335,13 +292,13 @@ export function HeaderImpl({ menuItems = DEFAULT_MENU_ITEMS }: HeaderProps) {
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        <div className={styles.searchResultTitle}>
+                        <span className={styles.searchResultTitle}>
                           {title}
-                        </div>
+                        </span>
                         {description && (
-                          <div className={styles.searchResultDescription}>
+                          <span className={styles.searchResultDescription}>
                             {description}
-                          </div>
+                          </span>
                         )}
                       </a>
                     </li>

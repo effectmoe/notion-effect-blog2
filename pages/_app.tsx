@@ -28,12 +28,14 @@ import {
   posthogId
 } from '@/lib/config'
 import { getMenuItemsForStaticProps } from '@/lib/menu-utils'
-import FontStyler from '@/components/FontStyler'
 import { fillFormulaProperties } from '@/lib/fill-formula-properties'
 
-if (!isServer) {
-  bootstrap()
-}
+import dynamic from 'next/dynamic'
+
+const FontStyler = dynamic(() => import('@/components/FontStyler'), { 
+  ssr: false,
+  loading: () => null
+})
 
 // カスタムAppPropsの型定義を追加
 type CustomAppProps = AppProps & {
@@ -47,6 +49,10 @@ export default function App({ Component, pageProps }: CustomAppProps) {
   const router = useRouter()
 
   React.useEffect(() => {
+    // クライアントサイドでのみbootstrapを実行
+    if (!isServer) {
+      bootstrap()
+    }
     function onRouteChangeComplete() {
       if (fathomId) {
         Fathom.trackPageview()
