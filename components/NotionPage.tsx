@@ -321,6 +321,18 @@ export function NotionPage({
 
   const footer = React.useMemo(() => <Footer />, [])
 
+  // デバッグ用のグローバル変数設定をuseEffectに移動
+  // 早期リターンの前に配置してフックの数を一定に保つ
+  React.useEffect(() => {
+    if (!config.isServer && block && recordMap) {
+      // add important objects to the window global for easy debugging
+      const g = window as any
+      g.pageId = pageId
+      g.recordMap = recordMap
+      g.block = block
+    }
+  }, [pageId, recordMap, block])
+
   if (router.isFallback) {
     return <Loading />
   }
@@ -338,17 +350,6 @@ export function NotionPage({
     rootNotionPageId: site.rootNotionPageId,
     recordMap
   })
-
-  // デバッグ用のグローバル変数設定をuseEffectに移動
-  React.useEffect(() => {
-    if (!config.isServer) {
-      // add important objects to the window global for easy debugging
-      const g = window as any
-      g.pageId = pageId
-      g.recordMap = recordMap
-      g.block = block
-    }
-  }, [pageId, recordMap, block])
 
   const canonicalPageUrl =
     !config.isDev && getCanonicalPageUrl(site, recordMap)(pageId)

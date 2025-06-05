@@ -4,9 +4,15 @@
   
   async function fillFormulas() {
     const elements = document.querySelectorAll('.notion-property-formula');
-    console.log('[Formula Script] Found elements:', elements.length);
+    console.log('[Formula Script] Found formula elements:', elements.length);
     
-    if (elements.length === 0) return;
+    const listItems = document.querySelectorAll('.notion-list-item');
+    console.log('[Formula Script] Found list items:', listItems.length);
+    
+    if (elements.length === 0 && listItems.length === 0) {
+      console.log('[Formula Script] No elements found to process');
+      return;
+    }
     
     // recordMapから情報を取得
     let recordMap = null;
@@ -34,12 +40,25 @@
     }
     
     // 各リストアイテムを処理
-    const listItems = document.querySelectorAll('.notion-list-item');
-    
     listItems.forEach(async (item, index) => {
-      const link = item.querySelector('a');
-      const title = link?.textContent?.trim();
+      // CustomPageLinkコンポーネントでdivに変更したため、両方を探す
+      const link = item.querySelector('a') || item.querySelector('[role="link"]') || item.querySelector('.notion-page-link');
+      // タイトルを取得（リストアイテム内のタイトル要素から）
+      const titleEl = item.querySelector('.notion-list-item-title') || link;
+      const title = titleEl?.textContent?.trim();
       const formulaEl = item.querySelector('.notion-property-formula');
+      
+      // デバッグ情報
+      if (index === 0) {
+        console.log('[Formula Script] First item debug:', {
+          item: item,
+          link: link,
+          titleEl: titleEl,
+          title: title,
+          formulaEl: formulaEl,
+          innerHTML: item.innerHTML.substring(0, 200)
+        });
+      }
       
       if (title && formulaEl && !formulaEl.textContent.trim()) {
         // タイトルでページを検索
