@@ -103,7 +103,8 @@ const ColorSettingsPanel = () => {
     layout: {
       name: 'その他',
       icon: '🎯',
-      items: ['selection']
+      items: ['selection'],
+      description: 'テキスト選択時のハイライト色など'
     }
   };
 
@@ -432,6 +433,10 @@ const ColorSettingsPanel = () => {
       {/* プリセット選択 */}
       <div className={styles.presetSelector}>
         <h2 style={{ marginBottom: '1rem' }}>カラープリセット</h2>
+        <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '1rem' }}>
+          プリセットをクリックすると、あらかじめ設定された配色パターンが適用されます。
+          適用後も個別に色を調整できます。
+        </p>
         <div className={styles.presetGrid}>
           {Object.entries(colorPresets).map(([key, preset]) => (
             <div
@@ -462,6 +467,11 @@ const ColorSettingsPanel = () => {
           >
             <span className={styles.categoryIcon}>{category.icon}</span>
             <span>{category.name}</span>
+            {category.description && (
+              <span style={{ fontSize: '0.75rem', color: '#9ca3af', marginLeft: '0.5rem' }}>
+                ({category.description})
+              </span>
+            )}
             <span style={{ marginLeft: 'auto' }}>
               {expandedCategories[categoryKey] ? icons.collapse : icons.expand}
             </span>
@@ -559,12 +569,13 @@ const ColorSettingsPanel = () => {
         <button 
           className={`${styles.button} ${styles.buttonSecondary}`}
           onClick={exportSettings}
+          title="現在の色設定をJSONファイルとして保存します"
         >
           {icons.export}
           <span>エクスポート</span>
         </button>
         
-        <label className={`${styles.button} ${styles.buttonSecondary}`}>
+        <label className={`${styles.button} ${styles.buttonSecondary}`} title="保存したJSONファイルから色設定を読み込みます">
           {icons.import}
           <span>インポート</span>
           <input
