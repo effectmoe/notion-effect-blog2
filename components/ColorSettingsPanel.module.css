@@ -505,22 +505,22 @@
   animation: fadeIn 0.3s ease;
 }
 
-/* スクロールバー */
-:global(::-webkit-scrollbar) {
+/* スクロールバー - コンテナ内のスクロールバーのみ対象 */
+.container ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
-:global(::-webkit-scrollbar-track) {
+.container ::-webkit-scrollbar-track {
   background: #f3f4f6;
   border-radius: 4px;
 }
 
-:global(::-webkit-scrollbar-thumb) {
+.container ::-webkit-scrollbar-thumb {
   background: #9ca3af;
   border-radius: 4px;
 }
 
-:global(::-webkit-scrollbar-thumb:hover) {
+.container ::-webkit-scrollbar-thumb:hover {
   background: #6b7280;
 }
