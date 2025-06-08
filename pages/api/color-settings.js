@@ -11,7 +11,14 @@ export default function handler(req, res) {
     try {
       if (fs.existsSync(settingsPath)) {
         const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
-        res.status(200).json(settings);
+        // デフォルト設定とマージして、欠けているプロパティを補完
+        const mergedSettings = { ...defaultSettings };
+        Object.keys(settings).forEach(key => {
+          if (mergedSettings[key]) {
+            mergedSettings[key] = { ...mergedSettings[key], ...settings[key] };
+          }
+        });
+        res.status(200).json(mergedSettings);
       } else {
         // ファイルが存在しない場合はデフォルト設定を返す
         res.status(200).json(defaultSettings);

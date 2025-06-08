@@ -106,7 +106,7 @@
 /* 設定グリッド */
 .settingsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: 1.5rem;
 }
 
@@ -162,11 +162,15 @@
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
+  align-items: flex-start;
+  width: 100%;
 }
 
 .colorControl {
   flex: 1;
-  min-width: 140px;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
 }
 
 .colorLabel {
@@ -181,6 +185,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  width: 100%;
 }
 
 .transparentButton {
@@ -246,6 +251,7 @@
 
 .colorInput {
   flex: 1;
+  min-width: 0;
   padding: 0.5rem;
   border: 2px solid #e5e7eb;
   border-radius: 6px;
@@ -544,6 +550,18 @@
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* 小さい画面での調整 */
+@media (max-width: 1024px) {
+  .colorControls {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .colorControl {
+    min-width: 100%;
+  }
 }
 
 /* レスポンシブ */

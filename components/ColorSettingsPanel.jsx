@@ -4,6 +4,7 @@ import { colorSettings as defaultSettings, colorPresets } from '../lib/color-cus
 import { 
   saveColorSettingsToLocalStorage,
   loadColorSettingsFromLocalStorage,
+  clearColorSettingsFromLocalStorage,
   hexToRgba, 
   suggestTextColor 
 } from '../lib/color-customizer/color-utils';
@@ -158,13 +159,15 @@ const ColorSettingsPanel = () => {
   const applyPreset = (presetKey) => {
     const preset = colorPresets[presetKey];
     if (preset) {
-      setSettings(preset.settings);
+      // デフォルト設定とマージして完全な設定を保証
+      const mergedSettings = { ...defaultSettings, ...preset.settings };
+      setSettings(mergedSettings);
       setActivePreset(presetKey);
       setSaved(false);
       
       // リアルタイム更新
       const event = new CustomEvent('colorSettingsUpdate', { 
-        detail: { settings: preset.settings } 
+        detail: { settings: mergedSettings } 
       });
       window.dispatchEvent(event);
     }
@@ -256,6 +259,14 @@ const ColorSettingsPanel = () => {
     }
   };
 
+  // キャッシュをクリア
+  const clearCache = () => {
+    if (window.confirm('キャッシュされた色設定をクリアしますか？\nページがリロードされます。')) {
+      clearColorSettingsFromLocalStorage();
+      window.location.reload();
+    }
+  };
+
   // エクスポート
   const exportSettings = () => {
     const dataStr = JSON.stringify(settings, null, 2);
@@ -309,14 +320,38 @@ const ColorSettingsPanel = () => {
         const cachedSettings = loadColorSettingsFromLocalStorage();
         if (cachedSettings) {
           console.log('Loading from localStorage:', cachedSettings);
-          setSettings(cachedSettings);
+          // デフォルト設定とマージして、欠けているプロパティを補完
+          const mergedSettings = { ...defaultSettings };
+          Object.keys(cachedSettings).forEach(key => {
+            if (mergedSettings[key]) {
+              mergedSettings[key] = { ...mergedSettings[key], ...cachedSettings[key] };
+            }
+          });
+          setSettings(mergedSettings);
         } else {
           // サーバーから取得
-          const response = await fetch('/api/color-settings');
-          if (response.ok) {
-            const data = await response.json();
-            console.log('Loading from server:', data);
-            setSettings(data);
+          try {
+            const response = await fetch('/api/color-settings');
+            if (response.ok) {
+              const data = await response.json();
+              console.log('Loading from server:', data);
+              // デフォルト設定とマージ
+              const mergedSettings = { ...defaultSettings };
+              Object.keys(data).forEach(key => {
+                if (mergedSettings[key]) {
+                  mergedSettings[key] = { ...mergedSettings[key], ...data[key] };
+                }
+              });
+              setSettings(mergedSettings);
+            } else {
+              // サーバーエラーの場合はデフォルト設定を使用
+              console.log('Server error, using default settings');
+              setSettings(defaultSettings);
+            }
+          } catch (fetchError) {
+            // ネットワークエラーの場合もデフォルト設定を使用
+            console.log('Network error, using default settings');
+            setSettings(defaultSettings);
           }
         }
       } catch (error) {
@@ -436,7 +471,10 @@ const ColorSettingsPanel = () => {
             <div className={styles.settingsGrid}>
               {category.items.map(itemKey => {
                 const item = settings[itemKey];
-                if (!item) return null;
+                if (!item) {
+                  console.warn(`Missing settings for ${itemKey} in category ${categoryKey}`);
+                  return null;
+                }
                 
                 return (
                   <div key={itemKey} className={styles.settingItem}>
@@ -536,6 +574,20 @@ const ColorSettingsPanel = () => {
             style={{ display: 'none' }}
           />
         </label>
+        
+        <button 
+          className={`${styles.button} ${styles.buttonSecondary}`}
+          onClick={clearCache}
+          title="キャッシュをクリアして問題を解決"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M3 6h18" />
+            <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+            <line x1="10" y1="11" x2="10" y2="17" />
+            <line x1="14" y1="11" x2="14" y2="17" />
+          </svg>
+          <span>キャッシュクリア</span>
+        </button>
       </div>
 
       {/* プレビュー */}
