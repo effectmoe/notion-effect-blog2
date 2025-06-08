@@ -47,11 +47,11 @@ const ColorSettingsPanel = () => {
     listItem: 'リストアイテム',
     galleryCard: 'ギャラリーカード',
     selection: 'テキスト選択',
-    propertySelectYellow: 'プロパティ（黄色）',
-    propertySelectBlue: 'プロパティ（青）',
-    propertySelectGreen: 'プロパティ（緑）',
-    propertySelectPink: 'プロパティ（ピンク）',
-    propertySelectGray: 'プロパティ（グレー）'
+    propertySelectYellow: 'データベースタグ（黄色）',
+    propertySelectBlue: 'データベースタグ（青）',
+    propertySelectGreen: 'データベースタグ（緑）',
+    propertySelectPink: 'データベースタグ（ピンク）',
+    propertySelectGray: 'データベースタグ（グレー）'
   };
 
   // カテゴリ分類
@@ -82,7 +82,7 @@ const ColorSettingsPanel = () => {
       items: ['table', 'listItem', 'galleryCard']
     },
     properties: {
-      name: 'Notionプロパティ',
+      name: 'データベースのタグ',
       icon: '🏷️',
       items: ['propertySelectYellow', 'propertySelectBlue', 'propertySelectGreen', 'propertySelectPink', 'propertySelectGray']
     },
@@ -184,29 +184,42 @@ const ColorSettingsPanel = () => {
     setError('');
     
     try {
-      const response = await fetch('/api/color-settings', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(settings),
-      });
-      
-      saveColorSettingsToLocalStorage(settings);
-      
-      if (response.ok) {
-        setSaved(true);
-        setTimeout(() => setSaved(false), 3000);
-      } else {
-        throw new Error('サーバーへの保存に失敗しました');
-      }
-    } catch (error) {
-      setError(error.message);
+      // まずLocalStorageに保存
       const localSaved = saveColorSettingsToLocalStorage(settings);
+      
+      // リアルタイムで反映
+      const event = new CustomEvent('colorSettingsUpdate', { 
+        detail: { settings } 
+      });
+      window.dispatchEvent(event);
+      
+      // サーバーに保存を試みる
+      try {
+        const response = await fetch('/api/color-settings', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(settings),
+        });
+        
+        if (!response.ok) {
+          console.error('Server save failed:', response.status);
+        }
+      } catch (fetchError) {
+        console.error('Failed to save to server:', fetchError);
+        // サーバー保存に失敗してもローカル保存が成功していれば続行
+      }
+      
       if (localSaved) {
         setSaved(true);
         setTimeout(() => setSaved(false), 3000);
+      } else {
+        throw new Error('設定の保存に失敗しました');
       }
+    } catch (error) {
+      setError(error.message);
+      console.error('Save error:', error);
     } finally {
       setLoading(false);
     }
@@ -401,11 +414,13 @@ const ColorSettingsPanel = () => {
                         style={{
                           backgroundColor: item.backgroundColor,
                           color: item.textColor,
-                          borderColor: item.borderColor,
-                          border: itemKey.includes('property') ? '1px solid' : undefined,
-                          padding: itemKey.includes('property') ? '4px 8px' : '0.5rem 1rem',
+                          borderColor: item.borderColor || item.backgroundColor,
+                          border: itemKey.includes('property') ? `1px solid ${item.borderColor || item.backgroundColor}` : undefined,
+                          padding: itemKey.includes('property') ? '2px 8px' : '0.5rem 1rem',
                           borderRadius: itemKey.includes('property') ? '3px' : '6px',
-                          fontSize: itemKey.includes('property') ? '0.75rem' : '0.875rem'
+                          fontSize: itemKey.includes('property') ? '0.75rem' : '0.875rem',
+                          fontWeight: itemKey.includes('property') ? '500' : 'normal',
+                          lineHeight: itemKey.includes('property') ? '1.2' : '1.5'
                         }}
                       >
                         {itemKey.includes('property') ? '見出し2' : 'サンプル'}
