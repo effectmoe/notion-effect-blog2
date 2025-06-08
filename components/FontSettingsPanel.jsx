@@ -9,9 +9,11 @@ const FontSettingsPanel = () => {
   const [showPreview, setShowPreview] = useState(false);
   const [saved, setSaved] = useState(false);
   const [fontList, setFontList] = useState([
+    // 日本語フォント
     { name: 'Noto Sans JP', import: "https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" },
     { name: 'Noto Serif JP', import: "https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&display=swap" },
     { name: 'M PLUS 1p', import: "https://fonts.googleapis.com/css2?family=M+PLUS+1p:wght@400;700&display=swap" },
+    { name: 'M PLUS Rounded 1c', import: "https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700&display=swap" },
     { name: 'Kosugi Maru', import: "https://fonts.googleapis.com/css2?family=Kosugi+Maru&display=swap" },
     { name: 'Sawarabi Gothic', import: "https://fonts.googleapis.com/css2?family=Sawarabi+Gothic&display=swap" },
     { name: 'Sawarabi Mincho', import: "https://fonts.googleapis.com/css2?family=Sawarabi+Mincho&display=swap" },
@@ -23,6 +25,18 @@ const FontSettingsPanel = () => {
     { name: 'Zen Old Mincho', import: "https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@400;500;700&display=swap" },
     { name: 'Yuji Syuku', import: "https://fonts.googleapis.com/css2?family=Yuji+Syuku&display=swap" },
     { name: 'Murecho', import: "https://fonts.googleapis.com/css2?family=Murecho:wght@400;500;700&display=swap" },
+    { name: 'Klee One', import: "https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&display=swap" },
+    { name: 'Kaisei Decol', import: "https://fonts.googleapis.com/css2?family=Kaisei+Decol:wght@400;500;700&display=swap" },
+    { name: 'Kaisei Tokumin', import: "https://fonts.googleapis.com/css2?family=Kaisei+Tokumin:wght@400;500;700;800&display=swap" },
+    { name: 'Hina Mincho', import: "https://fonts.googleapis.com/css2?family=Hina+Mincho&display=swap" },
+    
+    // 英語フォント
+    { name: 'Roboto', import: "https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" },
+    { name: 'Open Sans', import: "https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" },
+    { name: 'Lato', import: "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap" },
+    { name: 'Montserrat', import: "https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" },
+    { name: 'Playfair Display', import: "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" },
+    { name: 'Inter', import: "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" },
   ]);
   const [presets, setPresets] = useState([]);
   const [presetName, setPresetName] = useState('');
