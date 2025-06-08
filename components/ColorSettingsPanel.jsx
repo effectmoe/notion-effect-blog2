@@ -2,7 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { colorSettings as defaultSettings, colorPresets } from '../lib/color-customizer/color-settings';
 import { 
-  saveColorSettingsToLocalStorage, 
+  saveColorSettingsToLocalStorage,
+  loadColorSettingsFromLocalStorage,
   hexToRgba, 
   suggestTextColor 
 } from '../lib/color-customizer/color-utils';
@@ -159,6 +160,8 @@ const ColorSettingsPanel = () => {
 
   // 設定を変更
   const handleColorChange = (elementKey, property, value) => {
+    console.log('Changing color:', elementKey, property, value);
+    
     const newSettings = {
       ...settings,
       [elementKey]: {
@@ -166,6 +169,8 @@ const ColorSettingsPanel = () => {
         [property]: value
       }
     };
+    
+    console.log('New settings:', newSettings);
     
     setSettings(newSettings);
     setSaved(false);
@@ -288,10 +293,19 @@ const ColorSettingsPanel = () => {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const response = await fetch('/api/color-settings');
-        if (response.ok) {
-          const data = await response.json();
-          setSettings(data);
+        // まずLocalStorageから読み込み
+        const cachedSettings = loadColorSettingsFromLocalStorage();
+        if (cachedSettings) {
+          console.log('Loading from localStorage:', cachedSettings);
+          setSettings(cachedSettings);
+        } else {
+          // サーバーから取得
+          const response = await fetch('/api/color-settings');
+          if (response.ok) {
+            const data = await response.json();
+            console.log('Loading from server:', data);
+            setSettings(data);
+          }
         }
       } catch (error) {
         console.error('設定の読み込みに失敗しました', error);
@@ -329,12 +343,16 @@ const ColorSettingsPanel = () => {
             type="button"
             onClick={() => handleColorChange(elementKey, property, 'transparent')}
             style={{
-              padding: '4px 8px',
-              fontSize: '12px',
-              border: '1px solid #e5e7eb',
-              borderRadius: '4px',
-              background: value === 'transparent' ? '#e5e7eb' : 'white',
-              cursor: 'pointer'
+              padding: '6px 12px',
+              fontSize: '13px',
+              border: '2px solid #e5e7eb',
+              borderRadius: '6px',
+              background: value === 'transparent' ? '#8b5cf6' : 'white',
+              color: value === 'transparent' ? 'white' : '#6b7280',
+              cursor: 'pointer',
+              fontWeight: '500',
+              transition: 'all 0.2s ease',
+              whiteSpace: 'nowrap'
             }}
             title="透明に設定"
           >
