@@ -37,6 +37,11 @@ const FontStyler = dynamic(() => import('@/components/FontStyler'), {
   loading: () => null
 })
 
+const ColorStyler = dynamic(() => import('@/components/ColorStyler'), { 
+  ssr: false,
+  loading: () => null
+})
+
 // カスタムAppPropsの型定義を追加
 type CustomAppProps = AppProps & {
   pageProps: {
@@ -88,10 +93,11 @@ export default function App({ Component, pageProps }: CustomAppProps) {
     }
   }, [router.events])
 
-  // FontStylerコンポーネントを追加してフォントをカスタマイズ
+  // FontStylerとColorStylerコンポーネントを追加してスタイルをカスタマイズ
   return (
     <>
       <FontStyler />
+      <ColorStyler />
       <Component {...pageProps} />
     </>
   )
