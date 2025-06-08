@@ -23,6 +23,7 @@ const ColorSettingsPanel = () => {
     interactive: true,
     database: true,
     properties: true,
+    textBackgrounds: true,
     layout: true
   });
 
@@ -52,7 +53,13 @@ const ColorSettingsPanel = () => {
     propertySelectBlue: 'データベースタグ（青）',
     propertySelectGreen: 'データベースタグ（緑）',
     propertySelectPink: 'データベースタグ（ピンク）',
-    propertySelectGray: 'データベースタグ（グレー）'
+    propertySelectGray: 'データベースタグ（グレー）',
+    textYellowBackground: 'テキスト背景（黄色）',
+    textBlueBackground: 'テキスト背景（青）',
+    textPinkBackground: 'テキスト背景（ピンク）',
+    textPurpleBackground: 'テキスト背景（紫）',
+    textGreenBackground: 'テキスト背景（緑）',
+    textGrayBackground: 'テキスト背景（グレー）'
   };
 
   // カテゴリ分類
@@ -86,6 +93,11 @@ const ColorSettingsPanel = () => {
       name: 'データベースのタグ',
       icon: '🏷️',
       items: ['propertySelectYellow', 'propertySelectBlue', 'propertySelectGreen', 'propertySelectPink', 'propertySelectGray']
+    },
+    textBackgrounds: {
+      name: 'テキストの背景色',
+      icon: '🎨',
+      items: ['textYellowBackground', 'textBlueBackground', 'textPinkBackground', 'textPurpleBackground', 'textGreenBackground', 'textGrayBackground']
     },
     layout: {
       name: 'その他',
@@ -445,17 +457,17 @@ const ColorSettingsPanel = () => {
                         className={styles.settingPreview}
                         style={{
                           backgroundColor: item.backgroundColor,
-                          color: item.textColor,
+                          color: item.textColor === 'inherit' ? '#374151' : item.textColor,
                           borderColor: item.borderColor || item.backgroundColor,
                           border: itemKey.includes('property') ? `1px solid ${item.borderColor || item.backgroundColor}` : undefined,
-                          padding: itemKey.includes('property') ? '2px 8px' : '0.5rem 1rem',
-                          borderRadius: itemKey.includes('property') ? '3px' : '6px',
+                          padding: itemKey.includes('property') ? '2px 8px' : (itemKey.includes('textBackground') ? '0.25rem 0.5rem' : '0.5rem 1rem'),
+                          borderRadius: itemKey.includes('property') ? '3px' : (itemKey.includes('textBackground') ? '4px' : '6px'),
                           fontSize: itemKey.includes('property') ? '0.75rem' : '0.875rem',
                           fontWeight: itemKey.includes('property') ? '500' : 'normal',
                           lineHeight: itemKey.includes('property') ? '1.2' : '1.5'
                         }}
                       >
-                        {itemKey.includes('property') ? '見出し2' : 'サンプル'}
+                        {itemKey.includes('property') ? 'タグ' : (itemKey.includes('textBackground') ? 'テキスト' : 'サンプル')}
                       </div>
                     </div>
                     
