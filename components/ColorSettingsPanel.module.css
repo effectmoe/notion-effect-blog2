@@ -12,7 +12,7 @@
 
 /* ヘッダー */
 .header {
-  background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+  background: linear-gradient(135deg, #3b82f6 0%, #10b981 100%);
   color: white;
   padding: 2.5rem;
   border-radius: 16px;
@@ -130,6 +130,25 @@
   color: #374151;
 }
 
+.settingInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+}
+
+.settingClass {
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-family: 'Courier New', monospace;
+}
+
+.settingPath {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  font-style: italic;
+}
+
 .settingPreview {
   padding: 0.5rem 1rem;
   border-radius: 6px;
@@ -162,6 +181,40 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+.transparentButton {
+  padding: 6px 12px;
+  font-size: 13px;
+  border: 2px solid #e5e7eb;
+  border-radius: 6px;
+  background: white;
+  color: #6b7280;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.transparentButton:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.transparentButton:active {
+  background: #e5e7eb;
+}
+
+.transparentButtonActive {
+  background: #8b5cf6 !important;
+  color: white !important;
+  border-color: #8b5cf6 !important;
+}
+
+.transparentButtonActive:hover {
+  background: #7c3aed !important;
+  border-color: #7c3aed !important;
 }
 
 .colorSwatch {
@@ -267,14 +320,48 @@
   margin-top: 2rem;
 }
 
+.previewHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
 .previewTitle {
   font-size: 1.2rem;
   font-weight: 600;
-  margin-bottom: 1.5rem;
   color: #374151;
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  margin: 0;
+}
+
+.refreshButton {
+  padding: 0.5rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  background: white;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.refreshButton:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.refreshButton:active {
+  transform: translateY(0);
+  box-shadow: none;
 }
 
 .previewContent {

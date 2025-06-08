@@ -353,19 +353,8 @@ const ColorSettingsPanel = () => {
           />
           <button
             type="button"
+            className={`${styles.transparentButton} ${isTransparent ? styles.transparentButtonActive : ''}`}
             onClick={() => handleColorChange(elementKey, property, 'transparent')}
-            style={{
-              padding: '6px 12px',
-              fontSize: '13px',
-              border: '2px solid #e5e7eb',
-              borderRadius: '6px',
-              background: value === 'transparent' ? '#8b5cf6' : 'white',
-              color: value === 'transparent' ? 'white' : '#6b7280',
-              cursor: 'pointer',
-              fontWeight: '500',
-              transition: 'all 0.2s ease',
-              whiteSpace: 'nowrap'
-            }}
             title="透明に設定"
           >
             透明
@@ -452,7 +441,13 @@ const ColorSettingsPanel = () => {
                 return (
                   <div key={itemKey} className={styles.settingItem}>
                     <div className={styles.settingHeader}>
-                      <div className={styles.settingName}>{settingDisplayNames[itemKey] || itemKey}</div>
+                      <div>
+                        <div className={styles.settingName}>{settingDisplayNames[itemKey] || itemKey}</div>
+                        <div className={styles.settingInfo}>
+                          <span className={styles.settingClass}>クラス: {item.className || `.notion-${itemKey}`}</span>
+                          <span className={styles.settingPath}>ファイル: styles/notion.css</span>
+                        </div>
+                      </div>
                       <div 
                         className={styles.settingPreview}
                         style={{
@@ -546,17 +541,36 @@ const ColorSettingsPanel = () => {
       {/* プレビュー */}
       {showPreview && (
         <div className={`${styles.previewSection} ${styles.fadeIn}`}>
-          <h3 className={styles.previewTitle}>
-            {icons.preview}
-            <span>ライブプレビュー</span>
-          </h3>
+          <div className={styles.previewHeader}>
+            <h3 className={styles.previewTitle}>
+              {icons.preview}
+              <span>ライブプレビュー</span>
+            </h3>
+            <button
+              className={styles.refreshButton}
+              onClick={() => {
+                const iframe = document.querySelector('iframe[title="Color Preview"]');
+                if (iframe) {
+                  iframe.src = iframe.src;
+                }
+              }}
+              title="プレビューを更新"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="23 4 23 10 17 10" />
+                <polyline points="1 20 1 14 7 14" />
+                <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
+              </svg>
+              <span>更新</span>
+            </button>
+          </div>
           <div className={styles.previewContent}>
             <div className={styles.previewFrame}>
               <iframe
                 src={window.location.origin}
                 style={{
                   width: '100%',
-                  height: '600px',
+                  height: '1200px',
                   border: 'none',
                   borderRadius: '8px'
                 }}
