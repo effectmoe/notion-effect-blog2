@@ -52,9 +52,7 @@
   border: none;
   cursor: pointer;
   padding: 0;
-  position: absolute;
-  top: 15px;
-  right: 15px;
+  position: relative;
   z-index: 10;
 }
 
@@ -83,7 +81,7 @@
 .mobileMenu {
   display: none;
   position: absolute;
-  top: 50px;
+  top: 40px;
   right: 0;
   background-color: white;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
