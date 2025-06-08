@@ -25,6 +25,35 @@ const ColorSettingsPanel = () => {
     layout: true
   });
 
+  // 設定名の日本語表示
+  const settingDisplayNames = {
+    page: 'ページ全体',
+    header: 'ヘッダー',
+    footer: 'フッター',
+    sidebar: 'サイドバー',
+    pageTitle: 'ページタイトル',
+    heading1: '見出し1 (H1)',
+    heading2: '見出し2 (H2)',
+    heading3: '見出し3 (H3)',
+    text: '本文',
+    link: 'リンク',
+    codeBlock: 'コードブロック',
+    inlineCode: 'インラインコード',
+    quote: '引用',
+    callout: 'コールアウト',
+    toggle: 'トグル',
+    button: 'ボタン',
+    table: 'テーブル',
+    listItem: 'リストアイテム',
+    galleryCard: 'ギャラリーカード',
+    selection: 'テキスト選択',
+    propertySelectYellow: 'プロパティ（黄色）',
+    propertySelectBlue: 'プロパティ（青）',
+    propertySelectGreen: 'プロパティ（緑）',
+    propertySelectPink: 'プロパティ（ピンク）',
+    propertySelectGray: 'プロパティ（グレー）'
+  };
+
   // カテゴリ分類
   const categories = {
     basic: {
@@ -55,7 +84,7 @@ const ColorSettingsPanel = () => {
     properties: {
       name: 'Notionプロパティ',
       icon: '🏷️',
-      items: ['propertySelect', 'propertyMultiSelect', 'propertyStatus', 'propertyTag']
+      items: ['propertySelectYellow', 'propertySelectBlue', 'propertySelectGreen', 'propertySelectPink', 'propertySelectGray']
     },
     layout: {
       name: 'その他',
@@ -366,16 +395,20 @@ const ColorSettingsPanel = () => {
                 return (
                   <div key={itemKey} className={styles.settingItem}>
                     <div className={styles.settingHeader}>
-                      <div className={styles.settingName}>{itemKey}</div>
+                      <div className={styles.settingName}>{settingDisplayNames[itemKey] || itemKey}</div>
                       <div 
                         className={styles.settingPreview}
                         style={{
                           backgroundColor: item.backgroundColor,
                           color: item.textColor,
-                          borderColor: item.borderColor
+                          borderColor: item.borderColor,
+                          border: itemKey.includes('property') ? '1px solid' : undefined,
+                          padding: itemKey.includes('property') ? '4px 8px' : '0.5rem 1rem',
+                          borderRadius: itemKey.includes('property') ? '3px' : '6px',
+                          fontSize: itemKey.includes('property') ? '0.75rem' : '0.875rem'
                         }}
                       >
-                        プレビュー
+                        {itemKey.includes('property') ? '見出し2' : 'サンプル'}
                       </div>
                     </div>
                     
