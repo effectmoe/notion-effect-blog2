@@ -313,11 +313,10 @@ const ColorSettingsPanel = () => {
             className={`${styles.colorSwatch} ${isTransparent ? styles.colorSwatchTransparent : ''}`}
             style={{ backgroundColor: isTransparent ? 'transparent' : value }}
             onClick={() => {
-              if (!isTransparent) {
-                const input = document.getElementById(`${elementKey}-${property}-picker`);
-                input?.click();
-              }
+              const input = document.getElementById(`${elementKey}-${property}-picker`);
+              input?.click();
             }}
+            title={isTransparent ? "クリックして色を選択" : "クリックして色を変更"}
           />
           <input
             type="text"
@@ -326,6 +325,21 @@ const ColorSettingsPanel = () => {
             onChange={(e) => handleColorChange(elementKey, property, e.target.value)}
             placeholder="#000000"
           />
+          <button
+            type="button"
+            onClick={() => handleColorChange(elementKey, property, 'transparent')}
+            style={{
+              padding: '4px 8px',
+              fontSize: '12px',
+              border: '1px solid #e5e7eb',
+              borderRadius: '4px',
+              background: value === 'transparent' ? '#e5e7eb' : 'white',
+              cursor: 'pointer'
+            }}
+            title="透明に設定"
+          >
+            透明
+          </button>
           <input
             id={`${elementKey}-${property}-picker`}
             type="color"
