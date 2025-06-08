@@ -221,7 +221,7 @@
 }
 
 @media only screen and (max-width: 920px) {
-  .index-page.notion-page {
+  .notion-page {
     padding-left: 2vw;
     padding-right: 2vw;
   }
@@ -231,6 +231,17 @@
   .notion-page {
     padding-left: 2vw;
     padding-right: 2vw;
+  }
+  
+  /* 2カラムレイアウトを1カラムに変更 */
+  .notion-row {
+    display: block !important;
+  }
+  
+  .notion-column {
+    width: 100% !important;
+    display: block !important;
+    margin-bottom: 1rem;
   }
 }
 
@@ -998,5 +1009,207 @@
   font-size: 12px;
   color: var(--fg-color-3);
   margin-top: 2px;
+}
+
+/* 削除 - notion-asideクラスは存在しないため */
+
+/* 削除 - 不要なスタイル */
+
+/* 削除 - 効果がないため */
+
+/* メインコンテンツエリアのリストビューは除外 */
+.notion-page-content-inner > .notion-list-view-wrapper,
+.notion-page-content-inner > .notion-collection-view-body .notion-list-view,
+.notion-page-content > .notion-list-view-wrapper,
+.notion-page-content > .notion-collection-view-body .notion-list-view {
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  background-color: transparent;
+  margin: 0;
+}
+
+/* JavaScriptで追加されるサイドバーコレクションクラス */
+.sidebar-collection,
+.sidebar-collection-wrapper > div {
+  border: 1px solid rgba(55, 53, 47, 0.16) !important;
+  border-radius: 8px !important;
+  padding: 16px !important;
+  background-color: rgba(251, 251, 249, 0.5) !important;
+  margin: 16px 0 !important;
+}
+
+.dark-mode .sidebar-collection,
+.dark-mode .sidebar-collection-wrapper > div {
+  border-color: rgba(255, 255, 255, 0.13) !important;
+  background-color: rgba(25, 25, 25, 0.5) !important;
+}
+
+/* サイドバーコレクション内のリストアイテム */
+.sidebar-collection .notion-list-item {
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+.sidebar-collection .notion-list-item:last-child {
+  border-bottom: none;
+}
+
+.sidebar-collection .notion-list-item-title {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* サイドバーコレクションのヘッダー */
+.sidebar-collection .notion-collection-header-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+/* より具体的なセレクタでサイドバーのコレクションをターゲット */
+.notion-row > .notion-column:nth-child(2) .notion-collection,
+.notion-row > .notion-column:nth-child(2) .notion-collection-view,
+.notion-row > .notion-column:nth-child(2) .notion-list-view,
+.notion-row > .notion-column:last-child > div[data-block-id] {
+  border: 1px solid rgba(55, 53, 47, 0.16) !important;
+  border-radius: 8px !important;
+  padding: 16px !important;
+  background-color: rgba(251, 251, 249, 0.5) !important;
+  margin: 16px 0 !important;
+}
+
+.dark-mode .notion-row > .notion-column:nth-child(2) .notion-collection,
+.dark-mode .notion-row > .notion-column:nth-child(2) .notion-collection-view,
+.dark-mode .notion-row > .notion-column:nth-child(2) .notion-list-view,
+.dark-mode .notion-row > .notion-column:last-child > div[data-block-id] {
+  border-color: rgba(255, 255, 255, 0.13) !important;
+  background-color: rgba(25, 25, 25, 0.5) !important;
+}
+
+/* 全てのノーションカラム内のブロックをターゲット（メインコンテンツを除く） */
+.notion-column > div[data-block-id] {
+  border: 1px solid rgba(55, 53, 47, 0.16) !important;
+  border-radius: 8px !important;
+  padding: 16px !important;
+  background-color: rgba(251, 251, 249, 0.5) !important;
+  margin: 16px 0 !important;
+}
+
+/* メインコンテンツエリアのブロックを除外 */
+.notion-page-content > div[data-block-id],
+.notion-page-content-inner > div[data-block-id],
+.notion-column:first-child > div[data-block-id],
+.notion-column:only-child > div[data-block-id] {
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  background-color: transparent !important;
+  margin: 0 !important;
+}
+
+/* テキストブロックなどは除外 */
+.notion-column > div[data-block-id].notion-text-block,
+.notion-column > div[data-block-id].notion-header-block,
+.notion-column > div[data-block-id].notion-sub_header-block,
+.notion-column > div[data-block-id].notion-sub_sub_header-block,
+.notion-column > div[data-block-id].notion-quote-block,
+.notion-column > div[data-block-id].notion-callout-block {
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  background-color: transparent !important;
+  margin: 0 !important;
+}
+
+/* ダークモード対応 */
+.dark-mode .notion-column > div[data-block-id] {
+  border-color: rgba(255, 255, 255, 0.13) !important;
+  background-color: rgba(25, 25, 25, 0.5) !important;
+}
+
+/* 削除 - 問題のあるスタイル */
+
+/* レスポンシブデザインの追加改善 */
+@media only screen and (max-width: 1024px) {
+  /* タブレット向け調整 */
+  .notion-page {
+    max-width: 100%;
+    padding-left: 3vw;
+    padding-right: 3vw;
+  }
+  
+  .notion-column {
+    padding: 0 8px;
+  }
+}
+
+@media only screen and (max-width: 768px) {
+  /* スマートフォン向け調整 */
+  .notion-page-content {
+    font-size: 14px;
+  }
+  
+  /* ヘッダー画像の調整 */
+  .notion-page-cover-wrapper {
+    height: 30vh !important;
+    min-height: 200px;
+  }
+  
+  /* テキストブロックの余白調整 */
+  .notion-text-block {
+    margin: 0.5em 0;
+  }
+  
+  /* リストアイテムの調整 */
+  .notion-list-item {
+    padding: 8px 0;
+  }
+  
+  /* ギャラリービューをレスポンシブに */
+  .notion-gallery-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)) !important;
+    gap: 16px;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  /* 小型スマートフォン向け調整 */
+  .notion-page {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  /* タイトルサイズの調整 */
+  .notion-page-title-text {
+    font-size: 1.8rem;
+  }
+  
+  /* ヘッダーブロックのサイズ調整 */
+  .notion-header-block {
+    font-size: 1.4rem;
+  }
+  
+  .notion-sub_header-block {
+    font-size: 1.2rem;
+  }
+  
+  /* ギャラリービューを1カラムに */
+  .notion-gallery-grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* テーブルビューのスクロール対応 */
+  .notion-table-view {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* コレクションビューの余白調整 */
+  .notion-collection-view {
+    margin: 8px 0;
+  }
 }
 

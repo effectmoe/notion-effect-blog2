@@ -30,6 +30,13 @@ export default class MyDocument extends Document {
                   script.src = '/inject-formula-simple.js';
                   document.body.appendChild(script);
                 }, 1000);
+                
+                // サイドバーコレクションのスタイリング - 無効化
+                // setTimeout(function() {
+                //   const script2 = document.createElement('script');
+                //   script2.src = '/style-sidebar-collections.js';
+                //   document.body.appendChild(script2);
+                // }, 500);
               });
             ` }} />
           </body>
