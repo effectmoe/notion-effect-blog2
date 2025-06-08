@@ -21,6 +21,7 @@ const ColorSettingsPanel = () => {
     code: true,
     interactive: true,
     database: true,
+    properties: true,
     layout: true
   });
 
@@ -50,6 +51,11 @@ const ColorSettingsPanel = () => {
       name: 'データベース',
       icon: '📊',
       items: ['table', 'listItem', 'galleryCard']
+    },
+    properties: {
+      name: 'Notionプロパティ',
+      icon: '🏷️',
+      items: ['propertySelect', 'propertyMultiSelect', 'propertyStatus', 'propertyTag']
     },
     layout: {
       name: 'その他',
