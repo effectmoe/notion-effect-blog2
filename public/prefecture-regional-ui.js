@@ -20,20 +20,24 @@
         row-gap: 8px !important;
       }
       
-      /* 地域別のヘッダー（東北、関東など）を大きくする - 複数のセレクタに対応 */
-      .notion-gallery-view > div > div:first-child,
-      .notion-gallery > div > div:first-child,
-      [class*="notion-collection"] > div > div:first-child {
+      /* 「東北」などの地域タイトルだけを大きくする */
+      details > summary:has-text("北海道"),
+      details > summary:has-text("東北"),
+      details > summary:has-text("関東"),
+      details > summary:has-text("中部"),
+      details > summary:has-text("近畿"),
+      details > summary:has-text("中国"),
+      details > summary:has-text("四国"),
+      details > summary:has-text("九州") {
         font-size: 1.5em !important;
         font-weight: bold !important;
         padding: 12px 0 !important;
       }
       
-      /* Notion detailsタグの地域ヘッダー */
-      details > summary {
-        font-size: 1.5em !important;
+      /* より一般的なアプローチ：▼マークがあるsummaryのみ */
+      details > summary:first-child {
+        font-size: 1.3em !important;
         font-weight: bold !important;
-        padding: 12px 0 !important;
       }
     `;
     document.head.appendChild(style);
