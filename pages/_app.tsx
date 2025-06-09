@@ -14,6 +14,8 @@ import 'styles/notion.css'
 import 'styles/prism-theme.css'
 // instructor gallery responsive styles (specific collection only)
 import 'styles/instructor-gallery-responsive.css'
+// instructor gallery improvements (font and spacing)
+import 'styles/instructor-gallery-improvements.css'
 
 import type { AppProps } from 'next/app'
 import * as Fathom from 'fathom-client'
