@@ -13,13 +13,7 @@ import 'styles/notion.css'
 // global style overrides for prism theme (optional)
 import 'styles/prism-theme.css'
 // prefecture gallery styles
-// import 'styles/prefecture-gallery.css'
-// enhanced table styles
-// import 'styles/notion-table-enhanced.css'
-// prefecture table specific styles
-// import 'styles/prefecture-table.css'
-// notion div-based table styles
-// import 'styles/notion-div-table.css'
+import 'styles/prefecture-gallery.css'
 
 import type { AppProps } from 'next/app'
 import * as Fathom from 'fathom-client'
