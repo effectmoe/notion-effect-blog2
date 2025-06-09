@@ -12,12 +12,6 @@ import 'styles/global.css'
 import 'styles/notion.css'
 // global style overrides for prism theme (optional)
 import 'styles/prism-theme.css'
-// prefecture gallery CSS fixes
-import 'styles/prefecture-gallery-fix.css'
-// prefecture grouped view styles
-import 'styles/prefecture-grouped-view.css'
-// prefecture smart card design
-import 'styles/prefecture-smart-cards.css'
 
 import type { AppProps } from 'next/app'
 import * as Fathom from 'fathom-client'
