@@ -1,7 +1,7 @@
 (function() {
   'use strict';
 
-  console.log('[Prefecture UI] Script loaded');
+  console.log('[Prefecture UI] Script loaded v2');
 
   // 地域の定義
   const regions = [
@@ -39,7 +39,7 @@
     }
   ];
 
-  // すべての都道府県名（短縮形）
+  // すべての都道府県名
   const allPrefectures = regions.flatMap(r => r.prefectures);
 
   // スタイルを追加
@@ -87,119 +87,122 @@
         color: var(--fg-color-0, #333);
         display: block;
       }
+      /* 元のリストを非表示 */
+      .prefecture-original-list {
+        display: none !important;
+      }
     `;
     document.head.appendChild(style);
   }
 
   // メイン処理
   function processPrefectureLists() {
-    console.log('[Prefecture UI] Starting to process...');
+    console.log('[Prefecture UI] Processing...');
 
-    // 見出しを探す
-    const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
-    const keywords = ['公認インストラクター', 'ナビゲーター'];
-    
-    headings.forEach(heading => {
-      const text = heading.textContent || '';
-      if (!keywords.some(keyword => text.includes(keyword))) return;
-      
-      console.log('[Prefecture UI] Found heading:', text);
-      
-      // 見出しの後の要素を確認
-      let current = heading.nextElementSibling;
-      let foundList = false;
-      
-      while (current && !current.matches('h1, h2, h3, h4, h5, h6')) {
-        // すでに処理済みならスキップ
-        if (current.dataset.prefectureProcessed === 'true') {
-          current = current.nextElementSibling;
-          continue;
-        }
-        
-        // リンクを探す
-        const links = current.querySelectorAll('a');
-        const prefectureLinks = [];
-        
-        links.forEach(link => {
-          const linkText = link.textContent || '';
-          // 都道府県名が含まれているかチェック
-          for (const pref of allPrefectures) {
-            if (linkText.includes(pref)) {
-              prefectureLinks.push({
-                prefecture: pref,
-                element: link
-              });
-              break;
-            }
-          }
-        });
-        
-        console.log('[Prefecture UI] Found prefecture links:', prefectureLinks.length);
-        
-        if (prefectureLinks.length >= 10) {
-          foundList = true;
-          
-          // 地域別にグループ化
-          const grouped = {};
-          regions.forEach(region => {
-            grouped[region.name] = [];
-          });
-          
-          prefectureLinks.forEach(item => {
-            for (const region of regions) {
-              if (region.prefectures.includes(item.prefecture)) {
-                grouped[region.name].push(item.element);
-                break;
-              }
-            }
-          });
-          
-          // 地域別UIを作成
-          const container = document.createElement('div');
-          container.className = 'prefecture-regional-container';
-          
-          regions.forEach(region => {
-            const items = grouped[region.name];
-            if (items.length === 0) return;
-            
-            const regionDiv = document.createElement('div');
-            regionDiv.className = 'prefecture-region';
-            
-            const titleDiv = document.createElement('div');
-            titleDiv.className = 'prefecture-region-title';
-            titleDiv.textContent = region.name;
-            regionDiv.appendChild(titleDiv);
-            
-            const listDiv = document.createElement('div');
-            listDiv.className = 'prefecture-list';
-            
-            items.forEach(link => {
-              const itemDiv = document.createElement('div');
-              itemDiv.className = 'prefecture-item';
-              itemDiv.appendChild(link.cloneNode(true));
-              listDiv.appendChild(itemDiv);
-            });
-            
-            regionDiv.appendChild(listDiv);
-            container.appendChild(regionDiv);
-          });
-          
-          // 元の要素を置き換え
-          current.innerHTML = '';
-          current.appendChild(container);
-          current.dataset.prefectureProcessed = 'true';
-          
-          console.log('[Prefecture UI] Successfully processed prefecture list');
-          break;
-        }
-        
-        current = current.nextElementSibling;
+    // notion-page-linkで都道府県を含むものを探す
+    const pageLinks = document.querySelectorAll('.notion-page-link');
+    const prefectureElements = Array.from(pageLinks).filter(link => {
+      const text = link.textContent || '';
+      return allPrefectures.some(pref => text.includes(pref));
+    });
+
+    console.log('[Prefecture UI] Found prefecture links:', prefectureElements.length);
+
+    if (prefectureElements.length < 10) {
+      console.log('[Prefecture UI] Not enough prefectures found');
+      return;
+    }
+
+    // 最初の都道府県要素から共通の親要素を探す
+    let commonParent = prefectureElements[0];
+    while (commonParent && !commonParent.classList.contains('notion-collection-view')) {
+      commonParent = commonParent.parentElement;
+      if (!commonParent || commonParent === document.body) {
+        console.log('[Prefecture UI] Could not find collection parent');
+        return;
       }
+    }
+
+    // 既に処理済みかチェック
+    if (commonParent.dataset.prefectureProcessed === 'true') {
+      return;
+    }
+
+    console.log('[Prefecture UI] Found collection parent:', commonParent.className);
+
+    // 地域別にグループ化
+    const grouped = {};
+    regions.forEach(region => {
+      grouped[region.name] = [];
+    });
+
+    prefectureElements.forEach(element => {
+      const text = element.textContent || '';
+      const matchedPref = allPrefectures.find(pref => text.includes(pref));
       
-      if (!foundList) {
-        console.log('[Prefecture UI] No prefecture list found after heading');
+      if (matchedPref) {
+        for (const region of regions) {
+          if (region.prefectures.includes(matchedPref)) {
+            // リンク要素を探す
+            const link = element.querySelector('a') || element.closest('a');
+            if (link) {
+              grouped[region.name].push({
+                text: text.trim(),
+                href: link.href,
+                element: element
+              });
+            }
+            break;
+          }
+        }
       }
     });
+
+    // 地域別UIを作成
+    const container = document.createElement('div');
+    container.className = 'prefecture-regional-container';
+
+    regions.forEach(region => {
+      const items = grouped[region.name];
+      if (items.length === 0) return;
+
+      const regionDiv = document.createElement('div');
+      regionDiv.className = 'prefecture-region';
+
+      const titleDiv = document.createElement('div');
+      titleDiv.className = 'prefecture-region-title';
+      titleDiv.textContent = region.name;
+      regionDiv.appendChild(titleDiv);
+
+      const listDiv = document.createElement('div');
+      listDiv.className = 'prefecture-list';
+
+      items.forEach(item => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'prefecture-item';
+        
+        const link = document.createElement('a');
+        link.href = item.href;
+        link.textContent = item.text;
+        itemDiv.appendChild(link);
+        
+        listDiv.appendChild(itemDiv);
+      });
+
+      regionDiv.appendChild(listDiv);
+      container.appendChild(regionDiv);
+    });
+
+    // 元のコレクションビューの後に挿入
+    commonParent.parentElement.insertBefore(container, commonParent.nextSibling);
+    
+    // 元のリストを非表示にする
+    commonParent.classList.add('prefecture-original-list');
+    
+    // 処理済みフラグを設定
+    commonParent.dataset.prefectureProcessed = 'true';
+
+    console.log('[Prefecture UI] Successfully created regional view');
   }
 
   // 初期化
@@ -209,11 +212,15 @@
     // 少し待ってから実行
     setTimeout(() => {
       processPrefectureLists();
-    }, 1000);
+    }, 2000);
     
     // 動的な変更を監視
+    let debounceTimer;
     const observer = new MutationObserver(() => {
-      processPrefectureLists();
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        processPrefectureLists();
+      }, 500);
     });
     
     observer.observe(document.body, {
