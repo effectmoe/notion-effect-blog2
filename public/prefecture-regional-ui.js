@@ -172,17 +172,33 @@
       return true;
     }
 
-    // 都道府県名の数による判定
-    const items = container.querySelectorAll('.notion-collection-item, .notion-gallery-card, .notion-list-item');
+    // より広範囲で都道府県名を探す
+    const allText = container.textContent || '';
+    const allLinks = container.querySelectorAll('a');
     let prefectureCount = 0;
-    items.forEach(item => {
-      const text = item.textContent || '';
+    
+    // リンクのテキストから都道府県を探す
+    allLinks.forEach(link => {
+      const text = link.textContent || '';
       if (extractPrefectureName(text)) {
         prefectureCount++;
       }
     });
     
-    console.log('[Prefecture UI] Prefecture count:', prefectureCount);
+    console.log('[Prefecture UI] Prefecture count from links:', prefectureCount);
+    
+    // 通常のアイテムからも探す
+    if (prefectureCount < 10) {
+      const items = container.querySelectorAll('.notion-collection-item, .notion-gallery-card, .notion-list-item');
+      items.forEach(item => {
+        const text = item.textContent || '';
+        if (extractPrefectureName(text)) {
+          prefectureCount++;
+        }
+      });
+      console.log('[Prefecture UI] Total prefecture count:', prefectureCount);
+    }
+    
     return prefectureCount >= 10;
   }
 
@@ -261,9 +277,7 @@
       '.notion-collection-view-body',
       '.notion-gallery-view', 
       '.notion-list-view',
-      '.notion-collection-list',
-      // テキストベースのリストも検索
-      'div:has(> p:has(> a))'
+      '.notion-collection-list'
     ];
     
     patterns.forEach(pattern => {
@@ -274,40 +288,47 @@
         // 既に処理済みの場合はスキップ
         if (collection.dataset.prefectureProcessed === 'true') return;
         
-        // 特殊なケース: pタグのリスト
-        if (pattern.includes(':has')) {
-          const paragraphs = collection.querySelectorAll('p');
-          let prefectureCount = 0;
+        // デバッグ: ギャラリービューの内容を確認
+        if (pattern === '.notion-gallery-view') {
+          console.log('[Prefecture UI] Gallery view HTML structure:', collection.innerHTML.substring(0, 500));
           
-          // 都道府県名を含むpタグをカウント
-          paragraphs.forEach(p => {
-            const text = p.textContent || '';
-            if (extractPrefectureName(text)) {
-              prefectureCount++;
+          // より広範囲でアイテムを探す
+          const allLinks = collection.querySelectorAll('a');
+          console.log('[Prefecture UI] Found links in gallery:', allLinks.length);
+          
+          allLinks.forEach((link, i) => {
+            if (i < 5) { // 最初の5つだけログ出力
+              console.log(`[Prefecture UI] Link ${i}:`, link.textContent, link.href);
             }
           });
-          
-          console.log('[Prefecture UI] Found prefecture paragraphs:', prefectureCount);
-          
-          if (prefectureCount >= 10) {
-            // pタグベースの処理
-            processParagraphBasedList(collection, paragraphs);
-            collection.dataset.prefectureProcessed = 'true';
-          }
-        } else {
-          // 通常のコレクションビュー処理
-          if (!isPrefectureDatabase(collection)) return;
-          
-          const items = Array.from(collection.querySelectorAll('.notion-collection-item, .notion-gallery-card, .notion-list-item'));
-          if (items.length === 0) return;
-          
-          const groupedItems = groupByRegion(items);
-          const regionalUI = createRegionalUI(collection, groupedItems);
-          
-          collection.innerHTML = '';
-          collection.appendChild(regionalUI);
-          collection.dataset.prefectureProcessed = 'true';
         }
+        
+        // 通常のコレクションビュー処理
+        if (!isPrefectureDatabase(collection)) return;
+        
+        // ギャラリービューの場合は特別な処理
+        if (pattern === '.notion-gallery-view') {
+          const links = Array.from(collection.querySelectorAll('a'));
+          const prefectureLinks = links.filter(link => extractPrefectureName(link.textContent));
+          
+          if (prefectureLinks.length >= 10) {
+            console.log('[Prefecture UI] Processing gallery view with', prefectureLinks.length, 'prefecture links');
+            processLinkBasedList(collection, prefectureLinks);
+            collection.dataset.prefectureProcessed = 'true';
+            return;
+          }
+        }
+        
+        // 通常のアイテムベース処理
+        const items = Array.from(collection.querySelectorAll('.notion-collection-item, .notion-gallery-card, .notion-list-item'));
+        if (items.length === 0) return;
+        
+        const groupedItems = groupByRegion(items);
+        const regionalUI = createRegionalUI(collection, groupedItems);
+        
+        collection.innerHTML = '';
+        collection.appendChild(regionalUI);
+        collection.dataset.prefectureProcessed = 'true';
       });
     });
   }
