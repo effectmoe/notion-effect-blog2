@@ -1,16 +1,39 @@
 (function() {
   'use strict';
 
+  // CSSスタイルシートを追加
+  const styleSheet = document.createElement('style');
+  styleSheet.textContent = `
+    /* グリッドの間隔を強制的に詰める */
+    .notion-gallery-grid {
+      gap: 8px !important;
+      row-gap: 8px !important;
+      grid-gap: 8px !important;
+    }
+    
+    /* カードのフォントを強制的にゴシック体に */
+    .notion-collection-card,
+    .notion-collection-card * {
+      font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif !important;
+    }
+  `;
+  document.head.appendChild(styleSheet);
+
   function applyStyles() {
     // 1. ギャラリーグリッドの間隔を詰める
     document.querySelectorAll('.notion-gallery-grid').forEach(grid => {
       grid.style.setProperty('gap', '8px', 'important');
       grid.style.setProperty('row-gap', '8px', 'important');
+      grid.style.setProperty('grid-gap', '8px', 'important');
     });
 
-    // 2. カードをゴシック体にする
+    // 2. カード内のすべてのテキストをゴシック体にする
     document.querySelectorAll('.notion-collection-card').forEach(card => {
       card.style.setProperty('font-family', '"Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif', 'important');
+      // カード内のすべての要素にも適用
+      card.querySelectorAll('*').forEach(el => {
+        el.style.setProperty('font-family', '"Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif', 'important');
+      });
     });
 
     // 3. 地域名を大きくする
@@ -25,6 +48,8 @@
         summary.style.setProperty('padding', '16px 0', 'important');
       }
     });
+    
+    console.log('[Prefecture UI] Styles applied');
   }
 
   // 即座に実行
