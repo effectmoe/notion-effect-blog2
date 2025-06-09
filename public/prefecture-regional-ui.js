@@ -115,7 +115,12 @@
 
     // 最初の都道府県要素から共通の親要素を探す
     let commonParent = prefectureElements[0];
-    while (commonParent && !commonParent.classList.contains('notion-collection-view')) {
+    while (commonParent) {
+      if (commonParent.classList.contains('notion-gallery-view') || 
+          commonParent.classList.contains('notion-collection-view') ||
+          commonParent.classList.contains('notion-collection')) {
+        break;
+      }
       commonParent = commonParent.parentElement;
       if (!commonParent || commonParent === document.body) {
         console.log('[Prefecture UI] Could not find collection parent');
