@@ -1,0 +1,239 @@
+/* 都道府県スマートカードデザイン */
+
+/* コレクション全体のスタイル */
+.notion-collection {
+  max-width: 1200px !important;
+  margin: 0 auto !important;
+  padding: 20px !important;
+}
+
+/* タイトルのスタイル */
+.notion-collection-header {
+  text-align: center !important;
+  margin-bottom: 40px !important;
+  position: relative !important;
+}
+
+.notion-collection-header-title {
+  font-size: 2.5rem !important;
+  font-weight: 800 !important;
+  color: #1a1a1a !important;
+  letter-spacing: 1px !important;
+  position: relative !important;
+  display: inline-block !important;
+  padding-bottom: 15px !important;
+}
+
+.notion-collection-header-title::after {
+  content: "" !important;
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: 80px !important;
+  height: 4px !important;
+  background: linear-gradient(to right, #667eea, #764ba2) !important;
+  border-radius: 2px !important;
+}
+
+/* ギャラリービューまたはリストビューの改善 */
+.notion-collection-view-body {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+  gap: 24px !important;
+  padding: 0 !important;
+}
+
+/* 地域グループカード */
+.notion-collection-card,
+.notion-list-item {
+  background: #ffffff !important;
+  border: none !important;
+  border-radius: 16px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.06) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  cursor: pointer !important;
+  position: relative !important;
+}
+
+.notion-collection-card:hover,
+.notion-list-item:hover {
+  transform: translateY(-8px) !important;
+  box-shadow: 0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* 地域ヘッダー部分 */
+.notion-collection-card::before,
+.notion-list-item::before {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 6px !important;
+  background: linear-gradient(to right, #667eea, #764ba2) !important;
+}
+
+/* 北海道 */
+.notion-collection-card:has(.notion-page-title-text:contains("北海道"))::before,
+.notion-list-item:has(.notion-page-title-text:contains("北海道"))::before {
+  background: linear-gradient(to right, #ef4444, #dc2626) !important;
+}
+
+/* 東北 */
+.notion-collection-card:has(.notion-page-title-text:contains("東北"))::before,
+.notion-list-item:has(.notion-page-title-text:contains("東北"))::before {
+  background: linear-gradient(to right, #3b82f6, #2563eb) !important;
+}
+
+/* 関東 */
+.notion-collection-card:has(.notion-page-title-text:contains("関東"))::before,
+.notion-list-item:has(.notion-page-title-text:contains("関東"))::before {
+  background: linear-gradient(to right, #f97316, #ea580c) !important;
+}
+
+/* 中部 */
+.notion-collection-card:has(.notion-page-title-text:contains("中部"))::before,
+.notion-list-item:has(.notion-page-title-text:contains("中部"))::before {
+  background: linear-gradient(to right, #a855f7, #9333ea) !important;
+}
+
+/* 近畿 */
+.notion-collection-card:has(.notion-page-title-text:contains("近畿"))::before,
+.notion-list-item:has(.notion-page-title-text:contains("近畿"))::before {
+  background: linear-gradient(to right, #10b981, #059669) !important;
+}
+
+/* 中国 */
+.notion-collection-card:has(.notion-page-title-text:contains("中国"))::before,
+.notion-list-item:has(.notion-page-title-text:contains("中国"))::before {
+  background: linear-gradient(to right, #64748b, #475569) !important;
+}
+
+/* 四国 */
+.notion-collection-card:has(.notion-page-title-text:contains("四国"))::before,
+.notion-list-item:has(.notion-page-title-text:contains("四国"))::before {
+  background: linear-gradient(to right, #22c55e, #16a34a) !important;
+}
+
+/* 九州・沖縄 */
+.notion-collection-card:has(.notion-page-title-text:contains("九州"))::before,
+.notion-list-item:has(.notion-page-title-text:contains("九州"))::before {
+  background: linear-gradient(to right, #eab308, #ca8a04) !important;
+}
+
+/* 海外 */
+.notion-collection-card:has(.notion-page-title-text:contains("海外"))::before,
+.notion-list-item:has(.notion-page-title-text:contains("海外"))::before {
+  background: linear-gradient(to right, #94a3b8, #64748b) !important;
+}
+
+/* カード内のコンテンツ */
+.notion-collection-card-body,
+.notion-list-item-body {
+  padding: 24px !important;
+}
+
+/* 地域名のスタイル */
+.notion-page-title-text {
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  color: #1f2937 !important;
+  margin-bottom: 16px !important;
+  letter-spacing: 0.5px !important;
+}
+
+/* 都道府県リスト */
+.notion-collection-card-property,
+.notion-list-item-content {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  margin-top: 12px !important;
+}
+
+/* 各都道府県のタグスタイル */
+.notion-property-title {
+  background: #f3f4f6 !important;
+  color: #374151 !important;
+  padding: 6px 14px !important;
+  border-radius: 20px !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+  display: inline-block !important;
+  border: 1px solid #e5e7eb !important;
+}
+
+.notion-property-title:hover {
+  background: #e5e7eb !important;
+  transform: scale(1.05) !important;
+}
+
+/* アイコンを追加 */
+.notion-page-title-text::before {
+  content: "📍" !important;
+  margin-right: 8px !important;
+  font-size: 1.2rem !important;
+}
+
+/* 北海道のアイコン */
+.notion-page-title-text:contains("北海道")::before {
+  content: "🏔️" !important;
+}
+
+/* 海外のアイコン */
+.notion-page-title-text:contains("海外")::before {
+  content: "🌏" !important;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+  .notion-collection-view-body {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+  
+  .notion-collection-header-title {
+    font-size: 2rem !important;
+  }
+  
+  .notion-page-title-text {
+    font-size: 1.25rem !important;
+  }
+}
+
+/* 追加のエフェクト */
+.notion-collection-card::after,
+.notion-list-item::after {
+  content: "" !important;
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 0 !important;
+  background: linear-gradient(to top, rgba(0,0,0,0.05), transparent) !important;
+  transition: height 0.3s ease !important;
+}
+
+.notion-collection-card:hover::after,
+.notion-list-item:hover::after {
+  height: 100% !important;
+}
+
+/* カウンター表示（もし必要なら） */
+.notion-collection-card-property::after,
+.notion-list-item-content::after {
+  content: attr(data-count) !important;
+  position: absolute !important;
+  top: 20px !important;
+  right: 20px !important;
+  background: rgba(0,0,0,0.1) !important;
+  color: #6b7280 !important;
+  padding: 4px 12px !important;
+  border-radius: 20px !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+}
