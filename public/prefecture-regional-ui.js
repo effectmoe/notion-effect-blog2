@@ -27,6 +27,8 @@
           const cards = current.querySelectorAll('.notion-collection-card');
           cards.forEach(card => {
             card.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans JP", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif';
+            card.style.fontWeight = 'normal';
+            console.log('[Prefecture UI] Applied Gothic font to card:', card.textContent.substring(0, 20));
           });
           
           // 地域名（北海道、東北など）を大きくする
