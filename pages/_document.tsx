@@ -31,12 +31,19 @@ export default class MyDocument extends Document {
                   document.body.appendChild(script);
                 }, 1000);
                 
-                // サイドバーコレクションのスタイリング - 無効化
+                // ギャラリービューのスタイリング - 一時的に無効化
                 // setTimeout(function() {
                 //   const script2 = document.createElement('script');
-                //   script2.src = '/style-sidebar-collections.js';
+                //   script2.src = '/style-gallery-view.js';
                 //   document.body.appendChild(script2);
-                // }, 500);
+                // }, 2000);
+                
+                // 都道府県リストのグリッド化 - 一時的に無効化
+                // setTimeout(function() {
+                //   const script2 = document.createElement('script');
+                //   script2.src = '/inject-prefecture-grid.js';
+                //   document.body.appendChild(script2);
+                // }, 1500);
               });
             ` }} />
           </body>

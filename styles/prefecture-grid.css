@@ -1,0 +1,156 @@
+/* 都道府県リストのグリッドスタイル */
+
+/* 公認インストラクター＆ナビゲーターセクション */
+.notion-text:has(+ .notion-list) {
+  /* セクションタイトルのスタイル */
+}
+
+/* 都道府県を含むリスト */
+.notion-list {
+  position: relative;
+}
+
+/* 都道府県名を含むリストアイテムの親リスト */
+.notion-list:has(.notion-list-item:has(a[href*="沖縄県"])),
+.notion-list:has(.notion-list-item:has(a[href*="北海道"])),
+.notion-list:has(.notion-list-item:has(a[href*="東京都"])) {
+  display: grid !important;
+  grid-template-columns: repeat(6, 1fr) !important;
+  gap: 2px !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  max-height: 360px !important;
+  overflow-y: auto !important;
+  margin: 1rem 0 !important;
+  padding-right: 4px !important;
+}
+
+/* 都道府県リストアイテム */
+.notion-list:has(.notion-list-item:has(a[href*="沖縄県"])) .notion-list-item,
+.notion-list:has(.notion-list-item:has(a[href*="北海道"])) .notion-list-item,
+.notion-list:has(.notion-list-item:has(a[href*="東京都"])) .notion-list-item {
+  background: rgba(0, 0, 0, 0.02) !important;
+  border: none !important;
+  border-radius: 4px !important;
+  padding: 10px 4px !important;
+  min-height: 40px !important;
+  transition: background-color 0.12s ease !important;
+  cursor: pointer !important;
+  position: relative !important;
+  overflow: hidden !important;
+  box-shadow: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 !important;
+  text-align: center !important;
+}
+
+/* リンクスタイル */
+.notion-list:has(.notion-list-item:has(a[href*="沖縄県"])) .notion-page-link,
+.notion-list:has(.notion-list-item:has(a[href*="北海道"])) .notion-page-link,
+.notion-list:has(.notion-list-item:has(a[href*="東京都"])) .notion-page-link {
+  text-decoration: none !important;
+  font-size: 0.8125rem !important;
+  font-weight: 400 !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif !important;
+  color: var(--fg-color) !important;
+  line-height: 1 !important;
+  letter-spacing: 0 !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* ホバー効果 */
+.notion-list:has(.notion-list-item:has(a[href*="沖縄県"])) .notion-list-item:hover,
+.notion-list:has(.notion-list-item:has(a[href*="北海道"])) .notion-list-item:hover,
+.notion-list:has(.notion-list-item:has(a[href*="東京都"])) .notion-list-item:hover {
+  background: rgba(0, 0, 0, 0.05) !important;
+}
+
+/* スクロールバー */
+.notion-list:has(.notion-list-item:has(a[href*="沖縄県"]))::-webkit-scrollbar,
+.notion-list:has(.notion-list-item:has(a[href*="北海道"]))::-webkit-scrollbar,
+.notion-list:has(.notion-list-item:has(a[href*="東京都"]))::-webkit-scrollbar {
+  width: 4px;
+}
+
+.notion-list:has(.notion-list-item:has(a[href*="沖縄県"]))::-webkit-scrollbar-track,
+.notion-list:has(.notion-list-item:has(a[href*="北海道"]))::-webkit-scrollbar-track,
+.notion-list:has(.notion-list-item:has(a[href*="東京都"]))::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.notion-list:has(.notion-list-item:has(a[href*="沖縄県"]))::-webkit-scrollbar-thumb,
+.notion-list:has(.notion-list-item:has(a[href*="北海道"]))::-webkit-scrollbar-thumb,
+.notion-list:has(.notion-list-item:has(a[href*="東京都"]))::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 2px;
+}
+
+/* ダークモード対応 */
+@media (prefers-color-scheme: dark) {
+  .notion-list:has(.notion-list-item:has(a[href*="沖縄県"])) .notion-list-item,
+  .notion-list:has(.notion-list-item:has(a[href*="北海道"])) .notion-list-item,
+  .notion-list:has(.notion-list-item:has(a[href*="東京都"])) .notion-list-item {
+    background: rgba(255, 255, 255, 0.04) !important;
+  }
+  
+  .notion-list:has(.notion-list-item:has(a[href*="沖縄県"])) .notion-list-item:hover,
+  .notion-list:has(.notion-list-item:has(a[href*="北海道"])) .notion-list-item:hover,
+  .notion-list:has(.notion-list-item:has(a[href*="東京都"])) .notion-list-item:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+  }
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+  .notion-list:has(.notion-list-item:has(a[href*="沖縄県"])),
+  .notion-list:has(.notion-list-item:has(a[href*="北海道"])),
+  .notion-list:has(.notion-list-item:has(a[href*="東京都"])) {
+    grid-template-columns: repeat(5, 1fr) !important;
+    max-height: 340px !important;
+  }
+  
+  .notion-list:has(.notion-list-item:has(a[href*="沖縄県"])) .notion-list-item,
+  .notion-list:has(.notion-list-item:has(a[href*="北海道"])) .notion-list-item,
+  .notion-list:has(.notion-list-item:has(a[href*="東京都"])) .notion-list-item {
+    padding: 9px 3px !important;
+    min-height: 38px !important;
+  }
+  
+  .notion-list:has(.notion-list-item:has(a[href*="沖縄県"])) .notion-page-link,
+  .notion-list:has(.notion-list-item:has(a[href*="北海道"])) .notion-page-link,
+  .notion-list:has(.notion-list-item:has(a[href*="東京都"])) .notion-page-link {
+    font-size: 0.775rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .notion-list:has(.notion-list-item:has(a[href*="沖縄県"])),
+  .notion-list:has(.notion-list-item:has(a[href*="北海道"])),
+  .notion-list:has(.notion-list-item:has(a[href*="東京都"])) {
+    grid-template-columns: repeat(4, 1fr) !important;
+    max-height: 300px !important;
+  }
+  
+  .notion-list:has(.notion-list-item:has(a[href*="沖縄県"])) .notion-list-item,
+  .notion-list:has(.notion-list-item:has(a[href*="北海道"])) .notion-list-item,
+  .notion-list:has(.notion-list-item:has(a[href*="東京都"])) .notion-list-item {
+    padding: 8px 2px !important;
+    min-height: 36px !important;
+    border-radius: 3px !important;
+  }
+  
+  .notion-list:has(.notion-list-item:has(a[href*="沖縄県"])) .notion-page-link,
+  .notion-list:has(.notion-list-item:has(a[href*="北海道"])) .notion-page-link,
+  .notion-list:has(.notion-list-item:has(a[href*="東京都"])) .notion-page-link {
+    font-size: 0.75rem !important;
+  }
+}

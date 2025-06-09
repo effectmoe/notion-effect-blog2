@@ -96,8 +96,8 @@ const Code = dynamic(() =>
 
 // データベースビューコンポーネント
 const Collection = dynamic(() =>
-  import('react-notion-x/build/third-party/collection').then(
-    (m) => m.Collection
+  import('./CustomGalleryRenderer').then(
+    (m) => m.CustomGalleryRenderer
   )
 )
 
