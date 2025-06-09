@@ -12,6 +12,8 @@ import 'styles/global.css'
 import 'styles/notion.css'
 // global style overrides for prism theme (optional)
 import 'styles/prism-theme.css'
+// instructor gallery responsive styles (specific collection only)
+import 'styles/instructor-gallery-responsive.css'
 
 import type { AppProps } from 'next/app'
 import * as Fathom from 'fathom-client'
