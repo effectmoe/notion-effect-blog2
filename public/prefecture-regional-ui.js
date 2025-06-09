@@ -1,23 +1,8 @@
 (function() {
   'use strict';
 
-  // スタイルを追加
-  function addStyles() {
-    const styleId = 'prefecture-regional-styles';
-    if (document.getElementById(styleId)) return;
-
-    const style = document.createElement('style');
-    style.id = styleId;
-    style.innerHTML = `
-      /* 公認インストラクターセクション内のカードのみゴシック体に */
-      /* ギャラリーグリッドの行間隔を詰める（公認インストラクターセクション内のみ） */
-      /* 地域タイトルは標準のままとする */
-    `;
-    document.head.appendChild(style);
-  }
-
   // 初期化時に公認インストラクターセクションを特定してスタイルを適用
-  function applyCustomStyles() {
+  function applyPrefectureStyles() {
     // 見出しを探す
     const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
     
@@ -31,31 +16,28 @@
           // 次の見出しに到達したら終了
           if (current.matches('h1, h2, h3, h4, h5, h6')) break;
           
-          // ギャラリーグリッドを見つけたらスタイルを適用
+          // ギャラリーグリッドの間隔を詰める
           const grids = current.querySelectorAll('.notion-gallery-grid');
           grids.forEach(grid => {
             grid.style.gap = '8px';
             grid.style.rowGap = '8px';
           });
           
-          // カードを見つけたらゴシック体を適用
+          // カードをゴシック体にする
           const cards = current.querySelectorAll('.notion-collection-card');
           cards.forEach(card => {
             card.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans JP", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif';
           });
           
-          // 地域タイトル（details summary）を大きくする
+          // 地域名（北海道、東北など）を大きくする
           const summaries = current.querySelectorAll('details > summary');
           summaries.forEach(summary => {
             const summaryText = summary.textContent || '';
             // 地域名を含むsummaryのみ
-            if (summaryText.includes('北海道') || summaryText.includes('東北') || 
-                summaryText.includes('関東') || summaryText.includes('中部') || 
-                summaryText.includes('近畿') || summaryText.includes('中国') || 
-                summaryText.includes('四国') || summaryText.includes('九州')) {
-              summary.style.fontSize = '1.3em';
+            if (summaryText.match(/▼\s*(北海道|東北|関東|中部|近畿|中国|四国|九州)/)) {
+              summary.style.fontSize = '1.5em';
               summary.style.fontWeight = 'bold';
-              summary.style.padding = '12px 0';
+              summary.style.padding = '16px 0';
             }
           });
           
@@ -67,16 +49,18 @@
 
   // 初期化
   function initialize() {
-    addStyles();
-    
     // 少し待ってから実行
     setTimeout(() => {
-      applyCustomStyles();
+      applyPrefectureStyles();
     }, 1000);
     
     // 動的な変更を監視
+    let debounceTimer;
     const observer = new MutationObserver(() => {
-      applyCustomStyles();
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        applyPrefectureStyles();
+      }, 500);
     });
     
     observer.observe(document.body, {
