@@ -20,31 +20,20 @@
         row-gap: 8px !important;
       }
       
-      /* 地域別のヘッダー（東北、関東など）を大きくする */
-      .notion-collection-group summary,
-      .notion-collection-group > div:first-child {
+      /* 地域別のヘッダー（東北、関東など）を大きくする - 複数のセレクタに対応 */
+      .notion-gallery-view > div > div:first-child,
+      .notion-gallery > div > div:first-child,
+      [class*="notion-collection"] > div > div:first-child {
         font-size: 1.5em !important;
         font-weight: bold !important;
         padding: 12px 0 !important;
       }
       
-      /* 折りたたみ可能なグループのスタイル調整 */
-      details.notion-collection-group summary {
+      /* Notion detailsタグの地域ヘッダー */
+      details > summary {
         font-size: 1.5em !important;
         font-weight: bold !important;
         padding: 12px 0 !important;
-        cursor: pointer;
-      }
-      
-      /* グループタイトルの背景色や装飾を追加（オプション） */
-      details.notion-collection-group summary::before {
-        content: "▼ ";
-        display: inline-block;
-        transition: transform 0.2s;
-      }
-      
-      details.notion-collection-group[open] summary::before {
-        transform: rotate(-90deg);
       }
     `;
     document.head.appendChild(style);
