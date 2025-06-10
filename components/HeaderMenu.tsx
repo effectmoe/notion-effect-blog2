@@ -21,6 +21,7 @@ const HeaderMenu: React.FC<HeaderMenuProps> = ({ menuItems }) => {
 
   // 現在のページに基づいてアクティブなメニュー項目を判断
   const isActive = (url: string) => {
+    if (!isMounted) return false // マウント前はfalseを返す
     if (url === '/' && router.pathname === '/') {
       return true
     }
@@ -69,7 +70,7 @@ const HeaderMenu: React.FC<HeaderMenuProps> = ({ menuItems }) => {
               <li key={item.id} className={styles.menuItem}>
                 <Link 
                   href={item.url}
-                  className={`${styles.menuLink} ${isActive(item.url) ? styles.active : ''}`}
+                  className={styles.menuLink}
                 >
                   {item.title}
                 </Link>

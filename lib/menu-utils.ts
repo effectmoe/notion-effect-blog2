@@ -1,5 +1,6 @@
 import * as config from './config'
 import { notion } from './notion-api'
+import { throttleRequest } from './notion-concurrency'
 
 // プロパティ値を取得する独自関数
 function getPropertyValue(block: any, propertyName: string, recordMap: any): any {
@@ -70,7 +71,10 @@ export async function getMenuItems(): Promise<MenuItem[]> {
     }
 
     // NotionデータベースのページデータをAPI経由で取得
-    const pageData = await notion.getPage(rootNotionPageId)
+    const isVercel = process.env.VERCEL || process.env.VERCEL_ENV
+    const pageData = isVercel 
+      ? await throttleRequest(() => notion.getPage(rootNotionPageId))
+      : await notion.getPage(rootNotionPageId)
     if (!pageData) {
       console.error('Failed to get page data')
       return FALLBACK_MENU_ITEMS
@@ -80,7 +84,7 @@ export async function getMenuItems(): Promise<MenuItem[]> {
     const blocks = Object.values(pageData.block)
     
     // データベースのブロックを見つける
-    const collectionBlocks = blocks.filter(block => 
+    const collectionBlocks = blocks.filter((block: any) => 
       (block.value?.type === 'collection_view' || 
       block.value?.type === 'collection_view_page') &&
       block.value?.collection_id // collection_idプロパティが存在するブロックのみをフィルタリング
@@ -98,7 +102,7 @@ export async function getMenuItems(): Promise<MenuItem[]> {
     for (const block of collectionBlocks) {
       // 型アサーションを使用してTypeScriptのエラーを回避
       // collection_idが存在することがすでにフィルタリングされている
-      const blockValue = block.value as any
+      const blockValue = (block as any).value
       const collectionId = blockValue.collection_id
       const collection = pageData.collection?.[collectionId]
       

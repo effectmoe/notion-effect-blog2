@@ -14,11 +14,17 @@ export const CustomPageLink: React.FC<{
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault()
     
+    console.log('[CustomPageLink] Click detected:', { href })
+    
     // Handle both internal and external links
     if (href.startsWith('http://') || href.startsWith('https://')) {
+      console.log('[CustomPageLink] Opening external link:', href)
       window.open(href, '_blank', 'noopener,noreferrer')
     } else {
-      router.push(href)
+      console.log('[CustomPageLink] Navigating to internal link:', href)
+      router.push(href).catch(err => {
+        console.error('[CustomPageLink] Navigation error:', err)
+      })
     }
   }
   

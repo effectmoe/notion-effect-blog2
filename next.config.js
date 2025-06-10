@@ -11,7 +11,7 @@ export default withBundleAnalyzer({
     ignoreDuringBuilds: true, // ビルド時のESLintエラーを無視
   },
   reactStrictMode: false, // ハイドレーションエラーを軽減
-  staticPageGenerationTimeout: 300,
+  staticPageGenerationTimeout: 600, // タイムアウトを10分に延長
   
   // Service Worker のサポート
   async headers() {
