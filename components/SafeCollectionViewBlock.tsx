@@ -5,8 +5,9 @@ import { DebugCollectionView } from './DebugCollectionView';
 
 // エラーハンドリングを追加したCollectionコンポーネント
 export function SafeCollectionViewBlock(props: any) {
-  // NotionコンテキストからrecordMapを取得
-  const { recordMap } = useNotionContext();
+  // NotionコンテキストからrecordMapとその他の必要な関数を取得
+  const context = useNotionContext();
+  const { recordMap, mapPageUrl } = context;
   // デバッグ用ログ：受け取ったpropsの内容を詳細に出力
   console.log('SafeCollectionViewBlock props:', {
     hasBlock: !!props.block,
@@ -146,7 +147,11 @@ export function SafeCollectionViewBlock(props: any) {
       // recordMapから取得したデータで補完
       collection: requiredData.collection || props.collection,
       collection_view: requiredData.collectionView || props.collection_view,
-      collection_query: requiredData.collectionQuery || props.collection_query
+      collection_query: requiredData.collectionQuery || props.collection_query,
+      // NotionContextから重要な関数を渡す
+      mapPageUrl: props.mapPageUrl || mapPageUrl,
+      // その他のコンテキストプロパティも渡す
+      ...context
     };
     
     console.log('Passing to Collection component:', {
@@ -154,6 +159,13 @@ export function SafeCollectionViewBlock(props: any) {
       hasCollection: !!collectionProps.collection,
       hasCollectionView: !!collectionProps.collection_view,
       hasCollectionQuery: !!collectionProps.collection_query
+    });
+    
+    // mapPageUrlが正しく渡されているか確認
+    console.log('Collection props being passed:', {
+      hasMapPageUrl: !!collectionProps.mapPageUrl,
+      mapPageUrlType: typeof collectionProps.mapPageUrl,
+      allProps: Object.keys(collectionProps)
     });
     
     return <Collection {...collectionProps} />;
