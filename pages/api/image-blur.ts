@@ -18,7 +18,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const buffer = Buffer.from(await response.arrayBuffer());
     
     // Plaiceholderでブラー画像を生成
-    const { base64, img } = await getPlaiceholder(buffer, {
+    const { base64, metadata } = await getPlaiceholder(buffer, {
       size: 10 // 小さいサイズでブラー効果
     });
     
@@ -27,7 +27,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     
     res.status(200).json({
       base64,
-      img
+      metadata
     });
   } catch (error) {
     console.error('Blur generation error:', error);
