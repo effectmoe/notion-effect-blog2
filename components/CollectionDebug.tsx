@@ -1,8 +1,10 @@
 import React from 'react'
 import { useNotionContext } from 'react-notion-x'
+import { useRouter } from 'next/router'
 
 export function CollectionDebug() {
   const { recordMap, mapPageUrl } = useNotionContext()
+  const router = useRouter()
   
   React.useEffect(() => {
     // データベースアイテムのリンクをデバッグ
@@ -45,13 +47,15 @@ export function CollectionDebug() {
         if (!htmlItem.dataset.debugListener) {
           htmlItem.dataset.debugListener = 'true'
           item.addEventListener('click', (e) => {
+            const linkHref = (link as HTMLAnchorElement)?.href
             console.log(`[CollectionDebug] Collection item clicked:`, {
               target: e.target,
               currentTarget: e.currentTarget,
-              link: (link as HTMLAnchorElement)?.href,
+              link: linkHref,
               defaultPrevented: e.defaultPrevented,
               bubbles: e.bubbles
             })
+            
           }, true)
         }
       })
@@ -97,7 +101,7 @@ export function CollectionDebug() {
     })
     
     return () => observer.disconnect()
-  }, [])
+  }, [router])
   
   // mapPageUrl関数もデバッグ
   React.useEffect(() => {

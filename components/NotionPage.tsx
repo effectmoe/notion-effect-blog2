@@ -290,7 +290,7 @@ export function NotionPage({
       propertyTextValue,
       propertyDateValue,
       // WorkingPageLinkを使用してリンクを修正
-      PageLink: WorkingPageLink,
+      // PageLink: WorkingPageLink,
       // Remove custom Toggle to use default react-notion-x implementation
       // which might handle collection views better
     }),
@@ -440,7 +440,7 @@ export function NotionPage({
 
       <GitHubShareButton />
       {mounted && <FormulaPropertyDebug recordMap={recordMap} />}
-      {mounted && <CollectionDebug />}
+      {/* {mounted && <CollectionDebug />} */}
     </>
   )
 }
