@@ -29,25 +29,26 @@ export function CollectionDebug() {
       
       collectionItems.forEach((item, index) => {
         const link = item.querySelector('a') || item.closest('a')
-        const isClickable = item.style.cursor === 'pointer' || (link && link.href)
+        const htmlItem = item as HTMLElement
+        const isClickable = htmlItem.style.cursor === 'pointer' || (link && (link as HTMLAnchorElement).href)
         
         console.log(`[CollectionDebug] Item ${index}:`, {
           hasLink: !!link,
           href: link?.getAttribute('href'),
-          fullHref: link?.href,
+          fullHref: (link as HTMLAnchorElement)?.href,
           isClickable,
           className: item.className,
           tagName: item.tagName
         })
         
         // クリックイベントリスナーを追加してデバッグ
-        if (!item.dataset.debugListener) {
-          item.dataset.debugListener = 'true'
+        if (!htmlItem.dataset.debugListener) {
+          htmlItem.dataset.debugListener = 'true'
           item.addEventListener('click', (e) => {
             console.log(`[CollectionDebug] Collection item clicked:`, {
               target: e.target,
               currentTarget: e.currentTarget,
-              link: link?.href,
+              link: (link as HTMLAnchorElement)?.href,
               defaultPrevented: e.defaultPrevented,
               bubbles: e.bubbles
             })
