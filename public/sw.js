@@ -1,144 +1,182 @@
-// Simple Service Worker without ES modules
-self.addEventListener('install', (event) => {
-  console.log('Service Worker installing...');
-  self.skipWaiting();
-});
+/// <reference lib="webworker" />
 
-self.addEventListener('activate', (event) => {
-  console.log('Service Worker activating...');
-  event.waitUntil(clients.claim());
-});
+import { clientsClaim } from 'workbox-core';
+import { ExpirationPlugin } from 'workbox-expiration';
+import { precacheAndRoute, createHandlerBoundToURL } from 'workbox-precaching';
+import { registerRoute } from 'workbox-routing';
+import { NetworkFirst, CacheFirst, StaleWhileRevalidate } from 'workbox-strategies';
+import { CacheableResponsePlugin } from 'workbox-cacheable-response';
 
-// Cache strategies
-const CACHE_NAMES = {
-  static: 'static-v1',
-  dynamic: 'dynamic-v1',
-  notion: 'notion-api-v1'
-};
+// Service Workerの即時有効化
+clientsClaim();
 
-// Notion API caching - Network First
+// プリキャッシュマニフェスト（ビルド時に自動生成）
+precacheAndRoute([{"revision":"22d0b716475e6746ab12cf1324978029","url":"404.png"},{"revision":"9638a06841d6788388e11e1075e1109a","url":"cache-monitor.js"},{"revision":"4fc3227313543502958d98443e3973a7","url":"error.png"},{"revision":"2bad4a6f0080f9b445317af993cb6d72","url":"favicon-128x128.png"},{"revision":"820675e9e2dc369ce2a7f797f2a6ad0f","url":"favicon-192x192.png"},{"revision":"aaa3368a9b5804c3f3cbd6b6f8e17dcc","url":"favicon.ico"},{"revision":"281e0f701e10f4642c1cbe97467c3ea6","url":"favicon.png"},{"revision":"87b47e4d25e93e0107e96ebb4aad8495","url":"force-toggle-open.js"},{"revision":"9c00a95a99d709b0c7746d776f4168b5","url":"inject-formula-simple.js"},{"revision":"23ead271c28d44004a53b067f6f03672","url":"offline.html"},{"revision":"caf7f62ddc4bc796e3f7e9083013c67b","url":"prefecture-regional-ui.js"}] || []);
+
+// アプリシェルのルーティング
+const fileExtensionRegexp = new RegExp('/[^/?]+\\.[^/]+$');
+registerRoute(
+  ({ request, url }) => {
+    if (request.mode !== 'navigate') {
+      return false;
+    }
+    if (url.pathname.startsWith('/_')) {
+      return false;
+    }
+    if (url.pathname.match(fileExtensionRegexp)) {
+      return false;
+    }
+    return true;
+  },
+  createHandlerBoundToURL('/index.html')
+);
+
+// キャッシング戦略の定義
+
+// 1. NetworkFirst戦略（Notion APIレスポンス用）
+registerRoute(
+  ({ url }) => url.pathname.includes('/api/notion') || 
+               url.hostname.includes('notion.so'),
+  new NetworkFirst({
+    cacheName: 'notion-api-cache',
+    networkTimeoutSeconds: 3,
+    plugins: [
+      new CacheableResponsePlugin({
+        statuses: [0, 200],
+      }),
+      new ExpirationPlugin({
+        maxAgeSeconds: 60 * 60, // 1時間
+        maxEntries: 100,
+        purgeOnQuotaError: true,
+      }),
+    ],
+  })
+);
+
+// 2. CacheFirst戦略（静的アセット用）
+// フォント
+registerRoute(
+  ({ url }) => url.origin === 'https://fonts.googleapis.com' ||
+               url.origin === 'https://fonts.gstatic.com',
+  new CacheFirst({
+    cacheName: 'google-fonts-cache',
+    plugins: [
+      new CacheableResponsePlugin({
+        statuses: [0, 200],
+      }),
+      new ExpirationPlugin({
+        maxAgeSeconds: 60 * 60 * 24 * 365, // 1年
+        maxEntries: 30,
+      }),
+    ],
+  })
+);
+
+// 画像
+registerRoute(
+  ({ request }) => request.destination === 'image',
+  new CacheFirst({
+    cacheName: 'images-cache',
+    plugins: [
+      new CacheableResponsePlugin({
+        statuses: [0, 200],
+      }),
+      new ExpirationPlugin({
+        maxAgeSeconds: 60 * 60 * 24 * 30, // 30日
+        maxEntries: 200,
+        purgeOnQuotaError: true,
+      }),
+    ],
+  })
+);
+
+// CSS/JS
+registerRoute(
+  ({ request }) => request.destination === 'style' ||
+                   request.destination === 'script',
+  new StaleWhileRevalidate({
+    cacheName: 'static-resources',
+    plugins: [
+      new CacheableResponsePlugin({
+        statuses: [0, 200],
+      }),
+      new ExpirationPlugin({
+        maxAgeSeconds: 60 * 60 * 24 * 30, // 30日
+        maxEntries: 60,
+      }),
+    ],
+  })
+);
+
+// 3. StaleWhileRevalidate戦略（動的コンテンツ用）
+registerRoute(
+  ({ url }) => url.pathname.includes('/api/') &&
+               !url.pathname.includes('/api/notion'),
+  new StaleWhileRevalidate({
+    cacheName: 'api-cache',
+    plugins: [
+      new CacheableResponsePlugin({
+        statuses: [0, 200],
+      }),
+      new ExpirationPlugin({
+        maxAgeSeconds: 60 * 60 * 24, // 24時間
+        maxEntries: 50,
+      }),
+    ],
+  })
+);
+
+// オフライン時のフォールバック
 self.addEventListener('fetch', (event) => {
-  const { request } = event;
-  const url = new URL(request.url);
-
-  // Notion API requests
-  if (url.pathname.includes('/api/notion') || url.hostname.includes('notion.so')) {
+  if (event.request.mode === 'navigate') {
     event.respondWith(
-      networkFirst(request, CACHE_NAMES.notion, 60 * 60) // 1 hour
+      fetch(event.request).catch(() => {
+        return caches.match('/offline.html');
+      })
     );
-    return;
   }
-
-  // Static assets - Cache First
-  if (request.destination === 'image' || 
-      request.destination === 'style' || 
-      request.destination === 'script' ||
-      request.destination === 'font') {
-    event.respondWith(
-      cacheFirst(request, CACHE_NAMES.static, 30 * 24 * 60 * 60) // 30 days
-    );
-    return;
-  }
-
-  // Dynamic content - Stale While Revalidate
-  if (url.pathname.includes('/api/')) {
-    event.respondWith(
-      staleWhileRevalidate(request, CACHE_NAMES.dynamic, 24 * 60 * 60) // 24 hours
-    );
-    return;
-  }
-
-  // Default - Network First
-  event.respondWith(
-    networkFirst(request, CACHE_NAMES.dynamic, 60 * 60) // 1 hour
-  );
 });
 
-// Network First strategy
-async function networkFirst(request, cacheName, maxAge) {
-  try {
-    const networkResponse = await fetch(request);
-    if (networkResponse && networkResponse.status === 200) {
-      const cache = await caches.open(cacheName);
-      cache.put(request, networkResponse.clone());
-    }
-    return networkResponse;
-  } catch (error) {
-    const cachedResponse = await caches.match(request);
-    if (cachedResponse) {
-      return cachedResponse;
-    }
-    // Return offline page for navigation requests
-    if (request.mode === 'navigate') {
-      return caches.match('/offline.html');
-    }
-    throw error;
+// バックグラウンド同期
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'sync-notion-data') {
+    event.waitUntil(syncNotionData());
   }
-}
+});
 
-// Cache First strategy
-async function cacheFirst(request, cacheName, maxAge) {
-  const cachedResponse = await caches.match(request);
-  if (cachedResponse) {
-    // Update cache in background
-    fetch(request).then(response => {
-      if (response && response.status === 200) {
-        caches.open(cacheName).then(cache => {
-          cache.put(request, response);
-        });
+async function syncNotionData() {
+  try {
+    const cache = await caches.open('notion-api-cache');
+    const requests = await cache.keys();
+    
+    for (const request of requests) {
+      const response = await fetch(request);
+      if (response.ok) {
+        await cache.put(request, response);
       }
-    });
-    return cachedResponse;
-  }
-
-  try {
-    const networkResponse = await fetch(request);
-    if (networkResponse && networkResponse.status === 200) {
-      const cache = await caches.open(cacheName);
-      cache.put(request, networkResponse.clone());
     }
-    return networkResponse;
-  } catch (error) {
-    return new Response('Network error', { status: 408 });
-  }
-}
-
-// Stale While Revalidate strategy
-async function staleWhileRevalidate(request, cacheName, maxAge) {
-  const cachedResponse = await caches.match(request);
-  
-  const fetchPromise = fetch(request).then(response => {
-    if (response && response.status === 200) {
-      caches.open(cacheName).then(cache => {
-        cache.put(request, response.clone());
+    
+    // 更新完了を通知
+    const clients = await self.clients.matchAll();
+    clients.forEach(client => {
+      client.postMessage({
+        type: 'CACHE_UPDATED',
+        timestamp: Date.now()
       });
-    }
-    return response;
-  });
-
-  return cachedResponse || fetchPromise;
+    });
+  } catch (error) {
+    console.error('Sync failed:', error);
+  }
 }
 
-// Handle messages from the main thread
+// Service Workerの更新処理
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
-
-  if (event.data && event.data.type === 'GET_CACHE_STATS') {
-    getCacheStats().then(stats => {
-      event.ports[0].postMessage(stats);
-    });
-  }
-
-  if (event.data && event.data.type === 'CLEAR_CACHE') {
-    clearAllCaches().then(() => {
-      event.ports[0].postMessage({ success: true });
-    });
-  }
 });
 
-// Get cache statistics
+// キャッシュの統計情報
 async function getCacheStats() {
   const cacheNames = await caches.keys();
   const stats = {};
@@ -155,30 +193,18 @@ async function getCacheStats() {
   return stats;
 }
 
-// Clear all caches
-async function clearAllCaches() {
-  const cacheNames = await caches.keys();
-  await Promise.all(
-    cacheNames.map(cacheName => caches.delete(cacheName))
-  );
-}
-
-// Periodic cache cleanup
-self.addEventListener('periodicsync', (event) => {
-  if (event.tag === 'cache-cleanup') {
-    event.waitUntil(cleanupOldCaches());
+// キャッシュのクリーンアップ
+self.addEventListener('message', async (event) => {
+  if (event.data && event.data.type === 'GET_CACHE_STATS') {
+    const stats = await getCacheStats();
+    event.ports[0].postMessage(stats);
+  }
+  
+  if (event.data && event.data.type === 'CLEAR_CACHE') {
+    const cacheNames = await caches.keys();
+    await Promise.all(
+      cacheNames.map(cacheName => caches.delete(cacheName))
+    );
+    event.ports[0].postMessage({ success: true });
   }
 });
-
-async function cleanupOldCaches() {
-  const cacheWhitelist = Object.values(CACHE_NAMES);
-  const cacheNames = await caches.keys();
-  
-  return Promise.all(
-    cacheNames.map(cacheName => {
-      if (!cacheWhitelist.includes(cacheName)) {
-        return caches.delete(cacheName);
-      }
-    })
-  );
-}

@@ -5,9 +5,10 @@ export default function ServiceWorkerRegistration() {
   useEffect(() => {
     if (
       typeof window !== 'undefined' &&
-      'serviceWorker' in navigator &&
-      process.env.NODE_ENV === 'production'
+      'serviceWorker' in navigator
     ) {
+      // Service Worker registration - only in production builds
+      const isProduction = window.location.hostname !== 'localhost';
       const wb = new Workbox('/sw.js');
 
       // Service Worker更新時の処理
@@ -34,8 +35,8 @@ export default function ServiceWorkerRegistration() {
           console.log('Cache updated at:', new Date(event.data.timestamp));
           
           // 必要に応じてUIに通知を表示
-          if (window.showNotification) {
-            window.showNotification('コンテンツが更新されました');
+          if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification('コンテンツが更新されました');
           }
         }
       });
@@ -51,16 +52,16 @@ export default function ServiceWorkerRegistration() {
 
         // バックグラウンド同期の登録
         if ('sync' in registration) {
-          registration.sync.register('sync-notion-data').catch((err) => {
+          (registration as any).sync.register('sync-notion-data').catch((err: any) => {
             console.log('Background sync registration failed:', err);
           });
         }
 
         // 定期同期の登録（利用可能な場合）
         if ('periodicSync' in registration) {
-          registration.periodicSync.register('sync-notion-content', {
+          (registration as any).periodicSync.register('sync-notion-content', {
             minInterval: 24 * 60 * 60 * 1000 // 24時間
-          }).catch((err) => {
+          }).catch((err: any) => {
             console.log('Periodic sync registration failed:', err);
           });
         }
@@ -124,7 +125,9 @@ export default function ServiceWorkerRegistration() {
       };
 
       // デバッグ用: キャッシュ状態のログ出力
-      if (process.env.NODE_ENV === 'development') {
+      // Development環境でのデバッグは、環境変数で制御
+      const enableDebug = false; // 必要に応じて有効化
+      if (enableDebug) {
         setInterval(async () => {
           const stats = await (window as any).getCacheStats();
           console.log('Cache statistics:', stats);

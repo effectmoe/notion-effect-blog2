@@ -8,7 +8,11 @@ export async function getEdgeCacheConfig() {
 
   try {
     const config = await get('cacheConfig');
-    return config || getDefaultConfig();
+    // 型チェックを追加
+    if (typeof config === 'object' && config !== null && 'enableCache' in config) {
+      return config as ReturnType<typeof getDefaultConfig>;
+    }
+    return getDefaultConfig();
   } catch (error) {
     console.error('Edge Config error:', error);
     return getDefaultConfig();
@@ -98,7 +102,7 @@ export async function shouldBypassCache(request: Request): Promise<boolean> {
 }
 
 // エッジでのレスポンスキャッシュ
-export function getCacheHeaders(pathname: string, config: any) {
+export function getCacheHeaders(pathname: string, config: ReturnType<typeof getDefaultConfig>) {
   let maxAge = config.cacheDuration.dynamic;
   let swr = config.staleWhileRevalidate.dynamic;
   

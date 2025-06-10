@@ -1,5 +1,5 @@
 import Redis from 'ioredis';
-import LRU from 'lru-cache';
+import { LRUCache } from 'lru-cache';
 import { NotionAPI } from 'notion-client';
 
 // キャッシュレイヤーの優先順位:
@@ -9,7 +9,7 @@ import { NotionAPI } from 'notion-client';
 // 4. CDNキャッシュ - エッジ
 
 // インメモリキャッシュの設定
-const memoryCache = new LRU<string, any>({
+const memoryCache = new LRUCache<string, any>({
   max: 100, // 最大100エントリ
   ttl: 1000 * 60 * 5, // 5分
   updateAgeOnGet: true,

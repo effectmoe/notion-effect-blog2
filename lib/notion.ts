@@ -54,13 +54,13 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
   // キャッシュ付きAPIを使用（本番環境のみ）
   const api = process.env.NODE_ENV === 'production' ? cachedNotion : notion;
   
-  let recordMap = await api.getPage(pageId, {
+  let recordMap: ExtendedRecordMap = await api.getPage(pageId, {
     fetchMissingBlocks: true,
     fetchCollections: true,
     signFileUrls: false,
     chunkLimit: 500,  // Increase chunk limit
     chunkNumber: 0
-  })
+  }) as ExtendedRecordMap
   
   // Use the new helper function to find missing blocks
   const { missingBlocks, missingCollections, toggleContentBlocks } = findMissingBlocks(recordMap)
