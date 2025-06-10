@@ -31,8 +31,6 @@ import { PageHead } from './PageHead'
 import { Header } from './Header'
 import { FormulaPropertyDebug } from './FormulaPropertyDebug'
 import { CustomPageLink } from './CustomPageLink'
-import { CollectionDebug } from './CollectionDebug'
-import { WorkingPageLink } from './WorkingPageLink'
 // import { CollectionViewWrapper } from './CollectionViewWrapper'
 import styles from './styles.module.css'
 
@@ -98,23 +96,12 @@ const Code = dynamic(() =>
 )
 
 // データベースビューコンポーネント
-// react-notion-xのCollectionを直接使用してみる
 const Collection = dynamic(() =>
   import('react-notion-x/build/third-party/collection').then(
     (m) => m.Collection
   ),
   {
-    ssr: false,
-    loading: () => (
-      <div style={{ 
-        padding: '20px', 
-        background: '#f5f5f5', 
-        borderRadius: '8px',
-        margin: '10px 0' 
-      }}>
-        <p style={{ color: '#666' }}>データベースを読み込んでいます...</p>
-      </div>
-    )
+    ssr: false
   }
 )
 
@@ -289,8 +276,8 @@ export function NotionPage({
       propertyLastEditedTimeValue,
       propertyTextValue,
       propertyDateValue,
-      // WorkingPageLinkを使用してリンクを修正
-      // PageLink: WorkingPageLink,
+      // Override PageLink to fix div-in-anchor hydration error
+      PageLink: CustomPageLink as any,
       // Remove custom Toggle to use default react-notion-x implementation
       // which might handle collection views better
     }),
@@ -317,17 +304,7 @@ export function NotionPage({
     if (lite) params.lite = lite
 
     const searchParams = new URLSearchParams(params)
-    const mapFn = mapPageUrl(site, recordMap, searchParams)
-    
-    // デバッグ用にmapPageUrl関数をテスト
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[NotionPage] mapPageUrl test:', {
-        testId: '12345',
-        result: mapFn('12345')
-      })
-    }
-    
-    return mapFn
+    return mapPageUrl(site, recordMap, searchParams)
   }, [site, recordMap, lite])
 
   const keys = Object.keys(recordMap?.block || {})
@@ -440,7 +417,6 @@ export function NotionPage({
 
       <GitHubShareButton />
       {mounted && <FormulaPropertyDebug recordMap={recordMap} />}
-      {/* {mounted && <CollectionDebug />} */}
     </>
   )
 }
