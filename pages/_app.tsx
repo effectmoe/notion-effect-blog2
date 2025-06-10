@@ -37,6 +37,7 @@ import { getMenuItemsForStaticProps } from '@/lib/menu-utils'
 import { fillFormulaProperties } from '@/lib/fill-formula-properties'
 
 import dynamic from 'next/dynamic'
+import CriticalFontLoader from '@/components/CriticalFontLoader'
 
 const FontStyler = dynamic(() => import('@/components/FontStyler'), { 
   ssr: false,
@@ -44,6 +45,11 @@ const FontStyler = dynamic(() => import('@/components/FontStyler'), {
 })
 
 const ColorStyler = dynamic(() => import('@/components/ColorStyler'), { 
+  ssr: false,
+  loading: () => null
+})
+
+const PerformanceMonitor = dynamic(() => import('@/components/PerformanceMonitor'), {
   ssr: false,
   loading: () => null
 })
@@ -101,11 +107,12 @@ export default function App({ Component, pageProps }: CustomAppProps) {
 
   // FontStylerとColorStylerコンポーネントを追加してスタイルをカスタマイズ
   return (
-    <>
+    <CriticalFontLoader>
       <FontStyler />
       <ColorStyler />
       <Component {...pageProps} />
-    </>
+      <PerformanceMonitor enabled={process.env.NODE_ENV === 'development'} />
+    </CriticalFontLoader>
   )
 }
 

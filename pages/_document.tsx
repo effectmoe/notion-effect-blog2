@@ -16,6 +16,43 @@ export default class MyDocument extends Document {
             />
 
             <link rel='manifest' href='/manifest.json' />
+            
+            {/* フォント最適化: リソースヒント */}
+            <link rel='preconnect' href='https://fonts.googleapis.com' />
+            <link rel='preconnect' href='https://fonts.gstatic.com' crossOrigin="anonymous" />
+            <link rel='dns-prefetch' href='https://fonts.googleapis.com' />
+            <link rel='dns-prefetch' href='https://fonts.gstatic.com' />
+            
+            {/* Notion画像用のリソースヒント */}
+            <link rel='dns-prefetch' href='https://www.notion.so' />
+            <link rel='dns-prefetch' href='https://images.unsplash.com' />
+            
+            {/* 基本フォントのプリロード（サブセット版） */}
+            <link
+              rel='preload'
+              as='style'
+              href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400&display=swap&subset=japanese'
+            />
+            <link
+              rel='stylesheet'
+              href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400&display=swap&subset=japanese'
+              media='print'
+              onLoad="this.media='all'"
+            />
+            
+            {/* Critical fonts inline */}
+            <style dangerouslySetInnerHTML={{ __html: `
+              /* 初期フォント設定 - システムフォントで即座に表示 */
+              @font-face {
+                font-family: 'Noto Sans JP';
+                font-style: normal;
+                font-weight: 400;
+                font-display: swap;
+                src: local('Noto Sans JP Regular'), local('NotoSansJP-Regular'),
+                     local('Noto Sans CJK JP Regular');
+                unicode-range: U+3000-303F, U+3040-309F, U+30A0-30FF, U+FF00-FFEF, U+4E00-9FAF;
+              }
+            ` }} />
           </Head>
 
           <body>
