@@ -80,9 +80,15 @@ export default withBundleAnalyzer({
                 /node_modules[\\/]/.test(module.identifier())
             },
             name(module) {
-              const hash = require('crypto').createHash('sha1')
-              hash.update(module.identifier())
-              return hash.digest('hex').substring(0, 8)
+              const moduleId = module.identifier()
+              // Simple hash function without crypto
+              let hash = 0
+              for (let i = 0; i < moduleId.length; i++) {
+                const char = moduleId.charCodeAt(i)
+                hash = ((hash << 5) - hash) + char
+                hash = hash & hash // Convert to 32bit integer
+              }
+              return 'lib-' + Math.abs(hash).toString(16).substring(0, 8)
             },
             priority: 30,
             minChunks: 1,
