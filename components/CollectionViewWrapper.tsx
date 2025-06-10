@@ -30,8 +30,22 @@ export const CollectionViewWrapper: React.FC<{ block: any; className?: string; c
     return null
   }
 
-  // Get collection ID from block
-  const collectionId = getBlockCollectionId(block, recordMap)
+  // Debug: Log block structure
+  console.log('CollectionViewWrapper: Processing block', {
+    blockId: block.id,
+    blockType: block.type,
+    viewIds: block.view_ids,
+    collectionId: block.collection_id,
+    recordMapKeys: Object.keys(recordMap)
+  })
+
+  // Get collection ID from block - try multiple methods
+  let collectionId = getBlockCollectionId(block, recordMap)
+  
+  // If getBlockCollectionId didn't work, try direct access
+  if (!collectionId && block.collection_id) {
+    collectionId = block.collection_id
+  }
   
   // Check if collection exists
   const collection = recordMap.collection?.[collectionId]?.value
@@ -43,7 +57,9 @@ export const CollectionViewWrapper: React.FC<{ block: any; className?: string; c
       blockId: block.id,
       collectionId,
       hasCollection: !!collection,
-      hasCollectionView: !!collectionView
+      hasCollectionView: !!collectionView,
+      availableCollections: Object.keys(recordMap.collection || {}),
+      availableViews: Object.keys(recordMap.collection_view || {})
     })
     
     // Return a placeholder or null
