@@ -97,11 +97,21 @@ const Code = dynamic(() =>
 
 // データベースビューコンポーネント
 const Collection = dynamic(() =>
-  import('react-notion-x/build/third-party/collection').then(
-    (m) => m.Collection
+  import('./SafeCollectionViewBlock').then(
+    (m) => m.SafeCollectionViewBlock
   ),
   {
-    ssr: false
+    ssr: false,
+    loading: () => (
+      <div style={{ 
+        padding: '20px', 
+        background: '#f5f5f5', 
+        borderRadius: '8px',
+        margin: '10px 0' 
+      }}>
+        <p style={{ color: '#666' }}>データベースを読み込んでいます...</p>
+      </div>
+    )
   }
 )
 

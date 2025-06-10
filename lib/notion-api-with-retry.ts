@@ -17,7 +17,7 @@ export class NotionAPIWithRetry extends NotionAPI {
     super(config);
     this.maxRetries = config?.maxRetries || 3;
     this.retryDelay = config?.retryDelay || 1000;
-    this.timeout = config?.timeout || 30000; // 30秒のデフォルトタイムアウト
+    this.timeout = config?.timeout || 60000; // 60秒のデフォルトタイムアウト
   }
 
   // リトライロジックを含むラッパー
@@ -42,8 +42,14 @@ export class NotionAPIWithRetry extends NotionAPI {
         lastError = error as Error;
         console.error(`Attempt ${attempt + 1} failed for ${operationName}:`, error);
         
-        // タイムアウトエラーの場合は遅延を増やす
-        if (error instanceof Error && error.message.includes('timed out')) {
+        // タイムアウトエラーやネットワークエラーの場合はリトライ
+        const isRetryableError = error instanceof Error && 
+          (error.message.includes('timed out') || 
+           error.message.includes('ECONNRESET') ||
+           error.message.includes('ETIMEDOUT') ||
+           error.message.includes('socket hang up'));
+           
+        if (isRetryableError) {
           if (attempt < this.maxRetries - 1) {
             const delay = this.retryDelay * Math.pow(2, attempt); // 指数バックオフ
             console.log(`Retrying ${operationName} after ${delay}ms...`);
