@@ -75,3 +75,34 @@ details.notion-toggle[open] > summary {
 .dark details.notion-toggle summary:hover {
   background-color: rgba(255, 255, 255, 0.08);
 }
+
+/* Collection placeholder and error states */
+.notion-collection-placeholder,
+.notion-collection-error,
+.notion-collection-loading {
+  padding: 2rem;
+  text-align: center;
+  background-color: rgba(55, 53, 47, 0.03);
+  border-radius: 3px;
+  margin: 1rem 0;
+}
+
+.notion-collection-placeholder p,
+.notion-collection-error p,
+.notion-collection-loading {
+  margin: 0;
+  color: rgba(55, 53, 47, 0.65);
+  font-size: 14px;
+}
+
+.dark .notion-collection-placeholder,
+.dark .notion-collection-error,
+.dark .notion-collection-loading {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+.dark .notion-collection-placeholder p,
+.dark .notion-collection-error p,
+.dark .notion-collection-loading {
+  color: rgba(255, 255, 255, 0.65);
+}

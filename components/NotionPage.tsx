@@ -31,6 +31,7 @@ import { PageHead } from './PageHead'
 import { Header } from './Header'
 import { FormulaPropertyDebug } from './FormulaPropertyDebug'
 import { CustomPageLink } from './CustomPageLink'
+import { CollectionViewWrapper } from './CollectionViewWrapper'
 import styles from './styles.module.css'
 
 // -----------------------------------------------------------------------------
@@ -94,12 +95,8 @@ const Code = dynamic(() =>
   })
 )
 
-// データベースビューコンポーネント
-const Collection = dynamic(() =>
-  import('react-notion-x/build/third-party/collection').then(
-    (m) => m.Collection
-  )
-)
+// データベースビューコンポーネント - Use our wrapper instead
+const Collection = CollectionViewWrapper
 
 // 数式コンポーネント
 const Equation = dynamic(() =>

@@ -50,6 +50,20 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
     chunkLimit: 100,
     chunkNumber: 0
   })
+  
+  // Validate and fix collection views
+  if (recordMap?.block) {
+    for (const blockId in recordMap.block) {
+      const block = recordMap.block[blockId]?.value
+      if (block?.type === 'collection_view' && block?.view_ids?.length > 0) {
+        // Ensure collection view data exists
+        const viewId = block.view_ids[0]
+        if (!recordMap.collection_view?.[viewId]) {
+          console.warn(`Missing collection_view data for view ${viewId} in block ${blockId}`)
+        }
+      }
+    }
+  }
 
   if (navigationStyle !== 'default') {
     // ensure that any pages linked to in the custom navigation header have
