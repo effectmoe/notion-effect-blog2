@@ -31,6 +31,7 @@ import { PageHead } from './PageHead'
 import { Header } from './Header'
 import { FormulaPropertyDebug } from './FormulaPropertyDebug'
 import { CustomPageLink } from './CustomPageLink'
+import { CollectionDebug } from './CollectionDebug'
 // import { CollectionViewWrapper } from './CollectionViewWrapper'
 import styles from './styles.module.css'
 
@@ -287,7 +288,8 @@ export function NotionPage({
       propertyTextValue,
       propertyDateValue,
       // Override PageLink to fix div-in-anchor hydration error
-      PageLink: CustomPageLink as any,
+      // Temporarily disable custom PageLink to test if it's the issue
+      // PageLink: CustomPageLink as any,
       // Remove custom Toggle to use default react-notion-x implementation
       // which might handle collection views better
     }),
@@ -427,6 +429,7 @@ export function NotionPage({
 
       <GitHubShareButton />
       {mounted && <FormulaPropertyDebug recordMap={recordMap} />}
+      {mounted && <CollectionDebug />}
     </>
   )
 }
