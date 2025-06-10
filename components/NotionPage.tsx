@@ -32,6 +32,7 @@ import { Header } from './Header'
 import { FormulaPropertyDebug } from './FormulaPropertyDebug'
 import { CustomPageLink } from './CustomPageLink'
 import { CollectionDebug } from './CollectionDebug'
+import { WorkingPageLink } from './WorkingPageLink'
 // import { CollectionViewWrapper } from './CollectionViewWrapper'
 import styles from './styles.module.css'
 
@@ -288,7 +289,8 @@ export function NotionPage({
       propertyLastEditedTimeValue,
       propertyTextValue,
       propertyDateValue,
-      // カスタムPageLinkを完全に削除して、デフォルトの動作を使用
+      // WorkingPageLinkを使用してリンクを修正
+      PageLink: WorkingPageLink,
       // Remove custom Toggle to use default react-notion-x implementation
       // which might handle collection views better
     }),
