@@ -73,9 +73,11 @@ type CustomAppProps = AppProps & {
 }
 
 export default function App({ Component, pageProps }: CustomAppProps) {
-  const router = useRouter()
+  const [isMounted, setIsMounted] = React.useState(false)
+  const router = isMounted ? useRouter() : null
 
   React.useEffect(() => {
+    setIsMounted(true)
     // クライアントサイドでのみbootstrapを実行
     if (!isServer) {
       bootstrap()
@@ -103,7 +105,9 @@ export default function App({ Component, pageProps }: CustomAppProps) {
       posthog.init(posthogId, posthogConfig)
     }
 
-    router.events.on('routeChangeComplete', onRouteChangeComplete)
+    if (router) {
+      router.events.on('routeChangeComplete', onRouteChangeComplete)
+    }
     
     // 初回読み込み時にも実行
     if (!isServer) {
@@ -111,9 +115,11 @@ export default function App({ Component, pageProps }: CustomAppProps) {
     }
 
     return () => {
-      router.events.off('routeChangeComplete', onRouteChangeComplete)
+      if (router) {
+        router.events.off('routeChangeComplete', onRouteChangeComplete)
+      }
     }
-  }, [router.events])
+  }, [router])
 
   // FontStylerとColorStylerコンポーネントを追加してスタイルをカスタマイズ
   return (
@@ -128,31 +134,4 @@ export default function App({ Component, pageProps }: CustomAppProps) {
   )
 }
 
-// サーバーサイドでメニュー項目を取得
-App.getInitialProps = async (appContext: any) => {
-  // 元のgetInitialPropsを実行
-  const appProps = appContext.Component.getInitialProps
-    ? await appContext.Component.getInitialProps(appContext.ctx)
-    : {}
-
-  // Notionからメニュー項目を取得
-  try {
-    const menuItems = await getMenuItemsForStaticProps()
-    
-    // メニュー項目をページProps全体に追加
-    return {
-      pageProps: {
-        ...appProps,
-        menuItems
-      }
-    }
-  } catch (error) {
-    console.error('Error fetching menu items:', error)
-    return {
-      pageProps: {
-        ...appProps,
-        menuItems: []
-      }
-    }
-  }
-}
+// getInitialPropsを削除してSSGを有効化

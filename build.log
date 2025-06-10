@@ -1,0 +1,102 @@
+
+> nextjs-notion-starter-kit@2.0.0 build
+> next build && npm run build:sw
+
+ ⚠ You are using a non-standard "NODE_ENV" value in your environment. This creates inconsistencies in the project and is strongly advised against. Read more: https://nextjs.org/docs/messages/non-standard-node-env
+   ▲ Next.js 15.2.4
+   - Environments: .env.local, .env
+
+   Skipping linting
+   Checking validity of types ...
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Collecting page data ...
+Notion API設定状況:
+- NOTION_API_BASE_URL: 未設定（デフォルト使用）
+- NOTION_API_SECRET: 設定済み
+- DISABLE_COLLECTION_DATA: 有効
+Notion API設定状況:
+- NOTION_API_BASE_URL: 未設定（デフォルト使用）
+- NOTION_API_SECRET: 設定済み
+- DISABLE_COLLECTION_DATA: 有効
+Notion API設定状況:
+- NOTION_API_BASE_URL: 未設定（デフォルト使用）
+- NOTION_API_SECRET: 設定済み
+- DISABLE_COLLECTION_DATA: 有効
+Notion API設定状況:
+- NOTION_API_BASE_URL: 未設定（デフォルト使用）
+- NOTION_API_SECRET: 設定済み
+- DISABLE_COLLECTION_DATA: 有効
+   Generating static pages (0/7) ...
+Error: <Html> should not be imported outside of pages/_document.
+Read more: https://nextjs.org/docs/messages/no-document-import-in-page
+    at O (.next/server/chunks/263.js:6:1351)
+Error: <Html> should not be imported outside of pages/_document.
+Read more: https://nextjs.org/docs/messages/no-document-import-in-page
+    at O (.next/server/chunks/263.js:6:1351)
+Error: <Html> should not be imported outside of pages/_document.
+Read more: https://nextjs.org/docs/messages/no-document-import-in-page
+    at O (.next/server/chunks/263.js:6:1351)
+Error: <Html> should not be imported outside of pages/_document.
+Read more: https://nextjs.org/docs/messages/no-document-import-in-page
+    at O (.next/server/chunks/263.js:6:1351)
+Error: <Html> should not be imported outside of pages/_document.
+Read more: https://nextjs.org/docs/messages/no-document-import-in-page
+    at O (.next/server/chunks/263.js:6:1351)
+Error: <Html> should not be imported outside of pages/_document.
+Read more: https://nextjs.org/docs/messages/no-document-import-in-page
+    at O (.next/server/chunks/263.js:6:1351)
+Error occurred prerendering page "/admin/font-settings". Read more: https://nextjs.org/docs/messages/prerender-error
+Error: <Html> should not be imported outside of pages/_document.
+Read more: https://nextjs.org/docs/messages/no-document-import-in-page
+    at K (/Users/tonychustudio/Documents/notion-effect-blog2/node_modules/next/dist/compiled/next-server/pages.runtime.prod.js:16:6526)
+    at O (/Users/tonychustudio/Documents/notion-effect-blog2/.next/server/chunks/263.js:6:1351)
+    at renderWithHooks (/Users/tonychustudio/Documents/notion-effect-blog2/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5658:16)
+    at renderIndeterminateComponent (/Users/tonychustudio/Documents/notion-effect-blog2/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5732:15)
+    at renderElement (/Users/tonychustudio/Documents/notion-effect-blog2/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5957:7)
+    at renderNodeDestructiveImpl (/Users/tonychustudio/Documents/notion-effect-blog2/node_modules/react-dom/cjs/react-dom-server.browser.development.js:6115:11)
+    at renderNodeDestructive (/Users/tonychustudio/Documents/notion-effect-blog2/node_modules/react-dom/cjs/react-dom-server.browser.development.js:6087:14)
+    at renderContextProvider (/Users/tonychustudio/Documents/notion-effect-blog2/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5931:3)
+    at renderElement (/Users/tonychustudio/Documents/notion-effect-blog2/node_modules/react-dom/cjs/react-dom-server.browser.development.js:6028:11)
+    at renderNodeDestructiveImpl (/Users/tonychustudio/Documents/notion-effect-blog2/node_modules/react-dom/cjs/react-dom-server.browser.development.js:6115:11)
+Error occurred prerendering page "/404". Read more: https://nextjs.org/docs/messages/prerender-error
+Error: <Html> should not be imported outside of pages/_document.
+Read more: https://nextjs.org/docs/messages/no-document-import-in-page
+    at K (/Users/tonychustudio/Documents/notion-effect-blog2/node_modules/next/dist/compiled/next-server/pages.runtime.prod.js:16:6526)
+    at O (/Users/tonychustudio/Documents/notion-effect-blog2/.next/server/chunks/263.js:6:1351)
+    at renderWithHooks (/Users/tonychustudio/Documents/notion-effect-blog2/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5658:16)
+    at renderIndeterminateComponent (/Users/tonychustudio/Documents/notion-effect-blog2/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5732:15)
+    at renderElement (/Users/tonychustudio/Documents/notion-effect-blog2/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5957:7)
+    at renderNodeDestructiveImpl (/Users/tonychustudio/Documents/notion-effect-blog2/node_modules/react-dom/cjs/react-dom-server.browser.development.js:6115:11)
+    at renderNodeDestructive (/Users/tonychustudio/Documents/notion-effect-blog2/node_modules/react-dom/cjs/react-dom-server.browser.development.js:6087:14)
+    at renderContextProvider (/Users/tonychustudio/Documents/notion-effect-blog2/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5931:3)
+    at renderElement (/Users/tonychustudio/Documents/notion-effect-blog2/node_modules/react-dom/cjs/react-dom-server.browser.development.js:6028:11)
+    at renderNodeDestructiveImpl (/Users/tonychustudio/Documents/notion-effect-blog2/node_modules/react-dom/cjs/react-dom-server.browser.development.js:6115:11)
+Error occurred prerendering page "/cache-debug". Read more: https://nextjs.org/docs/messages/prerender-error
+Error: <Html> should not be imported outside of pages/_document.
+Read more: https://nextjs.org/docs/messages/no-document-import-in-page
+    at K (/Users/tonychustudio/Documents/notion-effect-blog2/node_modules/next/dist/compiled/next-server/pages.runtime.prod.js:16:6526)
+    at O (/Users/tonychustudio/Documents/notion-effect-blog2/.next/server/chunks/263.js:6:1351)
+    at renderWithHooks (/Users/tonychustudio/Documents/notion-effect-blog2/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5658:16)
+    at renderIndeterminateComponent (/Users/tonychustudio/Documents/notion-effect-blog2/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5732:15)
+    at renderElement (/Users/tonychustudio/Documents/notion-effect-blog2/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5957:7)
+    at renderNodeDestructiveImpl (/Users/tonychustudio/Documents/notion-effect-blog2/node_modules/react-dom/cjs/react-dom-server.browser.development.js:6115:11)
+    at renderNodeDestructive (/Users/tonychustudio/Documents/notion-effect-blog2/node_modules/react-dom/cjs/react-dom-server.browser.development.js:6087:14)
+    at renderContextProvider (/Users/tonychustudio/Documents/notion-effect-blog2/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5931:3)
+    at renderElement (/Users/tonychustudio/Documents/notion-effect-blog2/node_modules/react-dom/cjs/react-dom-server.browser.development.js:6028:11)
+    at renderNodeDestructiveImpl (/Users/tonychustudio/Documents/notion-effect-blog2/node_modules/react-dom/cjs/react-dom-server.browser.development.js:6115:11)
+Error occurred prerendering page "/cache-monitor". Read more: https://nextjs.org/docs/messages/prerender-error
+Error: <Html> should not be imported outside of pages/_document.
+Read more: https://nextjs.org/docs/messages/no-document-import-in-page
+    at K (/Users/tonychustudio/Documents/notion-effect-blog2/node_modules/next/dist/compiled/next-server/pages.runtime.prod.js:16:6526)
+    at O (/Users/tonychustudio/Documents/notion-effect-blog2/.next/server/chunks/263.js:6:1351)
+    at renderWithHooks (/Users/tonychustudio/Documents/notion-effect-blog2/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5658:16)
+    at renderIndeterminateComponent (/Users/tonychustudio/Documents/notion-effect-blog2/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5732:15)
+    at renderElement (/Users/tonychustudio/Documents/notion-effect-blog2/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5957:7)
+    at renderNodeDestructiveImpl (/Users/tonychustudio/Documents/notion-effect-blog2/node_modules/react-dom/cjs/react-dom-server.browser.development.js:6115:11)
+    at renderNodeDestructive (/Users/tonychustudio/Documents/notion-effect-blog2/node_modules/react-dom/cjs/react-dom-server.browser.development.js:6087:14)
+    at renderContextProvider (/Users/tonychustudio/Documents/notion-effect-blog2/node_modules/react-dom/cjs/react-dom-server.browser.development.js:5931:3)
+    at renderElement (/Users/tonychustudio/Documents/notion-effect-blog2/node_modules/react-dom/cjs/react-dom-server.browser.development.js:6028:11)
+    at renderNodeDestructiveImpl (/Users/tonychustudio/Documents/notion-effect-blog2/node_modules/react-dom/cjs/react-dom-server.browser.development.js:6115:11)
+Error occurred prerendering page "/500". Read more: https://nextjs.org/docs/messages/prerender-error
+ ⨯ Next.js build worker exited with code: 1 and signal: null

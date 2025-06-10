@@ -36,27 +36,13 @@ export const getStaticProps: GetStaticProps<PageProps, Params> = async (
 }
 
 export async function getStaticPaths() {
-  if (isDev) {
-    return {
-      paths: [],
-      fallback: true
-    }
+  // ビルド時のNextRouterエラーを回避するため、
+  // 初期ビルドではページを生成せず、
+  // リクエスト時にオンデマンドで生成
+  return {
+    paths: [],
+    fallback: 'blocking' // SSRフォールバック
   }
-
-  const siteMap = await getSiteMap()
-
-  const staticPaths = {
-    paths: Object.keys(siteMap.canonicalPageMap).map((pageId) => ({
-      params: {
-        pageId
-      }
-    })),
-    // paths: [],
-    fallback: true
-  }
-
-  console.log(staticPaths.paths)
-  return staticPaths
 }
 
 export default function NotionDomainDynamicPage(props) {
