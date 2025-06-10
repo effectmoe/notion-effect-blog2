@@ -1132,6 +1132,23 @@
 
 /* 削除 - 問題のあるスタイル */
 
+/* データベースアイテムのリンクを確実にクリック可能にする */
+.notion-collection-item,
+.notion-collection-card,
+.notion-list-item.notion-page-link,
+.notion-table-row {
+  cursor: pointer !important;
+}
+
+.notion-collection-item > a,
+.notion-collection-card > a,
+.notion-list-item.notion-page-link {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  text-decoration: none !important;
+}
+
 /* レスポンシブデザインの追加改善 */
 @media only screen and (max-width: 1024px) {
   /* タブレット向け調整 */
