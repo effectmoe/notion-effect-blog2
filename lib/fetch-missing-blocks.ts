@@ -24,14 +24,20 @@ export function findMissingBlocks(recordMap: ExtendedRecordMap): {
     
     // Log block for debugging
     if (block.type === 'toggle' || block.type === 'collection_view') {
-      console.log(`[Depth ${depth}] Found ${block.type} block:`, {
+      const logData: any = {
         id: block.id,
         type: block.type,
         hasContent: !!(block.content && block.content.length > 0),
-        contentLength: block.content?.length || 0,
-        viewIds: block.view_ids,
-        collectionId: block.collection_id
-      })
+        contentLength: block.content?.length || 0
+      }
+      
+      // Add collection-specific properties only for collection_view blocks
+      if (block.type === 'collection_view') {
+        logData.viewIds = (block as any).view_ids
+        logData.collectionId = (block as any).collection_id
+      }
+      
+      console.log(`[Depth ${depth}] Found ${block.type} block:`, logData)
     }
     
     // Check toggle blocks
@@ -52,7 +58,7 @@ export function findMissingBlocks(recordMap: ExtendedRecordMap): {
     
     // Check collection view blocks
     if (block.type === 'collection_view' || block.type === 'collection_view_page') {
-      const collectionId = getBlockCollectionId(block, recordMap) || block.collection_id
+      const collectionId = getBlockCollectionId(block, recordMap) || (block as any).collection_id
       
       if (collectionId && !recordMap.collection?.[collectionId]) {
         missingCollections.push(collectionId)
@@ -60,8 +66,9 @@ export function findMissingBlocks(recordMap: ExtendedRecordMap): {
       }
       
       // Check view IDs
-      if (block.view_ids?.length > 0) {
-        block.view_ids.forEach((viewId: string) => {
+      const viewIds = (block as any).view_ids
+      if (viewIds?.length > 0) {
+        viewIds.forEach((viewId: string) => {
           if (!recordMap.collection_view?.[viewId]) {
             console.warn(`Missing collection view: ${viewId} for block ${block.id}`)
           }
