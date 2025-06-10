@@ -77,29 +77,30 @@ export class NotionAPIEnhanced extends NotionAPI {
             collectionCount: Object.keys(recordMap.collection || {}).length,
             hasCollectionView: !!recordMap.collection_view,
             collectionViewCount: Object.keys(recordMap.collection_view || {}).length,
-          hasCollectionQuery: !!recordMap.collection_query,
-          collectionQueryCount: Object.keys(recordMap.collection_query || {}).length
-        });
-        
-        await fetchCollectionDataSafely(recordMap, this, {
-          concurrency,
-          kyOptions: rest.kyOptions
-        });
-        
-        // 取得後のコレクション関連データの状態をログ出力
-        console.log('After fetching collections:', {
-          hasBlock: !!recordMap.block,
-          blockCount: Object.keys(recordMap.block || {}).length,
-          hasCollection: !!recordMap.collection,
-          collectionCount: Object.keys(recordMap.collection || {}).length,
-          hasCollectionView: !!recordMap.collection_view,
-          collectionViewCount: Object.keys(recordMap.collection_view || {}).length,
-          hasCollectionQuery: !!recordMap.collection_query,
-          collectionQueryCount: Object.keys(recordMap.collection_query || {}).length
-        });
-      }
+            hasCollectionQuery: !!recordMap.collection_query,
+            collectionQueryCount: Object.keys(recordMap.collection_query || {}).length
+          });
+          
+          await fetchCollectionDataSafely(recordMap, this, {
+            concurrency,
+            kyOptions: rest.kyOptions
+          });
+          
+          // 取得後のコレクション関連データの状態をログ出力
+          console.log('After fetching collections:', {
+            hasBlock: !!recordMap.block,
+            blockCount: Object.keys(recordMap.block || {}).length,
+            hasCollection: !!recordMap.collection,
+            collectionCount: Object.keys(recordMap.collection || {}).length,
+            hasCollectionView: !!recordMap.collection_view,
+            collectionViewCount: Object.keys(recordMap.collection_view || {}).length,
+            hasCollectionQuery: !!recordMap.collection_query,
+            collectionQueryCount: Object.keys(recordMap.collection_query || {}).length
+          });
+        }
 
-      return recordMap;
+        return recordMap;
+      }
     } catch (error) {
       console.error('Error in getPage:', error);
       

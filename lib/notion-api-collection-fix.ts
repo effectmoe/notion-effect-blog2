@@ -69,68 +69,38 @@ export class NotionAPICollectionFix extends NotionAPI {
         try {
           console.log(`[NotionAPICollectionFix] Fetching collection data for block: ${blockId}, collection: ${collectionId}`)
           
-          // まずブロックIDでデータを取得
-          const blockData = await this.syncRecordValues({
-            requests: [
-              {
-                pointer: {
-                  table: 'block',
-                  id: blockId
-                },
-                version: -1
-              }
-            ]
+          // ブロックIDでページデータを再取得（コレクションを含む）
+          const blockData = await super.getPage(blockId, {
+            fetchCollections: true,
+            fetchMissingBlocks: false,
+            signFileUrls: false,
+            chunkLimit: 50
           })
           
-          // 次にコレクションIDでも試す
-          let collectionData = blockData
-          if (collectionId && collectionId !== blockId) {
-            const colData = await this.syncRecordValues({
-              requests: [
-                {
-                  pointer: {
-                    table: 'collection',
-                    id: collectionId
-                  },
-                  version: -1
-                }
-              ]
-            })
-            // 両方のデータをマージ
-            collectionData = {
-              recordMap: {
-                ...blockData?.recordMap,
-                ...colData?.recordMap
-              }
+          // 取得したコレクションデータをマージ
+          if (blockData?.collection) {
+            recordMap.collection = {
+              ...recordMap.collection,
+              ...blockData.collection
+            }
+          }
+          if (blockData?.collection_view) {
+            recordMap.collection_view = {
+              ...recordMap.collection_view,
+              ...blockData.collection_view
+            }
+          }
+          if (blockData?.collection_query) {
+            recordMap.collection_query = {
+              ...recordMap.collection_query,
+              ...blockData.collection_query
             }
           }
           
           console.log('[NotionAPICollectionFix] Collection data response:', {
-            hasRecordMap: !!collectionData?.recordMap,
-            collections: collectionData?.recordMap?.collection ? Object.keys(collectionData.recordMap.collection) : []
+            foundCollections: blockData?.collection ? Object.keys(blockData.collection) : [],
+            foundViews: blockData?.collection_view ? Object.keys(blockData.collection_view) : []
           })
-          
-          // 取得したデータをマージ
-          if (collectionData?.recordMap) {
-            if (collectionData.recordMap.collection) {
-              recordMap.collection = {
-                ...recordMap.collection,
-                ...collectionData.recordMap.collection
-              }
-            }
-            if (collectionData.recordMap.collection_view) {
-              recordMap.collection_view = {
-                ...recordMap.collection_view,
-                ...collectionData.recordMap.collection_view
-              }
-            }
-            if (collectionData.recordMap.collection_query) {
-              recordMap.collection_query = {
-                ...recordMap.collection_query,
-                ...collectionData.recordMap.collection_query
-              }
-            }
-          }
         } catch (error) {
           console.error(`[NotionAPICollectionFix] Error fetching collection data for block ${blockId}:`, error)
         }

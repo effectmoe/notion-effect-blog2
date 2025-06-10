@@ -28,13 +28,14 @@ export default function TestCollectionBlock() {
           })
 
           // ブロック情報を抽出
-          const block = recordMap.block?.[blockId]?.value
-          const collection = block?.collection_id ? recordMap.collection?.[block.collection_id]?.value : null
+          const block = recordMap.block?.[blockId]?.value as any
+          const collectionId = block?.collection_id || block?.format?.collection_pointer?.id
+          const collection = collectionId ? recordMap.collection?.[collectionId]?.value : null
 
           results.push({
             blockId,
             blockType: block?.type,
-            collectionId: block?.collection_id,
+            collectionId: collectionId,
             hasBlock: !!block,
             hasCollection: !!collection,
             collectionName: collection?.name?.[0]?.[0],
