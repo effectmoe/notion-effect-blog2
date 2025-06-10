@@ -1,0 +1,230 @@
+# Notion GraphQL Schema
+# 最適化されたデータ取得のためのスキーマ定義
+
+scalar DateTime
+scalar JSON
+
+# ページの重要コンテンツ（初期表示用）
+type CriticalContent {
+  title: String!
+  description: String
+  firstParagraph: String
+  heroImage: Image
+  estimatedReadTime: Int
+  lastEditedTime: DateTime
+}
+
+# 画像情報
+type Image {
+  url: String!
+  width: Int
+  height: Int
+  format: String
+  placeholder: String # Base64 LQIP
+  srcSet: [ImageSource!]
+}
+
+type ImageSource {
+  url: String!
+  width: Int!
+}
+
+# ページメタデータ
+type PageMetadata {
+  createdTime: DateTime!
+  lastEditedTime: DateTime!
+  createdBy: User
+  lastEditedBy: User
+  cover: Image
+  icon: String
+  properties: JSON
+}
+
+# ユーザー情報
+type User {
+  id: ID!
+  name: String
+  avatar: String
+  email: String
+}
+
+# ブロック情報
+type Block {
+  id: ID!
+  type: BlockType!
+  content: JSON
+  children: [Block!]
+  parentId: ID
+  createdTime: DateTime
+  lastEditedTime: DateTime
+}
+
+enum BlockType {
+  TEXT
+  HEADING_1
+  HEADING_2
+  HEADING_3
+  BULLETED_LIST_ITEM
+  NUMBERED_LIST_ITEM
+  TOGGLE
+  IMAGE
+  CODE
+  EQUATION
+  COLLECTION_VIEW
+  COLUMN_LIST
+  COLUMN
+  DIVIDER
+  CALLOUT
+  QUOTE
+  EMBED
+  VIDEO
+  AUDIO
+  FILE
+  PDF
+}
+
+# ページネーション用
+type BlockConnection {
+  edges: [BlockEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type BlockEdge {
+  node: Block!
+  cursor: String!
+}
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+}
+
+# コレクション（データベース）
+type Collection {
+  id: ID!
+  name: String!
+  schema: JSON
+  views: [CollectionView!]!
+}
+
+type CollectionView {
+  id: ID!
+  name: String!
+  type: CollectionViewType!
+  format: JSON
+  query: JSON
+}
+
+enum CollectionViewType {
+  TABLE
+  BOARD
+  GALLERY
+  LIST
+  CALENDAR
+  TIMELINE
+}
+
+# Notionページ
+type NotionPage {
+  id: ID!
+  title: String!
+  blocks(
+    first: Int
+    after: String
+    last: Int
+    before: String
+    type: [BlockType!]
+  ): BlockConnection!
+  metadata: PageMetadata!
+  criticalContent: CriticalContent!
+  collections: [Collection!]
+  # 最適化フィールド
+  renderedHTML: String # 事前レンダリング済みHTML
+  estimatedSize: Int # ページサイズ（バイト）
+  complexity: PageComplexity! # レンダリング複雑度
+}
+
+enum PageComplexity {
+  SIMPLE    # テキストのみ
+  MEDIUM    # 画像・基本ブロック含む
+  COMPLEX   # データベース・埋め込み含む
+}
+
+# 検索結果
+type SearchResult {
+  pages: [NotionPage!]!
+  totalCount: Int!
+  highlights: [Highlight!]
+}
+
+type Highlight {
+  pageId: ID!
+  blockId: ID!
+  text: String!
+  context: String!
+}
+
+# ルートクエリ
+type Query {
+  # 単一ページ取得
+  notionPage(id: ID!): NotionPage
+  
+  # 複数ページ取得（バッチ）
+  notionPages(ids: [ID!]!): [NotionPage!]!
+  
+  # 検索
+  searchNotionPages(
+    query: String!
+    limit: Int = 10
+    offset: Int = 0
+  ): SearchResult!
+  
+  # サイトマップ用
+  allPageIds: [ID!]!
+  
+  # ページ更新チェック
+  pageLastModified(id: ID!): DateTime
+}
+
+# ミューテーション
+type Mutation {
+  # キャッシュ無効化
+  invalidatePageCache(id: ID!): Boolean!
+  
+  # ページのプリフェッチ
+  prefetchPage(id: ID!): Boolean!
+}
+
+# サブスクリプション（リアルタイム更新）
+type Subscription {
+  # ページ更新の監視
+  pageUpdated(id: ID!): PageUpdateEvent!
+  
+  # ブロック更新の監視
+  blockUpdated(pageId: ID!): BlockUpdateEvent!
+}
+
+type PageUpdateEvent {
+  pageId: ID!
+  updatedAt: DateTime!
+  updatedBy: User
+  changeType: ChangeType!
+}
+
+type BlockUpdateEvent {
+  pageId: ID!
+  blockId: ID!
+  updatedAt: DateTime!
+  changeType: ChangeType!
+  newContent: JSON
+}
+
+enum ChangeType {
+  CREATED
+  UPDATED
+  DELETED
+  MOVED
+}
