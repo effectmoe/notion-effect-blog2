@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { onCLS, onFCP, onFID, onLCP, onTTFB, onINP } from 'web-vitals';
+import { onCLS, onFCP, onLCP, onTTFB, onINP } from 'web-vitals';
 
 interface PerformanceMonitorProps {
   enabled?: boolean;
@@ -28,11 +28,7 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
       onReport?.(metrics);
     });
 
-    onFID((metric) => {
-      metrics.FID = metric;
-      console.log('FID:', metric);
-      onReport?.(metrics);
-    });
+    // FIDは廃止されたため、INPを使用
 
     onLCP((metric) => {
       metrics.LCP = metric;

@@ -31,7 +31,6 @@ export default withBundleAnalyzer({
   },
   
   // パフォーマンス最適化
-  swcMinify: true,
   compress: true,
   productionBrowserSourceMaps: false,
   
