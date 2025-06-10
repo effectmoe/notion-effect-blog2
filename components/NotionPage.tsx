@@ -288,9 +288,7 @@ export function NotionPage({
       propertyLastEditedTimeValue,
       propertyTextValue,
       propertyDateValue,
-      // Override PageLink to fix div-in-anchor hydration error
-      // Temporarily disable custom PageLink to test if it's the issue
-      // PageLink: CustomPageLink as any,
+      // カスタムPageLinkを完全に削除して、デフォルトの動作を使用
       // Remove custom Toggle to use default react-notion-x implementation
       // which might handle collection views better
     }),

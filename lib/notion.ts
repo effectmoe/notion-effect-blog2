@@ -56,19 +56,22 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
   // キャッシュ付きAPIを使用（本番環境のみ）
   const api = process.env.NODE_ENV === 'production' ? cachedNotion : notion;
   
+  // コレクション取得を無効化するオプション
+  const fetchCollections = process.env.DISABLE_COLLECTION_FETCH !== 'true';
+  
   console.log('[notion.ts] Fetching page with options:', {
-    fetchMissingBlocks: true,
-    fetchCollections: true,
+    fetchMissingBlocks: false,  // 最初はmissingBlocksを取得しない
+    fetchCollections: fetchCollections,
     signFileUrls: false,
-    chunkLimit: 500,
+    chunkLimit: 50,  // さらに小さくしてタイムアウトを防ぐ
     chunkNumber: 0
   });
   
   let recordMap: ExtendedRecordMap = await api.getPage(pageId, {
-    fetchMissingBlocks: true,
-    fetchCollections: true,
+    fetchMissingBlocks: false,  // 最初はmissingBlocksを取得しない
+    fetchCollections: fetchCollections,
     signFileUrls: false,
-    chunkLimit: 100,  // Reduced chunk limit to prevent timeout
+    chunkLimit: 50,  // さらに小さくしてタイムアウトを防ぐ
     chunkNumber: 0
   }) as ExtendedRecordMap
   
@@ -85,55 +88,59 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
     collectionViews: recordMap.collection_view ? Object.keys(recordMap.collection_view) : []
   });
   
-  // Use the new helper function to find missing blocks
-  const { missingBlocks, missingCollections, toggleContentBlocks } = findMissingBlocks(recordMap)
-  
-  console.log('Block analysis:', {
-    totalBlocks: Object.keys(recordMap.block || {}).length,
-    toggleContentBlocks: toggleContentBlocks.length,
-    missingBlocks: missingBlocks.length,
-    missingCollections: missingCollections.length
-  })
-  
-  // If we have missing blocks, try to fetch them
-  if (missingBlocks.length > 0) {
-    console.log(`Attempting to fetch ${missingBlocks.length} missing blocks...`)
+  // ミッシングブロックの取得をスキップしてタイムアウトを防ぐ
+  // 必要に応じて後で有効化できます
+  if (process.env.FETCH_MISSING_BLOCKS === 'true') {
+    // Use the new helper function to find missing blocks
+    const { missingBlocks, missingCollections, toggleContentBlocks } = findMissingBlocks(recordMap)
     
-    try {
-      // Fetch all missing blocks in parallel with concurrency limit
-      const missingBlockData = await pMap(
-        missingBlocks,
-        async (blockId) => {
-          try {
-            const blockData = await notion.getPage(blockId, {
-              fetchMissingBlocks: true,
-              fetchCollections: true,
-              signFileUrls: false
-            })
-            return blockData
-          } catch (error) {
-            console.error(`Failed to fetch block ${blockId}:`, error)
-            return null
+    console.log('Block analysis:', {
+      totalBlocks: Object.keys(recordMap.block || {}).length,
+      toggleContentBlocks: toggleContentBlocks.length,
+      missingBlocks: missingBlocks.length,
+      missingCollections: missingCollections.length
+    })
+    
+    // If we have missing blocks, try to fetch them
+    if (missingBlocks.length > 0) {
+      console.log(`Attempting to fetch ${missingBlocks.length} missing blocks...`)
+      
+      try {
+        // Fetch all missing blocks in parallel with concurrency limit
+        const missingBlockData = await pMap(
+          missingBlocks.slice(0, 5), // 最初の5つのブロックのみ取得
+          async (blockId) => {
+            try {
+              const blockData = await notion.getPage(blockId, {
+                fetchMissingBlocks: false,
+                fetchCollections: false,
+                signFileUrls: false
+              })
+              return blockData
+            } catch (error) {
+              console.error(`Failed to fetch block ${blockId}:`, error)
+              return null
+            }
+          },
+          { concurrency: 2 } // 並行処理数を減らす
+        )
+        
+        // Merge all fetched data
+        missingBlockData.forEach(blockData => {
+          if (blockData) {
+            recordMap = mergeRecordMaps(recordMap, blockData)
           }
-        },
-        { concurrency: 3 }
-      )
-      
-      // Merge all fetched data
-      missingBlockData.forEach(blockData => {
-        if (blockData) {
-          recordMap = mergeRecordMaps(recordMap, blockData)
-        }
-      })
-      
-      // Re-analyze after fetching
-      const afterFetch = findMissingBlocks(recordMap)
-      console.log('After fetching missing blocks:', {
-        remainingMissing: afterFetch.missingBlocks.length,
-        remainingMissingCollections: afterFetch.missingCollections.length
-      })
-    } catch (error) {
-      console.error('Error fetching missing blocks:', error)
+        })
+        
+        // Re-analyze after fetching
+        const afterFetch = findMissingBlocks(recordMap)
+        console.log('After fetching missing blocks:', {
+          remainingMissing: afterFetch.missingBlocks.length,
+          remainingMissingCollections: afterFetch.missingCollections.length
+        })
+      } catch (error) {
+        console.error('Error fetching missing blocks:', error)
+      }
     }
   }
 
