@@ -37,7 +37,6 @@ import { getMenuItemsForStaticProps } from '@/lib/menu-utils'
 import { fillFormulaProperties } from '@/lib/fill-formula-properties'
 
 import dynamic from 'next/dynamic'
-import CriticalFontLoader from '@/components/CriticalFontLoader'
 
 const FontStyler = dynamic(() => import('@/components/FontStyler'), { 
   ssr: false,
@@ -54,12 +53,17 @@ const PerformanceMonitor = dynamic(() => import('@/components/PerformanceMonitor
   loading: () => null
 })
 
-const ServiceWorkerRegistration = dynamic(() => import('@/components/ServiceWorkerRegistration'), {
+const ServiceWorkerRegistration = dynamic(() => import('@/components/SimpleServiceWorkerRegistration'), {
   ssr: false,
   loading: () => null
 })
 
 const OfflineIndicator = dynamic(() => import('@/components/OfflineIndicator'), {
+  ssr: false,
+  loading: () => null
+})
+
+const CriticalFontLoader = dynamic(() => import('@/components/CriticalFontLoader'), {
   ssr: false,
   loading: () => null
 })
