@@ -36,8 +36,6 @@ export default class MyDocument extends Document {
             <link
               rel='stylesheet'
               href='https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400&display=swap&subset=japanese'
-              media='print'
-              onLoad="this.media='all'"
             />
             
             {/* Critical fonts inline */}
