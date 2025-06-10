@@ -7,29 +7,52 @@ export function CollectionDebug() {
   React.useEffect(() => {
     // データベースアイテムのリンクをデバッグ
     const debugLinks = () => {
-      const collectionItems = document.querySelectorAll('.notion-collection-item')
+      // より詳細なセレクタでデータベースアイテムを探す
+      const selectors = [
+        '.notion-collection-item',
+        '.notion-collection-card',
+        '.notion-gallery-grid a',
+        '.notion-table a',
+        '.notion-list-item',
+        '.notion-page-link'
+      ]
+      
+      selectors.forEach(selector => {
+        const elements = document.querySelectorAll(selector)
+        if (elements.length > 0) {
+          console.log(`[CollectionDebug] Found ${elements.length} elements with selector: ${selector}`)
+        }
+      })
+      
+      const collectionItems = document.querySelectorAll('.notion-collection-item, .notion-collection-card, .notion-gallery-grid > div')
       console.log('[CollectionDebug] Found collection items:', collectionItems.length)
       
       collectionItems.forEach((item, index) => {
         const link = item.querySelector('a') || item.closest('a')
-        if (link) {
-          console.log(`[CollectionDebug] Item ${index} link:`, {
-            href: link.getAttribute('href'),
-            onclick: link.onclick,
-            element: link
-          })
-        } else {
-          console.log(`[CollectionDebug] Item ${index} has no link`)
-        }
+        const isClickable = item.style.cursor === 'pointer' || (link && link.href)
+        
+        console.log(`[CollectionDebug] Item ${index}:`, {
+          hasLink: !!link,
+          href: link?.getAttribute('href'),
+          fullHref: link?.href,
+          isClickable,
+          className: item.className,
+          tagName: item.tagName
+        })
         
         // クリックイベントリスナーを追加してデバッグ
-        item.addEventListener('click', (e) => {
-          console.log(`[CollectionDebug] Collection item clicked:`, {
-            target: e.target,
-            currentTarget: e.currentTarget,
-            propagationStopped: e.defaultPrevented
-          })
-        }, true)
+        if (!item.dataset.debugListener) {
+          item.dataset.debugListener = 'true'
+          item.addEventListener('click', (e) => {
+            console.log(`[CollectionDebug] Collection item clicked:`, {
+              target: e.target,
+              currentTarget: e.currentTarget,
+              link: link?.href,
+              defaultPrevented: e.defaultPrevented,
+              bubbles: e.bubbles
+            })
+          }, true)
+        }
       })
       
       // ページリンクの状態も確認

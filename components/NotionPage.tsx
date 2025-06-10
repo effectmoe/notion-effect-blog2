@@ -97,9 +97,10 @@ const Code = dynamic(() =>
 )
 
 // データベースビューコンポーネント
+// react-notion-xのCollectionを直接使用してみる
 const Collection = dynamic(() =>
-  import('./SafeCollectionViewBlock').then(
-    (m) => m.SafeCollectionViewBlock
+  import('react-notion-x/build/third-party/collection').then(
+    (m) => m.Collection
   ),
   {
     ssr: false,
