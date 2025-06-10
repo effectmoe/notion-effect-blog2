@@ -44,6 +44,13 @@ export default class MyDocument extends Document {
                 //   script2.src = '/inject-prefecture-grid.js';
                 //   document.body.appendChild(script2);
                 // }, 1500);
+                
+                // Force toggle open for galleries
+                setTimeout(function() {
+                  const script3 = document.createElement('script');
+                  script3.src = '/force-toggle-open.js';
+                  document.body.appendChild(script3);
+                }, 1500);
               });
             ` }} />
           </body>

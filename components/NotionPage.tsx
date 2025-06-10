@@ -31,7 +31,7 @@ import { PageHead } from './PageHead'
 import { Header } from './Header'
 import { FormulaPropertyDebug } from './FormulaPropertyDebug'
 import { CustomPageLink } from './CustomPageLink'
-import { CollectionViewWrapper } from './CollectionViewWrapper'
+// import { CollectionViewWrapper } from './CollectionViewWrapper'
 import styles from './styles.module.css'
 
 // -----------------------------------------------------------------------------
@@ -95,8 +95,15 @@ const Code = dynamic(() =>
   })
 )
 
-// データベースビューコンポーネント - Use our wrapper instead
-const Collection = CollectionViewWrapper
+// データベースビューコンポーネント
+const Collection = dynamic(() =>
+  import('react-notion-x/build/third-party/collection').then(
+    (m) => m.Collection
+  ),
+  {
+    ssr: false
+  }
+)
 
 // 数式コンポーネント
 const Equation = dynamic(() =>
@@ -271,28 +278,8 @@ export function NotionPage({
       propertyDateValue,
       // Override PageLink to fix div-in-anchor hydration error
       PageLink: CustomPageLink as any,
-      // Custom Toggle component to ensure nested collections render properly
-      Toggle: ({ block, children }) => {
-        const [isOpen, setIsOpen] = React.useState(false)
-        const title = getBlockTitle(block, recordMap)
-        
-        return (
-          <details className="notion-toggle" open={isOpen}>
-            <summary 
-              className="notion-toggle-title"
-              onClick={(e) => {
-                e.preventDefault()
-                setIsOpen(!isOpen)
-              }}
-            >
-              {title}
-            </summary>
-            <div className="notion-toggle-content">
-              {children}
-            </div>
-          </details>
-        )
-      }
+      // Remove custom Toggle to use default react-notion-x implementation
+      // which might handle collection views better
     }),
     [recordMap]
   )

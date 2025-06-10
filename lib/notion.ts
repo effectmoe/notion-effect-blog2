@@ -48,8 +48,13 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
     fetchMissingBlocks: true,
     fetchCollections: true,
     signFileUrls: false,
-    chunkLimit: 100,
-    chunkNumber: 0
+    chunkLimit: 500,  // Increase chunk limit
+    chunkNumber: 0,
+    gotOptions: {
+      timeout: {
+        request: 60000  // 60 seconds timeout
+      }
+    }
   })
   
   // Use the new helper function to find missing blocks

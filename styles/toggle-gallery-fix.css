@@ -6,6 +6,15 @@
   margin: 0.5rem 0;
 }
 
+/* Force toggle to be open by default */
+details.notion-toggle {
+  open: true;
+}
+
+.notion-toggle[open] {
+  display: block !important;
+}
+
 .notion-toggle-title {
   cursor: pointer;
   padding: 0.5rem 0;
@@ -21,6 +30,11 @@
 .notion-toggle-content {
   padding-left: 1.5rem;
   margin-top: 0.5rem;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: auto !important;
+  overflow: visible !important;
 }
 
 /* Ensure collection views inside toggles are visible */
