@@ -54,6 +54,16 @@ const PerformanceMonitor = dynamic(() => import('@/components/PerformanceMonitor
   loading: () => null
 })
 
+const ServiceWorkerRegistration = dynamic(() => import('@/components/ServiceWorkerRegistration'), {
+  ssr: false,
+  loading: () => null
+})
+
+const OfflineIndicator = dynamic(() => import('@/components/OfflineIndicator'), {
+  ssr: false,
+  loading: () => null
+})
+
 // カスタムAppPropsの型定義を追加
 type CustomAppProps = AppProps & {
   pageProps: {
@@ -110,7 +120,9 @@ export default function App({ Component, pageProps }: CustomAppProps) {
     <CriticalFontLoader>
       <FontStyler />
       <ColorStyler />
+      <ServiceWorkerRegistration />
       <Component {...pageProps} />
+      <OfflineIndicator />
       <PerformanceMonitor enabled={process.env.NODE_ENV === 'development'} />
     </CriticalFontLoader>
   )

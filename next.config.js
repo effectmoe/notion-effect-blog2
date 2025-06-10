@@ -12,6 +12,25 @@ export default withBundleAnalyzer({
   },
   reactStrictMode: false, // ハイドレーションエラーを軽減
   staticPageGenerationTimeout: 300,
+  
+  // Service Worker のサポート
+  async headers() {
+    return [
+      {
+        source: '/sw.js',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=0, must-revalidate',
+          },
+          {
+            key: 'Service-Worker-Allowed',
+            value: '/',
+          },
+        ],
+      },
+    ]
+  },
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'www.notion.so' },

@@ -16,6 +16,13 @@ import { getTweetsMap } from './get-tweets'
 import { notion } from './notion-api'
 import { getPreviewImageMap } from './preview-images'
 import { findMissingBlocks } from './fetch-missing-blocks'
+import { CachedNotionAPI } from './cache'
+
+// キャッシュ付きAPIインスタンスを作成
+const cachedNotion = new CachedNotionAPI({
+  authToken: process.env.NOTION_TOKEN,
+  defaultTTL: 3600 // 1時間
+})
 
 const getNavigationLinkPages = pMemoize(
   async (): Promise<ExtendedRecordMap[]> => {
@@ -44,7 +51,10 @@ const getNavigationLinkPages = pMemoize(
 )
 
 export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
-  let recordMap = await notion.getPage(pageId, {
+  // キャッシュ付きAPIを使用（本番環境のみ）
+  const api = process.env.NODE_ENV === 'production' ? cachedNotion : notion;
+  
+  let recordMap = await api.getPage(pageId, {
     fetchMissingBlocks: true,
     fetchCollections: true,
     signFileUrls: false,
