@@ -71,6 +71,21 @@ export function CollectionDebug() {
     // 初回実行
     setTimeout(debugLinks, 1000)
     
+    // inject-formula-simple.jsのアイテムも確認
+    setTimeout(() => {
+      const formulaItems = document.querySelectorAll('.notion-list-item.notion-page-link')
+      console.log('[CollectionDebug] Formula script items:', formulaItems.length)
+      formulaItems.forEach((item, index) => {
+        const anchor = item as HTMLAnchorElement
+        console.log(`[CollectionDebug] Formula item ${index}:`, {
+          href: anchor.href,
+          pathname: anchor.pathname,
+          onclick: anchor.onclick,
+          hasClickHandler: !!(anchor as any).onclick || anchor.onclick !== null
+        })
+      })
+    }, 2000)
+    
     // DOMの変更を監視
     const observer = new MutationObserver(() => {
       debugLinks()

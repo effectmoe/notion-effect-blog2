@@ -45,6 +45,9 @@ export const getStaticProps: GetStaticProps<PageProps, Params> = async (
     if (err.message === 'Page fetch timeout') {
       return {
         props: {
+          site: null,
+          recordMap: null,
+          pageId: rawPageId,
           error: {
             statusCode: 504,
             message: 'Page loading timeout. Please try again later.'

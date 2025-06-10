@@ -315,7 +315,17 @@ export function NotionPage({
     if (lite) params.lite = lite
 
     const searchParams = new URLSearchParams(params)
-    return mapPageUrl(site, recordMap, searchParams)
+    const mapFn = mapPageUrl(site, recordMap, searchParams)
+    
+    // デバッグ用にmapPageUrl関数をテスト
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[NotionPage] mapPageUrl test:', {
+        testId: '12345',
+        result: mapFn('12345')
+      })
+    }
+    
+    return mapFn
   }, [site, recordMap, lite])
 
   const keys = Object.keys(recordMap?.block || {})
