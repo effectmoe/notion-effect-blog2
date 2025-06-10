@@ -16,6 +16,8 @@ import 'styles/prism-theme.css'
 import 'styles/instructor-gallery-responsive.css'
 // instructor gallery improvements (font and spacing)
 import 'styles/instructor-gallery-improvements.css'
+// toggle gallery fix
+import 'styles/toggle-gallery-fix.css'
 
 import type { AppProps } from 'next/app'
 import * as Fathom from 'fathom-client'

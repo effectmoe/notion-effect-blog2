@@ -273,9 +273,31 @@ export function NotionPage({
       propertyTextValue,
       propertyDateValue,
       // Override PageLink to fix div-in-anchor hydration error
-      PageLink: CustomPageLink as any
+      PageLink: CustomPageLink as any,
+      // Custom Toggle component to ensure nested collections render properly
+      Toggle: ({ block, children }) => {
+        const [isOpen, setIsOpen] = React.useState(false)
+        const title = getBlockTitle(block, recordMap)
+        
+        return (
+          <details className="notion-toggle" open={isOpen}>
+            <summary 
+              className="notion-toggle-title"
+              onClick={(e) => {
+                e.preventDefault()
+                setIsOpen(!isOpen)
+              }}
+            >
+              {title}
+            </summary>
+            <div className="notion-toggle-content">
+              {children}
+            </div>
+          </details>
+        )
+      }
     }),
-    []
+    [recordMap]
   )
 
   // ボディにNoNotionTabsクラスを追加
@@ -394,7 +416,7 @@ export function NotionPage({
           rootDomain={site.domain}
           fullPage={!isLiteMode}
           previewImages={!!recordMap.preview_images}
-          showCollectionViewDropdown={false}
+          showCollectionViewDropdown={true}
           showTableOfContents={showTableOfContents}
           minTableOfContentsItems={minTableOfContentsItems}
           defaultPageIcon={config.defaultPageIcon}

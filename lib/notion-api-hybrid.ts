@@ -55,7 +55,13 @@ export class NotionHybridAPI {
     
     // キャッシュミスの場合、APIから取得
     // console.log(`[Cache Miss] Fetching RecordMap for page ${pageId}`)
-    const recordMap = await this.unofficialClient.getPage(pageId)
+    const recordMap = await this.unofficialClient.getPage(pageId, {
+      fetchMissingBlocks: true,
+      fetchCollections: true,
+      signFileUrls: false,
+      chunkLimit: 100,
+      chunkNumber: 0
+    })
     
     // キャッシュに保存（30分）
     cacheManager.set(cacheKey, recordMap, CacheTTL.MEDIUM)
