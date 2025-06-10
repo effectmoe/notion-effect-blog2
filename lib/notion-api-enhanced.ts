@@ -25,23 +25,77 @@ export class NotionAPIEnhanced extends NotionAPI {
     }: any = {}
   ): Promise<notion.ExtendedRecordMap> {
     try {
-      // 基本的なページデータを取得（コレクションなし）
-      const recordMap = await super.getPage(pageId, {
-        concurrency,
-        fetchMissingBlocks,
-        fetchCollections: false, // 最初はコレクションなしで取得
-        signFileUrls,
-        chunkLimit,
-        chunkNumber,
-        ...rest
-      });
-
-      // コレクションデータを別途安全に取得
-      if (fetchCollections && recordMap) {
-        console.log('Fetching collection data safely...');
+      // まず、通常のgetPageでコレクションを含めて取得を試みる
+      console.log(`Fetching page ${pageId} with collections...`);
+      
+      try {
+        const recordMap = await super.getPage(pageId, {
+          concurrency,
+          fetchMissingBlocks,
+          fetchCollections, // コレクションを含めて取得
+          signFileUrls,
+          chunkLimit,
+          chunkNumber,
+          ...rest
+        });
+        
+        console.log('Page fetched successfully with collections:', {
+          hasBlock: !!recordMap.block,
+          blockCount: Object.keys(recordMap.block || {}).length,
+          hasCollection: !!recordMap.collection,
+          collectionCount: Object.keys(recordMap.collection || {}).length,
+          hasCollectionView: !!recordMap.collection_view,
+          collectionViewCount: Object.keys(recordMap.collection_view || {}).length,
+          hasCollectionQuery: !!recordMap.collection_query,
+          collectionQueryCount: Object.keys(recordMap.collection_query || {}).length
+        });
+        
+        return recordMap;
+      } catch (error) {
+        console.warn('Failed to fetch page with collections, retrying without collections:', error);
+        
+        // コレクション取得に失敗した場合は、コレクションなしで再試行
+        const recordMap = await super.getPage(pageId, {
+          concurrency,
+          fetchMissingBlocks,
+          fetchCollections: false, // コレクションなしで取得
+          signFileUrls,
+          chunkLimit,
+          chunkNumber,
+          ...rest
+        });
+        
+        // コレクションデータを別途安全に取得
+        if (fetchCollections && recordMap) {
+          console.log('Fetching collection data separately...');
+          
+          // 取得前のコレクション関連データの状態をログ出力
+          console.log('Before fetching collections:', {
+            hasBlock: !!recordMap.block,
+            blockCount: Object.keys(recordMap.block || {}).length,
+            hasCollection: !!recordMap.collection,
+            collectionCount: Object.keys(recordMap.collection || {}).length,
+            hasCollectionView: !!recordMap.collection_view,
+            collectionViewCount: Object.keys(recordMap.collection_view || {}).length,
+          hasCollectionQuery: !!recordMap.collection_query,
+          collectionQueryCount: Object.keys(recordMap.collection_query || {}).length
+        });
+        
         await fetchCollectionDataSafely(recordMap, this, {
           concurrency,
           kyOptions: rest.kyOptions
+        });
+        
+        // 取得後のコレクション関連データの状態をログ出力
+        console.log('After fetching collections:', {
+          hasBlock: !!recordMap.block,
+          blockCount: Object.keys(recordMap.block || {}).length,
+          hasCollection: !!recordMap.collection,
+          collectionCount: Object.keys(recordMap.collection || {}).length,
+          hasCollectionView: !!recordMap.collection_view,
+          collectionViewCount: Object.keys(recordMap.collection_view || {}).length,
+          hasCollectionQuery: !!recordMap.collection_query,
+          collectionQueryCount: Object.keys(recordMap.collection_query || {}).length
         });
       }
 

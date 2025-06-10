@@ -31,6 +31,12 @@ export async function fetchCollectionDataSafely(
     ) {
       const collectionId = block.collection_id;
       if (collectionId && block.view_ids?.length) {
+        console.log(`Found collection block: ${blockId}`, {
+          type: block.type,
+          collectionId: collectionId,
+          viewIds: block.view_ids
+        });
+        
         for (const collectionViewId of block.view_ids) {
           collectionInstances.push({
             collectionId,
@@ -40,6 +46,8 @@ export async function fetchCollectionDataSafely(
       }
     }
   }
+  
+  console.log(`Total collection instances to fetch: ${collectionInstances.length}`);
 
   // 並列でコレクションデータを取得（エラーを許容）
   const results = await Promise.allSettled(
@@ -69,10 +77,23 @@ export async function fetchCollectionDataSafely(
     })
   );
 
+  // 結果のサマリーをログ出力
+  const successCount = results.filter(r => r.status === 'fulfilled' && r.value).length;
+  const failureCount = results.filter(r => r.status === 'rejected' || !r.value).length;
+  console.log(`Collection fetch results: ${successCount} success, ${failureCount} failed`);
+
   // 成功したコレクションデータをrecordMapに統合
   for (const result of results) {
     if (result.status === 'fulfilled' && result.value) {
       const { collectionId, collectionViewId, data } = result.value;
+      
+      console.log(`Integrating collection data for ${collectionId}/${collectionViewId}`, {
+        hasRecordMap: !!data?.recordMap,
+        hasBlock: !!data?.recordMap?.block,
+        hasCollection: !!data?.recordMap?.collection,
+        hasCollectionView: !!data?.recordMap?.collection_view,
+        hasReducerResults: !!data?.result?.reducerResults
+      });
       
       if (data?.recordMap) {
         // ブロックデータの統合

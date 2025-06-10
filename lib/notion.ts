@@ -51,8 +51,18 @@ const getNavigationLinkPages = pMemoize(
 )
 
 export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
+  console.log(`[notion.ts] Getting page: ${pageId}`);
+  
   // キャッシュ付きAPIを使用（本番環境のみ）
   const api = process.env.NODE_ENV === 'production' ? cachedNotion : notion;
+  
+  console.log('[notion.ts] Fetching page with options:', {
+    fetchMissingBlocks: true,
+    fetchCollections: true,
+    signFileUrls: false,
+    chunkLimit: 500,
+    chunkNumber: 0
+  });
   
   let recordMap: ExtendedRecordMap = await api.getPage(pageId, {
     fetchMissingBlocks: true,
@@ -61,6 +71,19 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
     chunkLimit: 500,  // Increase chunk limit
     chunkNumber: 0
   }) as ExtendedRecordMap
+  
+  console.log('[notion.ts] RecordMap received:', {
+    hasBlock: !!recordMap.block,
+    blockCount: Object.keys(recordMap.block || {}).length,
+    hasCollection: !!recordMap.collection,
+    collectionCount: Object.keys(recordMap.collection || {}).length,
+    hasCollectionView: !!recordMap.collection_view,
+    collectionViewCount: Object.keys(recordMap.collection_view || {}).length,
+    hasCollectionQuery: !!recordMap.collection_query,
+    collectionQueryCount: Object.keys(recordMap.collection_query || {}).length,
+    collections: recordMap.collection ? Object.keys(recordMap.collection) : [],
+    collectionViews: recordMap.collection_view ? Object.keys(recordMap.collection_view) : []
+  });
   
   // Use the new helper function to find missing blocks
   const { missingBlocks, missingCollections, toggleContentBlocks } = findMissingBlocks(recordMap)
