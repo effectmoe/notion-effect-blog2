@@ -14,11 +14,16 @@ const Collection = dynamic(() =>
   }
 )
 
-export const CollectionViewWrapper: React.FC<{ block: any; className?: string }> = ({ 
+export const CollectionViewWrapper: React.FC<{ block: any; className?: string; ctx?: any }> = ({ 
   block, 
-  className 
+  className,
+  ctx 
 }) => {
-  const { recordMap } = useNotionContext()
+  const notionContext = useNotionContext()
+  const { recordMap } = notionContext
+  
+  // Use provided ctx or fallback to notionContext
+  const context = ctx || notionContext
   
   if (!block || !recordMap) {
     console.warn('CollectionViewWrapper: Missing block or recordMap')
@@ -55,7 +60,7 @@ export const CollectionViewWrapper: React.FC<{ block: any; className?: string }>
   }
 
   try {
-    return <Collection block={block} className={className} />
+    return <Collection block={block} className={className} ctx={context} />
   } catch (error) {
     console.error('CollectionViewWrapper: Error rendering collection', error)
     return (
