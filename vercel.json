@@ -1,0 +1,14 @@
+{
+  "functions": {
+    "pages/[pageId].tsx": {
+      "maxDuration": 30
+    },
+    "pages/index.tsx": {
+      "maxDuration": 30
+    },
+    "pages/api/*.ts": {
+      "maxDuration": 30
+    }
+  },
+  "regions": ["iad1"]
+}

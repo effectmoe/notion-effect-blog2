@@ -68,7 +68,7 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
     fetchMissingBlocks: true,
     fetchCollections: true,
     signFileUrls: false,
-    chunkLimit: 500,  // Increase chunk limit
+    chunkLimit: 100,  // Reduced chunk limit to prevent timeout
     chunkNumber: 0
   }) as ExtendedRecordMap
   

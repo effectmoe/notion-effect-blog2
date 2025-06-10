@@ -61,11 +61,15 @@ export class NotionAPICollectionFix extends NotionAPI {
     }
 
     // コレクションブロックが見つかった場合は常にデータを取得（既存のデータがあっても補完のため）
-    if (collectionBlocks.length > 0) {
-      console.log('[NotionAPICollectionFix] Collection blocks found. Fetching/verifying collection data...')
+    // ただし、すでにコレクションデータがある場合はスキップしてタイムアウトを防ぐ
+    if (collectionBlocks.length > 0 && (!recordMap.collection || Object.keys(recordMap.collection).length === 0)) {
+      console.log('[NotionAPICollectionFix] Collection blocks found but no collection data. Attempting to fetch...')
+      
+      // タイムアウトを防ぐため、最初の3つのコレクションブロックのみ処理
+      const blocksToProcess = collectionBlocks.slice(0, 3)
       
       // 各コレクションブロックのデータを個別に取得
-      for (const { blockId, collectionId } of collectionBlocks) {
+      for (const { blockId, collectionId } of blocksToProcess) {
         try {
           console.log(`[NotionAPICollectionFix] Fetching collection data for block: ${blockId}, collection: ${collectionId}`)
           
@@ -74,7 +78,7 @@ export class NotionAPICollectionFix extends NotionAPI {
             fetchCollections: true,
             fetchMissingBlocks: false,
             signFileUrls: false,
-            chunkLimit: 50
+            chunkLimit: 30  // より小さなチャンクサイズでタイムアウトを防ぐ
           })
           
           // 取得したコレクションデータをマージ
