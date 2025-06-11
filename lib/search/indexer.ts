@@ -40,8 +40,11 @@ export class SearchIndexer {
         console.log(`- ${id}`)
       })
       
-      // 今はすべてのページをインデックス対象にする
-      const pageIds = allPageIds
+      // ページIDからハイフンを除去
+      const pageIds = allPageIds.map(id => id.replace(/-/g, ''))
+      
+      console.log('\nProcessing page IDs (hyphens removed):')
+      pageIds.forEach(id => console.log(`- ${id}`))
       
       // バッチ処理でインデックスを構築
       const batchSize = 10
@@ -91,7 +94,11 @@ export class SearchIndexer {
    */
   async indexPage(pageId: string): Promise<SearchIndexItem | null> {
     try {
-      const indexItem = await this.hybridAPI.buildSearchIndexItem(pageId)
+      // ページIDからハイフンを除去
+      const cleanPageId = pageId.replace(/-/g, '')
+      console.log(`\nIndexing page: ${pageId} -> ${cleanPageId}`)
+      
+      const indexItem = await this.hybridAPI.buildSearchIndexItem(cleanPageId)
       
       // ブログページとして有効かチェック
       // 一時的にフィルタリングを無効化して、すべてのページをインデックス
