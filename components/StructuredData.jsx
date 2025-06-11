@@ -54,25 +54,76 @@ const StructuredData = ({ pageType, data = {} }) => {
           "https://www.instagram.com/aromatech_japan",
           "https://www.linkedin.com/company/aromatech-japan"
         ],
+        "knowsAbout": ["アロマオイル", "エッセンシャルオイル", "香り", "OEM製造", "B2B", "天然精油", "芳香", "空間演出"],
         "hasOfferCatalog": {
           "@type": "OfferCatalog",
-          "name": "アロマオイル製品カタログ",
+          "name": "業務用アロマオイル製品カタログ",
           "itemListElement": [
             {
               "@type": "Offer",
               "itemOffered": {
                 "@type": "Product",
-                "name": "プレミアムアロマオイル"
+                "name": "プレミアムアロマオイル",
+                "description": "最高品質の天然アロマオイル",
+                "brand": "アロマテックジャパン"
               }
             },
             {
               "@type": "Offer",
               "itemOffered": {
                 "@type": "Product",
-                "name": "業務用ディフューザー"
+                "name": "業務用ディフューザー",
+                "description": "大空間対応の業務用アロマディフューザー"
+              }
+            },
+            {
+              "@type": "Offer",
+              "itemOffered": {
+                "@type": "Service",
+                "name": "OEM製造サービス",
+                "description": "お客様のニーズに合わせたカスタム製造",
+                "category": "製造サービス"
               }
             }
           ]
+        },
+        "makesOffer": [
+          {
+            "@type": "Offer",
+            "name": "業務用アロマオイル卸売",
+            "category": "B2B",
+            "eligibleRegion": {
+              "@type": "Country",
+              "name": "Japan"
+            }
+          }
+        ],
+        "hasCredential": [
+          {
+            "@type": "EducationalOccupationalCredential",
+            "credentialCategory": "certification",
+            "name": "ISO 9001:2015",
+            "recognizedBy": {
+              "@type": "Organization",
+              "name": "ISO"
+            }
+          },
+          {
+            "@type": "EducationalOccupationalCredential",
+            "credentialCategory": "certification",
+            "name": "有機JAS認証",
+            "recognizedBy": {
+              "@type": "Organization",
+              "name": "日本農林規格"
+            }
+          }
+        ],
+        "slogan": "天然アロマオイルで、ビジネスに新たな価値を。",
+        "award": "アロマ産業優秀企業賞 2023年受賞",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://notion-effect-blog2.vercel.app/search?q={search_term_string}",
+          "query-input": "required name=search_term_string"
         }
       }
       break

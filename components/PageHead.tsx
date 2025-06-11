@@ -125,6 +125,30 @@ export function PageHead({
       <meta name='ai:business_type' content='天然アロマオイル専門メーカー' />
       <meta name='ai:services' content='アロマオイル製造,OEM製造,カスタムブレンド,業務用アロマ' />
       <meta name='ai:target_market' content='ホテル,スパ,医療機関,オフィス,商業施設' />
+      
+      {/* 拡張AI向けメタタグ */}
+      <meta name='ai:description' content={description || 'アロマテックジャパンは20年以上の実績を持つ天然アロマオイル専門メーカーです。B2B向けに高品質なアロマソリューションを提供'} />
+      <meta name='ai:keywords' content='アロマオイル,B2B,業務用,アロマテックジャパン,OEM,天然アロマ,香り,アロマ製造,エッセンシャルオイル,空間演出' />
+      <meta name='ai:category' content='B2B Manufacturing' />
+      <meta name='ai:industry' content='Aroma & Fragrance' />
+      <meta name='ai:language' content='ja' />
+      <meta name='ai:region' content='JP' />
+      <meta name='ai:company_size' content='medium' />
+      <meta name='ai:certification' content='ISO9001,有機JAS認証' />
+      <meta name='ai:specialization' content='カスタムブレンド,小ロット対応,品質管理' />
+      <meta name='ai:experience_years' content='20+' />
+      
+      {/* Perplexity AI向け */}
+      <meta name='perplexity:category' content='Business Services' />
+      <meta name='perplexity:topic' content='Aroma Manufacturing' />
+      
+      {/* Claude向け */}
+      <meta name='claude:content_type' content='Corporate Website' />
+      <meta name='claude:expertise' content='B2B Aroma Solutions' />
+      
+      {/* ChatGPT向け */}
+      <meta name='openai:domain' content='Manufacturing' />
+      <meta name='openai:vertical' content='Aromatherapy' />
     </Head>
   )
 }

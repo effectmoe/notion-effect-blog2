@@ -74,7 +74,20 @@ Crawl-delay: 1
 # 業務用アロマ製品、OEM製造、カスタムブレンド対応
 # 国内500社以上の導入実績
 
+# Sitemap
 Sitemap: ${host}/sitemap.xml
+Sitemap: ${host}/sitemap-ai.xml
+
+# AI/LLM向け詳細情報
+LLMS-txt: ${host}/llms.txt
+
+# AI向け追加情報
+# Company: アロマテックジャパン株式会社
+# Type: B2B Aroma Oil Manufacturer
+# Services: アロマオイル製造, OEM製造, カスタムブレンド
+# Industry: Aroma & Fragrance Manufacturing
+# Certifications: ISO9001, 有機JAS認証
+# Experience: 20+ years
 `)
   } else {
     res.write(`User-agent: *
