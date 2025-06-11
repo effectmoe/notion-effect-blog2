@@ -4,7 +4,7 @@
  */
 
 // 公式APIが有効になるまでの暫定実装
-export async function getSearchablePagesFromOfficialAPI(): Promise<string[]> {
+export async function getSearchablePagesFromOfficialAPI(propertyName: string = 'Searchable'): Promise<string[]> {
   try {
     // 環境変数チェック
     const notionApiKey = process.env.NOTION_SEARCH_API_SECRET || process.env.NOTION_API_SECRET
@@ -16,6 +16,9 @@ export async function getSearchablePagesFromOfficialAPI(): Promise<string[]> {
     // データベースID（カフェキネシコンテンツ）
     const databaseId = '1ceb802cb0c681e8a45e000ba000bfe2'
     
+    console.log('Querying Notion database with ID:', databaseId)
+    console.log('Using property name:', propertyName)
+    
     // 公式APIを使用してデータベースをクエリ
     const response = await fetch(`https://api.notion.com/v1/databases/${databaseId}/query`, {
       method: 'POST',
@@ -26,7 +29,7 @@ export async function getSearchablePagesFromOfficialAPI(): Promise<string[]> {
       },
       body: JSON.stringify({
         filter: {
-          property: '検索対象',  // ユーザーが作成したチェックボックスプロパティ
+          property: propertyName,  // 'Searchable' または '検索対象'
           checkbox: {
             equals: true
           }
@@ -35,7 +38,9 @@ export async function getSearchablePagesFromOfficialAPI(): Promise<string[]> {
     })
 
     if (!response.ok) {
-      console.error('Failed to query Notion database:', response.statusText)
+      const errorText = await response.text()
+      console.error('Failed to query Notion database:', response.status, response.statusText)
+      console.error('Error details:', errorText)
       return []
     }
 

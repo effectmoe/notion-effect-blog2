@@ -16,9 +16,15 @@ export default async function handler(
     
     console.log('Environment variables:', apiKeys)
     
-    // 公式APIで検索対象ページを取得
-    console.log('Fetching searchable pages from official API...')
-    const searchablePages = await getSearchablePagesFromOfficialAPI()
+    // 公式APIで検索対象ページを取得（英語名で試す）
+    console.log('Fetching searchable pages from official API with "Searchable"...')
+    let searchablePages = await getSearchablePagesFromOfficialAPI('Searchable')
+    
+    // 英語名で取得できない場合は日本語名を試す
+    if (searchablePages.length === 0) {
+      console.log('No results with "Searchable", trying "検索対象"...')
+      searchablePages = await getSearchablePagesFromOfficialAPI('検索対象')
+    }
     
     // 各ページの詳細情報を取得（最初の3つのみ）
     const pageDetails = []
