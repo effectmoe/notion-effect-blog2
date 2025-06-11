@@ -37,8 +37,7 @@ export class SearchIndexer {
       
       // デバッグ: すべてのページを表示
       allPageIds.forEach(id => {
-        const page = siteMap.pageMap[id]
-        console.log(`- ${id}: ${page?.title || 'No title'}`)
+        console.log(`- ${id}`)
       })
       
       // 今はすべてのページをインデックス対象にする
