@@ -100,10 +100,23 @@ const Code = dynamic(() =>
 // データベースビューコンポーネント
 const Collection = dynamic(() =>
   import('react-notion-x/build/third-party/collection').then(
-    (m) => m.Collection
+    (m) => {
+      console.log('[NotionPage] Collection component loaded:', m.Collection);
+      return m.Collection;
+    }
   ),
   {
-    ssr: false
+    ssr: false,
+    loading: () => (
+      <div style={{ 
+        padding: '20px', 
+        background: '#f5f5f5', 
+        borderRadius: '8px',
+        margin: '10px 0' 
+      }}>
+        <p>Loading database view...</p>
+      </div>
+    )
   }
 )
 
@@ -279,7 +292,7 @@ export function NotionPage({
       propertyTextValue,
       propertyDateValue,
       // Override PageLink to fix div-in-anchor hydration error
-      PageLink: CustomPageLink as any,
+      // PageLink: CustomPageLink as any, // データベース表示の問題のため無効化
       // Remove custom Toggle to use default react-notion-x implementation
       // which might handle collection views better
     }),
@@ -430,12 +443,35 @@ export function NotionPage({
                 Parent Table: {block?.parent_table}<br />
               </div>
             )}
+            {/* AutoBreadcrumb を一時的に無効化
             <AutoBreadcrumb
               pageId={pageId}
               recordMap={recordMap}
               rootPageId={site.rootNotionPageId}
             />
+            */}
           </>
+        )}
+        
+        {/* Collection Viewのデバッグ情報 */}
+        {config.isDev && (
+          <div style={{ background: '#ffe0e0', padding: '10px', margin: '10px' }}>
+            <h3>Collection Views in RecordMap:</h3>
+            <pre style={{ fontSize: '11px', overflow: 'auto' }}>
+              {JSON.stringify(
+                Object.entries(recordMap.block || {})
+                  .filter(([_, b]) => b.value?.type === 'collection_view' || b.value?.type === 'collection_view_page')
+                  .map(([id, b]) => ({
+                    id,
+                    type: b.value.type,
+                    collection_id: b.value.collection_id,
+                    view_ids: b.value.view_ids
+                  })),
+                null,
+                2
+              )}
+            </pre>
+          </div>
         )}
         <NotionRenderer
           bodyClassName={cs(
