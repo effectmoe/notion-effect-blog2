@@ -412,11 +412,30 @@ export function NotionPage({
       <div className={styles.notionPageContainer}>
         {/* 自動生成パンくずリスト（ホームページ以外で表示） */}
         {pageId !== site.rootNotionPageId && (
-          <AutoBreadcrumb
-            pageId={pageId}
-            recordMap={recordMap}
-            rootPageId={site.rootNotionPageId}
-          />
+          <>
+            {/* デバッグ情報 */}
+            {config.isDev && (
+              <div style={{ 
+                background: '#f0f0f0', 
+                padding: '10px', 
+                margin: '10px 0',
+                fontSize: '12px',
+                fontFamily: 'monospace'
+              }}>
+                <strong>Breadcrumb Debug Info:</strong><br />
+                Current Page ID: {pageId}<br />
+                Root Page ID: {site.rootNotionPageId}<br />
+                Block Type: {block?.type}<br />
+                Parent ID: {block?.parent_id}<br />
+                Parent Table: {block?.parent_table}<br />
+              </div>
+            )}
+            <AutoBreadcrumb
+              pageId={pageId}
+              recordMap={recordMap}
+              rootPageId={site.rootNotionPageId}
+            />
+          </>
         )}
         <NotionRenderer
           bodyClassName={cs(

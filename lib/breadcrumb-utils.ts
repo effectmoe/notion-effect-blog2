@@ -1,5 +1,6 @@
 import { type ExtendedRecordMap } from 'notion-types'
 import { getBlockTitle, getBlockParentPage } from 'notion-utils'
+import { getParentPageId } from './notion-page-utils'
 
 export interface BreadcrumbItem {
   id: string
@@ -21,19 +22,45 @@ export function getBreadcrumbs(
 ): BreadcrumbItem[] {
   const breadcrumbs: BreadcrumbItem[] = []
   
+  // 本番環境では無効化
+  const isDev = process.env.NODE_ENV === 'development'
+  
+  if (isDev) {
+    console.log('🍞 getBreadcrumbs Debug - Start:', {
+      pageId,
+      rootPageId,
+      hasRecordMap: !!recordMap,
+      blockCount: Object.keys(recordMap?.block || {}).length
+    })
+  }
+  
   if (!pageId || !recordMap) {
+    console.log('getBreadcrumbs: Early return - missing pageId or recordMap')
     return breadcrumbs
   }
 
   // 現在のページから親ページを辿る
   let currentPageId = pageId
   const visitedPages = new Set<string>() // 無限ループ防止
+  let iterationCount = 0
   
   while (currentPageId && currentPageId !== rootPageId && !visitedPages.has(currentPageId)) {
     visitedPages.add(currentPageId)
+    iterationCount++
     
     const block = recordMap.block[currentPageId]?.value
-    if (!block) break
+    console.log(`getBreadcrumbs Iteration ${iterationCount}:`, {
+      currentPageId,
+      hasBlock: !!block,
+      blockType: block?.type,
+      parentId: block?.parent_id,
+      parentTable: block?.parent_table
+    })
+    
+    if (!block) {
+      console.log('getBreadcrumbs: Breaking - no block found')
+      break
+    }
     
     const title = getBlockTitle(block, recordMap) || 'Untitled'
     
@@ -44,10 +71,26 @@ export function getBreadcrumbs(
       url: currentPageId === pageId ? '' : `/${currentPageId}`
     })
     
-    // 親ページを取得
+    // 親ページを取得 - まず代替実装を試す
+    const parentPageIdAlt = getParentPageId(block, recordMap)
     const parentPage = getBlockParentPage(block, recordMap)
-    currentPageId = parentPage?.id || ''
+    
+    console.log('Parent page result:', {
+      hasParentPage: !!parentPage,
+      parentPageId: parentPage?.id,
+      parentPageTitle: parentPage ? getBlockTitle(parentPage, recordMap) : null,
+      alternativeParentId: parentPageIdAlt,
+      usingAlternative: !parentPage?.id && !!parentPageIdAlt
+    })
+    
+    // notion-utilsの結果がない場合は代替実装を使用
+    currentPageId = parentPage?.id || parentPageIdAlt || ''
   }
+  
+  console.log('getBreadcrumbs: After loop:', {
+    breadcrumbsCount: breadcrumbs.length,
+    breadcrumbs: breadcrumbs.map(b => ({ id: b.id, title: b.title }))
+  })
   
   // ホームページを先頭に追加（現在のページがホームでない場合）
   if (pageId !== rootPageId && breadcrumbs.length > 0) {
@@ -56,7 +99,13 @@ export function getBreadcrumbs(
       title: 'ホーム',
       url: '/'
     })
+    console.log('getBreadcrumbs: Added home page')
   }
+  
+  console.log('getBreadcrumbs - Final result:', {
+    totalCount: breadcrumbs.length,
+    breadcrumbs: breadcrumbs.map(b => ({ id: b.id, title: b.title, url: b.url }))
+  })
   
   return breadcrumbs
 }

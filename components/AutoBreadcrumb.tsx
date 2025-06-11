@@ -31,6 +31,18 @@ export const AutoBreadcrumb: React.FC<AutoBreadcrumbProps> = ({
   const breadcrumbs = React.useMemo(() => {
     const items = getBreadcrumbs(pageId, recordMap, rootPageId)
     
+    // デバッグ情報を出力
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🍞 AutoBreadcrumb Debug:', {
+        pageId,
+        rootPageId,
+        itemsCount: items.length,
+        items: items.map(item => ({ id: item.id, title: item.title, url: item.url })),
+        recordMapKeys: Object.keys(recordMap || {}),
+        blockKeys: Object.keys(recordMap?.block || {}).length
+      })
+    }
+    
     // ホームラベルをカスタマイズ
     if (items.length > 0 && items[0].id === rootPageId && homeLabel !== 'ホーム') {
       items[0].title = homeLabel
@@ -46,6 +58,7 @@ export const AutoBreadcrumb: React.FC<AutoBreadcrumbProps> = ({
 
   // パンくずが1つ以下の場合は表示しない（現在のページのみ）
   if (breadcrumbs.length <= 1) {
+    console.log('AutoBreadcrumb: Not showing breadcrumbs - length:', breadcrumbs.length)
     return null
   }
 
@@ -77,27 +90,27 @@ export const AutoBreadcrumb: React.FC<AutoBreadcrumbProps> = ({
                 key={item.id} 
                 className={styles.breadcrumbItem}
               >
-                {!isLast ? (
-                  <>
-                    <Link 
-                      href={item.url}
-                      className={styles.breadcrumbLink}
-                    >
-                      {item.title}
-                    </Link>
-                    <span 
-                      className={styles.breadcrumbSeparator}
-                      aria-hidden="true"
-                    >
-                      {separator}
-                    </span>
-                  </>
+                {item.url ? (
+                  <Link 
+                    href={item.url}
+                    className={styles.breadcrumbLink}
+                  >
+                    {item.title}
+                  </Link>
                 ) : (
                   <span 
                     className={styles.breadcrumbCurrent}
                     aria-current="page"
                   >
                     {item.title}
+                  </span>
+                )}
+                {!isLast && (
+                  <span 
+                    className={styles.breadcrumbSeparator}
+                    aria-hidden="true"
+                  >
+                    {separator}
                   </span>
                 )}
               </li>
