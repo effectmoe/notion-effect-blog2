@@ -34,9 +34,12 @@ export class SearchIndexer {
     const startTime = Date.now()
     
     try {
-      // デバッグ情報から確認された実際のページIDを使用
-      // TODO: 将来的には自動取得に戻す
-      const pageIds = [
+      // まず全ページIDを取得
+      const rootPageId = '1ceb802cb0c680f29369dba86095fb38'
+      console.log('Getting all page IDs...')
+      
+      // 手動で定義された全ページID（バックアップ用）
+      const allPageIds = [
         // メインページ
         '1ceb802cb0c680f29369dba86095fb38', // ホームページ
         '20db802cb0c6809a9c4be362113bc3fa', // 都道府県リスト
@@ -49,38 +52,26 @@ export class SearchIndexer {
         '1d3b802cb0c680b78f23e50d60a8fe4b', // カレンダー
         '1d3b802cb0c680d5a093f49cfd1c675c', // カテゴリー
         '1d3b802cb0c680e48557cffb5e357161', // カフェキネシラバーズ
-        
-        // 都道府県ページ
-        '20db802cb0c6810c89e8c7470da6294f', // 広島県
-        '20db802cb0c68111b31be046a8adbe3b', // 秋田県
-        '20db802cb0c6811aa53ce09f5e86ca88', // 埼玉県
-        '20db802cb0c681279831dbf406ccea9d', // 岩手県
-        '20db802cb0c68127b32fd007536ba033', // 新潟県
-        '20db802cb0c68148b310c240c3ffe135', // 福岡県
-        '20db802cb0c68154a666cff7124ba1ea', // 長野県
-        '20db802cb0c6815db7beea3076cbbd52', // ヨーロッパ
-        '20db802cb0c6815dba8ac5bdbac33eaf', // 滋賀県
-        '20db802cb0c68161951bf97ad4ad1ff5', // 岡山県
-        '20db802cb0c681638438e7bc2bfef20d', // 北海道
-        '20db802cb0c681819afdfcac4b7c1c7b', // 宮城県
-        '20db802cb0c6818b9ae2f2e203c11182', // アメリカ
-        '20db802cb0c681948da2fb6799a60562', // 香川県
-        '20db802cb0c6819d9eb0c11066629375', // 京都府
-        '20db802cb0c681acbd69e74253c4509d', // 栃木県
-        '20db802cb0c681b09f0efb5ee5873925', // 大阪府
-        '20db802cb0c681bba89dc5870b8b4127', // 山梨県
-        '20db802cb0c681c0a86cc3936428813c', // 東京都
-        '20db802cb0c681c19cd0ef1657bc7ca5', // 兵庫県
-        '20db802cb0c681c1b21ec61e5ab788f1', // 静岡県
-        '20db802cb0c681d08baeec56aa7e3770', // 群馬県
-        '20db802cb0c681d58679da53af19c5c7', // 愛知県
-        '20db802cb0c681dcbd91ccbc81f29898', // 沖縄県
-        '20db802cb0c681e68c1dc3fc90e5c4cf', // 千葉県
-        '20db802cb0c681f58d00c702e1241bc6', // 青森県
-        '20db802cb0c681fab510dd6ac5e90e62', // 神奈川県
       ]
       
-      console.log(`Using ${pageIds.length} manually specified pages`)
+      // 検索対象のページのみをフィルタリング
+      console.log('Filtering searchable pages...')
+      const pageIds = await filterSearchablePages(allPageIds)
+      
+      // フォールバック：検索対象ページが見つからない場合は静的リストを使用
+      if (pageIds.length === 0) {
+        console.log('No searchable pages found, using static list')
+        const staticPageIds = [
+          '1ceb802cb0c680f29369dba86095fb38', // ホームページ
+          '1d3b802cb0c680519714ffd510528bc0', // カフェキネシ公認インストラクター
+          '1ceb802cb0c681b89b3ac07b70b7f37f', // 講座一覧
+          '1d3b802cb0c680569ac6e94e37eebfbf', // ブログ
+          '1d3b802cb0c680e48557cffb5e357161', // カフェキネシラバーズ
+        ]
+        pageIds.push(...staticPageIds)
+      }
+      
+      console.log(`Found ${pageIds.length} searchable pages`)
       
       console.log(`\n=== Indexing ${pageIds.length} pages ===`)
       pageIds.forEach(id => console.log(`- ${id}`))
