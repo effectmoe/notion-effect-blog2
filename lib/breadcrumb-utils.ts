@@ -20,7 +20,7 @@ export function getBreadcrumbs(
   recordMap: ExtendedRecordMap,
   rootPageId: string
 ): BreadcrumbItem[] {
-  const breadcrumbs: BreadcrumbItem[] = []
+  let breadcrumbs: BreadcrumbItem[] = []
   
   // 本番環境では無効化
   const isDev = process.env.NODE_ENV === 'development'
