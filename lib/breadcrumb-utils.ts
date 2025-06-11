@@ -92,16 +92,24 @@ export function getBreadcrumbs(
     breadcrumbs: breadcrumbs.map(b => ({ id: b.id, title: b.title }))
   })
   
-  // ホームページを先頭に追加（現在のページがホームでない場合）
-  // ただし、最初の要素が既にルートページの場合は追加しない
-  if (pageId !== rootPageId && breadcrumbs.length > 0 && breadcrumbs[0].id !== rootPageId) {
-    breadcrumbs.unshift({
-      id: rootPageId,
-      title: 'ホーム',
-      url: '/'
-    })
-    if (isDev) {
-      console.log('getBreadcrumbs: Added home page')
+  // パンくずリストの最初の要素をホーム（CafeKinesi）に置き換える
+  // CafeKinesiページのIDを検出して修正
+  const cafeKinesiId = '1ceb802cb0c680f29369dba86095fb38'
+  
+  if (breadcrumbs.length > 0) {
+    // CafeKinesiまたはその親がある場合、それより上は削除
+    const cafeKinesiIndex = breadcrumbs.findIndex(b => 
+      b.id === cafeKinesiId || b.title === 'CafeKinesi'
+    )
+    
+    if (cafeKinesiIndex >= 0) {
+      // CafeKinesiより上の階層を削除
+      breadcrumbs = breadcrumbs.slice(cafeKinesiIndex)
+      // CafeKinesiを「ホーム」として扱う
+      if (breadcrumbs[0]) {
+        breadcrumbs[0].title = 'ホーム'
+        breadcrumbs[0].url = '/'
+      }
     }
   }
   
