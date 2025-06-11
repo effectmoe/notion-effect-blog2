@@ -52,11 +52,11 @@ export class HybridNotionAPI {
    */
   async getEnrichedPageData(pageId: string): Promise<HybridPageData> {
     try {
-      // 並行してデータを取得
-      const [unofficialData, officialData] = await Promise.all([
-        this.getUnofficialPageData(pageId),
-        this.getOfficialPageData(pageId)
-      ])
+      // 現時点では非公式APIのデータのみ使用
+      const unofficialData = await this.getUnofficialPageData(pageId)
+      
+      // TODO: 公式APIのデータも統合する（ビルド問題解決後）
+      const officialData = {}
       
       // データを統合
       return this.mergePageData(unofficialData, officialData)
@@ -92,43 +92,6 @@ export class HybridNotionAPI {
   }
   
   /**
-   * 公式APIからページデータを取得
-   */
-  private async getOfficialPageData(pageId: string): Promise<Partial<HybridPageData>> {
-    if (!this.officialAPI) {
-      return {}
-    }
-    
-    try {
-      // ハイフン付きのページIDに変換
-      const formattedPageId = this.formatPageId(pageId)
-      
-      // ページ情報を取得
-      const page = await this.officialAPI.pages.retrieve({ 
-        page_id: formattedPageId 
-      })
-      
-      if (page.object !== 'page' || !('properties' in page)) {
-        return {}
-      }
-      
-      // プロパティを抽出
-      const properties = page.properties
-      const metadata = this.extractMetadata(properties)
-      
-      return {
-        properties,
-        lastEditedTime: page.last_edited_time,
-        createdTime: page.created_time,
-        ...metadata
-      }
-    } catch (error) {
-      console.error(`Error getting official page data for ${pageId}:`, error)
-      return {}
-    }
-  }
-  
-  /**
    * 両APIのデータをマージ
    */
   private mergePageData(
@@ -153,7 +116,7 @@ export class HybridNotionAPI {
       title: unofficialData.title || '',
       content: unofficialData.content || '',
       
-      // 公式APIのデータ
+      // 公式APIのデータ（現時点では空）
       properties: officialData.properties,
       lastEditedTime: officialData.lastEditedTime,
       createdTime: officialData.createdTime,
@@ -198,40 +161,6 @@ export class HybridNotionAPI {
     }
     
     return textContents.join(' ')
-  }
-  
-  /**
-   * プロパティからメタデータを抽出
-   */
-  private extractMetadata(properties: any): Partial<HybridPageData> {
-    const metadata: Partial<HybridPageData> = {}
-    
-    // タグの抽出
-    if (properties.Tags?.multi_select) {
-      metadata.tags = properties.Tags.multi_select.map((tag: any) => tag.name)
-    }
-    
-    // カテゴリの抽出
-    if (properties.Category?.select) {
-      metadata.category = properties.Category.select.name
-    }
-    
-    // 著者の抽出
-    if (properties.Author?.people?.[0]) {
-      metadata.author = properties.Author.people[0].name
-    }
-    
-    // ステータスの抽出
-    if (properties.Status?.status) {
-      metadata.status = properties.Status.status.name
-    }
-    
-    // 公開日の抽出
-    if (properties.PublishedDate?.date) {
-      metadata.publishedDate = properties.PublishedDate.date.start
-    }
-    
-    return metadata
   }
   
   /**

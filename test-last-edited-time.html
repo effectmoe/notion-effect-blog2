@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Last Edited Time CSS Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 20px;
+            background: #fff;
+        }
+        
+        .dark-mode {
+            background: #191919;
+            color: #fff;
+        }
+        
+        :root {
+            --bg-color: #fff;
+            --fg-color-3: #666;
+        }
+        
+        .dark-mode {
+            --bg-color: #191919;
+            --bg-color-dark: #191919;
+        }
+        
+        .test-container {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+        }
+        
+        .dark-mode .test-container {
+            border-color: #444;
+        }
+        
+        /* Your CSS implementation */
+        .notion-property-last_edited_time {
+            display: inline-flex;
+            align-items: center;
+            overflow: hidden;
+            font-size: 14px;
+            color: var(--fg-color-3);
+            position: relative;
+        }
+        
+        .notion-property-last_edited_time > span {
+            display: inline-block;
+            position: relative;
+            max-width: 10em;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+        
+        .notion-property-last_edited_time::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 50%;
+            background: linear-gradient(to right, transparent, var(--bg-color) 20%);
+            pointer-events: none;
+        }
+        
+        .dark-mode .notion-property-last_edited_time::after {
+            background: linear-gradient(to right, transparent, var(--bg-color-dark, #191919) 20%);
+        }
+        
+        @media (max-width: 768px) {
+            .notion-property-last_edited_time > span {
+                max-width: 8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Last Edited Time CSS Implementation Test</h1>
+    
+    <div class="test-container">
+        <h2>Light Mode</h2>
+        <p>Original format (full timestamp):</p>
+        <div style="color: #666; font-size: 14px;">2024年1月15日 14:30:45</div>
+        
+        <p>With CSS applied:</p>
+        <div class="notion-property-last_edited_time">
+            <span>2024年1月15日 14:30:45</span>
+        </div>
+    </div>
+    
+    <div class="test-container dark-mode">
+        <h2>Dark Mode</h2>
+        <p>Original format (full timestamp):</p>
+        <div style="color: #999; font-size: 14px;">2024年1月15日 14:30:45</div>
+        
+        <p>With CSS applied:</p>
+        <div class="notion-property-last_edited_time">
+            <span>2024年1月15日 14:30:45</span>
+        </div>
+    </div>
+    
+    <div class="test-container">
+        <h2>Different Date Formats</h2>
+        
+        <p>Japanese format:</p>
+        <div class="notion-property-last_edited_time">
+            <span>2024年1月15日 14:30:45</span>
+        </div>
+        
+        <p>English format:</p>
+        <div class="notion-property-last_edited_time">
+            <span>January 15, 2024 2:30:45 PM</span>
+        </div>
+        
+        <p>ISO format:</p>
+        <div class="notion-property-last_edited_time">
+            <span>2024-01-15 14:30:45</span>
+        </div>
+    </div>
+    
+    <div class="test-container">
+        <h2>Mobile View (simulated)</h2>
+        <div style="max-width: 375px; border: 1px solid #999; padding: 10px;">
+            <div class="notion-property-last_edited_time" style="max-width: 8em;">
+                <span>2024年1月15日 14:30:45</span>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Toggle dark mode for testing
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'd') {
+                document.body.classList.toggle('dark-mode');
+            }
+        });
+        
+        console.log('Press "d" to toggle dark mode');
+    </script>
+</body>
+</html>

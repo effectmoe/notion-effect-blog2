@@ -1,0 +1,35 @@
+  // ボディにNoNotionTabsクラスを追加
+  React.useEffect(() => {
+    document.body.classList.add('no-notion-tabs');
+    
+    // 緑枠のWhat's Newを削除（DOMが読み込まれた後）
+    if (site && pageId && site.rootNotionPageId && pageId === site.rootNotionPageId) {
+      setTimeout(() => {
+        // 複数回試行して確実に削除する
+        const removeGreenFrame = () => {
+          const collections = document.querySelectorAll('.notion-collection-row');
+          if (collections && collections.length > 0) {
+            collections.forEach(collection => {
+              // 緑枠のWhat's Newかどうかを判定して削除
+              const isDateContent = collection.textContent?.includes('2025.04.07') || 
+                collection.textContent?.includes('2025.04.01') ||
+                collection.textContent?.includes('Webサイトニューアル');
+              if (isDateContent) {
+                (collection as HTMLElement).style.display = 'none';
+                console.log('Hidden duplicate What\'s New element');
+              }
+            });
+          }
+        };
+
+        // ロード直後と少し遅延させた後の両方で実行
+        removeGreenFrame();
+        setTimeout(removeGreenFrame, 1000);
+        setTimeout(removeGreenFrame, 2000);
+      }, 100);
+    }
+    
+    return () => {
+      document.body.classList.remove('no-notion-tabs');
+    };
+  }, [pageId, site]);

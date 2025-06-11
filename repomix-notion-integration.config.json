@@ -1,0 +1,34 @@
+{
+  "output": {
+    "filePath": "repomix-notion-integration.xml",
+    "style": "xml",
+    "compress": true,
+    "removeComments": false,
+    "outputShowLineNumbers": true
+  },
+  "include": [
+    "**/lib/notion*.ts",
+    "**/lib/resolve-notion-page.ts",
+    "**/lib/get-site-map.ts",
+    "**/lib/map-page-url.ts",
+    "**/lib/acl.ts",
+    "**/lib/db.ts",
+    "**/components/Notion*.tsx",
+    "**/pages/[pageId].tsx",
+    "**/pages/api/**/*.ts"
+  ],
+  "ignore": {
+    "customPatterns": [
+      "**/node_modules/**",
+      "**/.next/**",
+      "**/dist/**",
+      "**/build/**",
+      "**/*.log",
+      "**/coverage/**",
+      "**/.git/**",
+      "**/repomix*.xml",
+      "**/*summary.md",
+      "**/temp/**"
+    ]
+  }
+}

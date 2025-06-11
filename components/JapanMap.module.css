@@ -1,0 +1,39 @@
+.mapContainer {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.map {
+  width: 100%;
+  height: auto;
+}
+
+.prefecture {
+  fill: #e0e7ff;
+  stroke: #6366f1;
+  stroke-width: 1;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.prefecture:hover,
+.prefecture.hovered {
+  fill: #6366f1;
+  transform: scale(1.02);
+  transform-origin: center;
+}
+
+.tooltip {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  pointer-events: none;
+}

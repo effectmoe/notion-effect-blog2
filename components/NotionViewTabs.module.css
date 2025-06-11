@@ -1,0 +1,7 @@
+.notionViewTabs {
+  display: flex;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+/* これは最小限のスタイルで、実際のスタイルは使用しないため */

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>オフライン - Notion Effect Blog</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .offline-container {
+            text-align: center;
+            padding: 2rem;
+            max-width: 500px;
+        }
+        
+        .offline-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 2rem;
+            opacity: 0.3;
+        }
+        
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #000;
+        }
+        
+        p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            color: #666;
+        }
+        
+        .retry-button {
+            display: inline-block;
+            padding: 0.75rem 2rem;
+            background-color: #0070f3;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+        }
+        
+        .retry-button:hover {
+            background-color: #0051cc;
+        }
+        
+        .cached-pages {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .cached-pages h2 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: #000;
+        }
+        
+        .cached-pages-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .cached-pages-list li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .cached-pages-list a {
+            color: #0070f3;
+            text-decoration: none;
+        }
+        
+        .cached-pages-list a:hover {
+            text-decoration: underline;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #1a1a1a;
+                color: #e0e0e0;
+            }
+            
+            h1, .cached-pages h2 {
+                color: #fff;
+            }
+            
+            p {
+                color: #999;
+            }
+            
+            .cached-pages {
+                border-top-color: #333;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <svg class="offline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 1l22 22"></path>
+            <path d="M9 9v2a3 3 0 0 0 5.12 2.12M15 15A3 3 0 0 1 12 18v-6"></path>
+            <path d="M17 13.5a5 5 0 0 0-10 0"></path>
+            <path d="M21 17.5a5 5 0 0 0-3.5-4.79"></path>
+            <path d="M3.5 12.71A5 5 0 0 1 7 8"></path>
+        </svg>
+        
+        <h1>オフラインです</h1>
+        <p>インターネット接続がありません。接続が回復したら、もう一度お試しください。</p>
+        
+        <a href="#" class="retry-button" onclick="window.location.reload(); return false;">再試行</a>
+        
+        <div class="cached-pages" id="cached-pages" style="display: none;">
+            <h2>キャッシュされたページ</h2>
+            <ul class="cached-pages-list" id="cached-pages-list">
+                <!-- キャッシュされたページのリストが動的に挿入されます -->
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        // Service Workerからキャッシュ済みページを取得
+        if ('serviceWorker' in navigator && 'caches' in window) {
+            caches.keys().then(function(cacheNames) {
+                const pageCache = cacheNames.find(name => name.includes('pages'));
+                if (pageCache) {
+                    caches.open(pageCache).then(function(cache) {
+                        cache.keys().then(function(requests) {
+                            const pages = requests
+                                .filter(req => req.url.includes('.html') || req.url.endsWith('/'))
+                                .map(req => ({
+                                    url: req.url,
+                                    title: new URL(req.url).pathname
+                                }));
+                            
+                            if (pages.length > 0) {
+                                const container = document.getElementById('cached-pages');
+                                const list = document.getElementById('cached-pages-list');
+                                
+                                container.style.display = 'block';
+                                list.innerHTML = pages.map(page => 
+                                    `<li><a href="${page.url}">${page.title}</a></li>`
+                                ).join('');
+                            }
+                        });
+                    });
+                }
+            });
+        }
+        
+        // オンラインに戻ったら自動リロード
+        window.addEventListener('online', function() {
+            window.location.reload();
+        });
+    </script>
+</body>
+</html>

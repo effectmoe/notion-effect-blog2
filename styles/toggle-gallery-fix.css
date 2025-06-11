@@ -1,0 +1,122 @@
+/* Toggle and Gallery View Fix */
+
+/* Ensure toggle content is visible */
+.notion-toggle {
+  width: 100%;
+  margin: 0.5rem 0;
+}
+
+/* Force toggle to be open by default */
+details.notion-toggle {
+  open: true;
+}
+
+.notion-toggle[open] {
+  display: block !important;
+}
+
+.notion-toggle-title {
+  cursor: pointer;
+  padding: 0.5rem 0;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+}
+
+.notion-toggle-title:hover {
+  background-color: rgba(55, 53, 47, 0.08);
+}
+
+.notion-toggle-content {
+  padding-left: 1.5rem;
+  margin-top: 0.5rem;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+/* Ensure collection views inside toggles are visible */
+.notion-toggle .notion-collection {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.notion-toggle .notion-collection-view {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.notion-toggle .notion-gallery {
+  display: grid !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.notion-toggle .notion-collection-gallery {
+  display: grid !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Fix for gallery grid inside toggles */
+.notion-toggle .notion-collection-view-body {
+  display: block !important;
+}
+
+.notion-toggle .notion-gallery-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+  width: 100%;
+}
+
+/* Ensure toggle arrow is visible */
+details.notion-toggle summary::-webkit-details-marker {
+  display: inline-block;
+  margin-right: 0.5rem;
+}
+
+/* Open state styling */
+details.notion-toggle[open] > summary {
+  margin-bottom: 0.5rem;
+}
+
+/* Dark mode support */
+.dark details.notion-toggle summary:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Collection placeholder and error states */
+.notion-collection-placeholder,
+.notion-collection-error,
+.notion-collection-loading {
+  padding: 2rem;
+  text-align: center;
+  background-color: rgba(55, 53, 47, 0.03);
+  border-radius: 3px;
+  margin: 1rem 0;
+}
+
+.notion-collection-placeholder p,
+.notion-collection-error p,
+.notion-collection-loading {
+  margin: 0;
+  color: rgba(55, 53, 47, 0.65);
+  font-size: 14px;
+}
+
+.dark .notion-collection-placeholder,
+.dark .notion-collection-error,
+.dark .notion-collection-loading {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+.dark .notion-collection-placeholder p,
+.dark .notion-collection-error p,
+.dark .notion-collection-loading {
+  color: rgba(255, 255, 255, 0.65);
+}
