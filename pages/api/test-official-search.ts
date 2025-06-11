@@ -41,7 +41,7 @@ export default async function handler(
       searchablePageCount: searchablePages.length,
       searchablePageIds: searchablePages,
       samplePageDetails: pageDetails,
-      databaseId: '1ceb802cb0c681e8a45e000ba000bfe2'
+      databaseId: '1ceb802cb0c6814ab43eddb38e80f2e0'
     })
   } catch (error) {
     console.error('Error:', error)

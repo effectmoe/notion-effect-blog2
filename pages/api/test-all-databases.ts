@@ -31,8 +31,8 @@ export default async function handler(
     
     // Test specific database IDs
     const databaseIdsToTest = [
-      '1ceb802cb0c681e8a45e000ba000bfe2',  // From code (no hyphens)
-      '1ceb802c-b0c6-81e8-a45e-000ba000bfe2',  // With hyphens
+      '1ceb802cb0c6814ab43eddb38e80f2e0',  // From code (no hyphens)
+      '1ceb802c-b0c6-814a-b43e-ddb38e80f2e0',  // With hyphens
     ]
 
     const testResults = []

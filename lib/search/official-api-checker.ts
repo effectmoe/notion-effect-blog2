@@ -14,7 +14,7 @@ export async function getSearchablePagesFromOfficialAPI(propertyName: string = '
     }
 
     // データベースID（カフェキネシコンテンツ）
-    const databaseId = '1ceb802cb0c681e8a45e000ba000bfe2'
+    const databaseId = '1ceb802cb0c6814ab43eddb38e80f2e0'
     
     console.log('Querying Notion database with ID:', databaseId)
     console.log('Using property name:', propertyName)

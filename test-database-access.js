@@ -15,8 +15,8 @@ async function testDatabaseAccess() {
   
   // Test different database ID formats
   const databaseIds = [
-    '1ceb802cb0c681e8a45e000ba000bfe2',  // Without hyphens (from code)
-    '1ceb802c-b0c6-81e8-a45e-000ba000bfe2',  // With hyphens (standard format)
+    '1ceb802cb0c6814ab43eddb38e80f2e0',  // Without hyphens (from code)
+    '1ceb802c-b0c6-814a-b43e-ddb38e80f2e0',  // With hyphens (standard format)
     '1ceb802c-b0c6-80f2-9369-dba86095fb38',  // Trying another format
   ];
   

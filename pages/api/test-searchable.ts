@@ -46,7 +46,7 @@ export default async function handler(
     
     // 複数ページのテスト
     // デバッグ情報から取得した正しいID
-    const collectionId = '1ceb802c-b0c6-81e8-a45e-000ba000bfe2' // カフェキネシコンテンツ
+    const collectionId = '1ceb802c-b0c6-814a-b43e-ddb38e80f2e0' // カフェキネシコンテンツ
     const collectionViewId = '1ceb802c-b0c6-811c-86ef-000c4141e47c' // Gallery view
     
     // 非公式APIでページリストを取得
