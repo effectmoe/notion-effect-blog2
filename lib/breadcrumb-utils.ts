@@ -93,19 +93,27 @@ export function getBreadcrumbs(
   })
   
   // ホームページを先頭に追加（現在のページがホームでない場合）
-  if (pageId !== rootPageId && breadcrumbs.length > 0) {
+  // ただし、最初の要素が既にルートページの場合は追加しない
+  if (pageId !== rootPageId && breadcrumbs.length > 0 && breadcrumbs[0].id !== rootPageId) {
     breadcrumbs.unshift({
       id: rootPageId,
       title: 'ホーム',
       url: '/'
     })
-    console.log('getBreadcrumbs: Added home page')
+    if (isDev) {
+      console.log('getBreadcrumbs: Added home page')
+    }
   }
   
-  console.log('getBreadcrumbs - Final result:', {
-    totalCount: breadcrumbs.length,
-    breadcrumbs: breadcrumbs.map(b => ({ id: b.id, title: b.title, url: b.url }))
-  })
+  if (isDev) {
+    console.log('🍞 getBreadcrumbs - Final result:', {
+      currentPageId: pageId,
+      rootPageId: rootPageId,
+      isRootPage: pageId === rootPageId,
+      totalCount: breadcrumbs.length,
+      breadcrumbs: breadcrumbs.map(b => ({ id: b.id, title: b.title, url: b.url }))
+    })
+  }
   
   return breadcrumbs
 }

@@ -56,9 +56,16 @@ export const AutoBreadcrumb: React.FC<AutoBreadcrumbProps> = ({
     return items
   }, [pageId, recordMap, rootPageId, showHome, homeLabel])
 
-  // パンくずが1つ以下の場合は表示しない（現在のページのみ）
-  if (breadcrumbs.length <= 1) {
-    console.log('AutoBreadcrumb: Not showing breadcrumbs - length:', breadcrumbs.length)
+  // 現在のページがルートページの場合、またはパンくずが1つ以下の場合は表示しない
+  if (pageId === rootPageId || breadcrumbs.length <= 1) {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🍞 AutoBreadcrumb: Not showing breadcrumbs', {
+        isRootPage: pageId === rootPageId,
+        breadcrumbsLength: breadcrumbs.length,
+        pageId,
+        rootPageId
+      })
+    }
     return null
   }
 
