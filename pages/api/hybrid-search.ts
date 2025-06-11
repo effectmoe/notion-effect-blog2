@@ -34,13 +34,15 @@ export default async function handler(
     }
 
     // 検索を実行
-    const results = await searchEngine.search(query)
+    const searchResponse = await searchEngine.search(query)
     
     res.status(200).json({
       success: true,
       query,
-      totalResults: results.length,
-      results
+      totalResults: searchResponse.total,
+      results: searchResponse.results,
+      hasMore: searchResponse.hasMore,
+      searchTime: searchResponse.searchTime
     })
   } catch (error) {
     console.error('Search error:', error)
