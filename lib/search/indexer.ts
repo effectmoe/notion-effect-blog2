@@ -17,7 +17,10 @@ export class SearchIndexer {
   
   constructor() {
     this.hybridAPI = new HybridNotionAPI()
-    this.indexPath = path.join(process.cwd(), 'data', 'search-index.json')
+    // Vercel環境では/tmpディレクトリを使用
+    this.indexPath = process.env.VERCEL
+      ? path.join('/tmp', 'search-index.json')
+      : path.join(process.cwd(), 'data', 'search-index.json')
   }
   
   /**
