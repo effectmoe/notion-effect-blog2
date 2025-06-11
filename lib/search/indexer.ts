@@ -10,6 +10,7 @@ import { shouldIndexPage, isValidBlogPageId } from './page-validator'
 import { memoryCache } from './memory-cache'
 import { getAllPageIds } from './batch-page-fetcher'
 import { filterSearchablePages } from './searchable-checker'
+import { SEARCHABLE_PAGE_IDS } from './static-searchable-pages'
 import type { SearchIndexItem, IndexStats } from './types'
 // import { getSiteMap } from '../get-site-map'
 
@@ -54,22 +55,12 @@ export class SearchIndexer {
         '1d3b802cb0c680e48557cffb5e357161', // カフェキネシラバーズ
       ]
       
-      // 検索対象のページのみをフィルタリング
-      console.log('Filtering searchable pages...')
-      const pageIds = await filterSearchablePages(allPageIds)
+      // 静的な検索対象リストを使用（確実性のため）
+      console.log('Using static searchable page list')
+      const pageIds = [...SEARCHABLE_PAGE_IDS]
       
-      // フォールバック：検索対象ページが見つからない場合は静的リストを使用
-      if (pageIds.length === 0) {
-        console.log('No searchable pages found, using static list')
-        const staticPageIds = [
-          '1ceb802cb0c680f29369dba86095fb38', // ホームページ
-          '1d3b802cb0c680519714ffd510528bc0', // カフェキネシ公認インストラクター
-          '1ceb802cb0c681b89b3ac07b70b7f37f', // 講座一覧
-          '1d3b802cb0c680569ac6e94e37eebfbf', // ブログ
-          '1d3b802cb0c680e48557cffb5e357161', // カフェキネシラバーズ
-        ]
-        pageIds.push(...staticPageIds)
-      }
+      // 将来的に動的フィルタリングを有効化する場合
+      // const pageIds = await filterSearchablePages(allPageIds)
       
       console.log(`Found ${pageIds.length} searchable pages`)
       
