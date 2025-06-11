@@ -11,6 +11,7 @@ import { memoryCache } from './memory-cache'
 import { getAllPageIds } from './batch-page-fetcher'
 import { filterSearchablePages } from './searchable-checker'
 import { SEARCHABLE_PAGE_IDS } from './static-searchable-pages'
+import { getSearchablePagesFromOfficialAPI } from './official-api-checker'
 import type { SearchIndexItem, IndexStats } from './types'
 // import { getSiteMap } from '../get-site-map'
 
@@ -55,12 +56,16 @@ export class SearchIndexer {
         '1d3b802cb0c680e48557cffb5e357161', // カフェキネシラバーズ
       ]
       
-      // 静的な検索対象リストを使用（確実性のため）
-      console.log('Using static searchable page list')
-      const pageIds = [...SEARCHABLE_PAGE_IDS]
+      // 公式APIで検索対象ページを取得
+      console.log('Fetching searchable pages from official API...')
+      const officialApiPages = await getSearchablePagesFromOfficialAPI()
       
-      // 将来的に動的フィルタリングを有効化する場合
-      // const pageIds = await filterSearchablePages(allPageIds)
+      // 静的リストと組み合わせ（重複を除去）
+      const combinedPageIds = [...new Set([...officialApiPages, ...SEARCHABLE_PAGE_IDS])]
+      console.log(`Found ${officialApiPages.length} pages from API, ${SEARCHABLE_PAGE_IDS.length} static pages`)
+      
+      // 公式APIで取得したページを優先的に使用
+      const pageIds = officialApiPages.length > 0 ? officialApiPages : SEARCHABLE_PAGE_IDS
       
       console.log(`Found ${pageIds.length} searchable pages`)
       
