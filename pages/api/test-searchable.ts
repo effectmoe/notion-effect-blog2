@@ -26,8 +26,8 @@ export default async function handler(
           const properties = block.properties
           
           // 検索対象プロパティをチェック（プロパティIDは実際のものに合わせて調整）
-          const searchableProperty = properties?.['xaH>'] // 検索対象のプロパティID
-          const isSearchable = searchableProperty?.[0]?.[0] === 'Yes'
+          const searchableProperty = properties?.['|}VV'] // Searchableチェックボックスの正しいプロパティID
+          const isSearchable = searchableProperty?.[0]?.[0] === 'Yes' || searchableProperty?.[0]?.[0] === true
           
           if (isSearchable) {
             searchablePages.push({

@@ -49,8 +49,8 @@ export default async function handler(
             const properties = blockData.value?.properties || {}
             const title = properties.title?.[0]?.[0] || 'Untitled'
             
-            // xaH> プロパティ（検索対象）をチェック
-            const searchableValue = properties['xaH>']?.[0]?.[0]
+            // |}VV プロパティ（Searchableチェックボックス）をチェック
+            const searchableValue = properties['|}VV']?.[0]?.[0]
             const isSearchable = searchableValue === 'Yes' || searchableValue === true
             
             searchablePages.push({

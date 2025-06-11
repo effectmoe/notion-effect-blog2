@@ -16,8 +16,8 @@ export async function isPageSearchable(pageId: string): Promise<boolean> {
     const block = page.block[pageId]?.value
     const properties = block?.properties
     
-    // プロパティIDでチェック（デバッグ情報から: xaH> が検索対象のプロパティID）
-    const searchableProperty = properties?.['xaH>'] || 
+    // プロパティIDでチェック（デバッグ情報から: |}VV が検索対象のプロパティID）
+    const searchableProperty = properties?.['|}VV'] || 
                              properties?.['検索対象'] || 
                              properties?.['Searchable'] || 
                              properties?.['Public']
