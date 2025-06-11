@@ -527,4 +527,10 @@ export class SearchEngine {
     
     return Array.from(suggestions).slice(0, limit)
   }
-}
+  
+  /**
+   * インデックスの再構築
+   */
+  async reindexAll(): Promise<void> {
+    await this.indexer.buildIndex()
+  }
