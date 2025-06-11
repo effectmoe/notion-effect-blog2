@@ -159,7 +159,7 @@ export const site: Site = {
   domain,
   name,
   rootNotionPageId,
-  rootNotionSpaceId,
+  rootNotionSpaceId: rootNotionSpaceId || null,
   description
 }
 
