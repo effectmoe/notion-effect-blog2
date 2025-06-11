@@ -9,6 +9,7 @@ import { isValidBlogPage } from './search-filter'
 import { shouldIndexPage, isValidBlogPageId } from './page-validator'
 import { memoryCache } from './memory-cache'
 import { getAllPageIds } from './batch-page-fetcher'
+import { filterSearchablePages } from './searchable-checker'
 import type { SearchIndexItem, IndexStats } from './types'
 // import { getSiteMap } from '../get-site-map'
 
