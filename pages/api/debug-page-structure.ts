@@ -53,7 +53,7 @@ export default async function handler(
         id,
         type: view.value?.type,
         name: view.value?.name || 'Unnamed View',
-        collection_id: view.value?.collection_id
+        collection_id: (view.value as any)?.collection_id
       })
     })
     
