@@ -8,7 +8,7 @@ import { HybridNotionAPI } from './hybrid-api'
 import { isValidBlogPage } from './search-filter'
 import { shouldIndexPage, isValidBlogPageId } from './page-validator'
 import type { SearchIndexItem, IndexStats } from './types'
-// import { getSiteMap } from '../get-site-map'
+import { getSiteMap } from '../get-site-map'
 
 export class SearchIndexer {
   private hybridAPI: HybridNotionAPI
@@ -28,20 +28,21 @@ export class SearchIndexer {
     const startTime = Date.now()
     
     try {
-      // 既知のブログページIDのリストを直接使用
-      const KNOWN_BLOG_PAGE_IDS = [
-        '1ceb802cb0c681068bbdd7b2107891f5',  // カフェキネシの歴史
-        '1ceb802cb0c681b89b3ac07b70b7f37f',  // カフェキネシの動画を見る
-        '1d3b802cb0c680519714ffd510528bc0',  // カフェキネシの特長
-        '1d3b802cb0c680569ac6e94e37eebfbf',  // (page 4)
-        '1d3b802cb0c6805f959ec180966b2a45',  // カフェキネシの夢
-        '1d3b802cb0c680b78f23e50d60a8fe4b',  // カフェキネシ講座を受講する
-        '1d3b802cb0c680d5a093f49cfd1c675c',  // アロマを購入する
-        '1d3b802cb0c680e48557cffb5e357161'   // 公認インストラクターを探す
-      ]
+      // サイトマップからすべてのページを取得
+      console.log('Getting site map...')
+      const siteMap = await getSiteMap()
+      const allPageIds = Object.keys(siteMap.pageMap)
       
-      console.log(`\n=== Indexing ${KNOWN_BLOG_PAGE_IDS.length} known blog pages ===`)
-      const pageIds = KNOWN_BLOG_PAGE_IDS
+      console.log(`\n=== Found ${allPageIds.length} pages in site map ===`)
+      
+      // デバッグ: すべてのページを表示
+      allPageIds.forEach(id => {
+        const page = siteMap.pageMap[id]
+        console.log(`- ${id}: ${page?.title || 'No title'}`)
+      })
+      
+      // 今はすべてのページをインデックス対象にする
+      const pageIds = allPageIds
       
       // バッチ処理でインデックスを構築
       const batchSize = 10
@@ -94,13 +95,14 @@ export class SearchIndexer {
       const indexItem = await this.hybridAPI.buildSearchIndexItem(pageId)
       
       // ブログページとして有効かチェック
-      if (!shouldIndexPage(indexItem.pageId, indexItem.title)) {
-        console.log(`\nSkipping non-blog page:`)
-        console.log(`  ID: ${indexItem.pageId}`)
-        console.log(`  Title: ${indexItem.title}`)
-        console.log(`  Reason: Not in whitelist or invalid title`);
-        return null;
-      }
+      // 一時的にフィルタリングを無効化して、すべてのページをインデックス
+      // if (!shouldIndexPage(indexItem.pageId, indexItem.title)) {
+      //   console.log(`\nSkipping non-blog page:`)
+      //   console.log(`  ID: ${indexItem.pageId}`)
+      //   console.log(`  Title: ${indexItem.title}`)
+      //   console.log(`  Reason: Not in whitelist or invalid title`);
+      //   return null;
+      // }
       
       console.log(`\nIndexing page:`)
       console.log(`  ID: ${indexItem.pageId}`)
