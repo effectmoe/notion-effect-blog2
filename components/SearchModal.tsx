@@ -60,7 +60,30 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => 
       }
       
       const data = await response.json()
-      setResults(data.results)
+      
+      // フロントエンドでも追加フィルタリング
+      const filteredResults = (data.results || []).filter((result: SearchResult) => {
+        // 無題のページを除外
+        if (result.title.includes('無題') || 
+            result.title.toLowerCase().includes('untitled') ||
+            result.title.includes('のページ')) {
+          return false
+        }
+        
+        // Notionページを除外
+        if (result.title.toLowerCase().includes('notion') && result.title.includes('ページ')) {
+          return false
+        }
+        
+        // タイトルが空または短すぎる場合は除外
+        if (!result.title || result.title.trim().length < 2) {
+          return false
+        }
+        
+        return true
+      })
+      
+      setResults(filteredResults)
     } catch (err) {
       console.error('Search error:', err)
       setError('検索中にエラーが発生しました')
@@ -231,7 +254,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => 
             <div className={styles.error}>{error}</div>
           )}
           
-          {!isLoading && !error && results.length === 0 && query && (
+          {!isLoading && !error && results.length === 0 && query && query.length >= 2 && (
             <div className={styles.noResults}>
               「{query}」に一致する結果が見つかりませんでした
             </div>

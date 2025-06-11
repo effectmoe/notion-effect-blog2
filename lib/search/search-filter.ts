@@ -76,8 +76,15 @@ export function isValidBlogPage(
     return false;
   }
   
-  // Untitledページは除外
-  if (title.toLowerCase() === 'untitled' || title === '無題') {
+  // Untitledページは除外（部分一致も含む）
+  if (title.toLowerCase().includes('untitled') || 
+      title.includes('無題') || 
+      title.includes('のページ')) {
+    return false;
+  }
+  
+  // Notionページという名前も除外
+  if (title.toLowerCase().includes('notion') && title.includes('ページ')) {
     return false;
   }
   
