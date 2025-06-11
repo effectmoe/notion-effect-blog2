@@ -32,6 +32,7 @@ import { Header } from './Header'
 import { FormulaPropertyDebug } from './FormulaPropertyDebug'
 import { CustomPageLink } from './CustomPageLink'
 // import { CollectionViewWrapper } from './CollectionViewWrapper'
+import StructuredData from './StructuredData'
 import styles from './styles.module.css'
 
 // -----------------------------------------------------------------------------
@@ -381,6 +382,26 @@ export function NotionPage({
         image={socialImage}
         url={canonicalPageUrl}
       />
+
+      {/* 構造化データを自動追加 */}
+      {pageId === site.rootNotionPageId ? (
+        <StructuredData pageType="Organization" />
+      ) : (
+        <StructuredData 
+          pageType="WebPage" 
+          data={{
+            title: title,
+            description: socialDescription,
+            url: canonicalPageUrl,
+            datePublished: recordMap?.block?.[pageId]?.value?.created_time 
+              ? new Date(recordMap.block[pageId].value.created_time).toISOString() 
+              : undefined,
+            dateModified: recordMap?.block?.[pageId]?.value?.last_edited_time
+              ? new Date(recordMap.block[pageId].value.last_edited_time).toISOString()
+              : undefined
+          }}
+        />
+      )}
 
       {/* All body class modifications moved to useEffect to avoid hydration issues */}
 

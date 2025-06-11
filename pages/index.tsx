@@ -2,7 +2,6 @@ import { NotionPage } from '@/components/NotionPage'
 import { domain } from '@/lib/config'
 import { resolveNotionPage } from '@/lib/resolve-notion-page'
 import { getMenuItems } from '@/lib/menu-utils'
-import { notionViews } from '@/lib/notion-views'
 
 export const getStaticProps = async () => {
   try {
