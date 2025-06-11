@@ -24,8 +24,21 @@ export async function getAllPageIds(rootPageId: string): Promise<string[]> {
     // ページタイプのブロックのみをフィルタ
     for (const blockId of allBlockIds) {
       const block = rootPage.block[blockId]?.value
-      if (block && block.type === 'page') {
+      if (block && (block.type === 'page' || block.type === 'collection_view_page')) {
         pageIds.add(blockId)
+      }
+    }
+    
+    // 子ページのコンテンツからもページを探す
+    for (const blockId of allBlockIds) {
+      const block = rootPage.block[blockId]?.value
+      if (block?.content) {
+        for (const childId of block.content) {
+          const childBlock = rootPage.block[childId]?.value
+          if (childBlock && (childBlock.type === 'page' || childBlock.type === 'collection_view_page')) {
+            pageIds.add(childId)
+          }
+        }
       }
     }
     
@@ -57,7 +70,7 @@ export async function getAllPageIds(rootPageId: string): Promise<string[]> {
     }
     
     // 子ページを再帰的に取得（深さ制限付き）
-    const maxDepth = 3
+    const maxDepth = 5  // 深さを増やす
     const visited = new Set<string>()
     
     async function getChildPages(pageId: string, depth: number = 0): Promise<void> {
