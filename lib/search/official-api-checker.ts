@@ -6,10 +6,10 @@
 // 公式APIが有効になるまでの暫定実装
 export async function getSearchablePagesFromOfficialAPI(propertyName: string = 'Searchable'): Promise<string[]> {
   try {
-    // 環境変数チェック - Blog Search APIキーを使用
-    const notionApiKey = process.env.NOTION_API_KEY
+    // 環境変数チェック - 利用可能なAPIキーを使用
+    const notionApiKey = process.env.NOTION_SEARCH_API_SECRET || process.env.NOTION_API_SECRET || process.env.NOTION_API_KEY
     if (!notionApiKey) {
-      console.log('NOTION_API_KEY not found, using static list')
+      console.log('No Notion API key found in environment variables')
       return []
     }
 
@@ -65,9 +65,9 @@ export async function getSearchablePagesFromOfficialAPI(propertyName: string = '
  */
 export async function getPagePropertiesFromOfficialAPI(pageId: string): Promise<any> {
   try {
-    const notionApiKey = process.env.NOTION_API_KEY
+    const notionApiKey = process.env.NOTION_SEARCH_API_SECRET || process.env.NOTION_API_SECRET || process.env.NOTION_API_KEY
     if (!notionApiKey) {
-      console.log('NOTION_API_KEY not found')
+      console.log('No Notion API key found in environment variables')
       return null
     }
 
