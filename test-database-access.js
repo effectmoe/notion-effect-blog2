@@ -3,10 +3,10 @@
 
 async function testDatabaseAccess() {
   // Get API key from environment
-  const apiKey = process.env.NOTION_API_KEY || process.env.NOTION_API_SECRET;
+  const apiKey = process.env.NOTION_API_SECRET;
   
   if (!apiKey) {
-    console.error('❌ No API key found in NOTION_API_KEY or NOTION_API_SECRET');
+    console.error('❌ No API key found in NOTION_API_SECRET');
     console.log('Please set one of these environment variables');
     return;
   }

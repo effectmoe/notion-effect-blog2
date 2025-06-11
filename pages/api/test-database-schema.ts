@@ -5,7 +5,7 @@ export default async function handler(
   res: NextApiResponse
 ) {
   try {
-    const notionApiKey = process.env.NOTION_SEARCH_API_SECRET || process.env.NOTION_API_SECRET || process.env.NOTION_API_KEY
+    const notionApiKey = process.env.NOTION_SEARCH_API_SECRET || process.env.NOTION_API_SECRET
     if (!notionApiKey) {
       return res.status(400).json({ error: 'No Notion API key found' })
     }

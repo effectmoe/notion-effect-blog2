@@ -205,7 +205,7 @@ const response = await fetch('/api/font-settings', {
    // pages/api/font-settings-from-notion.js
    import { Client } from '@notionhq/client';
    
-   const notion = new Client({ auth: process.env.NOTION_API_KEY });
+   const notion = new Client({ auth: process.env.NOTION_API_SECRET });
    
    export default async function handler(req, res) {
      const database = await notion.databases.query({
