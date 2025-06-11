@@ -443,13 +443,11 @@ export function NotionPage({
                 Parent Table: {block?.parent_table}<br />
               </div>
             )}
-            {/* AutoBreadcrumb を一時的に無効化
             <AutoBreadcrumb
               pageId={pageId}
               recordMap={recordMap}
               rootPageId={site.rootNotionPageId}
             />
-            */}
           </>
         )}
         
