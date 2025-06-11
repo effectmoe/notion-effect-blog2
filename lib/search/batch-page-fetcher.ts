@@ -21,6 +21,9 @@ export async function getAllPageIds(rootPageId: string): Promise<string[]> {
     const allBlockIds = Object.keys(rootPage.block || {})
     const pageIds: Set<string> = new Set()
     
+    // ルートページ自体を追加
+    pageIds.add(rootPageId)
+    
     // ページタイプのブロックのみをフィルタ
     for (const blockId of allBlockIds) {
       const block = rootPage.block[blockId]?.value
@@ -56,12 +59,23 @@ export async function getAllPageIds(rootPageId: string): Promise<string[]> {
             const collectionData = await notion.getCollectionData(
               collectionId,
               (collectionView.value as any).id,
-              { limit: 100 }
+              { limit: 1000 }  // より多くのアイテムを取得
             )
             
             // コレクション内のページIDを追加
             const blockIds = collectionData.recordMap?.block || {}
-            Object.keys(blockIds).forEach(id => pageIds.add(id))
+            Object.keys(blockIds).forEach(id => {
+              pageIds.add(id)
+              console.log(`Found page in collection: ${id}`)
+            })
+            
+            // コレクションページ自体も追加
+            if (collectionData.result?.blockIds) {
+              collectionData.result.blockIds.forEach(id => {
+                pageIds.add(id)
+                console.log(`Found page from collection blockIds: ${id}`)
+              })
+            }
           } catch (error) {
             console.error(`Failed to load collection ${collectionId}:`, error.message)
           }
@@ -87,6 +101,34 @@ export async function getAllPageIds(rootPageId: string): Promise<string[]> {
             pageIds.add(block.value.id)
             // 子ページも取得（深さ制限あり）
             await getChildPages(block.value.id, depth + 1)
+          }
+          
+          // コレクションビューブロックもチェック
+          if (block.value?.type === 'collection_view' || block.value?.type === 'collection_view_page') {
+            const collectionId = block.value?.collection_id
+            if (collectionId && page.collection?.[collectionId]) {
+              // このコレクション内のページを取得
+              try {
+                const viewId = block.value?.view_ids?.[0]
+                if (viewId) {
+                  const collectionData = await notion.getCollectionData(
+                    collectionId,
+                    viewId,
+                    { limit: 1000 }
+                  )
+                  
+                  // コレクション内のページを追加
+                  if (collectionData.result?.blockIds) {
+                    for (const pageId of collectionData.result.blockIds) {
+                      pageIds.add(pageId)
+                      console.log(`Found page in nested collection: ${pageId}`)
+                    }
+                  }
+                }
+              } catch (error) {
+                console.error(`Failed to load nested collection ${collectionId}:`, error.message)
+              }
+            }
           }
         }
       } catch (error) {
