@@ -5,6 +5,8 @@
 import fs from 'fs/promises'
 import path from 'path'
 import { HybridNotionAPI } from './hybrid-api'
+import { isValidBlogPage } from './search-filter'
+import { shouldIndexPage, isValidBlogPageId } from './page-validator'
 import type { SearchIndexItem, IndexStats } from './types'
 import { getSiteMap } from '../get-site-map'
 
@@ -28,9 +30,12 @@ export class SearchIndexer {
     try {
       // サイトマップから全ページIDを取得
       const siteMap = await getSiteMap()
-      const pageIds = Object.keys(siteMap.pageMap)
+      const allPageIds = Object.keys(siteMap.pageMap)
       
-      console.log(`Found ${pageIds.length} pages to index`)
+      // 既知のブログページIDのみをフィルタリング
+      const pageIds = allPageIds.filter(pageId => isValidBlogPageId(pageId))
+      
+      console.log(`Found ${allPageIds.length} total pages, indexing ${pageIds.length} blog pages`)
       
       // バッチ処理でインデックスを構築
       const batchSize = 10
@@ -81,6 +86,13 @@ export class SearchIndexer {
   async indexPage(pageId: string): Promise<SearchIndexItem | null> {
     try {
       const indexItem = await this.hybridAPI.buildSearchIndexItem(pageId)
+      
+      // ブログページとして有効かチェック
+      if (!shouldIndexPage(indexItem.pageId, indexItem.title)) {
+        console.log(`Skipping non-blog page: ${indexItem.title} (${indexItem.pageId})`);
+        return null;
+      }
+      
       this.indexCache.set(pageId, indexItem)
       return indexItem
     } catch (error) {

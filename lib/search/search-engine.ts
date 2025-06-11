@@ -3,6 +3,7 @@
  */
 
 import { SearchIndexer } from './indexer'
+import { filterSearchResults, isValidBlogPage } from './search-filter'
 import type {
   SearchResult,
   SearchOptions,
@@ -48,6 +49,9 @@ export class SearchEngine {
         default:
           results = await this.hybridSearch(searchQuery, options)
       }
+      
+      // システムページをフィルタリング
+      results = filterSearchResults(results)
       
       // 結果をソート
       results = this.sortResults(results, options)
