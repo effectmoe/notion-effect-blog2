@@ -464,8 +464,8 @@ export function NotionPage({
                   .map(([id, b]) => ({
                     id,
                     type: b.value.type,
-                    collection_id: b.value.collection_id,
-                    view_ids: b.value.view_ids
+                    collection_id: (b.value as any).collection_id,
+                    view_ids: (b.value as any).view_ids
                   })),
                 null,
                 2
