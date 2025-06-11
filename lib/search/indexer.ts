@@ -34,9 +34,11 @@ export class SearchIndexer {
       // 現在アクセス可能なページIDを手動で設定
       // ログから確認された実際のページID
       const pageIds = [
-        '1ceb802cb0c680f29369dba86095fb38',  // ホームページ
+        '1ceb802cb0c680f29369dba86095fb38',  // ホームページ（ユーザー提供）
         '1d3b802cb0c680eea6e4e9d17521957c',  // ログから確認されたページ
         '1d7b802cb0c680e9b07dc1f72720943d',  // 別の確認されたページ
+        // 追加のページIDをここに追加可能
+        // タイムアウトエラーを避けるため、一度に少数のページのみを処理
       ]
       
       console.log(`\n=== Indexing ${pageIds.length} pages ===`)

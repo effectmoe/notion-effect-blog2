@@ -25,7 +25,11 @@ export class HybridNotionAPI {
     
     // activeUserがなくても動作するように設定
     const apiOptions: any = {
-      authToken: authToken
+      authToken: authToken,
+      // タイムアウトを増やす
+      timeoutMs: 30000, // 30秒
+      // リトライ設定
+      maxRetries: 2
     }
     
     // activeUserがある場合のみ追加
