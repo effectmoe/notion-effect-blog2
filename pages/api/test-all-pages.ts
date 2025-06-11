@@ -10,8 +10,8 @@ export default async function handler(
     const rootPageId = '1ceb802cb0c680f29369dba86095fb38'
     const rootPage = await notion.getPage(rootPageId)
     
-    // スペースIDを抽出
-    const spaceId = Object.keys(rootPage.space || {})[0] || null
+    // スペースIDを抽出（ExtendedRecordMapから）
+    const spaceId = rootPage.block[rootPageId]?.value?.space_id || null
     
     // ページ一覧を取得する別の方法
     const searchParams = {
@@ -32,12 +32,18 @@ export default async function handler(
     
     let allPages = []
     
-    // searchAPI を使用してページを取得
+    // バッチページ取得を使用してページを取得
     try {
-      const searchResults = await notion.search(searchParams)
-      allPages = searchResults.results || []
+      const { getAllPageIds } = await import('@/lib/search/batch-page-fetcher')
+      const pageIds = await getAllPageIds(rootPageId)
+      allPages = pageIds.map(id => ({
+        id,
+        object: 'page',
+        created_time: new Date().toISOString(),
+        last_edited_time: new Date().toISOString()
+      }))
     } catch (searchError) {
-      console.error('Search API failed:', searchError)
+      console.error('Page discovery failed:', searchError)
     }
     
     // 結果を整形
@@ -47,9 +53,7 @@ export default async function handler(
       totalPages: allPages.length,
       pages: allPages.slice(0, 10).map(page => ({
         id: page.id,
-        title: page.properties?.title?.title?.[0]?.plain_text || 
-               page.properties?.Name?.title?.[0]?.plain_text || 
-               'Untitled',
+        title: 'Page ' + page.id.slice(0, 8),  // 簡略化
         type: page.object,
         createdTime: page.created_time,
         lastEditedTime: page.last_edited_time
