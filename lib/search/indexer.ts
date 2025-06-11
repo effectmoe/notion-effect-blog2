@@ -9,7 +9,7 @@ import { isValidBlogPage } from './search-filter'
 import { shouldIndexPage, isValidBlogPageId } from './page-validator'
 import { memoryCache } from './memory-cache'
 import type { SearchIndexItem, IndexStats } from './types'
-// import { getSiteMap } from '../get-site-map'
+import { getSiteMap } from '../get-site-map'
 
 export class SearchIndexer {
   private hybridAPI: HybridNotionAPI
@@ -32,15 +32,16 @@ export class SearchIndexer {
     const startTime = Date.now()
     
     try {
-      // 現在アクセス可能なページIDを手動で設定
-      // ログから確認された実際のページID
-      const pageIds = [
-        '1ceb802cb0c680f29369dba86095fb38',  // ホームページ（ユーザー提供）
-        '1d3b802cb0c680eea6e4e9d17521957c',  // ログから確認されたページ
-        '1d7b802cb0c680e9b07dc1f72720943d',  // 別の確認されたページ
-        // 追加のページIDをここに追加可能
-        // タイムアウトエラーを避けるため、一度に少数のページのみを処理
-      ]
+      // サイトマップから全ページを自動取得
+      const siteMap = await getSiteMap()
+      const pageIds = Object.keys(siteMap.canonicalPageMap)
+      
+      console.log(`Found ${pageIds.length} pages in site map`)
+      
+      // 開発/デバッグ用：手動でページIDを指定する場合はコメントアウトを解除
+      // const pageIds = [
+      //   '1ceb802cb0c680f29369dba86095fb38',  // ホームページ
+      // ]
       
       console.log(`\n=== Indexing ${pageIds.length} pages ===`)
       pageIds.forEach(id => console.log(`- ${id}`))
@@ -98,14 +99,13 @@ export class SearchIndexer {
       const indexItem = await this.hybridAPI.buildSearchIndexItem(pageId)
       
       // ブログページとして有効かチェック
-      // 一時的にフィルタリングを無効化して、すべてのページをインデックス
-      // if (!shouldIndexPage(indexItem.pageId, indexItem.title)) {
-      //   console.log(`\nSkipping non-blog page:`)
-      //   console.log(`  ID: ${indexItem.pageId}`)
-      //   console.log(`  Title: ${indexItem.title}`)
-      //   console.log(`  Reason: Not in whitelist or invalid title`);
-      //   return null;
-      // }
+      if (!shouldIndexPage(indexItem.pageId, indexItem.title)) {
+        console.log(`\nSkipping non-blog page:`)
+        console.log(`  ID: ${indexItem.pageId}`)
+        console.log(`  Title: ${indexItem.title}`)
+        console.log(`  Reason: Not in whitelist or invalid title`);
+        return null;
+      }
       
       console.log(`\nIndexing page:`)
       console.log(`  ID: ${indexItem.pageId}`)
