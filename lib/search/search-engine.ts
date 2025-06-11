@@ -532,5 +532,5 @@ export class SearchEngine {
    * インデックスの再構築
    */
   async reindexAll(): Promise<void> {
-    await this.indexer.buildIndex()
+    await this.indexer.buildFullIndex()
   }
