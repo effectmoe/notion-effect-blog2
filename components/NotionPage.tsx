@@ -33,6 +33,7 @@ import { FormulaPropertyDebug } from './FormulaPropertyDebug'
 import { CustomPageLink } from './CustomPageLink'
 // import { CollectionViewWrapper } from './CollectionViewWrapper'
 import StructuredData from './StructuredData'
+import { AutoBreadcrumb } from './AutoBreadcrumb'
 import styles from './styles.module.css'
 
 // -----------------------------------------------------------------------------
@@ -409,6 +410,14 @@ export function NotionPage({
       <Header menuItems={(menuItems && menuItems.length > 0) ? menuItems : navigationMenuItems} />
 
       <div className={styles.notionPageContainer}>
+        {/* 自動生成パンくずリスト（ホームページ以外で表示） */}
+        {pageId !== site.rootNotionPageId && (
+          <AutoBreadcrumb
+            pageId={pageId}
+            recordMap={recordMap}
+            rootPageId={site.rootNotionPageId}
+          />
+        )}
         <NotionRenderer
           bodyClassName={cs(
             styles.notion,

@@ -30,11 +30,23 @@
   min-height: calc(100vh - 60px);
 }
 
+/* パンくずリストのコンテナ調整 */
+.notionPageContainer > nav[aria-label="パンくずリスト"] {
+  max-width: var(--notion-max-width);
+  margin: 0 auto;
+  width: 100%;
+  padding: 0 2rem;
+}
+
 /* モバイル対応 */
 @media (max-width: 768px) {
   .notionPageContainer {
     margin-top: 55px;
     min-height: calc(100vh - 55px);
+  }
+  
+  .notionPageContainer > nav[aria-label="パンくずリスト"] {
+    padding: 0 1rem;
   }
 }
 
