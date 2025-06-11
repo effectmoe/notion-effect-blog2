@@ -3,14 +3,14 @@
  */
 
 import { NotionAPI } from 'notion-client'
-import { Client as NotionClient } from '@notionhq/client'
+import { Client } from '@notionhq/client'
 import type { ExtendedRecordMap } from 'notion-types'
 import { getTextContent, getPageProperty } from 'notion-utils'
 import type { HybridPageData, SearchIndexItem } from './types'
 
 export class HybridNotionAPI {
   private unofficialAPI: NotionAPI
-  private officialAPI: NotionClient | null = null
+  private officialAPI: Client | null = null
   
   constructor() {
     // 非公式API（react-notion-x）の初期化
@@ -23,7 +23,7 @@ export class HybridNotionAPI {
     // 検索専用APIキーを優先的に使用、なければ既存のAPIキーを使用
     const apiKey = process.env.NOTION_SEARCH_API_SECRET || process.env.NOTION_API_SECRET
     if (apiKey) {
-      this.officialAPI = new NotionClient({
+      this.officialAPI = new Client({
         auth: apiKey
       })
     }
