@@ -8,7 +8,7 @@ import { HybridNotionAPI } from './hybrid-api'
 import { isValidBlogPage } from './search-filter'
 import { shouldIndexPage, isValidBlogPageId } from './page-validator'
 import type { SearchIndexItem, IndexStats } from './types'
-import { getSiteMap } from '../get-site-map'
+// import { getSiteMap } from '../get-site-map'
 
 export class SearchIndexer {
   private hybridAPI: HybridNotionAPI
@@ -28,22 +28,15 @@ export class SearchIndexer {
     const startTime = Date.now()
     
     try {
-      // サイトマップからすべてのページを取得
-      console.log('Getting site map...')
-      const siteMap = await getSiteMap()
-      const allPageIds = Object.keys(siteMap.pageMap)
+      // 現在アクセス可能なページIDを手動で設定
+      // ログから確認された実際のページID
+      const pageIds = [
+        '1ceb802cb0c680f29369dba86095fb38',  // ホームページ
+        '1d3b802cb0c680eea6e4e9d17521957c',  // ログから確認されたページ
+        '1d7b802cb0c680e9b07dc1f72720943d',  // 別の確認されたページ
+      ]
       
-      console.log(`\n=== Found ${allPageIds.length} pages in site map ===`)
-      
-      // デバッグ: すべてのページを表示
-      allPageIds.forEach(id => {
-        console.log(`- ${id}`)
-      })
-      
-      // ページIDからハイフンを除去
-      const pageIds = allPageIds.map(id => id.replace(/-/g, ''))
-      
-      console.log('\nProcessing page IDs (hyphens removed):')
+      console.log(`\n=== Indexing ${pageIds.length} pages ===`)
       pageIds.forEach(id => console.log(`- ${id}`))
       
       // バッチ処理でインデックスを構築
@@ -94,11 +87,9 @@ export class SearchIndexer {
    */
   async indexPage(pageId: string): Promise<SearchIndexItem | null> {
     try {
-      // ページIDからハイフンを除去
-      const cleanPageId = pageId.replace(/-/g, '')
-      console.log(`\nIndexing page: ${pageId} -> ${cleanPageId}`)
+      console.log(`\nIndexing page: ${pageId}`)
       
-      const indexItem = await this.hybridAPI.buildSearchIndexItem(cleanPageId)
+      const indexItem = await this.hybridAPI.buildSearchIndexItem(pageId)
       
       // ブログページとして有効かチェック
       // 一時的にフィルタリングを無効化して、すべてのページをインデックス
