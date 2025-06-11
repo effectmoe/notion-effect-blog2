@@ -534,3 +534,4 @@ export class SearchEngine {
   async reindexAll(): Promise<void> {
     await this.indexer.buildFullIndex()
   }
+}
