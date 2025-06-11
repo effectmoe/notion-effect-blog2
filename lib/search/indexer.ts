@@ -8,6 +8,7 @@ import { HybridNotionAPI } from './hybrid-api'
 import { isValidBlogPage } from './search-filter'
 import { shouldIndexPage, isValidBlogPageId } from './page-validator'
 import { memoryCache } from './memory-cache'
+import { getAllPageIds } from './batch-page-fetcher'
 import type { SearchIndexItem, IndexStats } from './types'
 // import { getSiteMap } from '../get-site-map'
 
@@ -32,21 +33,23 @@ export class SearchIndexer {
     const startTime = Date.now()
     
     try {
-      // 一時的に手動ページIDに戻す（ビルドエラー回避のため）
-      const pageIds = [
-        '1ceb802cb0c680f29369dba86095fb38',  // ホームページ
-      ]
+      // バッチ処理で全ページIDを取得
+      const rootPageId = '1ceb802cb0c680f29369dba86095fb38'
+      let pageIds = await getAllPageIds(rootPageId)
       
-      // TODO: ビルドエラー解決後に以下を有効化
-      // const siteMap = await getSiteMap()
-      // const pageIds = Object.keys(siteMap.canonicalPageMap)
-      // console.log(`Found ${pageIds.length} pages in site map`)
+      // ページが見つからない場合は手動IDを使用
+      if (pageIds.length === 0) {
+        console.log('No pages found, using manual page IDs')
+        pageIds = [rootPageId]
+      }
+      
+      console.log(`Found ${pageIds.length} pages to index`)
       
       console.log(`\n=== Indexing ${pageIds.length} pages ===`)
       pageIds.forEach(id => console.log(`- ${id}`))
       
-      // バッチ処理でインデックスを構築
-      const batchSize = 10
+      // バッチ処理でインデックスを構築（小さめのバッチサイズでタイムアウト回避）
+      const batchSize = 3
       const indexItems: SearchIndexItem[] = []
       
       for (let i = 0; i < pageIds.length; i += batchSize) {
