@@ -241,7 +241,7 @@ export function HeaderImpl({ menuItems = DEFAULT_MENU_ITEMS }: HeaderProps) {
                   
                   return (
                     <li key={id} className={styles.searchResultItem}>
-                      <a 
+                      <Link 
                         href={url} 
                         className={styles.searchResultLink}
                         onClick={() => {
@@ -249,8 +249,6 @@ export function HeaderImpl({ menuItems = DEFAULT_MENU_ITEMS }: HeaderProps) {
                           setSearchQuery('');
                           setSearchResults([]);
                         }}
-                        target="_blank"
-                        rel="noopener noreferrer"
                       >
                         <span className={styles.searchResultTitle}>
                           {title}
@@ -260,7 +258,7 @@ export function HeaderImpl({ menuItems = DEFAULT_MENU_ITEMS }: HeaderProps) {
                             {excerpt}
                           </span>
                         )}
-                      </a>
+                      </Link>
                     </li>
                   );
                 })}
