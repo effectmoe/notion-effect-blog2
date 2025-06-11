@@ -6,9 +6,9 @@ export default async function handler(
   res: NextApiResponse
 ) {
   try {
-    // テスト用：特定のコレクションから検索対象ページを取得
-    const collectionId = '1ceb802cb0c681e8a45e000ba000bfe2' // カフェキネシコンテンツ
-    const collectionViewId = '1ceb802cb0c6811c86ef000c4141e47c' // Gallery view
+    // デバッグ情報から取得した正しいID
+    const collectionId = '1ceb802c-b0c6-81e8-a45e-000ba000bfe2' // カフェキネシコンテンツ
+    const collectionViewId = '1ceb802c-b0c6-811c-86ef-000c4141e47c' // Gallery view
     
     const collectionData = await notion.getCollectionData(
       collectionId,

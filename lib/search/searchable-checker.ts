@@ -16,12 +16,15 @@ export async function isPageSearchable(pageId: string): Promise<boolean> {
     const block = page.block[pageId]?.value
     const properties = block?.properties
     
-    // 「検索対象」プロパティをチェック（Notionのプロパティ名に合わせて調整が必要）
-    // チェックボックスプロパティは通常 [["Yes"]] または [["No"]] の形式
-    const searchableProperty = properties?.['検索対象'] || properties?.['Searchable'] || properties?.['Public']
+    // プロパティIDでチェック（デバッグ情報から: xaH> が検索対象のプロパティID）
+    const searchableProperty = properties?.['xaH>'] || 
+                             properties?.['検索対象'] || 
+                             properties?.['Searchable'] || 
+                             properties?.['Public']
     
     if (searchableProperty && searchableProperty[0] && searchableProperty[0][0]) {
-      return searchableProperty[0][0] === 'Yes' || searchableProperty[0][0] === 'true' || searchableProperty[0][0] === true
+      const value = searchableProperty[0][0]
+      return value === 'Yes' || value === 'true' || value === true || value === '✓'
     }
     
     // デフォルトは検索対象外
