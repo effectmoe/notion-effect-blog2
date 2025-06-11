@@ -3,14 +3,13 @@
  */
 
 import { NotionAPI } from 'notion-client'
-import { Client } from '@notionhq/client'
 import type { ExtendedRecordMap } from 'notion-types'
 import { getTextContent, getPageProperty } from 'notion-utils'
 import type { HybridPageData, SearchIndexItem } from './types'
 
 export class HybridNotionAPI {
   private unofficialAPI: NotionAPI
-  private officialAPI: Client | null = null
+  private officialAPI: any | null = null
   
   constructor() {
     // 非公式API（react-notion-x）の初期化
@@ -19,13 +18,26 @@ export class HybridNotionAPI {
       authToken: process.env.NOTION_TOKEN_V2
     })
     
-    // 公式APIの初期化（環境変数が設定されている場合）
-    // 検索専用APIキーを優先的に使用、なければ既存のAPIキーを使用
-    const apiKey = process.env.NOTION_SEARCH_API_SECRET || process.env.NOTION_API_SECRET
-    if (apiKey) {
-      this.officialAPI = new Client({
-        auth: apiKey
-      })
+    // 公式APIの初期化は非同期で行う
+    this.initOfficialAPI()
+  }
+  
+  /**
+   * 公式APIを非同期で初期化
+   */
+  private async initOfficialAPI() {
+    try {
+      const apiKey = process.env.NOTION_SEARCH_API_SECRET || process.env.NOTION_API_SECRET
+      if (apiKey) {
+        // 動的インポートを使用
+        const notionModule = await import('@notionhq/client')
+        const { Client } = notionModule
+        this.officialAPI = new Client({
+          auth: apiKey
+        })
+      }
+    } catch (error) {
+      console.error('Failed to initialize Notion official API:', error)
     }
   }
   
@@ -34,6 +46,11 @@ export class HybridNotionAPI {
    */
   async getEnrichedPageData(pageId: string): Promise<HybridPageData> {
     try {
+      // 公式APIの初期化を待つ
+      if (!this.officialAPI) {
+        await this.initOfficialAPI()
+      }
+      
       // 並行してデータを取得
       const [unofficialData, officialData] = await Promise.all([
         this.getUnofficialPageData(pageId),
