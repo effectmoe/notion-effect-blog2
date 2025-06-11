@@ -18,6 +18,8 @@ import 'styles/instructor-gallery-responsive.css'
 import 'styles/instructor-gallery-improvements.css'
 // toggle gallery fix
 import 'styles/toggle-gallery-fix.css'
+// database item click fix
+import 'styles/database-fix.css'
 
 import type { AppProps } from 'next/app'
 import * as Fathom from 'fathom-client'

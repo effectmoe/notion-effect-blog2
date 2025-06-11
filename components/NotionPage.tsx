@@ -292,7 +292,7 @@ export function NotionPage({
       propertyTextValue,
       propertyDateValue,
       // Override PageLink to fix div-in-anchor hydration error
-      // PageLink: CustomPageLink as any, // データベース表示の問題のため無効化
+      // PageLink: CollectionItemLink as any, // 一時的に無効化
       // Remove custom Toggle to use default react-notion-x implementation
       // which might handle collection views better
     }),
