@@ -6,10 +6,10 @@
 // 公式APIが有効になるまでの暫定実装
 export async function getSearchablePagesFromOfficialAPI(propertyName: string = 'Searchable'): Promise<string[]> {
   try {
-    // 環境変数チェック
-    const notionApiKey = process.env.NOTION_SEARCH_API_SECRET || process.env.NOTION_API_SECRET
+    // 環境変数チェック - Blog Search APIキーを使用
+    const notionApiKey = process.env.NOTION_API_KEY
     if (!notionApiKey) {
-      console.log('Notion API key not found, using static list')
+      console.log('NOTION_API_KEY not found, using static list')
       return []
     }
 
@@ -65,8 +65,11 @@ export async function getSearchablePagesFromOfficialAPI(propertyName: string = '
  */
 export async function getPagePropertiesFromOfficialAPI(pageId: string): Promise<any> {
   try {
-    const notionApiKey = process.env.NOTION_SEARCH_API_SECRET || process.env.NOTION_API_SECRET
-    if (!notionApiKey) return null
+    const notionApiKey = process.env.NOTION_API_KEY
+    if (!notionApiKey) {
+      console.log('NOTION_API_KEY not found')
+      return null
+    }
 
     // ハイフン付きのページIDに変換
     const formattedPageId = pageId.replace(

@@ -5,9 +5,9 @@ export default async function handler(
   res: NextApiResponse
 ) {
   try {
-    const notionApiKey = process.env.NOTION_SEARCH_API_SECRET || process.env.NOTION_API_SECRET
+    const notionApiKey = process.env.NOTION_API_KEY
     if (!notionApiKey) {
-      return res.status(400).json({ error: 'Notion API key not found' })
+      return res.status(400).json({ error: 'NOTION_API_KEY not found' })
     }
 
     const databaseId = '1ceb802cb0c681e8a45e000ba000bfe2'

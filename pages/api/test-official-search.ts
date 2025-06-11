@@ -8,8 +8,7 @@ export default async function handler(
   try {
     // 環境変数の確認
     const apiKeys = {
-      NOTION_SEARCH_API_SECRET: !!process.env.NOTION_SEARCH_API_SECRET,
-      NOTION_API_SECRET: !!process.env.NOTION_API_SECRET,
+      NOTION_API_KEY: !!process.env.NOTION_API_KEY,
       NOTION_TOKEN_V2: !!process.env.NOTION_TOKEN_V2,
       NOTION_ACTIVE_USER: !!process.env.NOTION_ACTIVE_USER
     }
