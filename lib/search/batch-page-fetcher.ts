@@ -36,13 +36,13 @@ export async function getAllPageIds(rootPageId: string): Promise<string[]> {
       if (collection) {
         // コレクション内のページを取得
         const collectionView = Object.values(rootPage.collection_view || {})
-          .find(cv => cv.value?.collection_id === collectionId)
+          .find(cv => (cv.value as any)?.collection_id === collectionId)
         
         if (collectionView?.value) {
           try {
             const collectionData = await notion.getCollectionData(
               collectionId,
-              collectionView.value.id,
+              (collectionView.value as any).id,
               { limit: 100 }
             )
             
