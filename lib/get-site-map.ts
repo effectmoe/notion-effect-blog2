@@ -27,7 +27,16 @@ const getAllPages = pMemoize(getAllPagesImpl, {
 
 const getPage = async (pageId: string, ...args) => {
   console.log('\nnotion getPage', uuidToId(pageId))
-  return notion.getPage(pageId, ...args)
+  try {
+    return await notion.getPage(pageId, ...args)
+  } catch (error) {
+    console.error(`Failed to load page ${pageId}:`, error.message)
+    // タイムアウトエラーの場合はnullを返して続行
+    if (error.message && error.message.includes('timeout')) {
+      return null
+    }
+    throw error
+  }
 }
 
 async function getAllPagesImpl(
@@ -44,7 +53,8 @@ async function getAllPagesImpl(
     (map, pageId: string) => {
       const recordMap = pageMap[pageId]
       if (!recordMap) {
-        throw new Error(`Error loading page "${pageId}"`)
+        console.warn(`Skipping page "${pageId}" - failed to load`)
+        return map
       }
 
       const block = recordMap.block[pageId]?.value

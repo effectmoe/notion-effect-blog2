@@ -9,7 +9,7 @@ import { isValidBlogPage } from './search-filter'
 import { shouldIndexPage, isValidBlogPageId } from './page-validator'
 import { memoryCache } from './memory-cache'
 import type { SearchIndexItem, IndexStats } from './types'
-import { getSiteMap } from '../get-site-map'
+// import { getSiteMap } from '../get-site-map'
 
 export class SearchIndexer {
   private hybridAPI: HybridNotionAPI
@@ -32,16 +32,15 @@ export class SearchIndexer {
     const startTime = Date.now()
     
     try {
-      // サイトマップから全ページを自動取得
-      const siteMap = await getSiteMap()
-      const pageIds = Object.keys(siteMap.canonicalPageMap)
+      // 一時的に手動ページIDに戻す（ビルドエラー回避のため）
+      const pageIds = [
+        '1ceb802cb0c680f29369dba86095fb38',  // ホームページ
+      ]
       
-      console.log(`Found ${pageIds.length} pages in site map`)
-      
-      // 開発/デバッグ用：手動でページIDを指定する場合はコメントアウトを解除
-      // const pageIds = [
-      //   '1ceb802cb0c680f29369dba86095fb38',  // ホームページ
-      // ]
+      // TODO: ビルドエラー解決後に以下を有効化
+      // const siteMap = await getSiteMap()
+      // const pageIds = Object.keys(siteMap.canonicalPageMap)
+      // console.log(`Found ${pageIds.length} pages in site map`)
       
       console.log(`\n=== Indexing ${pageIds.length} pages ===`)
       pageIds.forEach(id => console.log(`- ${id}`))
