@@ -9,19 +9,19 @@ export default siteConfig({
   rootNotionSpaceId: null,
 
   // basic site info (required)
-  name: 'カフェキネシ',
-  domain: 'nextjs-notion-starter-kit.transitivebullsh.it',
-  author: '©cafekinesi',
+  name: 'アロマテックジャパン株式会社',
+  domain: 'notion-effect-blog2.vercel.app',
+  author: '©AromaTech Japan Inc.',
 
   // open graph metadata (optional)
-  description: 'カフェで出来るキネシオロジー',
+  description: '天然アロマオイルで、ビジネスに新たな価値を。20年以上の実績を持つアロマオイル専門メーカー。ホテル、スパ、オフィスなど500社以上の導入実績。OEM製造、カスタムブレンド対応可。',
 
   // social usernames (optional)
-  // twitter: 'transitive_bs',
+  // twitter: 'aromatech_japan',
   // github: 'transitive-bullshit',
-  // linkedin: 'fisch2',
-  instagram: 'your_instagram_username',
-  facebook: 'your_facebook_username_or_page_id',
+  linkedin: 'aromatech-japan',
+  instagram: 'aromatech_japan',
+  facebook: 'aromatech.japan',
   // youtube: 'your_channel_id_or_name',
   // mastodon: '#', // optional mastodon profile URL, provides link verification
   // newsletter: '#', // optional newsletter URL

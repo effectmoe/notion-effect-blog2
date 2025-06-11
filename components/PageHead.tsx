@@ -99,6 +99,32 @@ export function PageHead({
       <meta property='og:title' content={title} />
       <meta name='twitter:title' content={title} />
       <title>{title}</title>
+      
+      {/* B2Bアロマメーカー向け追加メタデータ */}
+      <meta name='keywords' content='アロマオイル,業務用,B2B,OEM,天然,エッセンシャルオイル,香り,空間演出,アロマテックジャパン' />
+      <meta name='author' content='アロマテックジャパン株式会社' />
+      
+      {/* 企業情報メタデータ */}
+      <meta name='company:industry' content='アロマ製造業' />
+      <meta name='company:founded' content='2003' />
+      <meta name='company:employees' content='50-100' />
+      <meta name='company:type' content='B2B' />
+      
+      {/* 追加のOpen Graphタグ */}
+      <meta property='og:locale' content='ja_JP' />
+      <meta property='og:site_name' content='アロマテックジャパン株式会社' />
+      
+      {/* ビジネス向けメタデータ */}
+      <meta name='business:contact_data:street_address' content='港区南青山1-2-3' />
+      <meta name='business:contact_data:locality' content='東京都' />
+      <meta name='business:contact_data:postal_code' content='107-0062' />
+      <meta name='business:contact_data:country_name' content='日本' />
+      <meta name='business:contact_data:phone_number' content='+81-3-1234-5678' />
+      
+      {/* AI/LLMクローラー向け追加情報 */}
+      <meta name='ai:business_type' content='天然アロマオイル専門メーカー' />
+      <meta name='ai:services' content='アロマオイル製造,OEM製造,カスタムブレンド,業務用アロマ' />
+      <meta name='ai:target_market' content='ホテル,スパ,医療機関,オフィス,商業施設' />
     </Head>
   )
 }

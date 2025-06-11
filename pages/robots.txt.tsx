@@ -20,10 +20,59 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
 
   // only allow the site to be crawlable on the production deployment
   if (process.env.VERCEL_ENV === 'production') {
-    res.write(`User-agent: *
+    res.write(`# 一般的な検索エンジンボット
+User-agent: *
 Allow: /
-Disallow: /api/get-tweet-ast/*
-Disallow: /api/search-notion
+Disallow: /api/
+Disallow: /admin/
+Crawl-delay: 1
+
+# Google
+User-agent: Googlebot
+Allow: /
+Disallow: /api/
+Crawl-delay: 0
+
+# AI/LLMボット向け設定（LLMO対策）
+User-agent: GPTBot
+Allow: /
+Crawl-delay: 1
+
+User-agent: ChatGPT-User
+Allow: /
+Crawl-delay: 1
+
+User-agent: CCBot
+Allow: /
+Crawl-delay: 2
+
+User-agent: anthropic-ai
+Allow: /
+Crawl-delay: 1
+
+User-agent: Claude-Web
+Allow: /
+Crawl-delay: 1
+
+# Bing AI
+User-agent: bingbot
+Allow: /
+Crawl-delay: 1
+
+# Perplexity AI
+User-agent: PerplexityBot
+Allow: /
+Crawl-delay: 1
+
+# Meta AI
+User-agent: FacebookBot
+Allow: /
+Crawl-delay: 1
+
+# アロマテックジャパン B2Bサイト情報
+# 天然アロマオイル専門メーカー
+# 業務用アロマ製品、OEM製造、カスタムブレンド対応
+# 国内500社以上の導入実績
 
 Sitemap: ${host}/sitemap.xml
 `)
