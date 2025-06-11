@@ -4,6 +4,8 @@
 
 import { SearchIndexer } from './indexer'
 import { filterSearchResults, isValidBlogPage } from './search-filter'
+import { memoryCache } from './memory-cache'
+import { staticSearchIndex } from './static-index'
 import type {
   SearchResult,
   SearchOptions,
@@ -131,7 +133,15 @@ export class SearchEngine {
     query: SearchQuery,
     options: SearchOptions
   ): Promise<SearchResult[]> {
-    const index = await this.indexer.loadIndex()
+    let index = await this.indexer.loadIndex()
+    
+    // インデックスが空の場合は静的インデックスを使用
+    if (index.length === 0) {
+      console.log('Using static index for metadata search')
+      index = staticSearchIndex
+      memoryCache.setSearchIndex(index)
+    }
+    
     const results: SearchResult[] = []
     
     for (const item of index) {
@@ -157,7 +167,15 @@ export class SearchEngine {
     query: SearchQuery,
     options: SearchOptions
   ): Promise<SearchResult[]> {
-    const index = await this.indexer.loadIndex()
+    let index = await this.indexer.loadIndex()
+    
+    // インデックスが空の場合は静的インデックスを使用
+    if (index.length === 0) {
+      console.log('Using static index for content search')
+      index = staticSearchIndex
+      memoryCache.setSearchIndex(index)
+    }
+    
     const results: SearchResult[] = []
     
     for (const item of index) {
@@ -263,9 +281,11 @@ export class SearchEngine {
     }
     
     // タグマッチ（中スコア）
-    for (const token of queryTokens) {
-      if (item.metadata.tags.some(tag => tag.toLowerCase().includes(token))) {
-        score += 3
+    if (item.metadata.tags && item.metadata.tags.length > 0) {
+      for (const token of queryTokens) {
+        if (item.metadata.tags.some(tag => tag.toLowerCase().includes(token))) {
+          score += 3
+        }
       }
     }
     
@@ -279,9 +299,11 @@ export class SearchEngine {
     }
     
     // キーワードマッチ
-    for (const token of queryTokens) {
-      if (item.keywords.some(keyword => keyword.includes(token))) {
-        score += 2
+    if (item.keywords && item.keywords.length > 0) {
+      for (const token of queryTokens) {
+        if (item.keywords.some(keyword => keyword.includes(token))) {
+          score += 2
+        }
       }
     }
     

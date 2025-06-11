@@ -7,6 +7,7 @@ import path from 'path'
 import { HybridNotionAPI } from './hybrid-api'
 import { isValidBlogPage } from './search-filter'
 import { shouldIndexPage, isValidBlogPageId } from './page-validator'
+import { memoryCache } from './memory-cache'
 import type { SearchIndexItem, IndexStats } from './types'
 // import { getSiteMap } from '../get-site-map'
 
@@ -188,13 +189,22 @@ export class SearchIndexer {
    */
   private async saveIndex(index: SearchIndexItem[]): Promise<void> {
     try {
-      // ディレクトリが存在しない場合は作成
-      const dir = path.dirname(this.indexPath)
-      await fs.mkdir(dir, { recursive: true })
+      // メモリキャッシュに保存（Vercel対応）
+      memoryCache.setSearchIndex(index)
       
-      // JSONとして保存
-      const jsonContent = JSON.stringify(index, null, 2)
-      await fs.writeFile(this.indexPath, jsonContent, 'utf-8')
+      // ファイルシステムにも保存を試みる
+      try {
+        // ディレクトリが存在しない場合は作成
+        const dir = path.dirname(this.indexPath)
+        await fs.mkdir(dir, { recursive: true })
+        
+        // JSONとして保存
+        const jsonContent = JSON.stringify(index, null, 2)
+        await fs.writeFile(this.indexPath, jsonContent, 'utf-8')
+      } catch (fsError) {
+        // ファイルシステムへの保存が失敗してもメモリキャッシュがあれば続行
+        console.log('Could not save to file system, using memory cache only:', fsError.message)
+      }
       
       // キャッシュを更新
       this.indexCache.clear()
@@ -209,14 +219,29 @@ export class SearchIndexer {
    * インデックスをファイルから読み込み
    */
   async loadIndex(): Promise<SearchIndexItem[]> {
+    // まずメモリキャッシュをチェック
+    if (memoryCache.hasSearchIndex()) {
+      const index = memoryCache.getSearchIndex()
+      console.log(`Loaded ${index.length} items from memory cache`)
+      
+      // ローカルキャッシュも更新
+      this.indexCache.clear()
+      index.forEach(item => this.indexCache.set(item.pageId, item))
+      
+      return index
+    }
+    
+    // メモリキャッシュになければファイルから読み込み
     try {
       const content = await fs.readFile(this.indexPath, 'utf-8')
       const index = JSON.parse(content) as SearchIndexItem[]
       
-      // キャッシュを更新
+      // メモリキャッシュとローカルキャッシュを更新
+      memoryCache.setSearchIndex(index)
       this.indexCache.clear()
       index.forEach(item => this.indexCache.set(item.pageId, item))
       
+      console.log(`Loaded ${index.length} items from file`)
       return index
     } catch (error) {
       // ファイルが存在しない場合は空配列を返す
