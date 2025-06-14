@@ -103,17 +103,7 @@ const Collection = dynamic(() =>
     (m) => m.Collection
   ),
   {
-    ssr: false,
-    loading: () => (
-      <div style={{ 
-        padding: '20px', 
-        background: '#f5f5f5', 
-        borderRadius: '8px',
-        margin: '10px 0' 
-      }}>
-        <p>Loading database view...</p>
-      </div>
-    )
+    ssr: true
   }
 )
 
