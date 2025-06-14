@@ -72,18 +72,35 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       answer: answerPropertyId,
       category: categoryPropertyId
     });
+    
 
     // FAQアイテムを処理
     const faqItems = [];
     
-    if (collectionData.result?.blockIds) {
-      for (const blockId of collectionData.result.blockIds) {
+    // blockIdsの場所を確認して取得
+    const blockIds = collectionData.result?.blockIds || 
+                    collectionData.result?.reducerResults?.collection_group_results?.blockIds || 
+                    [];
+    
+    
+    if (blockIds.length > 0) {
+      for (const blockId of blockIds) {
         const block = collectionData.recordMap?.block?.[blockId]?.value;
         
         if (block && block.properties) {
-          // 公開フラグを確認（修正: trueの場合のみ表示）
-          const isPublic = publicPropertyId && block.properties[publicPropertyId]?.[0]?.[0] === 'Yes';
           
+          // 公開フラグを確認
+          // notion-clientでは、チェックボックスがオンの場合は [["Yes"]]、オフの場合は undefined または []
+          const publicProp = publicPropertyId ? block.properties[publicPropertyId] : undefined;
+          let isPublic = false;
+          
+          if (publicProp && publicProp.length > 0 && publicProp[0] && publicProp[0].length > 0) {
+            // 値が存在する場合、'Yes' をチェック
+            isPublic = publicProp[0][0] === 'Yes';
+          }
+          
+          
+          // 公開されているアイテムのみ処理
           if (isPublic) {
             const question = questionPropertyId 
               ? block.properties[questionPropertyId]?.[0]?.[0] || block.properties.title?.[0]?.[0] || ''
@@ -114,7 +131,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(200).json({
       success: true,
       items: faqItems,
-      totalItems: collectionData.result?.blockIds?.length || 0,
+      totalItems: blockIds.length,
       publicItems: faqItems.length
     });
     
