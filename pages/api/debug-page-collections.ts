@@ -102,7 +102,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
     
     // FAQマスターデータベースのIDを探す
-    const faqMasterDatabaseId = '212b802cb0c680eab7edef4459f38819';
+    const faqMasterDatabaseId = '212b802c-b0c6-80ea-b7ed-ef4459f38819';
     const faqMasterFound = collections.find(col => col.id === faqMasterDatabaseId);
     
     const result = {

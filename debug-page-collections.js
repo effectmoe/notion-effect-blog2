@@ -110,7 +110,7 @@ async function debugPageCollections() {
     
     // FAQマスターデータベースのIDを探す
     console.log('\n\n🔍 Searching for FAQ Master Database ID:');
-    const faqMasterDatabaseId = '212b802cb0c680eab7edef4459f38819';
+    const faqMasterDatabaseId = '212b802c-b0c6-80ea-b7ed-ef4459f38819';
     
     // コレクション内を検索
     const faqInCollections = collections.find(([id]) => id === faqMasterDatabaseId);
