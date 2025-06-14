@@ -31,7 +31,7 @@ import { PageHead } from './PageHead'
 import { Header } from './Header'
 import { FormulaPropertyDebug } from './FormulaPropertyDebug'
 import { CustomPageLink } from './CustomPageLink'
-import { CollectionViewWrapper } from './CollectionViewWrapper'
+// import { CollectionViewWrapper } from './CollectionViewWrapper'
 import StructuredData from './StructuredData'
 import { AutoBreadcrumb } from './AutoBreadcrumb'
 import styles from './styles.module.css'
@@ -269,7 +269,7 @@ export function NotionPage({
       nextLegacyImage: Image,
       nextLink: Link,
       Code,
-      Collection: CollectionViewWrapper, // Override Collection component
+      Collection,
       Equation,
       Pdf,
       Modal,
