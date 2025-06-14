@@ -31,7 +31,7 @@ import { PageHead } from './PageHead'
 import { Header } from './Header'
 import { FormulaPropertyDebug } from './FormulaPropertyDebug'
 import { CustomPageLink } from './CustomPageLink'
-// import { CollectionViewWrapper } from './CollectionViewWrapper'
+import { CollectionViewWrapper } from './CollectionViewWrapper'
 import StructuredData from './StructuredData'
 import { AutoBreadcrumb } from './AutoBreadcrumb'
 import styles from './styles.module.css'
@@ -98,14 +98,15 @@ const Code = dynamic(() =>
 )
 
 // データベースビューコンポーネント
-const Collection = dynamic(() =>
-  import('react-notion-x/build/third-party/collection').then(
-    (m) => m.Collection
-  ),
-  {
-    ssr: true
-  }
-)
+// CollectionViewWrapperで置き換えるため、元のCollectionは使用しない
+// const Collection = dynamic(() =>
+//   import('react-notion-x/build/third-party/collection').then(
+//     (m) => m.Collection
+//   ),
+//   {
+//     ssr: true
+//   }
+// )
 
 // 数式コンポーネント
 const Equation = dynamic(() =>
@@ -268,7 +269,7 @@ export function NotionPage({
       nextLegacyImage: Image,
       nextLink: Link,
       Code,
-      Collection,
+      Collection: CollectionViewWrapper, // Override Collection component
       Equation,
       Pdf,
       Modal,

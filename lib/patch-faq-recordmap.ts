@@ -1,46 +1,37 @@
 import { ExtendedRecordMap } from 'notion-types';
 
 export function patchFAQRecordMap(recordMap: ExtendedRecordMap): ExtendedRecordMap {
-  // FAQマスターブロックのID
+  // FAQマスターブロックのID（リンクドビュー）
   const faqMasterBlockId = '212b802c-b0c6-80be-aa3a-e91428cbde58';
+  // オリジナルFAQデータベースのブロックID
+  const faqOriginalBlockId = '212b802c-b0c6-80ea-b7ed-ef4459f38819';
   const faqCollectionId = '212b802c-b0c6-8046-b4ee-000b2833619c';
   
-  // FAQマスターブロックが存在するか確認
+  // FAQマスターブロックをオリジナルデータベースに置き換える
   const faqMasterBlock = recordMap.block[faqMasterBlockId];
   
-  if (faqMasterBlock && faqMasterBlock.value && faqMasterBlock.value.type === 'collection_view') {
-    // ビューからcollection IDを取得
-    const viewId = faqMasterBlock.value.view_ids?.[0];
-    if (viewId) {
-      const view = recordMap.collection_view?.[viewId]?.value;
-      const collectionId = view?.format?.collection_pointer?.id || faqCollectionId;
-      
-      if (collectionId && !faqMasterBlock.value.collection_id) {
-        console.log('Patching FAQ Master block with collection_id:', collectionId);
-        
-        // collection_idとformatを追加
-        (faqMasterBlock.value as any).collection_id = collectionId;
-        (faqMasterBlock.value as any).format = {
-          collection_pointer: {
-            id: collectionId,
-            table: "collection",
-            spaceId: view.format?.collection_pointer?.spaceId || "d1457284-c418-4f36-a7d3-658181f0a8f5"
-          }
-        };
-        
-        // コレクションデータが存在するか確認
-        if (!recordMap.collection || !recordMap.collection[collectionId]) {
-          console.log('FAQ collection data is missing in recordMap. Collection ID:', collectionId);
-          console.log('Available collections:', Object.keys(recordMap.collection || {}));
-        } else {
-          console.log('FAQ collection data found in recordMap');
-        }
-        
-        // collection_queryデータも確認
-        if (!recordMap.collection_query || !recordMap.collection_query[collectionId]) {
-          console.log('FAQ collection_query data is missing');
-        }
+  if (faqMasterBlock && faqMasterBlock.value) {
+    console.log('Replacing FAQ Master linked view with original database');
+    
+    // オリジナルデータベースのタイプに変更
+    (faqMasterBlock.value as any).type = 'collection_view_page';
+    (faqMasterBlock.value as any).collection_id = faqCollectionId;
+    
+    // formatを追加
+    (faqMasterBlock.value as any).format = {
+      page_icon: '❓',
+      collection_pointer: {
+        id: faqCollectionId,
+        table: "collection",
+        spaceId: "d1457284-c418-4f36-a7d3-658181f0a8f5"
       }
+    };
+    
+    // プロパティも追加
+    if (!faqMasterBlock.value.properties) {
+      (faqMasterBlock.value as any).properties = {
+        title: [['FAQマスター']]
+      };
     }
   }
   
