@@ -11,23 +11,8 @@ export function patchFAQRecordMap(recordMap: ExtendedRecordMap): ExtendedRecordM
   if (faqMasterBlock && faqMasterBlock.value && faqMasterBlock.value.type === 'collection_view') {
     console.log('Patching FAQ Master block with collection_id:', faqCollectionId);
     
-    // collection_idを追加（元のtypeとview_idsは維持）
+    // collection_idを追加
     (faqMasterBlock.value as any).collection_id = faqCollectionId;
-    
-    // formatを追加（元のビュー設定を維持）
-    const viewId = faqMasterBlock.value.view_ids?.[0];
-    if (viewId) {
-      const view = recordMap.collection_view?.[viewId]?.value;
-      if (view && !faqMasterBlock.value.format) {
-        (faqMasterBlock.value as any).format = view.format || {
-          collection_pointer: {
-            id: faqCollectionId,
-            table: "collection",
-            spaceId: "d1457284-c418-4f36-a7d3-658181f0a8f5"
-          }
-        };
-      }
-    }
   }
   
   return recordMap;
