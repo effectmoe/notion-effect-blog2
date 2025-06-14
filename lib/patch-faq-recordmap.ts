@@ -13,6 +13,20 @@ export function patchFAQRecordMap(recordMap: ExtendedRecordMap): ExtendedRecordM
     
     // collection_idを追加
     (faqMasterBlock.value as any).collection_id = faqCollectionId;
+    
+    // ビューIDを取得して、フィルターを削除
+    const viewId = faqMasterBlock.value.view_ids?.[0];
+    if (viewId && recordMap.collection_view?.[viewId]) {
+      const view = recordMap.collection_view[viewId];
+      if (view && view.value) {
+        console.log('Removing filter from FAQ view');
+        // フィルターを削除
+        if (view.value.format) {
+          delete (view.value.format as any).filter;
+          delete (view.value.format as any).filter_operator;
+        }
+      }
+    }
   }
   
   return recordMap;
