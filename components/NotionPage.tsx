@@ -97,12 +97,12 @@ const Code = dynamic(() =>
   })
 )
 
-// データベースビューコンポーネント
+// データベースビューコンポーネント - FAQマスター対応版を使用
 const Collection = dynamic(() =>
-  import('react-notion-x/build/third-party/collection').then(
+  import('./CollectionWrapperV2').then(
     (m) => {
-      console.log('[NotionPage] Collection component loaded:', m.Collection);
-      return m.Collection;
+      console.log('[NotionPage] CollectionWrapperV2 component loaded');
+      return m.CollectionWrapperV2;
     }
   ),
   {
