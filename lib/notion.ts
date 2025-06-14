@@ -66,6 +66,34 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
   // FAQマスターのrecordMapを修正
   recordMap = patchFAQRecordMap(recordMap)
   
+  // FAQコレクションを明示的にフェッチ
+  const faqCollectionId = '212b802c-b0c6-8046-b4ee-000b2833619c';
+  if (!recordMap.collection || !recordMap.collection[faqCollectionId]) {
+    console.log('Fetching FAQ collection separately...');
+    try {
+      const faqData = await api.getPage(faqCollectionId, {
+        fetchMissingBlocks: true,
+        fetchCollections: true,
+        signFileUrls: false
+      }) as ExtendedRecordMap;
+      
+      // FAQコレクションデータをマージ
+      if (faqData.collection && faqData.collection[faqCollectionId]) {
+        if (!recordMap.collection) recordMap.collection = {};
+        recordMap.collection[faqCollectionId] = faqData.collection[faqCollectionId];
+        console.log('FAQ collection data merged successfully');
+      }
+      
+      // collection_queryもマージ
+      if (faqData.collection_query && faqData.collection_query[faqCollectionId]) {
+        if (!recordMap.collection_query) recordMap.collection_query = {};
+        recordMap.collection_query[faqCollectionId] = faqData.collection_query[faqCollectionId];
+      }
+    } catch (error) {
+      console.error('Failed to fetch FAQ collection:', error);
+    }
+  }
+  
   // Use the new helper function to find missing blocks
   const { missingBlocks, missingCollections, toggleContentBlocks } = findMissingBlocks(recordMap)
   
