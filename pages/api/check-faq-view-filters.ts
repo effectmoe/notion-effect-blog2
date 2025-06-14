@@ -19,7 +19,8 @@ export default async function handler(
     
     for (const [viewId, viewData] of collectionViews) {
       const view = viewData.value;
-      const collectionId = view?.collection_id;
+      // collection_idはビューの型によって異なる場所にある可能性がある
+      const collectionId = (view as any)?.collection_id || (view as any)?.parent_id;
       
       if (collectionId) {
         const collection = pageData.collection?.[collectionId]?.value;
@@ -31,15 +32,15 @@ export default async function handler(
           
           // 公開プロパティのIDを探す
           let publicPropertyId = null;
-          Object.entries(schema).forEach(([propId, prop]) => {
+          Object.entries(schema).forEach(([propId, prop]: [string, any]) => {
             if (prop.name === '公開' && prop.type === 'checkbox') {
               publicPropertyId = propId;
             }
           });
           
           // ビューのフィルター設定を確認
-          const viewFilters = view.query2?.filter?.filters || [];
-          const publicFilter = viewFilters.find(f => f.property === publicPropertyId);
+          const viewFilters = (view as any).query2?.filter?.filters || [];
+          const publicFilter = viewFilters.find((f: any) => f.property === publicPropertyId);
           
           faqViews.push({
             viewId,
@@ -53,9 +54,9 @@ export default async function handler(
               operator: publicFilter.filter?.operator,
               value: publicFilter.filter?.value?.type || publicFilter.filter?.value
             } : null,
-            allFilters: viewFilters.map(f => ({
+            allFilters: viewFilters.map((f: any) => ({
               property: f.property,
-              propertyName: schema[f.property]?.name,
+              propertyName: (schema as any)[f.property]?.name,
               type: f.filter?.type,
               operator: f.filter?.operator,
               value: f.filter?.value
@@ -77,7 +78,7 @@ export default async function handler(
     console.error('Error:', error);
     return res.status(500).json({ 
       success: false, 
-      error: error.message 
+      error: error instanceof Error ? error.message : 'Unknown error occurred'
     });
   }
 }

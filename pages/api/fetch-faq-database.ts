@@ -54,7 +54,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     let answerPropertyId = null;
     let categoryPropertyId = null;
     
-    for (const [propId, prop] of Object.entries(schema)) {
+    for (const [propId, prop] of Object.entries(schema) as [string, any][]) {
       if (prop.name === '公開' && prop.type === 'checkbox') {
         publicPropertyId = propId;
       } else if (prop.name === '質問' || prop.name === 'Question') {
@@ -122,7 +122,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.error('Error fetching FAQ database:', error);
     return res.status(500).json({ 
       success: false, 
-      error: error.message || 'FAQデータの取得中にエラーが発生しました' 
+      error: error instanceof Error ? error.message : 'FAQデータの取得中にエラーが発生しました' 
     });
   }
 }
