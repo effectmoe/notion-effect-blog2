@@ -17,6 +17,7 @@ import { notion } from './notion-api'
 import { getPreviewImageMap } from './preview-images'
 import { findMissingBlocks } from './fetch-missing-blocks'
 import { CachedNotionAPI } from './cache'
+import { patchFAQRecordMap } from './patch-faq-recordmap'
 
 // キャッシュ付きAPIインスタンスを作成
 const cachedNotion = new CachedNotionAPI({
@@ -61,6 +62,9 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
     chunkLimit: 500,  // Increase chunk limit
     chunkNumber: 0
   }) as ExtendedRecordMap
+  
+  // FAQマスターのrecordMapを修正
+  recordMap = patchFAQRecordMap(recordMap)
   
   // Use the new helper function to find missing blocks
   const { missingBlocks, missingCollections, toggleContentBlocks } = findMissingBlocks(recordMap)

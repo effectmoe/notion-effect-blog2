@@ -1,0 +1,66 @@
+{
+  "faqMasterBlock": {
+    "id": "212b802c-b0c6-80be-aa3a-e91428cbde58",
+    "version": 9,
+    "type": "collection_view",
+    "view_ids": [
+      "212b802c-b0c6-80ff-9c41-000cec7d8204"
+    ],
+    "created_time": 1749897867758,
+    "last_edited_time": 1749924844195,
+    "parent_id": "208b802c-b0c6-80c5-9250-f1ced3f7842c",
+    "parent_table": "block",
+    "alive": true,
+    "space_id": "d1457284-c418-4f36-a7d3-658181f0a8f5"
+  },
+  "contentBlock": {
+    "id": "20db802c-b0c6-80e2-93d4-fc46bf2dd823",
+    "version": 44,
+    "type": "collection_view",
+    "view_ids": [
+      "20db802c-b0c6-8066-846e-000cd27e4a85",
+      "20db802c-b0c6-80b0-9446-000c7ec37b88"
+    ],
+    "collection_id": "20db802c-b0c6-80b4-aa12-000b61277830",
+    "format": {
+      "collection_pointer": {
+        "id": "20db802c-b0c6-80b4-aa12-000b61277830",
+        "table": "collection",
+        "spaceId": "d1457284-c418-4f36-a7d3-658181f0a8f5"
+      },
+      "collection_pointers": [
+        {
+          "id": "20db802c-b0c6-80b4-aa12-000b61277830",
+          "table": "collection",
+          "spaceId": "d1457284-c418-4f36-a7d3-658181f0a8f5"
+        }
+      ],
+      "hide_inline_collection_name": true
+    },
+    "created_time": 1749443749339,
+    "last_edited_time": 1749667444055,
+    "parent_id": "20db802c-b0c6-809a-9c4b-e362113bc3fa",
+    "parent_table": "block",
+    "alive": true,
+    "space_id": "d1457284-c418-4f36-a7d3-658181f0a8f5"
+  },
+  "collections": [
+    "1ceb802c-b0c6-81e8-a45e-000ba000bfe2",
+    "212b802c-b0c6-8046-b4ee-000b2833619c",
+    "20db802c-b0c6-80b4-aa12-000b61277830"
+  ],
+  "collectionViews": [
+    "20fb802c-b0c6-80b2-a9ff-000cb1533162",
+    "1ceb802c-b0c6-811c-86ef-000c4141e47c",
+    "1ceb802c-b0c6-81bb-b35b-000ce79c6306",
+    "208b802c-b0c6-808a-a63b-000c472afd7e",
+    "208b802c-b0c6-80ff-8664-000c822da019",
+    "1d3b802c-b0c6-80cd-b5af-000ca05b7763",
+    "212b802c-b0c6-80ff-9c41-000cec7d8204",
+    "20fb802c-b0c6-80e4-a576-000c5cc975b8",
+    "212b802c-b0c6-8085-a531-000cd226d827",
+    "212b802c-b0c6-8026-8290-000cee82ffad",
+    "20db802c-b0c6-8066-846e-000cd27e4a85",
+    "20db802c-b0c6-80b0-9446-000c7ec37b88"
+  ]
+}
