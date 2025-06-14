@@ -18,11 +18,15 @@ export const getStaticProps: GetStaticProps<PageProps, Params> = async (
     // NotionデータベースからMenuがtrueの項目を取得
     const menuItems = await getMenuItems()
     
+    // CafeKinesiページの場合、FAQセクションを表示するフラグを追加
+    const showFAQ = rawPageId.toLowerCase() === 'cafekinesi'
+    
     // propsにmenuItemsを追加
     return { 
       props: {
         ...props,
-        menuItems
+        menuItems,
+        showFAQ
       }, 
       revalidate: 10 
     }

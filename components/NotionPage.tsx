@@ -34,6 +34,7 @@ import { CustomPageLink } from './CustomPageLink'
 // import { CollectionViewWrapper } from './CollectionViewWrapper'
 import StructuredData from './StructuredData'
 import { AutoBreadcrumb } from './AutoBreadcrumb'
+import { FAQSection } from './FAQSection'
 import styles from './styles.module.css'
 
 // -----------------------------------------------------------------------------
@@ -199,8 +200,9 @@ export function NotionPage({
   recordMap,
   error,
   pageId,
-  menuItems // Notionデータベースからのメニューアイテムを受け取る
-}: types.PageProps & { menuItems?: any[] }) {
+  menuItems, // Notionデータベースからのメニューアイテムを受け取る
+  showFAQ // FAQセクションを表示するかどうか
+}: types.PageProps & { menuItems?: any[]; showFAQ?: boolean }) {
   const router = useRouter()
   const lite = useSearchParam('lite')
   const [mounted, setMounted] = React.useState(false)
@@ -483,6 +485,13 @@ export function NotionPage({
           footer={footer}
           className="no-notion-tabs"
         />
+        
+        {/* CafeKinesiページにFAQセクションを追加 */}
+        {showFAQ && (
+          <div className={styles.faqContainer}>
+            <FAQSection />
+          </div>
+        )}
       </div>
 
       <GitHubShareButton />
