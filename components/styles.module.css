@@ -301,3 +301,10 @@ a.facebook:hover {
 .social a.facebook svg {
   fill: currentColor;
 }
+
+/* FAQセクションのスタイル */
+.faqContainer {
+  max-width: var(--notion-max-width);
+  margin: 3rem auto;
+  padding: 0 2rem;
+}
