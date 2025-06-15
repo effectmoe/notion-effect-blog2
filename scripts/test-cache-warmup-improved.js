@@ -1,19 +1,37 @@
 #!/usr/bin/env node
 
-// ローカルでキャッシュウォームアップをテストするスクリプト
-// Node.js 18+ has native fetch
-
+// Improved cache warmup test that gets page list before clearing cache
 const API_URL = process.env.API_URL || 'http://localhost:3000';
 const TOKEN = process.env.CACHE_CLEAR_TOKEN || 'test-token';
 
-async function testCacheWarmup() {
-  console.log('Testing cache warmup locally...');
+async function testImprovedCacheWarmup() {
+  console.log('Testing improved cache warmup...');
   console.log(`API URL: ${API_URL}`);
   console.log(`Token: ${TOKEN ? 'Set' : 'Not set'}`);
   
   try {
-    // 1. まずキャッシュをクリア
-    console.log('\n1. Clearing cache...');
+    // 1. First get the list of pages while cache is populated
+    console.log('\n1. Getting current page list...');
+    const pagesResponse = await fetch(`${API_URL}/api/cache-get-pages`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${TOKEN}`
+      }
+    });
+    
+    if (!pagesResponse.ok) {
+      const error = await pagesResponse.text();
+      throw new Error(`Failed to get pages: ${error}`);
+    }
+    
+    const pagesResult = await pagesResponse.json();
+    console.log('Pages response:', pagesResult);
+    
+    const pageIds = pagesResult.pageIds || [];
+    console.log(`Found ${pageIds.length} important pages to warm up`);
+    
+    // 2. Clear the cache
+    console.log('\n2. Clearing cache...');
     const clearResponse = await fetch(`${API_URL}/api/cache-clear`, {
       method: 'POST',
       headers: {
@@ -30,17 +48,22 @@ async function testCacheWarmup() {
       throw new Error(`Cache clear failed: ${clearResult.error}`);
     }
     
-    // 2. 少し待つ
-    console.log('\n2. Waiting 2 seconds...');
+    // 3. Wait a moment
+    console.log('\n3. Waiting 2 seconds...');
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    // 3. キャッシュウォームアップを実行
-    console.log('\n3. Running cache warmup...');
+    // 4. Warm up cache with specific pages
+    console.log('\n4. Running cache warmup with specific pages...');
     const warmupResponse = await fetch(`${API_URL}/api/cache-warmup`, {
       method: 'POST',
       headers: {
+        'Content-Type': 'application/json',
         'Authorization': `Bearer ${TOKEN}`
-      }
+      },
+      body: JSON.stringify({ 
+        skipSiteMap: true,  // Skip trying to get site map after cache clear
+        pageIds: pageIds    // Provide specific page IDs to warm up
+      })
     });
     
     const warmupResult = await warmupResponse.json();
@@ -50,14 +73,14 @@ async function testCacheWarmup() {
       throw new Error(`Cache warmup failed: ${warmupResult.error}`);
     }
     
-    // 結果をサマリー
+    // 5. Summary
     console.log('\n=== Summary ===');
-    console.log(`Total pages: ${warmupResult.totalPages || warmupResult.warmedUp}`);
+    console.log(`Pages identified before cache clear: ${pageIds.length}`);
     console.log(`Successfully warmed: ${warmupResult.warmedUp}`);
     console.log(`Failed: ${warmupResult.failed}`);
     
     if (warmupResult.pageIds) {
-      console.log(`\nFirst few page IDs: ${warmupResult.pageIds.join(', ')}`);
+      console.log(`\nFirst few warmed page IDs: ${warmupResult.pageIds.slice(0, 3).join(', ')}`);
     }
     
     if (warmupResult.failedDetails && warmupResult.failedDetails.length > 0) {
@@ -73,5 +96,5 @@ async function testCacheWarmup() {
   }
 }
 
-// 実行
-testCacheWarmup();
+// Run the test
+testImprovedCacheWarmup();

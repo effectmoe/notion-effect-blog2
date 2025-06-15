@@ -10,7 +10,7 @@ import { notion } from './notion-api'
 const uuid = !!includeNotionIdInUrls
 
 export async function getSiteMap(): Promise<types.SiteMap> {
-  const partialSiteMap = await getAllPages(
+  const partialSiteMap = await memoizedGetAllPages(
     config.rootNotionPageId,
     config.rootNotionSpaceId
   )
@@ -22,14 +22,22 @@ export async function getSiteMap(): Promise<types.SiteMap> {
 }
 
 const getAllPages = pMemoize(getAllPagesImpl, {
-  cacheKey: (...args) => JSON.stringify(args)
+  cacheKey: (...args) => JSON.stringify(args),
+  // Add a TTL of 5 minutes to prevent stale cache after clearing
+  maxAge: 5 * 60 * 1000
 })
+
+// Create a version with cache that can be cleared
+let memoizedGetAllPages = getAllPages
 
 // Export a function to clear the memoized cache
 export function clearSiteMapCache() {
   console.log('[SiteMap] Site map cache clear requested')
-  // p-memoizeのキャッシュは直接クリアできないため、
-  // キャッシュが期限切れになるか、アプリケーションが再起動されるまで待つ必要がある
+  // Re-create the memoized function to clear cache
+  memoizedGetAllPages = pMemoize(getAllPagesImpl, {
+    cacheKey: (...args) => JSON.stringify(args),
+    maxAge: 5 * 60 * 1000
+  })
 }
 
 const getPage = async (pageId: string, ...args) => {

@@ -10,6 +10,7 @@ export const IMPORTANT_PAGES = [
 ];
 
 // デフォルトの重要ページスラッグ
+// Note: These are page slugs, not IDs. They need to be mapped to actual page IDs
 export const DEFAULT_IMPORTANT_SLUGS = [
   'cafekinesi',
   'カフェキネシ構造',
@@ -22,6 +23,14 @@ export const DEFAULT_IMPORTANT_SLUGS = [
   'カテゴリー',
   'プライバシーポリシー'
 ];
+
+// Map of known page slugs to their Notion page IDs
+// These should be populated with actual page IDs from your Notion workspace
+export const SLUG_TO_PAGE_ID_MAP: Record<string, string> = {
+  // Example format:
+  // 'cafekinesi': '1234567890abcdef1234567890abcdef',
+  // Add your actual mappings here
+};
 
 // 動的に重要なページを取得
 export async function getImportantPageIds(): Promise<string[]> {
@@ -37,6 +46,13 @@ export async function getImportantPageIds(): Promise<string[]> {
   
   // 追加のページID
   pageIds.push(...additionalPageIds.filter(id => id.trim()));
+  
+  // Map known slugs to page IDs
+  for (const slug of DEFAULT_IMPORTANT_SLUGS) {
+    if (SLUG_TO_PAGE_ID_MAP[slug]) {
+      pageIds.push(SLUG_TO_PAGE_ID_MAP[slug]);
+    }
+  }
   
   // 重複を削除
   return [...new Set(pageIds)];

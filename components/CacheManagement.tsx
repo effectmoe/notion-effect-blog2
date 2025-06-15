@@ -152,6 +152,85 @@ export const CacheManagement: React.FC = () => {
     }
   };
 
+  // キャッシュクリアとウォームアップを一連の流れで実行
+  const handleClearAndWarmup = async () => {
+    setLoading(true);
+    setMessage('');
+
+    try {
+      const token = getAuthToken();
+      
+      // 1. まず現在のページリストを取得（キャッシュがある間に）
+      console.log('[CacheManagement] Step 1: Getting page list before cache clear...');
+      const pagesResponse = await fetch('/api/cache-get-pages');
+      
+      let pageIds: string[] = [];
+      if (pagesResponse.ok) {
+        const pagesData = await pagesResponse.json();
+        pageIds = pagesData.pageIds || [];
+        console.log(`[CacheManagement] Retrieved ${pageIds.length} page IDs`);
+        setMessage(`📄 ${pageIds.length}ページのIDを取得しました`);
+      } else {
+        console.log('[CacheManagement] Failed to get page list');
+        setMessage('⚠️ ページリストの取得に失敗しました');
+      }
+      
+      // 2. キャッシュをクリア
+      console.log('[CacheManagement] Step 2: Clearing cache...');
+      const clearResponse = await fetch('/api/cache-clear', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ type: 'all' }),
+      });
+
+      if (!clearResponse.ok) {
+        const clearData = await clearResponse.json();
+        throw new Error(`Cache clear failed: ${clearData.error}`);
+      }
+      
+      setMessage('🗑️ キャッシュをクリアしました');
+      
+      // 3. 少し待つ
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // 4. キャッシュウォームアップを実行
+      console.log('[CacheManagement] Step 3: Warming up cache...');
+      const warmupResponse = await fetch('/api/cache-warmup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          pageIds: pageIds.length > 0 ? pageIds : undefined,
+          skipSiteMap: true // クリア後なのでサイトマップはスキップ
+        }),
+      });
+
+      const warmupData = await warmupResponse.json();
+
+      if (warmupResponse.ok) {
+        setMessage(`✅ 完了: ${warmupData.warmedUp}ページを事前読み込みしました`);
+        if (warmupData.failed > 0) {
+          setMessage(prev => `${prev} (失敗: ${warmupData.failed}ページ)`);
+        }
+      } else {
+        setMessage(`❌ ウォームアップエラー: ${warmupData.error}`);
+      }
+      
+      // 統計を更新
+      setTimeout(fetchStats, 1000);
+      
+    } catch (error) {
+      setMessage(`❌ エラー: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // キャッシュウォームアップ
   const handleWarmupCache = async () => {
     setLoading(true);
@@ -159,18 +238,40 @@ export const CacheManagement: React.FC = () => {
 
     try {
       const token = getAuthToken();
+      
+      // まず現在のページリストを取得
+      console.log('[CacheManagement] Getting page list before warmup...');
+      const pagesResponse = await fetch('/api/cache-get-pages');
+      
+      let pageIds: string[] = [];
+      if (pagesResponse.ok) {
+        const pagesData = await pagesResponse.json();
+        pageIds = pagesData.pageIds || [];
+        console.log(`[CacheManagement] Retrieved ${pageIds.length} page IDs`);
+      } else {
+        console.log('[CacheManagement] Failed to get page list, using fallback');
+      }
 
+      // キャッシュウォームアップを実行
       const response = await fetch('/api/cache-warmup', {
         method: 'POST',
         headers: {
+          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
+        body: JSON.stringify({
+          pageIds: pageIds.length > 0 ? pageIds : undefined,
+          skipSiteMap: pageIds.length > 0
+        }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
         setMessage(`✅ ${data.warmedUp}ページのキャッシュを事前読み込みしました`);
+        if (data.failed > 0) {
+          setMessage(prev => `${prev} (失敗: ${data.failed}ページ)`);
+        }
       } else {
         setMessage(`❌ エラー: ${data.error}`);
       }
@@ -308,6 +409,16 @@ export const CacheManagement: React.FC = () => {
             style={{ background: '#10b981' }}
           >
             キャッシュ事前読み込み 🚀
+          </button>
+          
+          <button
+            onClick={handleClearAndWarmup}
+            disabled={loading}
+            className={styles.button}
+            style={{ background: '#6366f1' }}
+            title="キャッシュをクリアしてすぐに事前読み込みを実行"
+          >
+            クリア&ウォームアップ 🔄
           </button>
         </div>
       </div>

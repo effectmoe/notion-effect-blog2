@@ -17,54 +17,72 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    // 主要ページのIDを取得
-    console.log('Getting site map...');
-    const siteMap = await getSiteMap();
-    
-    // デバッグ情報
-    console.log('Site map keys:', Object.keys(siteMap));
-    console.log('Canonical page map:', siteMap.canonicalPageMap);
+    console.log('[Cache Warmup] Starting cache warmup process...');
     
     let pageIds: string[] = [];
+    let useFallback = false;
     
-    // canonicalPageMapからページIDを取得
-    if (siteMap.canonicalPageMap && typeof siteMap.canonicalPageMap === 'object') {
-      pageIds = Object.keys(siteMap.canonicalPageMap).slice(0, 10); // 最初の10ページ
+    // Check if specific page IDs were provided
+    const providedPageIds = req.body?.pageIds;
+    if (providedPageIds && Array.isArray(providedPageIds) && providedPageIds.length > 0) {
+      console.log(`[Cache Warmup] Using ${providedPageIds.length} provided page IDs`);
+      pageIds = providedPageIds.filter(id => typeof id === 'string' && id.trim());
+    }
+    
+    // Check if we should skip getSiteMap (e.g., right after cache clear)
+    const skipSiteMap = req.body?.skipSiteMap || false || pageIds.length > 0;
+    
+    if (!skipSiteMap) {
+      try {
+        // 主要ページのIDを取得
+        console.log('[Cache Warmup] Attempting to get site map...');
+        const siteMap = await getSiteMap();
+        
+        // デバッグ情報
+        console.log('[Cache Warmup] Site map received:', {
+          hasPageMap: !!siteMap.pageMap,
+          hasCanonicalPageMap: !!siteMap.canonicalPageMap,
+          canonicalPageMapType: typeof siteMap.canonicalPageMap,
+          canonicalPageMapKeys: siteMap.canonicalPageMap ? Object.keys(siteMap.canonicalPageMap).length : 0
+        });
+        
+        // canonicalPageMapからページIDを取得
+        if (siteMap.canonicalPageMap && typeof siteMap.canonicalPageMap === 'object') {
+          pageIds = Object.keys(siteMap.canonicalPageMap).slice(0, 10); // 最初の10ページ
+          console.log('[Cache Warmup] Found pages in canonicalPageMap:', pageIds.length);
+        }
+      } catch (error) {
+        console.log('[Cache Warmup] Error getting site map:', error.message);
+        useFallback = true;
+      }
+    } else {
+      console.log('[Cache Warmup] Skipping site map lookup as requested');
+      useFallback = true;
     }
     
     // ページIDが取得できない場合は、重要なページIDを使用
-    if (pageIds.length === 0) {
-      console.log('No pages found in siteMap, using fallback strategy');
+    if (pageIds.length === 0 || useFallback) {
+      console.log('[Cache Warmup] Using fallback strategy');
       
-      // デフォルトの重要ページスラッグ
-      const defaultSlugs = [
-        'cafekinesi',
-        'カフェキネシ構造',
-        '都道府県リスト',
-        'カフェキネシコンテンツ',
-        '講座一覧',
-        'ブログ',
-        'アロマ購入',
-        'カフェキネシとは何ですか',
-        '講座料金はいくらですか',
-        'オンライン受講は可能ですか'
-      ];
-      
-      // 環境変数のページIDも含める
+      // 環境変数のページIDを取得（これらは実際のNotion page IDs）
       const importantPageIds = await getImportantPageIds();
       
-      // 結合して重複を削除
-      pageIds = [...new Set([...importantPageIds, ...defaultSlugs])].slice(0, 15);
+      // At minimum, use the main page ID multiple times to ensure we warm up something
+      if (importantPageIds.length === 0 && process.env.NOTION_PAGE_ID) {
+        // If we only have the main page ID, we'll warm it up
+        pageIds = [process.env.NOTION_PAGE_ID];
+      } else {
+        pageIds = importantPageIds;
+      }
       
-      console.log('Using fallback page IDs:', pageIds);
-      console.log('Fallback includes:', {
+      console.log('[Cache Warmup] Using fallback page IDs:', pageIds);
+      console.log('[Cache Warmup] Fallback includes:', {
         importantPageIds: importantPageIds.length,
-        defaultSlugs: defaultSlugs.length,
         total: pageIds.length
       });
     }
 
-    console.log(`Warming up cache for ${pageIds.length} pages:`, pageIds);
+    console.log(`[Cache Warmup] Warming up cache for ${pageIds.length} pages`);
 
     if (pageIds.length === 0) {
       return res.status(200).json({
@@ -77,15 +95,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // 並列でページを読み込み（キャッシュに保存される）
     const results = await Promise.allSettled(
-      pageIds.map(async (pageId) => {
+      pageIds.map(async (pageIdOrSlug) => {
         try {
-          console.log(`Fetching page: ${pageId}`);
-          const result = await getPage(pageId);
-          console.log(`Successfully fetched: ${pageId}`);
-          return { pageId, success: true };
+          console.log(`[Cache Warmup] Fetching page: ${pageIdOrSlug}`);
+          
+          // Try to detect if it's a UUID or a slug
+          const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(pageIdOrSlug) ||
+                        /^[0-9a-f]{32}$/i.test(pageIdOrSlug);
+          
+          if (!isUuid) {
+            // It's a slug, we need to find the actual page ID
+            // For now, we'll skip slugs that aren't UUIDs
+            console.log(`[Cache Warmup] Skipping non-UUID identifier: ${pageIdOrSlug}`);
+            return { pageId: pageIdOrSlug, success: false, error: 'Not a valid page ID' };
+          }
+          
+          const result = await getPage(pageIdOrSlug);
+          console.log(`[Cache Warmup] Successfully fetched: ${pageIdOrSlug}`);
+          return { pageId: pageIdOrSlug, success: true };
         } catch (error) {
-          console.error(`Failed to fetch page ${pageId}:`, error);
-          return { pageId, success: false, error: error.message };
+          console.error(`[Cache Warmup] Failed to fetch page ${pageIdOrSlug}:`, error.message);
+          return { pageId: pageIdOrSlug, success: false, error: error.message };
         }
       })
     );
