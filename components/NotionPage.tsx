@@ -33,7 +33,6 @@ import { FormulaPropertyDebug } from './FormulaPropertyDebug'
 import { CustomPageLink } from './CustomPageLink'
 // import { CollectionViewWrapper } from './CollectionViewWrapper'
 import StructuredData from './StructuredData'
-import { AutoBreadcrumb } from './AutoBreadcrumb'
 import styles from './styles.module.css'
 
 // -----------------------------------------------------------------------------
@@ -199,9 +198,8 @@ export function NotionPage({
   recordMap,
   error,
   pageId,
-  menuItems, // Notionデータベースからのメニューアイテムを受け取る
-  showFAQ // FAQセクションを表示するかどうか
-}: types.PageProps & { menuItems?: any[]; showFAQ?: boolean }) {
+  menuItems // Notionデータベースからのメニューアイテムを受け取る
+}: types.PageProps & { menuItems?: any[] }) {
   const router = useRouter()
   const lite = useSearchParam('lite')
   const [mounted, setMounted] = React.useState(false)
@@ -280,7 +278,7 @@ export function NotionPage({
       propertyTextValue,
       propertyDateValue,
       // Override PageLink to fix div-in-anchor hydration error
-      // PageLink: CollectionItemLink as any, // 一時的に無効化
+      PageLink: CustomPageLink as any,
       // Remove custom Toggle to use default react-notion-x implementation
       // which might handle collection views better
     }),
@@ -411,54 +409,6 @@ export function NotionPage({
       <Header menuItems={(menuItems && menuItems.length > 0) ? menuItems : navigationMenuItems} />
 
       <div className={styles.notionPageContainer}>
-        {/* 自動生成パンくずリスト（ホームページ以外で表示） */}
-        {pageId !== site.rootNotionPageId && (
-          <>
-            {/* デバッグ情報 */}
-            {config.isDev && (
-              <div style={{ 
-                background: '#f0f0f0', 
-                padding: '10px', 
-                margin: '10px 0',
-                fontSize: '12px',
-                fontFamily: 'monospace'
-              }}>
-                <strong>Breadcrumb Debug Info:</strong><br />
-                Current Page ID: {pageId}<br />
-                Root Page ID: {site.rootNotionPageId}<br />
-                Block Type: {block?.type}<br />
-                Parent ID: {block?.parent_id}<br />
-                Parent Table: {block?.parent_table}<br />
-              </div>
-            )}
-            <AutoBreadcrumb
-              pageId={pageId}
-              recordMap={recordMap}
-              rootPageId={site.rootNotionPageId}
-            />
-          </>
-        )}
-        
-        {/* Collection Viewのデバッグ情報 */}
-        {config.isDev && (
-          <div style={{ background: '#ffe0e0', padding: '10px', margin: '10px' }}>
-            <h3>Collection Views in RecordMap:</h3>
-            <pre style={{ fontSize: '11px', overflow: 'auto' }}>
-              {JSON.stringify(
-                Object.entries(recordMap.block || {})
-                  .filter(([_, b]) => b.value?.type === 'collection_view' || b.value?.type === 'collection_view_page')
-                  .map(([id, b]) => ({
-                    id,
-                    type: b.value.type,
-                    collection_id: (b.value as any).collection_id,
-                    view_ids: (b.value as any).view_ids
-                  })),
-                null,
-                2
-              )}
-            </pre>
-          </div>
-        )}
         <NotionRenderer
           bodyClassName={cs(
             styles.notion,
@@ -484,7 +434,6 @@ export function NotionPage({
           footer={footer}
           className="no-notion-tabs"
         />
-        
       </div>
 
       <GitHubShareButton />
