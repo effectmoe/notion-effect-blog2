@@ -13,13 +13,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     let pageIds: string[] = [];
     
     // canonicalPageMapからページIDを取得
+    // canonicalPageMapは { [slug]: pageId } の形式なので、valuesを取得
     if (siteMap.canonicalPageMap && typeof siteMap.canonicalPageMap === 'object') {
-      pageIds = Object.keys(siteMap.canonicalPageMap);
+      // スラッグではなく実際のページIDを取得
+      pageIds = Object.values(siteMap.canonicalPageMap);
       console.log(`Found ${pageIds.length} pages in site map`);
+      console.log('Sample page IDs:', pageIds.slice(0, 3));
     }
     
-    // 最大20ページまでに制限
-    const importantPageIds = pageIds.slice(0, 20);
+    // ルートページIDを必ず含める
+    const rootPageId = process.env.NOTION_PAGE_ID;
+    if (rootPageId && !pageIds.includes(rootPageId)) {
+      pageIds.unshift(rootPageId);
+    }
+    
+    // 重複を削除して最大20ページまでに制限
+    const uniquePageIds = [...new Set(pageIds)];
+    const importantPageIds = uniquePageIds.slice(0, 20);
     
     res.status(200).json({
       success: true,
