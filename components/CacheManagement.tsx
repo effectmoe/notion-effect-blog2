@@ -160,10 +160,10 @@ export const CacheManagement: React.FC = () => {
     try {
       const token = getAuthToken();
       
-      // 1. まず現在のページリストを取得（キャッシュがある間に）
-      console.log('[CacheManagement] Step 1: Getting page list before cache clear...');
-      // 最初にget-all-page-idsを使用（getStaticPathsと同じ方法）
-      let pagesResponse = await fetch('/api/get-all-page-ids');
+      // 1. まず完全なページリストを取得
+      console.log('[CacheManagement] Step 1: Getting complete page list before cache clear...');
+      // 完全なページリストを使用（ハードコードされた72ページ）
+      let pagesResponse = await fetch('/api/get-complete-page-list');
       
       let pageIds: string[] = [];
       if (pagesResponse.ok) {
@@ -172,18 +172,29 @@ export const CacheManagement: React.FC = () => {
         console.log(`[CacheManagement] Retrieved ${pageIds.length} page IDs (source: ${pagesData.source})`);
         setMessage(`📄 ${pageIds.length}ページのIDを取得しました`);
       } else {
-        // フォールバック: cache-get-pagesを使用
-        console.log('[CacheManagement] Falling back to cache-get-pages...');
-        pagesResponse = await fetch('/api/cache-get-pages');
+        // フォールバック: get-all-page-idsを使用
+        console.log('[CacheManagement] Falling back to get-all-page-ids...');
+        pagesResponse = await fetch('/api/get-all-page-ids');
         
         if (pagesResponse.ok) {
           const pagesData = await pagesResponse.json();
           pageIds = pagesData.pageIds || [];
-          console.log(`[CacheManagement] Retrieved ${pageIds.length} page IDs from cache`);
-          setMessage(`📄 ${pageIds.length}ページのIDを取得しました（キャッシュから）`);
+          console.log(`[CacheManagement] Retrieved ${pageIds.length} page IDs (source: ${pagesData.source})`);
+          setMessage(`📄 ${pageIds.length}ページのIDを取得しました`);
         } else {
-          console.log('[CacheManagement] Failed to get page list');
-          setMessage('⚠️ ページリストの取得に失敗しました');
+          // 最終フォールバック: cache-get-pagesを使用
+          console.log('[CacheManagement] Falling back to cache-get-pages...');
+          pagesResponse = await fetch('/api/cache-get-pages');
+          
+          if (pagesResponse.ok) {
+            const pagesData = await pagesResponse.json();
+            pageIds = pagesData.pageIds || [];
+            console.log(`[CacheManagement] Retrieved ${pageIds.length} page IDs from cache`);
+            setMessage(`📄 ${pageIds.length}ページのIDを取得しました（キャッシュから）`);
+          } else {
+            console.log('[CacheManagement] Failed to get page list');
+            setMessage('⚠️ ページリストの取得に失敗しました');
+          }
         }
       }
       
@@ -261,17 +272,27 @@ export const CacheManagement: React.FC = () => {
     try {
       const token = getAuthToken();
       
-      // まず現在のページリストを取得
-      console.log('[CacheManagement] Getting page list before warmup...');
-      const pagesResponse = await fetch('/api/cache-get-pages');
+      // まず完全なページリストを取得
+      console.log('[CacheManagement] Getting complete page list before warmup...');
+      let pagesResponse = await fetch('/api/get-complete-page-list');
       
       let pageIds: string[] = [];
       if (pagesResponse.ok) {
         const pagesData = await pagesResponse.json();
         pageIds = pagesData.pageIds || [];
-        console.log(`[CacheManagement] Retrieved ${pageIds.length} page IDs`);
+        console.log(`[CacheManagement] Retrieved ${pageIds.length} page IDs (source: ${pagesData.source})`);
       } else {
-        console.log('[CacheManagement] Failed to get page list, using fallback');
+        // フォールバック: cache-get-pagesを使用
+        console.log('[CacheManagement] Falling back to cache-get-pages...');
+        pagesResponse = await fetch('/api/cache-get-pages');
+        
+        if (pagesResponse.ok) {
+          const pagesData = await pagesResponse.json();
+          pageIds = pagesData.pageIds || [];
+          console.log(`[CacheManagement] Retrieved ${pageIds.length} page IDs from cache`);
+        } else {
+          console.log('[CacheManagement] Failed to get page list, using fallback');
+        }
       }
 
       // キャッシュウォームアップを実行
