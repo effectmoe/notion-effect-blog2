@@ -117,7 +117,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       console.log('[Cache Warmup] Fallback IDs sample:', pageIds.slice(0, 3).map(id => id.substring(0, 8) + '...'));
     }
 
-    // 無料プランでは処理ページ数を制限
+    // バッチ処理の設定（60秒のタイムアウトを活用）
+    const BATCH_SIZE = 5; // 一度に処理するページ数
+    const DELAY_BETWEEN_BATCHES = 800; // バッチ間の待機時間（ミリ秒）
+    const RETRY_COUNT = 3; // リトライ回数
+    const RETRY_DELAY = 1500; // リトライ前の待機時間（ミリ秒）
+    const PAGE_TIMEOUT = 8000; // ページ取得のタイムアウト（8秒）
+    const MAX_PAGES_PER_REQUEST = 50; // 1リクエストで処理する最大ページ数
+
+    // 処理ページ数を制限（必要に応じて）
     if (pageIds.length > MAX_PAGES_PER_REQUEST) {
       console.log(`[Cache Warmup] Limiting pages from ${pageIds.length} to ${MAX_PAGES_PER_REQUEST} for this request`);
       pageIds = pageIds.slice(0, MAX_PAGES_PER_REQUEST);
@@ -139,14 +147,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         message: 'No pages found to warm up. Site map might be empty after cache clear.'
       });
     }
-
-    // バッチ処理の設定（60秒のタイムアウトを活用）
-    const BATCH_SIZE = 5; // 一度に処理するページ数
-    const DELAY_BETWEEN_BATCHES = 800; // バッチ間の待機時間（ミリ秒）
-    const RETRY_COUNT = 3; // リトライ回数
-    const RETRY_DELAY = 1500; // リトライ前の待機時間（ミリ秒）
-    const PAGE_TIMEOUT = 8000; // ページ取得のタイムアウト（8秒）
-    const MAX_PAGES_PER_REQUEST = 50; // 1リクエストで処理する最大ページ数
 
     // リトライ機能付きのページ取得
     async function fetchPageWithRetry(pageIdOrSlug: string, retries = RETRY_COUNT): Promise<any> {
