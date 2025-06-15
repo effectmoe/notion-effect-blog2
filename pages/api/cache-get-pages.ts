@@ -38,12 +38,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
     
     // データベースページを優先的に含める
-    const databasePageSlugs = ['都道府県リスト', '講座一覧'];
+    const databasePageSlugs = ['都道府県リスト', '講座一覧', 'FAQ', 'FAQマスター'];
     const databasePageIds: string[] = [];
     
-    // データベースページのページIDを取得
+    // データベースページのページIDを取得（部分一致も許可）
     for (const [slug, pageId] of Object.entries(siteMap.canonicalPageMap || {})) {
-      if (databasePageSlugs.includes(slug) && isValidPageId(pageId)) {
+      const isDatabase = databasePageSlugs.some(dbSlug => 
+        slug === dbSlug || slug.includes('FAQ') || slug.includes('データベース')
+      );
+      if (isDatabase && isValidPageId(pageId)) {
         databasePageIds.push(normalizePageId(pageId));
       }
     }

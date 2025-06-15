@@ -23,7 +23,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         keyType: keyParsed ? 'valid-id' : 'slug',
         value: value.substring(0, 20) + '...',
         valueType: valueParsed ? 'valid-id' : 'slug',
-        isDatabase: key.includes('データベース') || key.includes('都道府県') || key.includes('リスト')
+        isDatabase: key.includes('データベース') || key.includes('都道府県') || key.includes('リスト') || key.includes('FAQ') || key.toLowerCase().includes('faq')
       };
     });
     
@@ -38,7 +38,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         key.includes('データベース') || 
         key.includes('都道府県') || 
         key.includes('リスト') ||
-        key.includes('一覧')
+        key.includes('一覧') ||
+        key.includes('FAQ') ||
+        key.toLowerCase().includes('faq')
       )
       .map(([key, value]) => ({ slug: key, id: value }));
     
@@ -49,7 +51,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         databasePages: databasePages.length
       },
       sampleAnalysis: pageAnalysis,
-      databasePages: databasePages.slice(0, 5),
+      databasePages: databasePages,  // すべてのデータベースページを表示
       rootPageId: process.env.NOTION_PAGE_ID,
       includeNotionIdInUrls: process.env.NEXT_PUBLIC_INCLUDE_NOTION_ID_IN_URLS
     });
