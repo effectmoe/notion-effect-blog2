@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getSiteMap } from '@/lib/get-site-map';
 import { getPage } from '@/lib/notion';
-import { getImportantPageIds, DEFAULT_IMPORTANT_SLUGS } from '@/lib/get-important-pages';
+import { getImportantPageIds } from '@/lib/get-important-pages';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -36,19 +36,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (pageIds.length === 0) {
       console.log('No pages found in siteMap, using fallback strategy');
       
-      // デフォルトの重要ページを使用
+      // デフォルトの重要ページスラッグ
+      const defaultSlugs = [
+        'cafekinesi',
+        'カフェキネシ構造',
+        '都道府県リスト',
+        'カフェキネシコンテンツ',
+        '講座一覧',
+        'ブログ',
+        'アロマ購入',
+        'カフェキネシとは何ですか',
+        '講座料金はいくらですか',
+        'オンライン受講は可能ですか'
+      ];
+      
+      // 環境変数のページIDも含める
       const importantPageIds = await getImportantPageIds();
       
-      // デフォルトの重要ページスラッグと環境変数のページIDを結合
-      const fallbackPages = [...new Set([...importantPageIds, ...DEFAULT_IMPORTANT_SLUGS])];
-      
-      // 最大15ページまでを取得
-      pageIds = fallbackPages.slice(0, 15);
+      // 結合して重複を削除
+      pageIds = [...new Set([...importantPageIds, ...defaultSlugs])].slice(0, 15);
       
       console.log('Using fallback page IDs:', pageIds);
       console.log('Fallback includes:', {
         importantPageIds: importantPageIds.length,
-        defaultSlugs: DEFAULT_IMPORTANT_SLUGS.length,
+        defaultSlugs: defaultSlugs.length,
         total: pageIds.length
       });
     }
