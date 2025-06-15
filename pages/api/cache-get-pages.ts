@@ -1,7 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getSiteMap } from '@/lib/get-site-map';
 import { normalizePageId, isValidPageId } from '@/lib/normalize-page-id';
-import { isDatabaseByTitle } from '@/lib/detect-database-pages';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -38,37 +37,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
     
-    // データベースページを自動検出して優先的に含める
-    // 環境変数から優先データベースを取得（デフォルト値あり）
-    const priorityDatabaseSlugs = process.env.PRIORITY_DATABASE_SLUGS?.split(',').map(s => s.trim()) || [];
-    const knownDatabaseSlugs = priorityDatabaseSlugs.length > 0 
-      ? priorityDatabaseSlugs 
-      : ['都道府県リスト', '講座一覧', 'FAQ', 'FAQマスター'];
-    const databasePageIds: string[] = [];
-    
-    // タイトルからデータベースページを自動検出
-    for (const [slug, pageId] of Object.entries(siteMap.canonicalPageMap || {})) {
-      // 既知のデータベースまたはタイトルから推測
-      const isKnownDatabase = knownDatabaseSlugs.some(dbSlug => slug === dbSlug);
-      const mightBeDatabase = isDatabaseByTitle(slug);
-      
-      if ((isKnownDatabase || mightBeDatabase) && isValidPageId(pageId)) {
-        databasePageIds.push(normalizePageId(pageId));
-      }
-    }
-    
-    // データベースページを先頭に、その他のページを後に
-    const allUniquePageIds = [...new Set([...databasePageIds, ...pageIds])];
-    const importantPageIds = allUniquePageIds.slice(0, 20);
-    
-    console.log(`Database pages included: ${databasePageIds.length}`);
-    console.log('Database page IDs:', databasePageIds);
+    // シンプルに：すべてのページを平等に扱う
+    // 重複を削除して最初の30ページを取得（十分な数）
+    const uniquePageIds = [...new Set(pageIds)];
+    const selectedPageIds = uniquePageIds.slice(0, 30);
     
     res.status(200).json({
       success: true,
-      pageIds: importantPageIds,
-      total: pageIds.length,
-      message: `Retrieved ${importantPageIds.length} important pages`
+      pageIds: selectedPageIds,
+      total: uniquePageIds.length,
+      message: `Retrieved ${selectedPageIds.length} pages`
     });
 
   } catch (error) {

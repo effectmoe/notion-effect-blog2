@@ -1,7 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getSiteMap } from '@/lib/get-site-map';
 import { getPage } from '@/lib/notion';
-import { getImportantPageIds } from '@/lib/get-important-pages';
 import { normalizePageId, isValidPageId } from '@/lib/normalize-page-id';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -47,9 +46,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           canonicalPageMapKeys: siteMap.canonicalPageMap ? Object.keys(siteMap.canonicalPageMap).length : 0
         });
         
-        // canonicalPageMapからページIDを取得
+        // canonicalPageMapからページIDを取得（values側が実際のページID）
         if (siteMap.canonicalPageMap && typeof siteMap.canonicalPageMap === 'object') {
-          pageIds = Object.keys(siteMap.canonicalPageMap).slice(0, 10); // 最初の10ページ
+          const allPageIds = Object.values(siteMap.canonicalPageMap)
+            .filter(id => typeof id === 'string' && isValidPageId(id))
+            .map(id => normalizePageId(id));
+          
+          // シンプルに最初の30ページを取得（すべてのページを平等に扱う）
+          pageIds = allPageIds.slice(0, 30);
           console.log('[Cache Warmup] Found pages in canonicalPageMap:', pageIds.length);
         }
       } catch (error) {
@@ -65,22 +69,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (pageIds.length === 0 || useFallback) {
       console.log('[Cache Warmup] Using fallback strategy');
       
-      // 環境変数のページIDを取得（これらは実際のNotion page IDs）
-      const importantPageIds = await getImportantPageIds();
+      // フォールバック: 環境変数から取得
+      const envPageIds = process.env.IMPORTANT_PAGE_IDS?.split(',').filter(Boolean) || [];
       
-      // At minimum, use the main page ID multiple times to ensure we warm up something
-      if (importantPageIds.length === 0 && process.env.NOTION_PAGE_ID) {
-        // If we only have the main page ID, we'll warm it up
-        pageIds = [process.env.NOTION_PAGE_ID];
-      } else {
-        pageIds = importantPageIds;
+      const rootPageId = process.env.NOTION_PAGE_ID;
+      if (rootPageId && isValidPageId(rootPageId)) {
+        envPageIds.unshift(normalizePageId(rootPageId));
       }
       
-      console.log('[Cache Warmup] Using fallback page IDs:', pageIds);
-      console.log('[Cache Warmup] Fallback includes:', {
-        importantPageIds: importantPageIds.length,
-        total: pageIds.length
-      });
+      pageIds = envPageIds.slice(0, 30);
+      
+      console.log('[Cache Warmup] Using fallback page IDs:', pageIds.length);
     }
 
     console.log(`[Cache Warmup] Warming up cache for ${pageIds.length} pages`);
