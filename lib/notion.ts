@@ -96,8 +96,7 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
           notion_user: faqData.recordMap.notion_user || {},
           collection_query: {},
           signed_urls: {},
-          preview_images: {},
-          tweets: {}
+          preview_images: {}
         };
         recordMap = mergeRecordMaps(recordMap, extendedFaqData);
         console.log('FAQ collection data merged successfully');
