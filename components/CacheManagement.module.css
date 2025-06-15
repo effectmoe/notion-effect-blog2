@@ -2,7 +2,8 @@
   max-width: 900px;
   margin: 0 auto;
   padding: 2rem;
-  padding-top: 3rem; /* 上部の余白を増やす */
+  padding-top: 6rem; /* 大幅に上部の余白を増やす */
+  margin-top: 2rem; /* さらにマージンも追加 */
 }
 
 .pageTitle {
@@ -686,7 +687,8 @@ details[open] .chevron {
 @media (max-width: 640px) {
   .container {
     padding: 1rem;
-    padding-top: 2rem; /* モバイルでも上部の余白を確保 */
+    padding-top: 5rem; /* モバイルでも大幅に上部の余白を確保 */
+    margin-top: 1rem;
   }
   
   .pageTitle {
