@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getSiteMap } from '@/lib/get-site-map';
 import { normalizePageId, isValidPageId } from '@/lib/normalize-page-id';
+import { isDatabaseByTitle } from '@/lib/detect-database-pages';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -37,16 +38,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
     
-    // データベースページを優先的に含める
-    const databasePageSlugs = ['都道府県リスト', '講座一覧', 'FAQ', 'FAQマスター'];
+    // データベースページを自動検出して優先的に含める
+    // 環境変数から優先データベースを取得（デフォルト値あり）
+    const priorityDatabaseSlugs = process.env.PRIORITY_DATABASE_SLUGS?.split(',').map(s => s.trim()) || [];
+    const knownDatabaseSlugs = priorityDatabaseSlugs.length > 0 
+      ? priorityDatabaseSlugs 
+      : ['都道府県リスト', '講座一覧', 'FAQ', 'FAQマスター'];
     const databasePageIds: string[] = [];
     
-    // データベースページのページIDを取得（部分一致も許可）
+    // タイトルからデータベースページを自動検出
     for (const [slug, pageId] of Object.entries(siteMap.canonicalPageMap || {})) {
-      const isDatabase = databasePageSlugs.some(dbSlug => 
-        slug === dbSlug || slug.includes('FAQ') || slug.includes('データベース')
-      );
-      if (isDatabase && isValidPageId(pageId)) {
+      // 既知のデータベースまたはタイトルから推測
+      const isKnownDatabase = knownDatabaseSlugs.some(dbSlug => slug === dbSlug);
+      const mightBeDatabase = isDatabaseByTitle(slug);
+      
+      if ((isKnownDatabase || mightBeDatabase) && isValidPageId(pageId)) {
         databasePageIds.push(normalizePageId(pageId));
       }
     }
