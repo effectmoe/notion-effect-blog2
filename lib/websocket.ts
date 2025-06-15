@@ -4,14 +4,18 @@ import { NextApiResponse } from 'next';
 
 // グローバル変数でSocket.IOサーバーを管理
 declare global {
-  var io: SocketIOServer | undefined;
+  namespace NodeJS {
+    interface Global {
+      io?: SocketIOServer;
+    }
+  }
 }
 
 export function initializeWebSocket(server: HTTPServer): SocketIOServer {
-  if (!global.io) {
+  if (!(global as any).io) {
     console.log('Initializing WebSocket server...');
     
-    global.io = new SocketIOServer(server, {
+    (global as any).io = new SocketIOServer(server, {
       path: '/api/socketio',
       cors: {
         origin: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
@@ -19,7 +23,7 @@ export function initializeWebSocket(server: HTTPServer): SocketIOServer {
       },
     });
 
-    global.io.on('connection', (socket) => {
+    (global as any).io.on('connection', (socket) => {
       console.log('Client connected:', socket.id);
 
       // クライアントからの購読リクエスト
@@ -52,13 +56,13 @@ export function initializeWebSocket(server: HTTPServer): SocketIOServer {
     });
   }
 
-  return global.io;
+  return (global as any).io;
 }
 
 // 特定のページの更新を通知
 export function notifyPageUpdate(pageId: string, data: any) {
-  if (global.io) {
-    global.io.to(`page:${pageId}`).emit('page-updated', {
+  if ((global as any).io) {
+    (global as any).io.to(`page:${pageId}`).emit('page-updated', {
       pageId,
       data,
       timestamp: new Date().toISOString(),
@@ -68,8 +72,8 @@ export function notifyPageUpdate(pageId: string, data: any) {
 
 // グローバルな更新を通知
 export function notifyGlobalUpdate(type: string, data: any) {
-  if (global.io) {
-    global.io.to('global-updates').emit('content-updated', {
+  if ((global as any).io) {
+    (global as any).io.to('global-updates').emit('content-updated', {
       type,
       data,
       timestamp: new Date().toISOString(),
@@ -79,14 +83,14 @@ export function notifyGlobalUpdate(type: string, data: any) {
 
 // Next.js APIルートでWebSocketをサポートするためのヘルパー
 export function withWebSocket(handler: any) {
-  return async (req: any, res: NextApiResponse) => {
-    if (!res.socket.server.io) {
+  return async (req: any, res: any) => {
+    if (!res.socket?.server?.io) {
       console.log('Socket.io is not initialized');
       // 必要に応じてここで初期化
     }
     
     // リクエストにioインスタンスを追加
-    req.io = global.io;
+    req.io = (global as any).io;
     
     return handler(req, res);
   };

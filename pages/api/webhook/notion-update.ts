@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import cache from '@/lib/cache';
-import { verifyNotionWebhook } from '@/lib/notion-webhook';
-import { revalidatePage } from '@/lib/revalidate';
+// import { verifyNotionWebhook } from '@/lib/notion-webhook';
+// import { revalidatePage } from '@/lib/revalidate';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -9,10 +9,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    // Notion Webhookの検証
-    const isValid = await verifyNotionWebhook(req);
-    if (!isValid) {
-      return res.status(401).json({ error: 'Invalid webhook signature' });
+    // Notion Webhookの検証（一時的に簡易認証）
+    const authHeader = req.headers.authorization;
+    const expectedToken = process.env.NOTION_WEBHOOK_TOKEN || process.env.CACHE_CLEAR_TOKEN;
+    
+    if (expectedToken && authHeader !== `Bearer ${expectedToken}`) {
+      return res.status(401).json({ error: 'Unauthorized' });
     }
 
     const { type, data } = req.body;
@@ -29,10 +31,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         await cache.invalidate(`notion:page:${pageId}`);
         await cache.invalidate(`notion:blocks:${pageId}`);
         
-        // Next.jsのISRを再検証
-        if (data.url) {
-          await revalidatePage(data.url);
-        }
+        // Next.jsのISRを再検証（実装予定）
+        // if (data.url) {
+        //   await revalidatePage(data.url);
+        // }
         
         result = { 
           cleared: 'page-cache', 
@@ -83,8 +85,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // WebSocketで接続中のクライアントに通知
-    if (global.io) {
-      global.io.emit('cache-invalidated', {
+    if ((global as any).io) {
+      (global as any).io.emit('cache-invalidated', {
         type,
         data,
         timestamp: new Date().toISOString()

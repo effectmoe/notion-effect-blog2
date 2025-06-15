@@ -1,4 +1,4 @@
-import { NextApiResponse } from 'next';
+import { NextApiRequest, NextApiResponse } from 'next';
 
 export interface CacheConfig {
   // キャッシュの種類
@@ -16,24 +16,24 @@ export interface CacheConfig {
 }
 
 // プリセットのキャッシュ設定
-export const CACHE_PRESETS = {
+export const CACHE_PRESETS: Record<string, CacheConfig> = {
   // 静的アセット（画像、フォントなど）
   static: {
-    type: 'static' as const,
+    type: 'static',
     maxAge: 31536000, // 1年
     immutable: true,
   },
   
   // ビルドされたJS/CSSファイル
   build: {
-    type: 'static' as const,
+    type: 'static',
     maxAge: 31536000, // 1年
     immutable: true,
   },
   
   // Notion API レスポンス
   notion: {
-    type: 'notion' as const,
+    type: 'notion',
     maxAge: 300, // 5分
     swr: 3600, // 1時間
     useEtag: true,
@@ -41,14 +41,14 @@ export const CACHE_PRESETS = {
   
   // 検索結果
   search: {
-    type: 'api' as const,
+    type: 'api',
     maxAge: 60, // 1分
     swr: 300, // 5分
   },
   
   // 動的ページ
   page: {
-    type: 'dynamic' as const,
+    type: 'dynamic',
     maxAge: 0,
     swr: 3600, // 1時間
     private: true,
@@ -56,18 +56,20 @@ export const CACHE_PRESETS = {
   
   // リアルタイムデータ
   realtime: {
-    type: 'api' as const,
+    type: 'api',
     maxAge: 0,
     private: true,
   },
-} as const;
+};
 
 // キャッシュヘッダーを設定
 export function setCacheHeaders(
   res: NextApiResponse,
   config: CacheConfig | keyof typeof CACHE_PRESETS
 ) {
-  const cacheConfig = typeof config === 'string' ? CACHE_PRESETS[config] : config;
+  const cacheConfig: CacheConfig = typeof config === 'string' 
+    ? CACHE_PRESETS[config]
+    : config;
   
   const parts: string[] = [];
   

@@ -2,6 +2,9 @@ import { useEffect, useCallback, useState } from 'react';
 import io, { Socket } from 'socket.io-client';
 import { useRouter } from 'next/router';
 
+// SSR/SSGビルド時のチェック
+const isServer = typeof window === 'undefined';
+
 interface RealtimeUpdateOptions {
   pageId?: string;
   onUpdate?: (data: any) => void;
@@ -13,9 +16,12 @@ export function useRealtimeUpdates(options: RealtimeUpdateOptions = {}) {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
-  const router = useRouter();
+  const router = !isServer ? useRouter() : null;
 
   useEffect(() => {
+    // サーバーサイドでは実行しない
+    if (isServer) return;
+    
     // Socket.IOクライアントの初期化
     const socketIo = io(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000', {
       path: '/api/socketio',
@@ -55,7 +61,7 @@ export function useRealtimeUpdates(options: RealtimeUpdateOptions = {}) {
         onUpdate(data);
       }
 
-      if (autoRefresh && data.pageId === pageId) {
+      if (autoRefresh && data.pageId === pageId && router) {
         // ページをリロード
         router.reload();
       }
@@ -70,7 +76,7 @@ export function useRealtimeUpdates(options: RealtimeUpdateOptions = {}) {
         onUpdate(data);
       }
 
-      if (autoRefresh) {
+      if (autoRefresh && router) {
         // 現在のページに関連する更新の場合はリロード
         if (shouldRefreshPage(data)) {
           router.reload();
@@ -96,7 +102,7 @@ export function useRealtimeUpdates(options: RealtimeUpdateOptions = {}) {
       }
 
       // ページをリロード
-      if (autoRefresh) {
+      if (autoRefresh && router) {
         setTimeout(() => {
           router.reload();
         }, 100);
@@ -114,7 +120,9 @@ export function useRealtimeUpdates(options: RealtimeUpdateOptions = {}) {
 
   // 手動リフレッシュ
   const refresh = useCallback(() => {
-    router.reload();
+    if (router) {
+      router.reload();
+    }
   }, [router]);
 
   // キャッシュクリア
@@ -133,7 +141,9 @@ export function useRealtimeUpdates(options: RealtimeUpdateOptions = {}) {
         console.log('Cache cleared successfully');
         // 少し待ってからリロード
         setTimeout(() => {
-          router.reload();
+          if (router) {
+            router.reload();
+          }
         }, 500);
       }
     } catch (error) {
