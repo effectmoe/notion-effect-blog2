@@ -9,7 +9,8 @@ interface NotionFAQProps {
 }
 
 export const NotionFAQ: React.FC<NotionFAQProps> = ({ blockId }) => {
-  const { recordMap } = useNotionContext();
+  const ctx = useNotionContext();
+  const { recordMap } = ctx;
   
   // FAQマスターブロックを取得
   const block = recordMap.block[blockId];
@@ -30,6 +31,7 @@ export const NotionFAQ: React.FC<NotionFAQProps> = ({ blockId }) => {
         <Collection 
           block={block.value as CollectionViewBlock | CollectionViewPageBlock} 
           className={styles.faqCollection}
+          ctx={ctx}
         />
       </div>
     </div>
