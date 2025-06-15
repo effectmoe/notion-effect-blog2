@@ -8,6 +8,12 @@ import { rateLimit, rateLimitPresets } from '@/lib/rate-limiter';
 const rateLimiter = rateLimit(rateLimitPresets.webhook);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  // Notionの初回認証チャレンジに対応
+  if (req.method === 'POST' && req.body?.type === 'url_verification') {
+    console.log('Notion verification challenge received:', req.body.challenge);
+    return res.status(200).json({ challenge: req.body.challenge });
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
