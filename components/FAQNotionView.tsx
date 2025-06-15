@@ -32,22 +32,9 @@ export const FAQNotionView: React.FC<FAQNotionViewProps> = ({
   
   const collectionBlock = block.value as CollectionViewBlock | CollectionViewPageBlock;
   
-  // 特定のビューIDを強制的に使用
-  const modifiedBlock = {
-    ...collectionBlock,
-    format: {
-      ...collectionBlock.format,
-      collection_pointer: {
-        id: collectionBlock.collection_id || '212b802c-b0c6-8046-b4ee-000b2833619c',
-        table: 'collection',
-        spaceId: collectionBlock.space_id
-      }
-    }
-  };
-  
-  // 特定のビューを選択するためのプロパティを追加
+  // コレクションコンポーネントに渡すプロパティ
   const collectionProps = {
-    block: modifiedBlock,
+    block: collectionBlock,
     className: styles.faqCollection,
     ctx: ctx
   };
