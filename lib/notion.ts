@@ -194,7 +194,7 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
   
   // Debug FAQ collection view
   if (process.env.NODE_ENV === 'development') {
-    debugCollectionView(recordMap, '212b802c-b0c6-80ea-b7ed-ef4459f38819');
+    debugCollectionView(recordMap, '213b802cb0c680ea91c9e30f610943da'); // 新しいFAQリンクビュー
   }
 
   return recordMap

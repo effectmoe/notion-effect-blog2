@@ -8,6 +8,9 @@ export function patchFAQRecordMap(recordMap: ExtendedRecordMap): ExtendedRecordM
   // 実際のFAQマスターブロックID
   const actualFaqMasterBlockId = '212b802c-b0c6-80ea-b7ed-ef4459f38819';
   
+  // 新しいFAQマスターリンクデータベースビューのID
+  const newFaqLinkBlockId = '213b802cb0c680ea91c9e30f610943da';
+  
   // 古いブロックIDへの参照がある場合のための互換性パッチ
   const oldFaqMasterBlock = recordMap.block[oldFaqMasterBlockId];
   if (oldFaqMasterBlock && oldFaqMasterBlock.value && oldFaqMasterBlock.value.type === 'collection_view') {
@@ -39,6 +42,18 @@ export function patchFAQRecordMap(recordMap: ExtendedRecordMap): ExtendedRecordM
         // 必要に応じてフィルターを調整
       }
     });
+  }
+  
+  // 新しいFAQリンクデータベースビューのパッチ
+  const newFaqLinkBlock = recordMap.block[newFaqLinkBlockId];
+  if (newFaqLinkBlock && newFaqLinkBlock.value) {
+    console.log('Found new FAQ link database view:', newFaqLinkBlockId);
+    
+    // collection_idが設定されていない場合は追加
+    if (newFaqLinkBlock.value.type === 'collection_view' && !(newFaqLinkBlock.value as any).collection_id) {
+      console.log('Adding collection_id to new FAQ link view');
+      (newFaqLinkBlock.value as any).collection_id = faqCollectionId;
+    }
   }
   
   // FAQコレクションのクエリ結果が空の場合の対処
