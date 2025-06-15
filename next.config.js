@@ -143,6 +143,30 @@ export default withBundleAnalyzer({
       }
     }
     
+    // Production時はCSSを最適化
+    if (!dev && config.optimization) {
+      config.optimization.moduleIds = 'deterministic';
+      
+      // CSSの最適化
+      if (config.module?.rules) {
+        config.module.rules.forEach((rule) => {
+          if (rule.oneOf) {
+            rule.oneOf.forEach((oneOfRule) => {
+              if (oneOfRule.use?.loader?.includes('css-loader')) {
+                oneOfRule.use.options = {
+                  ...oneOfRule.use.options,
+                  modules: {
+                    ...oneOfRule.use.options?.modules,
+                    exportOnlyLocals: false,
+                  },
+                };
+              }
+            });
+          }
+        });
+      }
+    }
+
     return config
   },
 
