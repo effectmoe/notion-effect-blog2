@@ -2,7 +2,6 @@ import { siteConfig } from './lib/site-config'
 
 export default siteConfig({
   // the site's root Notion page (required)
-  // CafeKinesiページのID（正しいID）
   rootNotionPageId: '1ceb802cb0c680f29369dba86095fb38',
 
   // if you want to restrict pages to a single notion workspace (optional)
