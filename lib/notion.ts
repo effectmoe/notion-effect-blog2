@@ -90,9 +90,14 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
       if (faqData?.recordMap) {
         // Merge the FAQ data into the main recordMap
         const extendedFaqData: ExtendedRecordMap = {
-          ...faqData.recordMap,
+          block: faqData.recordMap.block || {},
+          collection: faqData.recordMap.collection || {},
+          collection_view: faqData.recordMap.collection_view || {},
+          notion_user: faqData.recordMap.notion_user || {},
           collection_query: {},
-          signed_urls: {}
+          signed_urls: {},
+          preview_images: {},
+          tweets: {}
         };
         recordMap = mergeRecordMaps(recordMap, extendedFaqData);
         console.log('FAQ collection data merged successfully');
