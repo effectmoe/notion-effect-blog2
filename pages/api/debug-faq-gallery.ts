@@ -30,7 +30,7 @@ export default async function handler(
     const faqCollectionQuery = patchedRecordMap.collection_query?.[faqCollectionId]
     
     // ビュー情報
-    const viewId = faqBlock?.view_ids?.[0]
+    const viewId = (faqBlock as any)?.view_ids?.[0]
     const faqView = viewId ? patchedRecordMap.collection_view?.[viewId]?.value : null
     
     // コレクション内のアイテム数を確認
@@ -46,10 +46,10 @@ export default async function handler(
         exists: !!faqBlock,
         id: faqMasterBlockId,
         type: faqBlock?.type,
-        collection_id: faqBlock?.collection_id,
-        view_ids: faqBlock?.view_ids,
-        hasFormat: !!faqBlock?.format,
-        formatCollectionPointer: (faqBlock?.format as any)?.collection_pointer
+        collection_id: (faqBlock as any)?.collection_id,
+        view_ids: (faqBlock as any)?.view_ids,
+        hasFormat: !!(faqBlock as any)?.format,
+        formatCollectionPointer: (faqBlock as any)?.format?.collection_pointer
       },
       faqCollection: {
         exists: !!faqCollection,

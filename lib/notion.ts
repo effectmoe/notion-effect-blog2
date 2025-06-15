@@ -104,14 +104,7 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
         // Also ensure collection_query is populated
         if (!recordMap.collection_query) recordMap.collection_query = {};
         if (!recordMap.collection_query[faqCollectionId]) {
-          recordMap.collection_query[faqCollectionId] = {
-            collection_group_results: {
-              type: 'results',
-              blockIds: Object.keys(faqData.recordMap.block || {}).filter(id => id !== faqCollectionId),
-              aggregationResults: [],
-              total: Object.keys(faqData.recordMap.block || {}).length - 1
-            }
-          };
+          recordMap.collection_query[faqCollectionId] = {} as any;
         }
       }
     } catch (error) {
