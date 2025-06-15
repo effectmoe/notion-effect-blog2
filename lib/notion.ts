@@ -77,14 +77,9 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
     console.log('FAQ collection query results are empty, fetching collection data...');
     try {
       // Try to get collection data using getCollectionData
-      const collectionView = {
-        id: faqViewId,
-        type: 'gallery' as const
-      };
-      
       const faqData = await notion.getCollectionData(
         faqCollectionId,
-        collectionView,
+        faqViewId,
         {
           limit: 100,
           searchQuery: '',
