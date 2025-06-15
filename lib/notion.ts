@@ -17,11 +17,10 @@ import { notion } from './notion-api'
 import { getPreviewImageMap } from './preview-images'
 import { findMissingBlocks } from './fetch-missing-blocks'
 import { CachedNotionAPI } from './cache'
-import { filterTestCollections } from './filter-test-collections'
 
 // キャッシュ付きAPIインスタンスを作成
 const cachedNotion = new CachedNotionAPI({
-  authToken: process.env.NOTION_API_SECRET,
+  authToken: process.env.NOTION_TOKEN,
   defaultTTL: 3600 // 1時間
 })
 
@@ -62,53 +61,6 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
     chunkLimit: 500,  // Increase chunk limit
     chunkNumber: 0
   }) as ExtendedRecordMap
-  
-  // FAQマスターのrecordMapを修正 - 一時的に無効化
-  // recordMap = patchFAQRecordMap(recordMap)
-  
-  // FAQコレクションの明示的なクエリ実行 - 一時的にコメントアウト
-  // const faqCollectionId = '212b802c-b0c6-8046-b4ee-000b2833619c';
-  // const faqViewId = '212b802c-b0c6-8026-8290-000cee82ffad'; // 公開FAQ view
-  
-  // Check if FAQ collection query results are empty
-  // if (!recordMap.collection_query?.[faqCollectionId]?.collection_group_results?.blockIds?.length) {
-  //   console.log('FAQ collection query results are empty, fetching collection data...');
-  //   try {
-  //     // Try to get collection data using getCollectionData
-  //     const faqData = await notion.getCollectionData(
-  //       faqCollectionId,
-  //       faqViewId,
-  //       {
-  //         limit: 100,
-  //         searchQuery: '',
-  //         userTimeZone: 'Asia/Tokyo'
-  //       }
-  //     );
-      
-  //     if (faqData?.recordMap) {
-  //       // Merge the FAQ data into the main recordMap
-  //       const extendedFaqData: ExtendedRecordMap = {
-  //         block: faqData.recordMap.block || {},
-  //         collection: faqData.recordMap.collection || {},
-  //         collection_view: faqData.recordMap.collection_view || {},
-  //         notion_user: faqData.recordMap.notion_user || {},
-  //         collection_query: {},
-  //         signed_urls: {},
-  //         preview_images: {}
-  //       };
-  //       recordMap = mergeRecordMaps(recordMap, extendedFaqData);
-  //       console.log('FAQ collection data merged successfully');
-        
-  //       // Also ensure collection_query is populated
-  //       if (!recordMap.collection_query) recordMap.collection_query = {};
-  //       if (!recordMap.collection_query[faqCollectionId]) {
-  //         recordMap.collection_query[faqCollectionId] = {} as any;
-  //       }
-  //     }
-  //   } catch (error) {
-  //     console.error('Failed to fetch FAQ collection data:', error);
-  //   }
-  // }
   
   // Use the new helper function to find missing blocks
   const { missingBlocks, missingCollections, toggleContentBlocks } = findMissingBlocks(recordMap)
@@ -183,10 +135,6 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
   }
 
   await getTweetsMap(recordMap)
-
-  // Filter out test collections and blocks
-  recordMap = filterTestCollections(recordMap)
-  
 
   return recordMap
 }
