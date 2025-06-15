@@ -42,17 +42,34 @@ export const CacheManagement: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // トークン取得のヘルパー関数
+  const getAuthToken = () => {
+    let token = process.env.NEXT_PUBLIC_CACHE_CLEAR_TOKEN;
+    if (!token) {
+      token = localStorage.getItem('cache_clear_token') || '';
+      if (!token) {
+        token = prompt('キャッシュクリアトークンを入力してください:') || '';
+        if (token) {
+          localStorage.setItem('cache_clear_token', token);
+        }
+      }
+    }
+    return token;
+  };
+
   // キャッシュクリア（タイプ別）
   const handleClearCache = async (type: string) => {
     setLoading(true);
     setMessage('');
 
     try {
+      const token = getAuthToken();
+      
       const response = await fetch('/api/cache-clear', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_CACHE_CLEAR_TOKEN}`,
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({ type }),
       });
@@ -79,10 +96,12 @@ export const CacheManagement: React.FC = () => {
     setMessage('');
 
     try {
+      const token = getAuthToken();
+
       const response = await fetch('/api/cache-warmup', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_CACHE_CLEAR_TOKEN}`,
+          'Authorization': `Bearer ${token}`,
         },
       });
 
@@ -109,11 +128,13 @@ export const CacheManagement: React.FC = () => {
     setMessage('');
 
     try {
+      const token = getAuthToken();
+      
       const response = await fetch('/api/cache-clear', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_CACHE_CLEAR_TOKEN}`,
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({ type: 'pattern', pattern }),
       });
