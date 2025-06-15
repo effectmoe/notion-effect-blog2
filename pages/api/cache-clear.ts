@@ -1,5 +1,9 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import cache from '@/lib/cache';
+import { rateLimit, rateLimitPresets } from '@/lib/rate-limiter';
+
+// レート制限を適用
+const rateLimiter = rateLimit(rateLimitPresets.strict);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -12,6 +16,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   
   if (expectedToken && authHeader !== `Bearer ${expectedToken}`) {
     return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  // レート制限チェック（認証後）
+  const rateLimitResult = await new Promise<boolean>((resolve) => {
+    rateLimiter(req, res, () => resolve(true));
+  });
+  
+  if (!rateLimitResult) {
+    return; // レート制限でブロックされた
   }
 
   try {

@@ -11,25 +11,32 @@ export async function verifyNotionWebhook(req: NextApiRequest): Promise<boolean>
   }
 
   // Notionからの署名ヘッダーを取得
-  const signature = req.headers['x-notion-signature'] as string;
+  const signature = req.headers['x-hub-signature-256'] as string;
   if (!signature) {
     return false;
   }
 
+  // "sha256=" プレフィックスを除去
+  const sig = signature.replace('sha256=', '');
+  
   // リクエストボディを文字列として取得
-  const body = JSON.stringify(req.body);
+  const rawBody = JSON.stringify(req.body);
   
   // HMAC-SHA256で署名を計算
   const expectedSignature = crypto
     .createHmac('sha256', webhookSecret)
-    .update(body)
+    .update(rawBody, 'utf8')
     .digest('hex');
 
   // タイミング攻撃を防ぐため、crypto.timingSafeEqualを使用
-  return crypto.timingSafeEqual(
-    Buffer.from(signature),
-    Buffer.from(expectedSignature)
-  );
+  try {
+    return crypto.timingSafeEqual(
+      Buffer.from(sig),
+      Buffer.from(expectedSignature)
+    );
+  } catch (error) {
+    return false;
+  }
 }
 
 // Webhookイベントの型定義

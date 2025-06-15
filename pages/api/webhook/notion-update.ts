@@ -1,19 +1,35 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import cache from '@/lib/cache';
-// import { verifyNotionWebhook } from '@/lib/notion-webhook';
+import { verifyNotionWebhook } from '@/lib/notion-webhook';
+import { rateLimit, rateLimitPresets } from '@/lib/rate-limiter';
 // import { revalidatePage } from '@/lib/revalidate';
+
+// レート制限を適用
+const rateLimiter = rateLimit(rateLimitPresets.webhook);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // レート制限チェック
+  const rateLimitResult = await new Promise<boolean>((resolve) => {
+    rateLimiter(req, res, () => resolve(true));
+  });
+  
+  if (!rateLimitResult) {
+    return; // レート制限でブロックされた
+  }
+
   try {
-    // Notion Webhookの検証（一時的に簡易認証）
+    // Notion Webhookの検証
+    const isValidWebhook = await verifyNotionWebhook(req);
+    
+    // Webhook検証またはトークン認証
     const authHeader = req.headers.authorization;
     const expectedToken = process.env.NOTION_WEBHOOK_TOKEN || process.env.CACHE_CLEAR_TOKEN;
     
-    if (expectedToken && authHeader !== `Bearer ${expectedToken}`) {
+    if (!isValidWebhook && expectedToken && authHeader !== `Bearer ${expectedToken}`) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 

@@ -1,6 +1,14 @@
 import { useEffect, useCallback, useState } from 'react';
-import io, { Socket } from 'socket.io-client';
 import { useRouter } from 'next/router';
+import {
+  getSocket,
+  subscribeToPageUpdates,
+  subscribeToGlobalUpdates,
+  unsubscribeFromUpdates,
+  onUpdate,
+  isSocketConnected,
+  getDebugInfo,
+} from '@/lib/websocket-client';
 
 // SSR/SSGビルド時のチェック
 const isServer = typeof window === 'undefined';
@@ -12,8 +20,7 @@ interface RealtimeUpdateOptions {
 }
 
 export function useRealtimeUpdates(options: RealtimeUpdateOptions = {}) {
-  const { pageId, onUpdate, autoRefresh = true } = options;
-  const [socket, setSocket] = useState<Socket | null>(null);
+  const { pageId, onUpdate: onUpdateCallback, autoRefresh = true } = options;
   const [isConnected, setIsConnected] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const router = !isServer ? useRouter() : null;
@@ -21,44 +28,43 @@ export function useRealtimeUpdates(options: RealtimeUpdateOptions = {}) {
   useEffect(() => {
     // サーバーサイドでは実行しない
     if (isServer) return;
+
+    // WebSocket接続を初期化
+    const socket = getSocket();
     
-    // Socket.IOクライアントの初期化
-    const socketIo = io(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000', {
-      path: '/api/socketio',
-      reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
-    });
-
-    setSocket(socketIo);
-
-    // 接続イベント
-    socketIo.on('connect', () => {
+    // 接続状態を監視
+    const checkConnection = () => {
+      setIsConnected(isSocketConnected());
+    };
+    
+    // 初期状態をチェック
+    checkConnection();
+    
+    // 接続イベントの監視
+    const unsubConnect = onUpdate('connect', () => {
       console.log('Connected to WebSocket server');
       setIsConnected(true);
-
-      // ページIDがある場合は購読
+      
+      // 購読設定
       if (pageId) {
-        socketIo.emit('subscribe', { pageId });
+        subscribeToPageUpdates(pageId);
       } else {
-        // グローバル更新を購読
-        socketIo.emit('subscribe', { type: 'all' });
+        subscribeToGlobalUpdates();
       }
     });
-
-    // 切断イベント
-    socketIo.on('disconnect', () => {
+    
+    const unsubDisconnect = onUpdate('disconnect', () => {
       console.log('Disconnected from WebSocket server');
       setIsConnected(false);
     });
 
     // ページ更新イベント
-    socketIo.on('page-updated', (data) => {
+    const unsubPageUpdate = onUpdate('page-updated', (data) => {
       console.log('Page updated:', data);
       setLastUpdate(new Date(data.timestamp));
 
-      if (onUpdate) {
-        onUpdate(data);
+      if (onUpdateCallback) {
+        onUpdateCallback(data);
       }
 
       if (autoRefresh && data.pageId === pageId && router) {
@@ -68,12 +74,12 @@ export function useRealtimeUpdates(options: RealtimeUpdateOptions = {}) {
     });
 
     // グローバル更新イベント
-    socketIo.on('content-updated', (data) => {
+    const unsubContentUpdate = onUpdate('content-updated', (data) => {
       console.log('Content updated:', data);
       setLastUpdate(new Date(data.timestamp));
 
-      if (onUpdate) {
-        onUpdate(data);
+      if (onUpdateCallback) {
+        onUpdateCallback(data);
       }
 
       if (autoRefresh && router) {
@@ -85,7 +91,7 @@ export function useRealtimeUpdates(options: RealtimeUpdateOptions = {}) {
     });
 
     // キャッシュ無効化イベント
-    socketIo.on('cache-invalidated', async (data) => {
+    const unsubCacheInvalidated = onUpdate('cache-invalidated', async (data) => {
       console.log('Cache invalidated:', data);
       
       // Service Workerのキャッシュをクリア
@@ -109,14 +115,25 @@ export function useRealtimeUpdates(options: RealtimeUpdateOptions = {}) {
       }
     });
 
+    // 購読開始（既に接続済みの場合）
+    if (isSocketConnected()) {
+      if (pageId) {
+        subscribeToPageUpdates(pageId);
+      } else {
+        subscribeToGlobalUpdates();
+      }
+    }
+
     // クリーンアップ
     return () => {
-      if (pageId) {
-        socketIo.emit('unsubscribe', { pageId });
-      }
-      socketIo.disconnect();
+      unsubscribeFromUpdates(pageId);
+      unsubConnect();
+      unsubDisconnect();
+      unsubPageUpdate();
+      unsubContentUpdate();
+      unsubCacheInvalidated();
     };
-  }, [pageId, onUpdate, autoRefresh, router]);
+  }, [pageId, onUpdateCallback, autoRefresh, router]);
 
   // 手動リフレッシュ
   const refresh = useCallback(() => {
@@ -151,12 +168,17 @@ export function useRealtimeUpdates(options: RealtimeUpdateOptions = {}) {
     }
   }, [router]);
 
+  // デバッグ情報の取得
+  const debugInfo = useCallback(() => {
+    return getDebugInfo();
+  }, []);
+
   return {
     isConnected,
     lastUpdate,
     refresh,
     clearCache,
-    socket,
+    debugInfo,
   };
 }
 
