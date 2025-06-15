@@ -198,15 +198,11 @@ export const CacheManagement: React.FC = () => {
       
       // 4. キャッシュウォームアップを実行
       console.log('[CacheManagement] Step 3: Warming up cache...');
-      const warmupRequestBody = {
+      const warmupBody = {
         pageIds: pageIds.length > 0 ? pageIds : undefined,
         skipSiteMap: true // クリア後なのでサイトマップはスキップ
       };
-      console.log('[CacheManagement] Warmup request body:', {
-        hasPageIds: !!warmupRequestBody.pageIds,
-        pageIdsCount: warmupRequestBody.pageIds?.length || 0,
-        skipSiteMap: warmupRequestBody.skipSiteMap
-      });
+      console.log('[CacheManagement] Warmup request body:', warmupBody);
       
       const warmupResponse = await fetch('/api/cache-warmup', {
         method: 'POST',
@@ -214,21 +210,22 @@ export const CacheManagement: React.FC = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify(warmupRequestBody),
+        body: JSON.stringify(warmupBody),
       });
 
       const warmupData = await warmupResponse.json();
       console.log('[CacheManagement] Warmup response:', warmupData);
+      console.log('[CacheManagement] Warmup debug info:', {
+        totalAttempted: warmupData.totalPages,
+        succeeded: warmupData.warmedUp,
+        failed: warmupData.failed,
+        failedDetails: warmupData.failedDetails
+      });
 
       if (warmupResponse.ok) {
         setMessage(`✅ 完了: ${warmupData.warmedUp}ページを事前読み込みしました`);
         if (warmupData.failed > 0) {
           setMessage(prev => `${prev} (失敗: ${warmupData.failed}ページ)`);
-        }
-        
-        // Debug info
-        if (warmupData.debug) {
-          console.log('[CacheManagement] Warmup debug info:', warmupData.debug);
         }
       } else {
         setMessage(`❌ ウォームアップエラー: ${warmupData.error}`);
@@ -332,143 +329,241 @@ export const CacheManagement: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      <h2>キャッシュ管理</h2>
+      <h1 className={styles.pageTitle}>キャッシュ管理</h1>
       
-      {/* WebSocket接続状態 */}
-      <div className={styles.status}>
-        <div className={styles.statusItem}>
-          <span>WebSocket接続:</span>
-          <span className={isConnected ? styles.connected : styles.disconnected}>
-            {isConnected ? '接続中' : '切断'}
-          </span>
+      {/* わかりやすい説明 */}
+      <div className={styles.introSection}>
+        <div className={styles.introCard}>
+          <h3>🤔 キャッシュとは？</h3>
+          <p>ウェブサイトの表示を高速化するために、一度読み込んだデータを保存しておく仕組みです。</p>
         </div>
-        {lastUpdate && (
-          <div className={styles.statusItem}>
-            <span>最終更新:</span>
-            <span>{lastUpdate.toLocaleString('ja-JP')}</span>
+        <div className={styles.introCard}>
+          <h3>📌 通常はこれだけ！</h3>
+          <p>Notionの内容を更新した後は「<strong>クリア&ウォームアップ</strong>」ボタンを押すだけでOKです。</p>
+        </div>
+      </div>
+      
+      {/* ステータスバー */}
+      <div className={styles.statusBar}>
+        <div className={styles.statusLeft}>
+          <div className={styles.statusIndicator}>
+            <div className={isConnected ? styles.indicatorGreen : styles.indicatorRed}></div>
+            <span>WebSocket: {isConnected ? '接続中' : '切断'}</span>
           </div>
-        )}
+        </div>
+        <div className={styles.statusRight}>
+          {lastUpdate && (
+            <span className={styles.lastUpdate}>
+              🕒 最終更新: {lastUpdate.toLocaleTimeString('ja-JP')}
+            </span>
+          )}
+        </div>
       </div>
 
       {/* キャッシュ統計 */}
       {stats && (
-        <div className={styles.stats}>
-          <h3>キャッシュ統計</h3>
+        <div className={styles.statsContainer}>
+          <h3 className={styles.sectionTitle}>📋 キャッシュ統計</h3>
           
-          <div className={styles.statsSection}>
-            <h4>メモリキャッシュ</h4>
-            <ul>
-              <li>エントリ数: {stats.memory.size}</li>
-              <li>サイズ: {(stats.memory.calculatedSize / 1024 / 1024).toFixed(2)} MB</li>
-              <li>ヒット率: {stats.memory.hits > 0 ? ((stats.memory.hits / (stats.memory.hits + stats.memory.misses)) * 100).toFixed(1) : 0}%</li>
-            </ul>
-          </div>
-
-          {stats.redis.connected && (
-            <div className={styles.statsSection}>
-              <h4>Redisキャッシュ</h4>
-              <ul>
-                <li>状態: 接続中</li>
-                <li>キー数: {stats.redis.keyCount}</li>
-                <li>メモリ使用量: {(stats.redis.memoryUsage / 1024 / 1024).toFixed(2)} MB</li>
-              </ul>
+          <div className={styles.statsGrid}>
+            <div className={styles.statCard}>
+              <div className={styles.statHeader}>
+                <span className={styles.statIcon}>💾</span>
+                <h4>メモリキャッシュ</h4>
+              </div>
+              <div className={styles.statDetails}>
+                <div className={styles.statRow}>
+                  <span>エントリ数</span>
+                  <strong>{stats.memory.size}</strong>
+                </div>
+                <div className={styles.statRow}>
+                  <span>サイズ</span>
+                  <strong>{(stats.memory.calculatedSize / 1024 / 1024).toFixed(2)} MB</strong>
+                </div>
+                <div className={styles.statRow}>
+                  <span>ヒット率</span>
+                  <strong className={styles.hitRate}>
+                    {stats.memory.hits > 0 ? ((stats.memory.hits / (stats.memory.hits + stats.memory.misses)) * 100).toFixed(1) : 0}%
+                  </strong>
+                </div>
+              </div>
             </div>
-          )}
+
+            {stats.redis.connected && (
+              <div className={styles.statCard}>
+                <div className={styles.statHeader}>
+                  <span className={styles.statIcon}>🔴</span>
+                  <h4>Redisキャッシュ</h4>
+                </div>
+                <div className={styles.statDetails}>
+                  <div className={styles.statRow}>
+                    <span>状態</span>
+                    <strong className={styles.connected}>接続中</strong>
+                  </div>
+                  <div className={styles.statRow}>
+                    <span>キー数</span>
+                    <strong>{stats.redis.keyCount}</strong>
+                  </div>
+                  <div className={styles.statRow}>
+                    <span>メモリ使用量</span>
+                    <strong>{(stats.redis.memoryUsage / 1024 / 1024).toFixed(2)} MB</strong>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
-      {/* キャッシュクリアボタン */}
-      <div className={styles.actions}>
-        <h3>キャッシュクリア</h3>
-        
-        <div className={styles.buttons}>
-          <button
-            onClick={() => handleClearCache('all')}
-            disabled={loading}
-            className={styles.button}
-            title="警告: すべてのキャッシュをクリアすると、次回アクセス時に読み込みが遅くなります"
-          >
-            すべてクリア ⚠️
-          </button>
-          
-          <button
-            onClick={() => handleClearCache('notion')}
-            disabled={loading}
-            className={styles.button}
-          >
-            Notionキャッシュクリア
-          </button>
-          
-          <button
-            onClick={handleClearPattern}
-            disabled={loading}
-            className={styles.button}
-          >
-            パターン指定クリア
-          </button>
-          
-          <button
-            onClick={clearCache}
-            disabled={loading}
-            className={styles.button}
-          >
-            ブラウザキャッシュクリア
-          </button>
-          
-          <button
-            onClick={handleWarmupCache}
-            disabled={loading}
-            className={styles.button}
-            style={{ background: '#10b981' }}
-          >
-            キャッシュ事前読み込み 🚀
-          </button>
-          
+      {/* メイン操作 */}
+      <div className={styles.mainActionSection}>
+        <h2 className={styles.mainActionTitle}>🎯 通常使用するのはこれだけ！</h2>
+        <div className={styles.mainActionCard}>
           <button
             onClick={handleClearAndWarmup}
             disabled={loading}
-            className={styles.button}
-            style={{ background: '#6366f1' }}
-            title="キャッシュをクリアしてすぐに事前読み込みを実行"
+            className={styles.mainActionButton}
           >
-            クリア&ウォームアップ 🔄
+            <div className={styles.mainActionIcon}>🔄</div>
+            <div className={styles.mainActionContent}>
+              <div className={styles.mainActionName}>クリア&ウォームアップ</div>
+              <div className={styles.mainActionDescription}>
+                古いキャッシュを削除して、最新のデータを読み込みます
+              </div>
+            </div>
           </button>
+          <div className={styles.mainActionExplain}>
+            <h4>どんな時に使う？</h4>
+            <ul>
+              <li>Notionでページを更新した後</li>
+              <li>新しいページを追加した後</li>
+              <li>ページが正しく表示されない時</li>
+            </ul>
+          </div>
         </div>
       </div>
+      
+      {/* 詳細操作（通常は使わない） */}
+      <details className={styles.advancedSection}>
+        <summary className={styles.advancedSummary}>
+          <span>🛠️ 詳細な操作（通常は必要ありません）</span>
+          <span className={styles.chevron}>▼</span>
+        </summary>
+        
+        <div className={styles.advancedContent}>
+          <div className={styles.advancedGrid}>
+            <div className={styles.advancedCard}>
+              <button
+                onClick={handleWarmupCache}
+                disabled={loading}
+                className={`${styles.button} ${styles.warmupButton}`}
+              >
+                <span className={styles.buttonIcon}>🚀</span>
+                <span>事前読み込みのみ</span>
+              </button>
+              <p className={styles.buttonDescription}>
+                キャッシュをクリアせずに、データを再読み込みします。
+                <br /><small>※ 通常は不要です</small>
+              </p>
+            </div>
+            
+            <div className={styles.advancedCard}>
+              <button
+                onClick={() => handleClearCache('all')}
+                disabled={loading}
+                className={`${styles.button} ${styles.dangerButton}`}
+              >
+                <span className={styles.buttonIcon}>⚠️</span>
+                <span>すべてクリアのみ</span>
+              </button>
+              <p className={styles.buttonDescription}>
+                キャッシュを削除だけして、再読み込みはしません。
+                <br /><small>※ 次回アクセスが遅くなります</small>
+              </p>
+            </div>
+            
+            <div className={styles.advancedCard}>
+              <button
+                onClick={() => handleClearCache('notion')}
+                disabled={loading}
+                className={styles.button}
+              >
+                <span className={styles.buttonIcon}>📄</span>
+                <span>Notionキャッシュのみ</span>
+              </button>
+              <p className={styles.buttonDescription}>
+                Notion関連のキャッシュだけをクリアします。
+                <br /><small>※ 部分的な更新用</small>
+              </p>
+            </div>
+            
+            <div className={styles.advancedCard}>
+              <button
+                onClick={clearCache}
+                disabled={loading}
+                className={styles.button}
+              >
+                <span className={styles.buttonIcon}>🌐</span>
+                <span>ブラウザキャッシュ</span>
+              </button>
+              <p className={styles.buttonDescription}>
+                ブラウザ側のキャッシュをクリアします。
+                <br /><small>※ Service Worker用</small>
+              </p>
+            </div>
+            
+            <div className={styles.advancedCard}>
+              <button
+                onClick={handleClearPattern}
+                disabled={loading}
+                className={styles.button}
+              >
+                <span className={styles.buttonIcon}>🔍</span>
+                <span>パターン指定</span>
+              </button>
+              <p className={styles.buttonDescription}>
+                特定のパターンに一致するキャッシュをクリアします。
+                <br /><small>※ 開発者向け</small>
+              </p>
+            </div>
+          </div>
+        </div>
+      </details>
 
       {/* メッセージ表示 */}
       {message && (
-        <div className={styles.message}>
+        <div className={`${styles.message} ${message.includes('✓') || message.includes('完了') ? styles.successMessage : message.includes('❌') || message.includes('エラー') ? styles.errorMessage : styles.infoMessage}`}>
           {message}
         </div>
       )}
 
-      {/* 使用方法 */}
-      <div className={styles.help}>
-        <h3>使用方法</h3>
-        <ul>
-          <li><strong>すべてクリア</strong>: メモリとRedisの全キャッシュをクリア</li>
-          <li><strong>Notionキャッシュクリア</strong>: Notion関連のキャッシュのみクリア</li>
-          <li><strong>パターン指定クリア</strong>: 特定のパターンに一致するキャッシュをクリア</li>
-          <li><strong>ブラウザキャッシュクリア</strong>: Service Workerのキャッシュをクリア</li>
-        </ul>
+      {/* API設定（開発者向け） */}
+      <details className={styles.apiSection}>
+        <summary className={styles.apiSummary}>
+          <span>🔧 API設定（開発者向け）</span>
+          <span className={styles.chevron}>▼</span>
+        </summary>
         
-        <h4>Webhookエンドポイント</h4>
-        <p>外部からキャッシュをクリアする場合:</p>
-        <pre className={styles.code}>
-{`curl -X POST ${process.env.NEXT_PUBLIC_SITE_URL}/api/cache-clear \\
+        <div className={styles.apiContent}>
+          <div className={styles.codeBlock}>
+            <div className={styles.codeHeader}>Webhookエンドポイント</div>
+            <pre className={styles.code}>
+{`curl -X POST ${process.env.NEXT_PUBLIC_SITE_URL || 'https://your-site.com'}/api/cache-clear \\
   -H "Authorization: Bearer YOUR_TOKEN" \\
   -H "Content-Type: application/json" \\
   -d '{"type": "all"}'`}
-        </pre>
-        
-        <h4>Notion Webhook設定</h4>
-        <p>Notionからの自動更新を受け取る場合:</p>
-        <pre className={styles.code}>
-{`Webhook URL: ${process.env.NEXT_PUBLIC_SITE_URL}/api/webhook/notion-update
+            </pre>
+          </div>
+          
+          <div className={styles.codeBlock}>
+            <div className={styles.codeHeader}>Notion Webhook設定</div>
+            <pre className={styles.code}>
+{`Webhook URL: ${process.env.NEXT_PUBLIC_SITE_URL || 'https://your-site.com'}/api/webhook/notion-update
 Secret: NOTION_WEBHOOK_SECRET環境変数に設定`}
-        </pre>
-      </div>
+            </pre>
+          </div>
+        </div>
+      </details>
     </div>
   );
 };
