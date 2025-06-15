@@ -9,6 +9,20 @@ export const IMPORTANT_PAGES = [
   // { id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx', name: 'Blog' },
 ];
 
+// デフォルトの重要ページスラッグ
+export const DEFAULT_IMPORTANT_SLUGS = [
+  'cafekinesi',
+  'カフェキネシ構造',
+  '都道府県リスト',
+  'カフェキネシコンテンツ',
+  '講座一覧',
+  'ブログ',
+  'アロマ購入',
+  'お申込みの流れ',
+  'カテゴリー',
+  'プライバシーポリシー'
+];
+
 // 動的に重要なページを取得
 export async function getImportantPageIds(): Promise<string[]> {
   const pageIds: string[] = [];

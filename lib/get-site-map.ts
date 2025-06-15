@@ -25,6 +25,16 @@ const getAllPages = pMemoize(getAllPagesImpl, {
   cacheKey: (...args) => JSON.stringify(args)
 })
 
+// Export a function to clear the memoized cache
+export function clearSiteMapCache() {
+  console.log('[SiteMap] Clearing site map cache...')
+  const cacheSize = getAllPages.cache?.size || 0
+  console.log(`[SiteMap] Cache size before clear: ${cacheSize}`)
+  getAllPages.clear()
+  const cacheSizeAfter = getAllPages.cache?.size || 0
+  console.log(`[SiteMap] Site map cache cleared. Size after: ${cacheSizeAfter}`)
+}
+
 const getPage = async (pageId: string, ...args) => {
   console.log('\nnotion getPage', uuidToId(pageId))
   try {

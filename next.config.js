@@ -17,7 +17,7 @@ export default withBundleAnalyzer({
   async headers() {
     return [
       {
-        source: '/sw.js',
+        source: '/(sw\.js|sw-simple\.js)/',
         headers: [
           {
             key: 'Cache-Control',

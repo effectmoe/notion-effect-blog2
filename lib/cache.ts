@@ -115,29 +115,38 @@ export async function setToCache<T>(
 
 // キャッシュの無効化
 export async function invalidateCache(pattern: string): Promise<void> {
+  console.log(`[Cache] Invalidating cache with pattern: ${pattern}`);
+  
   // 1. メモリキャッシュのクリア
   const keys = [...memoryCache.keys()];
+  let deletedMemoryKeys = 0;
   for (const key of keys) {
     if (key.includes(pattern)) {
       memoryCache.delete(key);
+      deletedMemoryKeys++;
     }
   }
+  console.log(`[Cache] Deleted ${deletedMemoryKeys} memory cache keys matching "${pattern}"`);
 
   // 2. Redisのクリア
   if (redisClient) {
     try {
       // 接続されていない場合は接続
       if (redisClient.status !== 'ready') {
+        console.log('[Cache] Redis not ready, attempting to connect...');
         await redisClient.connect();
       }
       const keys = await redisClient.keys(`*${pattern}*`);
+      console.log(`[Cache] Found ${keys.length} Redis keys matching "*${pattern}*"`);
       if (keys.length > 0) {
         await redisClient.del(...keys);
-        console.log(`Invalidated ${keys.length} Redis keys`);
+        console.log(`[Cache] Invalidated ${keys.length} Redis keys`);
       }
     } catch (error) {
-      console.error('Redis invalidate error:', error);
+      console.error('[Cache] Redis invalidate error:', error);
     }
+  } else {
+    console.log('[Cache] Redis client not configured');
   }
 }
 
@@ -285,18 +294,45 @@ export async function warmupCache(pageIds: string[]) {
 
 // クリーンアップ処理
 export async function cleanupCache() {
+  console.log('[Cache] Starting cache cleanup...');
   try {
+    // メモリキャッシュの状態を確認
+    const memorySizeBefore = memoryCache.size;
+    console.log(`[Cache] Memory cache size before clear: ${memorySizeBefore}`);
+    
     // メモリキャッシュのクリア
     memoryCache.clear();
-    console.log('Memory cache cleared');
+    const memorySizeAfter = memoryCache.size;
+    console.log(`[Cache] Memory cache cleared. Size after: ${memorySizeAfter}`);
     
     // Redisキャッシュのクリア（接続は維持）
-    if (redisClient && redisClient.status === 'ready') {
-      await redisClient.flushdb();
-      console.log('Redis cache cleared');
+    if (redisClient) {
+      console.log(`[Cache] Redis status: ${redisClient.status}`);
+      if (redisClient.status === 'ready') {
+        const keyCountBefore = await redisClient.dbsize();
+        console.log(`[Cache] Redis key count before clear: ${keyCountBefore}`);
+        
+        await redisClient.flushdb();
+        
+        const keyCountAfter = await redisClient.dbsize();
+        console.log(`[Cache] Redis cache cleared. Key count after: ${keyCountAfter}`);
+      } else {
+        console.log('[Cache] Redis not ready, attempting to connect...');
+        await redisClient.connect();
+        if (redisClient.status === 'ready') {
+          await redisClient.flushdb();
+          console.log('[Cache] Redis connected and cleared');
+        } else {
+          console.log('[Cache] Redis connection failed');
+        }
+      }
+    } else {
+      console.log('[Cache] Redis client not configured');
     }
+    
+    console.log('[Cache] Cache cleanup completed successfully');
   } catch (error) {
-    console.error('Cleanup cache error:', error);
+    console.error('[Cache] Cleanup cache error:', error);
     throw error;
   }
 }

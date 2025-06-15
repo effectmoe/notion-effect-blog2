@@ -9,7 +9,7 @@ export default function ServiceWorkerRegistration() {
     ) {
       // Service Worker registration - only in production builds
       const isProduction = window.location.hostname !== 'localhost';
-      const wb = new Workbox('/sw.js');
+      const wb = new Workbox('/sw-simple.js');
 
       // Service Worker更新時の処理
       const showSkipWaitingPrompt = () => {

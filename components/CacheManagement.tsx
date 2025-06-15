@@ -59,11 +59,16 @@ export const CacheManagement: React.FC = () => {
 
   // キャッシュクリア（タイプ別）
   const handleClearCache = async (type: string) => {
+    console.log(`[CacheManagement] Clearing cache with type: ${type}`);
     setLoading(true);
     setMessage('');
 
     try {
       const token = getAuthToken();
+      console.log('[CacheManagement] Token obtained:', token ? 'Yes' : 'No');
+      
+      const requestBody = { type };
+      console.log('[CacheManagement] Sending request:', requestBody);
       
       const response = await fetch('/api/cache-clear', {
         method: 'POST',
@@ -71,19 +76,76 @@ export const CacheManagement: React.FC = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({ type }),
+        body: JSON.stringify(requestBody),
       });
 
+      console.log('[CacheManagement] Response status:', response.status);
       const data = await response.json();
+      console.log('[CacheManagement] Response data:', data);
 
       if (response.ok) {
         setMessage(`✅ ${data.message}`);
+        
+        // Log cache stats if available
+        if (data.stats) {
+          console.log('[CacheManagement] Cache stats comparison:', {
+            memory: {
+              before: data.stats.before.memory.size,
+              after: data.stats.after.memory.size,
+              cleared: data.stats.before.memory.size - data.stats.after.memory.size
+            },
+            redis: {
+              before: data.stats.before.redis.keyCount,
+              after: data.stats.after.redis.keyCount,
+              cleared: data.stats.before.redis.keyCount - data.stats.after.redis.keyCount
+            }
+          });
+        }
+        
+        // Also clear Service Worker cache if clearing all
+        if (type === 'all') {
+          console.log('[CacheManagement] Clearing Service Worker cache...');
+          if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+            const messageChannel = new MessageChannel();
+            messageChannel.port1.onmessage = (event) => {
+              console.log('[CacheManagement] Service Worker cache cleared:', event.data);
+            };
+            navigator.serviceWorker.controller.postMessage(
+              { type: 'CLEAR_CACHE' },
+              [messageChannel.port2]
+            );
+          }
+          
+          // Also clear browser caches
+          if ('caches' in window) {
+            try {
+              const cacheNames = await caches.keys();
+              console.log('[CacheManagement] Found browser caches:', cacheNames);
+              await Promise.all(
+                cacheNames.map(cacheName => {
+                  console.log(`[CacheManagement] Deleting cache: ${cacheName}`);
+                  return caches.delete(cacheName);
+                })
+              );
+              console.log('[CacheManagement] Browser caches cleared');
+            } catch (error) {
+              console.error('[CacheManagement] Failed to clear browser caches:', error);
+            }
+          }
+        }
+        
         // 統計を更新
-        setTimeout(fetchStats, 1000);
+        console.log('[CacheManagement] Updating stats in 1 second...');
+        setTimeout(() => {
+          console.log('[CacheManagement] Fetching updated stats...');
+          fetchStats();
+        }, 1000);
       } else {
+        console.error('[CacheManagement] Error response:', data);
         setMessage(`❌ エラー: ${data.error}`);
       }
     } catch (error) {
+      console.error('[CacheManagement] Request failed:', error);
       setMessage(`❌ エラー: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setLoading(false);

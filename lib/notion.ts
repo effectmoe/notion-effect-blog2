@@ -50,6 +50,16 @@ const getNavigationLinkPages = pMemoize(
   }
 )
 
+// Export function to clear navigation cache
+export function clearNavigationCache() {
+  console.log('[Navigation] Clearing navigation cache...')
+  const cacheSize = getNavigationLinkPages.cache?.size || 0
+  console.log(`[Navigation] Cache size before clear: ${cacheSize}`)
+  getNavigationLinkPages.clear()
+  const cacheSizeAfter = getNavigationLinkPages.cache?.size || 0
+  console.log(`[Navigation] Navigation cache cleared. Size after: ${cacheSizeAfter}`)
+}
+
 export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
   // キャッシュ付きAPIを使用（本番環境のみ）
   const api = process.env.NODE_ENV === 'production' ? cachedNotion : notion;

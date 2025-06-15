@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getSiteMap } from '@/lib/get-site-map';
 import { getPage } from '@/lib/notion';
-import { getImportantPageIds } from '@/lib/get-important-pages';
+import { getImportantPageIds, DEFAULT_IMPORTANT_SLUGS } from '@/lib/get-important-pages';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -34,31 +34,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     
     // ページIDが取得できない場合は、重要なページIDを使用
     if (pageIds.length === 0) {
+      console.log('No pages found in siteMap, using fallback strategy');
+      
       // デフォルトの重要ページを使用
-      const importantPages = await getImportantPageIds();
+      const importantPageIds = await getImportantPageIds();
       
-      // ルートページは必ず含める
-      const rootPageId = process.env.NOTION_PAGE_ID;
-      if (rootPageId) {
-        importantPages.unshift(rootPageId);
-      }
+      // デフォルトの重要ページスラッグと環境変数のページIDを結合
+      const fallbackPages = [...new Set([...importantPageIds, ...DEFAULT_IMPORTANT_SLUGS])];
       
-      // 最近アクセスされたページ（仮の実装）
-      // 実際には、アクセスログから取得するのが理想的
-      const recentPages = [
-        'cafekinesi',
-        'カフェキネシ構造',
-        '都道府県リスト',
-        'カフェキネシコンテンツ',
-        '講座一覧',
-        'ブログ',
-        'アロマ購入',
-      ];
-      
-      // ページIDとページスラッグを結合
-      pageIds = [...new Set([...importantPages, ...recentPages])].slice(0, 10);
+      // 最大15ページまでを取得
+      pageIds = fallbackPages.slice(0, 15);
       
       console.log('Using fallback page IDs:', pageIds);
+      console.log('Fallback includes:', {
+        importantPageIds: importantPageIds.length,
+        defaultSlugs: DEFAULT_IMPORTANT_SLUGS.length,
+        total: pageIds.length
+      });
     }
 
     console.log(`Warming up cache for ${pageIds.length} pages:`, pageIds);
@@ -74,18 +66,38 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // 並列でページを読み込み（キャッシュに保存される）
     const results = await Promise.allSettled(
-      pageIds.map(pageId => getPage(pageId))
+      pageIds.map(async (pageId) => {
+        try {
+          console.log(`Fetching page: ${pageId}`);
+          const result = await getPage(pageId);
+          console.log(`Successfully fetched: ${pageId}`);
+          return { pageId, success: true };
+        } catch (error) {
+          console.error(`Failed to fetch page ${pageId}:`, error);
+          return { pageId, success: false, error: error.message };
+        }
+      })
     );
 
-    const successful = results.filter(r => r.status === 'fulfilled').length;
-    const failed = results.filter(r => r.status === 'rejected').length;
+    const successful = results.filter(r => r.status === 'fulfilled' && r.value?.success).length;
+    const failed = results.filter(r => r.status === 'rejected' || (r.status === 'fulfilled' && !r.value?.success)).length;
+    
+    // 失敗したページの詳細を取得
+    const failedDetails = results
+      .filter(r => r.status === 'rejected' || (r.status === 'fulfilled' && !r.value?.success))
+      .map((r, idx) => ({
+        pageId: pageIds[idx],
+        reason: r.status === 'rejected' ? r.reason : r.value?.error
+      }));
 
     res.status(200).json({
       success: true,
       warmedUp: successful,
       failed,
       message: `Cache warmed up for ${successful} pages`,
-      pageIds: pageIds.slice(0, 5) // デバッグ用：最初の5ページIDを返す
+      pageIds: pageIds.slice(0, 5), // デバッグ用：最初の5ページIDを返す
+      totalPages: pageIds.length,
+      failedDetails: failedDetails.slice(0, 3) // 最初の3つの失敗詳細
     });
 
   } catch (error) {
