@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { CacheManagement } from '@/components/CacheManagement';
 import { PageHead } from '@/components/PageHead';
 import { Footer } from '@/components/Footer';
-import styles from '@/styles/notion.module.css';
+import styles from '@/components/styles.module.css';
 
 export default function AdminPage() {
   const router = useRouter();
