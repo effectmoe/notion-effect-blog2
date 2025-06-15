@@ -10,8 +10,8 @@ interface FAQNotionViewProps {
 }
 
 export const FAQNotionView: React.FC<FAQNotionViewProps> = ({ 
-  blockId = '213b802cb0c680ea91c9e30f610943da',
-  viewId = '213b802cb0c680b2a49a000ceae6c0cc' // 公開FAQビューのID
+  blockId = '212b802c-b0c6-80ea-b7ed-ef4459f38819',
+  viewId = '212b802c-b0c6-8026-8290-000cee82ffad' // 公開FAQビューのID
 }) => {
   const { recordMap } = useNotionContext();
   

@@ -489,8 +489,8 @@ export function NotionPage({
         {/* CafeKinesiページにFAQセクションを追加 */}
         {showFAQ && (
           <FAQNotionView 
-            blockId="213b802cb0c680ea91c9e30f610943da"
-            viewId="213b802cb0c680b2a49a000ceae6c0cc"
+            blockId="212b802c-b0c6-80ea-b7ed-ef4459f38819"
+            viewId="212b802c-b0c6-8026-8290-000cee82ffad"
           />
         )}
       </div>
