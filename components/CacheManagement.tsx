@@ -162,17 +162,29 @@ export const CacheManagement: React.FC = () => {
       
       // 1. まず現在のページリストを取得（キャッシュがある間に）
       console.log('[CacheManagement] Step 1: Getting page list before cache clear...');
-      const pagesResponse = await fetch('/api/cache-get-pages');
+      // 最初にNotionから直接すべてのページを取得を試みる
+      let pagesResponse = await fetch('/api/get-all-pages');
       
       let pageIds: string[] = [];
       if (pagesResponse.ok) {
         const pagesData = await pagesResponse.json();
         pageIds = pagesData.pageIds || [];
-        console.log(`[CacheManagement] Retrieved ${pageIds.length} page IDs`);
+        console.log(`[CacheManagement] Retrieved ${pageIds.length} page IDs from Notion`);
         setMessage(`📄 ${pageIds.length}ページのIDを取得しました`);
       } else {
-        console.log('[CacheManagement] Failed to get page list');
-        setMessage('⚠️ ページリストの取得に失敗しました');
+        // フォールバック: cache-get-pagesを使用
+        console.log('[CacheManagement] Falling back to cache-get-pages...');
+        pagesResponse = await fetch('/api/cache-get-pages');
+        
+        if (pagesResponse.ok) {
+          const pagesData = await pagesResponse.json();
+          pageIds = pagesData.pageIds || [];
+          console.log(`[CacheManagement] Retrieved ${pageIds.length} page IDs from cache`);
+          setMessage(`📄 ${pageIds.length}ページのIDを取得しました`);
+        } else {
+          console.log('[CacheManagement] Failed to get page list');
+          setMessage('⚠️ ページリストの取得に失敗しました');
+        }
       }
       
       // 2. キャッシュをクリア
