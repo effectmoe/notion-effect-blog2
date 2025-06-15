@@ -1,0 +1,185 @@
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.status {
+  background: #f5f5f5;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 2rem;
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.statusItem {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.connected {
+  color: #22c55e;
+  font-weight: bold;
+}
+
+.disconnected {
+  color: #ef4444;
+  font-weight: bold;
+}
+
+.stats {
+  background: #ffffff;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stats h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.statsSection {
+  margin-bottom: 1.5rem;
+}
+
+.statsSection:last-child {
+  margin-bottom: 0;
+}
+
+.statsSection h4 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  color: #666;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+}
+
+.statsSection ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.statsSection li {
+  padding: 0.25rem 0;
+  color: #666;
+}
+
+.actions {
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.actions h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.button {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.button:hover:not(:disabled) {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.message {
+  background: #e0f2fe;
+  border: 1px solid #7dd3fc;
+  border-radius: 6px;
+  padding: 1rem;
+  margin: 1rem 0;
+  color: #0369a1;
+}
+
+.help {
+  background: #fafafa;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: 2rem;
+}
+
+.help h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.help h4 {
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: #666;
+}
+
+.help ul {
+  padding-left: 1.5rem;
+  color: #666;
+}
+
+.help li {
+  margin-bottom: 0.5rem;
+}
+
+.help li strong {
+  color: #333;
+}
+
+.code {
+  background: #1e1e1e;
+  color: #d4d4d4;
+  padding: 1rem;
+  border-radius: 4px;
+  overflow-x: auto;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin: 0.5rem 0;
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding: 1rem;
+  }
+  
+  .buttons {
+    grid-template-columns: 1fr;
+  }
+  
+  .status {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
