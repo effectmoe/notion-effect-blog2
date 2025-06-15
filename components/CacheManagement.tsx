@@ -73,6 +73,33 @@ export const CacheManagement: React.FC = () => {
     }
   };
 
+  // キャッシュウォームアップ
+  const handleWarmupCache = async () => {
+    setLoading(true);
+    setMessage('');
+
+    try {
+      const response = await fetch('/api/cache-warmup', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_CACHE_CLEAR_TOKEN}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage(`✅ ${data.warmedUp}ページのキャッシュを事前読み込みしました`);
+      } else {
+        setMessage(`❌ エラー: ${data.error}`);
+      }
+    } catch (error) {
+      setMessage(`❌ エラー: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // 特定のパターンでキャッシュクリア
   const handleClearPattern = async () => {
     const pattern = prompt('クリアするキャッシュのパターンを入力してください（例: notion:page:*）');
@@ -162,8 +189,9 @@ export const CacheManagement: React.FC = () => {
             onClick={() => handleClearCache('all')}
             disabled={loading}
             className={styles.button}
+            title="警告: すべてのキャッシュをクリアすると、次回アクセス時に読み込みが遅くなります"
           >
-            すべてクリア
+            すべてクリア ⚠️
           </button>
           
           <button
@@ -188,6 +216,15 @@ export const CacheManagement: React.FC = () => {
             className={styles.button}
           >
             ブラウザキャッシュクリア
+          </button>
+          
+          <button
+            onClick={handleWarmupCache}
+            disabled={loading}
+            className={styles.button}
+            style={{ background: '#10b981' }}
+          >
+            キャッシュ事前読み込み 🚀
           </button>
         </div>
       </div>

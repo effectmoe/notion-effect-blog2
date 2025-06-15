@@ -53,10 +53,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       case 'page.updated':
       case 'page.created':
       case 'page.deleted':
-        // ページ関連のキャッシュをクリア
+        // 特定のページのキャッシュのみクリア（全体クリアを避ける）
         const pageId = data.id;
         await cache.invalidate(`notion:page:${pageId}`);
         await cache.invalidate(`notion:blocks:${pageId}`);
+        // 関連するデータベースビューもクリア
+        if (data.parent?.database_id) {
+          await cache.invalidate(`notion:collection:${data.parent.database_id}`);
+        }
         
         // Next.jsのISRを再検証（実装予定）
         // if (data.url) {
