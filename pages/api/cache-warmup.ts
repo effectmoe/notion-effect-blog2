@@ -289,7 +289,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     
     // 詳細なエラーログを出力
     console.log('[Cache Warmup] Detailed failure analysis:', failureAnalysis);
-    console.log('[Cache Warmup] Sample failed page details:', failedDetails.slice(0, 3));
+    console.log('[Cache Warmup] All failed page details:', failedDetails.map(detail => ({
+      pageId: detail.pageId,
+      error: detail.error,
+      status: detail.status
+    })));
 
     // 元のページ数と制限後のページ数を記録
     const originalPageCount = req.body?.pageIds?.length || pageIds.length;
