@@ -606,7 +606,8 @@ export const CacheManagement: React.FC = () => {
             <div className={styles.mainActionContent}>
               <div className={styles.mainActionName}>クリア&ウォームアップ</div>
               <div className={styles.mainActionDescription}>
-                古いキャッシュを削除して、最新のデータを読み込みます
+                古いキャッシュを削除して、最新のデータを読み込みます<br />
+                <small>（1回につき10ページずつ、5秒間隔で安全に処理）</small>
               </div>
             </div>
           </button>
@@ -617,6 +618,11 @@ export const CacheManagement: React.FC = () => {
               <li>新しいページを追加した後</li>
               <li>ページが正しく表示されない時</li>
             </ul>
+            <div style={{ marginTop: '1rem', padding: '0.75rem', backgroundColor: '#f0f9ff', borderRadius: '6px', fontSize: '0.875rem' }}>
+              <strong>💡 段階的処理について</strong><br />
+              全72ページを一度に処理すると失敗しやすいため、10ページずつ段階的に処理します。<br />
+              残りのページがある場合は、数回に分けて実行してください。
+            </div>
           </div>
         </div>
       </div>

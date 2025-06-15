@@ -117,13 +117,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       console.log('[Cache Warmup] Fallback IDs sample:', pageIds.slice(0, 3).map(id => id.substring(0, 8) + '...'));
     }
 
-    // バッチ処理の設定（最も保守的な設定）
+    // バッチ処理の設定（超保守的な設定）
     const BATCH_SIZE = 1; // 一度に処理するページ数（順次処理）
-    const DELAY_BETWEEN_BATCHES = 2000; // バッチ間の待機時間（ミリ秒）
+    const DELAY_BETWEEN_BATCHES = 5000; // バッチ間の待機時間（5秒）
     const RETRY_COUNT = 1; // リトライ回数（シンプル化）
     const RETRY_DELAY = 3000; // リトライ前の待機時間（ミリ秒）
     const PAGE_TIMEOUT = 15000; // ページ取得のタイムアウト（15秒）
-    const MAX_PAGES_PER_REQUEST = 20; // 1リクエストで処理する最大ページ数（さらに少なく）
+    const MAX_PAGES_PER_REQUEST = 10; // 1リクエストで処理する最大ページ数（10ページに制限）
 
     // 処理ページ数を制限（必要に応じて）
     if (pageIds.length > MAX_PAGES_PER_REQUEST) {
@@ -209,7 +209,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const results = [];
     const totalBatches = Math.ceil(pageIds.length / BATCH_SIZE);
     
-    console.log(`[Cache Warmup] Processing ${pageIds.length} pages sequentially (1 page at a time with ${DELAY_BETWEEN_BATCHES}ms delay)`);
+    console.log(`[Cache Warmup] Processing ${pageIds.length} pages sequentially (1 page at a time with ${DELAY_BETWEEN_BATCHES/1000}s delay)`);
     
     for (let i = 0; i < pageIds.length; i += BATCH_SIZE) {
       const batch = pageIds.slice(i, i + BATCH_SIZE);
@@ -233,7 +233,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       
       // 最後のページでない場合は待機
       if (i + BATCH_SIZE < pageIds.length) {
-        console.log(`[Cache Warmup] Waiting ${DELAY_BETWEEN_BATCHES}ms before next page...`);
+        console.log(`[Cache Warmup] Waiting ${DELAY_BETWEEN_BATCHES/1000}s before next page...`);
         await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_BATCHES));
       }
       
@@ -268,18 +268,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     console.log(`[Cache Warmup] Results: ${successful} successful, ${failed} failed out of ${pageIds.length} total`);
     
-    // 失敗の種類を分析
+    // 失敗の種類を分析（より詳細に）
     const failureAnalysis = failedDetails.reduce((acc, detail) => {
       const errorLower = detail.error?.toLowerCase() || '';
-      const key = detail.status === '429' || detail.status === 429 ? 'rateLimited' : 
+      const statusStr = String(detail.status);
+      
+      const key = statusStr === '429' ? 'rateLimited' : 
+                  statusStr === '400' ? 'badRequest' :
+                  statusStr === '401' ? 'unauthorized' :
+                  statusStr === '403' ? 'forbidden' :
+                  statusStr === '404' ? 'notFound' :
+                  statusStr === '500' ? 'serverError' :
                   errorLower.includes('timeout') ? 'timeout' :
-                  errorLower.includes('not found') || errorLower.includes('could not find') ? 'notFound' :
-                  errorLower.includes('unauthorized') || detail.status === '401' || detail.status === 401 ? 'unauthorized' :
                   errorLower.includes('network') || errorLower.includes('fetch') ? 'network' :
+                  errorLower.includes('could not find') ? 'pageNotFound' :
                   'other';
       acc[key] = (acc[key] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
+    
+    // 詳細なエラーログを出力
+    console.log('[Cache Warmup] Detailed failure analysis:', failureAnalysis);
+    console.log('[Cache Warmup] Sample failed page details:', failedDetails.slice(0, 3));
 
     // 元のページ数と制限後のページ数を記録
     const originalPageCount = req.body?.pageIds?.length || pageIds.length;
