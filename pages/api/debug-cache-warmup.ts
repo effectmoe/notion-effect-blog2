@@ -38,15 +38,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const pageId = testPageIds[i];
       const pageStartTime = Date.now();
       
+      // ページIDを正規化
+      let pageIdToUse = pageId;
+      if (isValidPageId(pageId)) {
+        pageIdToUse = normalizePageId(pageId);
+      }
+      
       try {
         console.log(`[Debug Cache Warmup] Testing page ${i + 1}/${testPageIds.length}: ${pageId}`);
-        
-        // ページIDを正規化
-        let pageIdToUse = pageId;
-        if (isValidPageId(pageId)) {
-          pageIdToUse = normalizePageId(pageId);
-        }
-        
         console.log(`[Debug Cache Warmup] Normalized ID: ${pageIdToUse}`);
         
         const result = await getPage(pageIdToUse);
