@@ -8,17 +8,22 @@ import { rateLimit, rateLimitPresets } from '@/lib/rate-limiter';
 const rateLimiter = rateLimit(rateLimitPresets.webhook);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  // Notionの初回認証チャレンジに対応
-  if (req.method === 'POST' && req.body?.type === 'url_verification') {
-    console.log('Notion verification challenge received:', req.body.challenge);
-    return res.status(200).json({ challenge: req.body.challenge });
-  }
-
+  // メソッドチェック
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // レート制限チェック
+  // Notionの初回認証チャレンジは認証をスキップ
+  if (req.body?.type === 'url_verification') {
+    console.log('Notion verification challenge received:', req.body);
+    const challenge = req.body.challenge;
+    if (challenge) {
+      return res.status(200).json({ challenge });
+    }
+    return res.status(400).json({ error: 'No challenge provided' });
+  }
+
+  // レート制限チェック（認証チャレンジ以外の場合）
   const rateLimitResult = await new Promise<boolean>((resolve) => {
     rateLimiter(req, res, () => resolve(true));
   });
@@ -28,7 +33,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    // Notion Webhookの検証
+    // 通常のWebhookリクエストの場合のみ認証チェック
     const isValidWebhook = await verifyNotionWebhook(req);
     
     // Webhook検証またはトークン認証
