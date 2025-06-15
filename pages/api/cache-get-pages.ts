@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getSiteMap } from '@/lib/get-site-map';
-import { parsePageId } from 'notion-utils';
+import { normalizePageId, isValidPageId } from '@/lib/normalize-page-id';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -20,31 +20,40 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const allPageIds = Object.values(siteMap.canonicalPageMap);
       console.log('All page IDs from canonicalPageMap:', allPageIds.slice(0, 5));
       
-      pageIds = allPageIds.filter(id => {
-        // 有効なページIDのみをフィルタリング
-        if (typeof id !== 'string') {
-          console.log('Non-string page ID:', id);
-          return false;
-        }
-        const parsed = parsePageId(id);
-        if (!parsed) {
-          console.log('Failed to parse page ID:', id);
-        }
-        return !!parsed;
-      });
+      // ハイフン付き・なし両方に対応し、一貫性のため正規化
+      pageIds = allPageIds
+        .filter(id => typeof id === 'string' && isValidPageId(id))
+        .map(id => normalizePageId(id));
       console.log(`Found ${pageIds.length} valid page IDs out of ${allPageIds.length} total in site map`);
       console.log('Sample valid page IDs:', pageIds.slice(0, 3));
     }
     
-    // ルートページIDを必ず含める
+    // ルートページIDを必ず含める（正規化して追加）
     const rootPageId = process.env.NOTION_PAGE_ID;
-    if (rootPageId && !pageIds.includes(rootPageId)) {
-      pageIds.unshift(rootPageId);
+    if (rootPageId && isValidPageId(rootPageId)) {
+      const normalizedRootId = normalizePageId(rootPageId);
+      if (!pageIds.includes(normalizedRootId)) {
+        pageIds.unshift(normalizedRootId);
+      }
     }
     
-    // 重複を削除して最大20ページまでに制限
-    const uniquePageIds = [...new Set(pageIds)];
-    const importantPageIds = uniquePageIds.slice(0, 20);
+    // データベースページを優先的に含める
+    const databasePageSlugs = ['都道府県リスト', '講座一覧'];
+    const databasePageIds: string[] = [];
+    
+    // データベースページのページIDを取得
+    for (const [slug, pageId] of Object.entries(siteMap.canonicalPageMap || {})) {
+      if (databasePageSlugs.includes(slug) && isValidPageId(pageId)) {
+        databasePageIds.push(normalizePageId(pageId));
+      }
+    }
+    
+    // データベースページを先頭に、その他のページを後に
+    const allUniquePageIds = [...new Set([...databasePageIds, ...pageIds])];
+    const importantPageIds = allUniquePageIds.slice(0, 20);
+    
+    console.log(`Database pages included: ${databasePageIds.length}`);
+    console.log('Database page IDs:', databasePageIds);
     
     res.status(200).json({
       success: true,

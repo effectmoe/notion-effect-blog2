@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { getSiteMap } from '@/lib/get-site-map';
 import { getPage } from '@/lib/notion';
 import { getImportantPageIds } from '@/lib/get-important-pages';
-import { parsePageId } from 'notion-utils';
+import { normalizePageId, isValidPageId } from '@/lib/normalize-page-id';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -84,7 +84,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     console.log(`[Cache Warmup] Warming up cache for ${pageIds.length} pages`);
-    console.log('[Cache Warmup] Page IDs to warm up:', pageIds.map(id => id.substring(0, 8) + '...'));
+    console.log('[Cache Warmup] Page IDs to warm up:', pageIds.map(id => {
+      if (typeof id === 'string' && id.length > 8) {
+        return id.substring(0, 8) + '...';
+      }
+      return id;
+    }));
 
     if (pageIds.length === 0) {
       return res.status(200).json({
@@ -101,16 +106,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         try {
           console.log(`[Cache Warmup] Fetching page: ${pageIdOrSlug}`);
           
-          // Use notion-utils to parse and validate the page ID
-          const parsedPageId = parsePageId(pageIdOrSlug);
-          
-          if (!parsedPageId) {
-            console.log(`[Cache Warmup] Invalid page ID: ${pageIdOrSlug}`);
-            return { pageId: pageIdOrSlug, success: false, error: 'Invalid page ID' };
+          // ページIDを正規化してから使用
+          let pageIdToUse = pageIdOrSlug;
+          if (isValidPageId(pageIdOrSlug)) {
+            pageIdToUse = normalizePageId(pageIdOrSlug);
           }
           
-          const result = await getPage(parsedPageId);
-          console.log(`[Cache Warmup] Successfully fetched: ${pageIdOrSlug} (parsed: ${parsedPageId})`);
+          const result = await getPage(pageIdToUse);
+          console.log(`[Cache Warmup] Successfully fetched: ${pageIdOrSlug} (used: ${pageIdToUse})`);
           return { pageId: pageIdOrSlug, success: true };
         } catch (error) {
           console.error(`[Cache Warmup] Failed to fetch page ${pageIdOrSlug}:`, error.message);
