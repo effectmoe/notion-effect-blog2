@@ -67,7 +67,7 @@ export async function getFromCache<T>(key: string): Promise<T | null> {
   if (redisClient) {
     try {
       // 接続されていない場合は接続
-      if (redisClient.status !== 'ready') {
+      if (redisClient.status !== 'ready' && redisClient.status !== 'connecting') {
         await redisClient.connect();
       }
       const redisResult = await redisClient.get(key);
@@ -101,7 +101,7 @@ export async function setToCache<T>(
   if (redisClient) {
     try {
       // 接続されていない場合は接続
-      if (redisClient.status !== 'ready') {
+      if (redisClient.status !== 'ready' && redisClient.status !== 'connecting') {
         await redisClient.connect();
       }
       await redisClient.setex(key, ttlSeconds, JSON.stringify(value));
@@ -242,7 +242,7 @@ export async function getCacheStats() {
   if (redisClient) {
     try {
       // 接続されていない場合は接続
-      if (redisClient.status !== 'ready') {
+      if (redisClient.status !== 'ready' && redisClient.status !== 'connecting') {
         await redisClient.connect();
       }
       stats.redis.connected = redisClient.status === 'ready';
@@ -318,12 +318,16 @@ export async function cleanupCache() {
         console.log(`[Cache] Redis cache cleared. Key count after: ${keyCountAfter}`);
       } else {
         console.log('[Cache] Redis not ready, attempting to connect...');
-        await redisClient.connect();
-        if (redisClient.status === 'ready') {
+        try {
+          if (redisClient.status !== 'connecting') {
+            await redisClient.connect();
+          }
+          // 接続後にクリアを試みる
           await redisClient.flushdb();
           console.log('[Cache] Redis connected and cleared');
-        } else {
-          console.log('[Cache] Redis connection failed');
+        } catch (connectError) {
+          console.log('[Cache] Redis connection or clear failed:', connectError);
+          // Redisエラーは無視して続行
         }
       }
     } else {

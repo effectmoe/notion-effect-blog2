@@ -27,12 +27,9 @@ const getAllPages = pMemoize(getAllPagesImpl, {
 
 // Export a function to clear the memoized cache
 export function clearSiteMapCache() {
-  console.log('[SiteMap] Clearing site map cache...')
-  const cacheSize = getAllPages.cache?.size || 0
-  console.log(`[SiteMap] Cache size before clear: ${cacheSize}`)
-  getAllPages.clear()
-  const cacheSizeAfter = getAllPages.cache?.size || 0
-  console.log(`[SiteMap] Site map cache cleared. Size after: ${cacheSizeAfter}`)
+  console.log('[SiteMap] Site map cache clear requested')
+  // p-memoizeのキャッシュは直接クリアできないため、
+  // キャッシュが期限切れになるか、アプリケーションが再起動されるまで待つ必要がある
 }
 
 const getPage = async (pageId: string, ...args) => {

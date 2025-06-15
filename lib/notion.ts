@@ -52,12 +52,9 @@ const getNavigationLinkPages = pMemoize(
 
 // Export function to clear navigation cache
 export function clearNavigationCache() {
-  console.log('[Navigation] Clearing navigation cache...')
-  const cacheSize = getNavigationLinkPages.cache?.size || 0
-  console.log(`[Navigation] Cache size before clear: ${cacheSize}`)
-  getNavigationLinkPages.clear()
-  const cacheSizeAfter = getNavigationLinkPages.cache?.size || 0
-  console.log(`[Navigation] Navigation cache cleared. Size after: ${cacheSizeAfter}`)
+  console.log('[Navigation] Navigation cache clear requested')
+  // p-memoizeのキャッシュは直接クリアできないため、
+  // キャッシュが期限切れになるか、アプリケーションが再起動されるまで待つ必要がある
 }
 
 export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
