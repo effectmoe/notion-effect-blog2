@@ -238,38 +238,117 @@ export const CacheManagement: React.FC = () => {
       });
 
       if (warmupResponse.ok) {
-        setProgress({ 
-          current: warmupData.totalPages, 
-          total: warmupData.totalPages, 
-          succeeded: warmupData.warmedUp, 
-          failed: warmupData.failed, 
-          phase: 'complete' 
-        });
-        
-        let resultMessage = `✅ 完了: ${warmupData.warmedUp}/${warmupData.totalPages}ページを事前読み込みしました`;
-        if (warmupData.failed > 0) {
-          resultMessage += ` (失敗: ${warmupData.failed}ページ)`;
+        // 残りのページがある場合は追加リクエストを送信
+        if (warmupData.needMoreRequests && warmupData.remainingPages > 0) {
+          let totalSucceeded = warmupData.warmedUp;
+          let totalFailed = warmupData.failed;
+          let totalProcessed = warmupData.totalPages;
+          const originalTotal = warmupData.debug?.originalPageCount || warmupData.totalPages;
           
-          // 失敗の詳細を表示
-          if (warmupData.debug?.failureAnalysis) {
-            const analysis = warmupData.debug.failureAnalysis;
-            const details = [];
-            if (analysis.rateLimited) details.push(`レート制限: ${analysis.rateLimited}`);
-            if (analysis.timeout) details.push(`タイムアウト: ${analysis.timeout}`);
-            if (analysis.notFound) details.push(`見つからない: ${analysis.notFound}`);
-            if (analysis.other) details.push(`その他: ${analysis.other}`);
+          setProgress(prev => prev ? { 
+            ...prev, 
+            current: totalProcessed, 
+            total: originalTotal, 
+            succeeded: totalSucceeded, 
+            failed: totalFailed 
+          } : null);
+          
+          // 残りのページを処理するための追加リクエスト
+          const remainingPageIds = pageIds.slice(warmupData.totalPages);
+          let currentIndex = warmupData.totalPages;
+          
+          while (remainingPageIds.length > 0 && currentIndex < pageIds.length) {
+            const nextBatch = remainingPageIds.slice(0, warmupData.debug?.maxPagesPerRequest || 10);
+            remainingPageIds.splice(0, nextBatch.length);
             
-            if (details.length > 0) {
-              resultMessage += `\n詳細: ${details.join(', ')}`;
+            console.log(`[CacheManagement] Processing additional batch: ${nextBatch.length} pages`);
+            
+            try {
+              const additionalWarmupResponse = await fetch('/api/cache-warmup', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                  pageIds: nextBatch,
+                  skipSiteMap: true
+                }),
+              });
+
+              const additionalWarmupData = await additionalWarmupResponse.json();
+              
+              if (additionalWarmupResponse.ok) {
+                totalSucceeded += additionalWarmupData.warmedUp;
+                totalFailed += additionalWarmupData.failed;
+                totalProcessed += additionalWarmupData.totalPages;
+                
+                setProgress(prev => prev ? { 
+                  ...prev, 
+                  current: totalProcessed, 
+                  succeeded: totalSucceeded, 
+                  failed: totalFailed 
+                } : null);
+                
+                // もう残りがない場合は終了
+                if (!additionalWarmupData.needMoreRequests) {
+                  break;
+                }
+              } else {
+                console.error('[CacheManagement] Additional warmup failed:', additionalWarmupData.error);
+                break;
+              }
+            } catch (error) {
+              console.error('[CacheManagement] Additional warmup request failed:', error);
+              break;
+            }
+            
+            currentIndex += nextBatch.length;
+          }
+          
+          setProgress(prev => prev ? { ...prev, phase: 'complete' } : null);
+          
+          let resultMessage = `✅ 完了: ${totalSucceeded}/${originalTotal}ページを事前読み込みしました`;
+          if (totalFailed > 0) {
+            resultMessage += ` (失敗: ${totalFailed}ページ)`;
+          }
+          
+          setMessage(resultMessage);
+        } else {
+          // 単一リクエストで完了
+          setProgress({ 
+            current: warmupData.totalPages, 
+            total: warmupData.totalPages, 
+            succeeded: warmupData.warmedUp, 
+            failed: warmupData.failed, 
+            phase: 'complete' 
+          });
+          
+          let resultMessage = `✅ 完了: ${warmupData.warmedUp}/${warmupData.totalPages}ページを事前読み込みしました`;
+          if (warmupData.failed > 0) {
+            resultMessage += ` (失敗: ${warmupData.failed}ページ)`;
+            
+            // 失敗の詳細を表示
+            if (warmupData.debug?.failureAnalysis) {
+              const analysis = warmupData.debug.failureAnalysis;
+              const details = [];
+              if (analysis.rateLimited) details.push(`レート制限: ${analysis.rateLimited}`);
+              if (analysis.timeout) details.push(`タイムアウト: ${analysis.timeout}`);
+              if (analysis.notFound) details.push(`見つからない: ${analysis.notFound}`);
+              if (analysis.other) details.push(`その他: ${analysis.other}`);
+              
+              if (details.length > 0) {
+                resultMessage += `\n詳細: ${details.join(', ')}`;
+              }
             }
           }
+          
+          if (warmupData.debug?.processingTime) {
+            resultMessage += `\n処理時間: ${warmupData.debug.processingTime}`;
+          }
+          
+          setMessage(resultMessage);
         }
-        
-        if (warmupData.debug?.processingTime) {
-          resultMessage += `\n処理時間: ${warmupData.debug.processingTime}`;
-        }
-        
-        setMessage(resultMessage);
       } else {
         setMessage(`❌ ウォームアップエラー: ${warmupData.error}`);
       }

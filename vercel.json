@@ -6,6 +6,12 @@
     "pages/index.tsx": {
       "maxDuration": 30
     },
+    "pages/api/cache-warmup.ts": {
+      "maxDuration": 60
+    },
+    "pages/api/cache-clear.ts": {
+      "maxDuration": 30
+    },
     "pages/api/*.ts": {
       "maxDuration": 30
     }

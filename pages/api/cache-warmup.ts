@@ -30,7 +30,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   // Vercelのserverlessファンクションタイムアウト対策
-  // デフォルトは10秒、Proプランは60秒
+  // vercel.jsonで60秒に設定済み
   const maxExecutionTime = 55000; // 55秒（安全マージン）
   const executionTimer = setTimeout(() => {
     if (!res.headersSent) {
@@ -117,6 +117,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       console.log('[Cache Warmup] Fallback IDs sample:', pageIds.slice(0, 3).map(id => id.substring(0, 8) + '...'));
     }
 
+    // 無料プランでは処理ページ数を制限
+    if (pageIds.length > MAX_PAGES_PER_REQUEST) {
+      console.log(`[Cache Warmup] Limiting pages from ${pageIds.length} to ${MAX_PAGES_PER_REQUEST} for this request`);
+      pageIds = pageIds.slice(0, MAX_PAGES_PER_REQUEST);
+    }
+
     console.log(`[Cache Warmup] Warming up cache for ${pageIds.length} pages`);
     console.log('[Cache Warmup] Page IDs to warm up:', pageIds.map(id => {
       if (typeof id === 'string' && id.length > 8) {
@@ -134,12 +140,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // バッチ処理の設定
+    // バッチ処理の設定（60秒のタイムアウトを活用）
     const BATCH_SIZE = 5; // 一度に処理するページ数
-    const DELAY_BETWEEN_BATCHES = 1000; // バッチ間の待機時間（ミリ秒）
+    const DELAY_BETWEEN_BATCHES = 800; // バッチ間の待機時間（ミリ秒）
     const RETRY_COUNT = 3; // リトライ回数
-    const RETRY_DELAY = 2000; // リトライ前の待機時間（ミリ秒）
-    const PAGE_TIMEOUT = 30000; // ページ取得のタイムアウト（30秒）
+    const RETRY_DELAY = 1500; // リトライ前の待機時間（ミリ秒）
+    const PAGE_TIMEOUT = 8000; // ページ取得のタイムアウト（8秒）
+    const MAX_PAGES_PER_REQUEST = 50; // 1リクエストで処理する最大ページ数
 
     // リトライ機能付きのページ取得
     async function fetchPageWithRetry(pageIdOrSlug: string, retries = RETRY_COUNT): Promise<any> {
@@ -260,6 +267,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return acc;
     }, {} as Record<string, number>);
 
+    // 元のページ数と制限後のページ数を記録
+    const originalPageCount = req.body?.pageIds?.length || pageIds.length;
+    const remainingPages = Math.max(0, originalPageCount - pageIds.length);
+
     res.status(200).json({
       success: true,
       warmedUp: successful,
@@ -267,14 +278,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       message: `Cache warmed up for ${successful} pages`,
       pageIds: pageIds.slice(0, 5), // デバッグ用：最初の5ページIDを返す
       totalPages: pageIds.length,
+      remainingPages,
+      needMoreRequests: remainingPages > 0,
       failedDetails: failedDetails.slice(0, 10), // 最初の10個の失敗詳細
       debug: {
         totalAttempted: pageIds.length,
+        originalPageCount,
         successful,
         failed,
         failureAnalysis,
         batchSize: BATCH_SIZE,
         totalBatches,
+        maxPagesPerRequest: MAX_PAGES_PER_REQUEST,
         processingTime: `${((Date.now() - startTime) / 1000).toFixed(1)}s`
       }
     });
