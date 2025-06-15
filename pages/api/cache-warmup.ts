@@ -132,12 +132,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     console.log(`[Cache Warmup] Warming up cache for ${pageIds.length} pages`);
-    console.log('[Cache Warmup] Page IDs to warm up:', pageIds.map(id => {
-      if (typeof id === 'string' && id.length > 8) {
-        return id.substring(0, 8) + '...';
-      }
-      return id;
-    }));
+    
+    // ページIDの重複をチェック
+    const uniquePageIds = [...new Set(pageIds)];
+    const duplicateCount = pageIds.length - uniquePageIds.length;
+    
+    if (duplicateCount > 0) {
+      console.warn(`[Cache Warmup] WARNING: Found ${duplicateCount} duplicate page IDs!`);
+      console.log('[Cache Warmup] Original count:', pageIds.length);
+      console.log('[Cache Warmup] Unique count:', uniquePageIds.length);
+      
+      // 重複を除去
+      pageIds = uniquePageIds;
+    }
+    
+    console.log('[Cache Warmup] Page IDs to warm up (first 10):', pageIds.slice(0, 10));
+    console.log('[Cache Warmup] Page IDs format check:', pageIds.slice(0, 5).map(id => ({
+      id: id,
+      length: id.length,
+      hasHyphens: id.includes('-'),
+      isUUID: /^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i.test(id)
+    })));
 
     if (pageIds.length === 0) {
       return res.status(200).json({
@@ -193,11 +208,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           }
           
           if (isLastAttempt) {
+            // 詳細なエラー情報をログ出力
+            console.error(`[Cache Warmup] FAILED PAGE DETAILS:`, {
+              pageId: pageIdOrSlug,
+              normalizedPageId: pageIdToUse,
+              errorMessage: error.message,
+              errorStatus: error.status,
+              errorCode: error.code,
+              errorName: error.name,
+              errorStack: error.stack?.split('\n').slice(0, 3).join('\n'),
+              fullError: JSON.stringify(error, null, 2)
+            });
+            
             return { 
               pageId: pageIdOrSlug, 
               success: false, 
               error: error.message,
-              status: error.status || 'unknown'
+              status: error.status || 'unknown',
+              details: {
+                code: error.code,
+                name: error.name,
+                normalized: pageIdToUse
+              }
             };
           }
         }
@@ -267,6 +299,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
 
     console.log(`[Cache Warmup] Results: ${successful} successful, ${failed} failed out of ${pageIds.length} total`);
+    
+    // 成功したページのIDをログ出力
+    const successfulPages = results
+      .filter(r => r.status === 'fulfilled' && r.value?.success)
+      .map(r => r.value.pageId);
+    console.log('[Cache Warmup] Successful page IDs:', successfulPages);
     
     // 失敗の種類を分析（より詳細に）
     const failureAnalysis = failedDetails.reduce((acc, detail) => {

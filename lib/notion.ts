@@ -61,13 +61,23 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
   // キャッシュ付きAPIを使用（本番環境のみ）
   const api = process.env.NODE_ENV === 'production' ? cachedNotion : notion;
   
-  let recordMap: ExtendedRecordMap = await api.getPage(pageId, {
-    fetchMissingBlocks: true,
-    fetchCollections: true,
-    signFileUrls: false,
-    chunkLimit: 500,  // Increase chunk limit
-    chunkNumber: 0
-  }) as ExtendedRecordMap
+  try {
+    let recordMap: ExtendedRecordMap = await api.getPage(pageId, {
+      fetchMissingBlocks: true,
+      fetchCollections: true,
+      signFileUrls: false,
+      chunkLimit: 500,  // Increase chunk limit
+      chunkNumber: 0
+    }) as ExtendedRecordMap
+    
+    // ページが空の場合のチェック
+    if (!recordMap || !recordMap.block || Object.keys(recordMap.block).length === 0) {
+      console.error(`[getPage] Empty or invalid page data for pageId: ${pageId}`);
+      const error = new Error(`Page ${pageId} returned empty data`);
+      (error as any).status = 404;
+      (error as any).code = 'empty_page';
+      throw error;
+    }
   
   // Use the new helper function to find missing blocks
   const { missingBlocks, missingCollections, toggleContentBlocks } = findMissingBlocks(recordMap)
@@ -144,6 +154,24 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
   await getTweetsMap(recordMap)
 
   return recordMap
+  } catch (error: any) {
+    console.error(`[getPage] Error fetching page ${pageId}:`, {
+      message: error.message,
+      status: error.status,
+      code: error.code,
+      name: error.name
+    });
+    
+    // エラーに追加情報を付与
+    if (!error.status) {
+      error.status = error.message?.includes('not found') ? 404 : 500;
+    }
+    if (!error.code) {
+      error.code = error.message?.includes('not found') ? 'page_not_found' : 'unknown_error';
+    }
+    
+    throw error;
+  }
 }
 
 export async function search(params: SearchParams | { query: string }): Promise<SearchResults> {

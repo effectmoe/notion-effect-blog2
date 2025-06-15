@@ -706,20 +706,38 @@ export const CacheManagement: React.FC = () => {
       <div className={styles.mainActionSection}>
         <h2 className={styles.mainActionTitle}>🎯 通常使用するのはこれだけ！</h2>
         <div className={styles.mainActionCard}>
-          <button
-            onClick={handleClearAndWarmup}
-            disabled={loading}
-            className={styles.mainActionButton}
-          >
-            <div className={styles.mainActionIcon}>🔄</div>
-            <div className={styles.mainActionContent}>
-              <div className={styles.mainActionName}>クリア&ウォームアップ</div>
-              <div className={styles.mainActionDescription}>
-                古いキャッシュを削除して、最新のデータを読み込みます<br />
-                <small>（1回につき10ページずつ、5秒間隔で安全に処理）</small>
+          <div className={styles.mainActionButtons}>
+            <button
+              onClick={handleClearAndWarmup}
+              disabled={loading}
+              className={styles.mainActionButton}
+            >
+              <div className={styles.mainActionIcon}>🔄</div>
+              <div className={styles.mainActionContent}>
+                <div className={styles.mainActionName}>クリア&ウォームアップ</div>
+                <div className={styles.mainActionDescription}>
+                  古いキャッシュを削除して、最新のデータを読み込みます<br />
+                  <small>（10ページずつ処理）</small>
+                </div>
               </div>
-            </div>
-          </button>
+            </button>
+            
+            <button
+              onClick={handleAutoWarmup}
+              disabled={loading || isAutoProcessing}
+              className={`${styles.mainActionButton} ${styles.autoButton}`}
+            >
+              <div className={styles.mainActionIcon}>🚀</div>
+              <div className={styles.mainActionContent}>
+                <div className={styles.mainActionName}>全自動処理</div>
+                <div className={styles.mainActionDescription}>
+                  全ページを自動的に処理します<br />
+                  <small>（約6-8分で完了）</small>
+                </div>
+              </div>
+            </button>
+          </div>
+          
           <div className={styles.mainActionExplain}>
             <h4>どんな時に使う？</h4>
             <ul>
@@ -727,10 +745,18 @@ export const CacheManagement: React.FC = () => {
               <li>新しいページを追加した後</li>
               <li>ページが正しく表示されない時</li>
             </ul>
-            <div style={{ marginTop: '1rem', padding: '0.75rem', backgroundColor: '#f0f9ff', borderRadius: '6px', fontSize: '0.875rem' }}>
-              <strong>💡 段階的処理について</strong><br />
-              全72ページを一度に処理すると失敗しやすいため、10ページずつ段階的に処理します。<br />
-              残りのページがある場合は、数回に分けて実行してください。
+            
+            <div style={{ marginTop: '1rem', padding: '0.75rem', backgroundColor: '#fff3cd', borderRadius: '6px', fontSize: '0.875rem', border: '1px solid #ffeaa7' }}>
+              <strong>⚠️ なぜ一部のページが失敗するのか？</strong><br />
+              <ul style={{ marginBottom: 0, paddingLeft: '1.2rem' }}>
+                <li>削除されたページや非公開ページ</li>
+                <li>Notion APIの一時的な制限</li>
+                <li>大きすぎるページ（画像が多いなど）</li>
+                <li>権限設定の問題</li>
+              </ul>
+              <div style={{ marginTop: '0.5rem' }}>
+                ※ 失敗したページはアクセス時に個別に読み込まれるため、サイトの動作に影響はありません。
+              </div>
             </div>
           </div>
         </div>
@@ -760,20 +786,6 @@ export const CacheManagement: React.FC = () => {
               </p>
             </div>
             
-            <div className={styles.advancedCard}>
-              <button
-                onClick={handleAutoWarmup}
-                disabled={loading || isAutoProcessing}
-                className={`${styles.button} ${styles.warmupButton}`}
-              >
-                <span className={styles.buttonIcon}>🔄</span>
-                <span>自動全ページ処理</span>
-              </button>
-              <p className={styles.buttonDescription}>
-                全ページを10ページずつ自動的に処理します。
-                <br /><small>※ 完了まで数分かかります</small>
-              </p>
-            </div>
             
             <div className={styles.advancedCard}>
               <button
