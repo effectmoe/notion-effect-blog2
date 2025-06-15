@@ -16,10 +16,19 @@ interface CacheStats {
   };
 }
 
+interface WarmupProgress {
+  current: number;
+  total: number;
+  succeeded: number;
+  failed: number;
+  phase: 'preparing' | 'clearing' | 'warming' | 'complete';
+}
+
 export const CacheManagement: React.FC = () => {
   const [stats, setStats] = useState<CacheStats | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [progress, setProgress] = useState<WarmupProgress | null>(null);
   const { isConnected, lastUpdate, clearCache } = useRealtimeUpdates();
 
   // キャッシュ統計を取得
@@ -156,50 +165,30 @@ export const CacheManagement: React.FC = () => {
   const handleClearAndWarmup = async () => {
     setLoading(true);
     setMessage('');
+    setProgress({ current: 0, total: 0, succeeded: 0, failed: 0, phase: 'preparing' });
 
     try {
       const token = getAuthToken();
       
-      // 1. まず完全なページリストを取得
-      console.log('[CacheManagement] Step 1: Getting complete page list before cache clear...');
-      // 完全なページリストを使用（ハードコードされた72ページ）
-      let pagesResponse = await fetch('/api/get-complete-page-list');
+      // 1. まず現在のページリストを取得（キャッシュがある間に）
+      console.log('[CacheManagement] Step 1: Getting page list before cache clear...');
+      const pagesResponse = await fetch('/api/cache-get-pages');
       
       let pageIds: string[] = [];
       if (pagesResponse.ok) {
         const pagesData = await pagesResponse.json();
         pageIds = pagesData.pageIds || [];
-        console.log(`[CacheManagement] Retrieved ${pageIds.length} page IDs (source: ${pagesData.source})`);
+        console.log(`[CacheManagement] Retrieved ${pageIds.length} page IDs`);
         setMessage(`📄 ${pageIds.length}ページのIDを取得しました`);
+        setProgress({ current: 0, total: pageIds.length, succeeded: 0, failed: 0, phase: 'preparing' });
       } else {
-        // フォールバック: get-all-page-idsを使用
-        console.log('[CacheManagement] Falling back to get-all-page-ids...');
-        pagesResponse = await fetch('/api/get-all-page-ids');
-        
-        if (pagesResponse.ok) {
-          const pagesData = await pagesResponse.json();
-          pageIds = pagesData.pageIds || [];
-          console.log(`[CacheManagement] Retrieved ${pageIds.length} page IDs (source: ${pagesData.source})`);
-          setMessage(`📄 ${pageIds.length}ページのIDを取得しました`);
-        } else {
-          // 最終フォールバック: cache-get-pagesを使用
-          console.log('[CacheManagement] Falling back to cache-get-pages...');
-          pagesResponse = await fetch('/api/cache-get-pages');
-          
-          if (pagesResponse.ok) {
-            const pagesData = await pagesResponse.json();
-            pageIds = pagesData.pageIds || [];
-            console.log(`[CacheManagement] Retrieved ${pageIds.length} page IDs from cache`);
-            setMessage(`📄 ${pageIds.length}ページのIDを取得しました（キャッシュから）`);
-          } else {
-            console.log('[CacheManagement] Failed to get page list');
-            setMessage('⚠️ ページリストの取得に失敗しました');
-          }
-        }
+        console.log('[CacheManagement] Failed to get page list');
+        setMessage('⚠️ ページリストの取得に失敗しました');
       }
       
       // 2. キャッシュをクリア
       console.log('[CacheManagement] Step 2: Clearing cache...');
+      setProgress(prev => prev ? { ...prev, phase: 'clearing' } : null);
       const clearResponse = await fetch('/api/cache-clear', {
         method: 'POST',
         headers: {
@@ -221,6 +210,7 @@ export const CacheManagement: React.FC = () => {
       
       // 4. キャッシュウォームアップを実行
       console.log('[CacheManagement] Step 3: Warming up cache...');
+      setProgress(prev => prev ? { ...prev, phase: 'warming' } : null);
       const warmupBody = {
         pageIds: pageIds.length > 0 ? pageIds : undefined,
         skipSiteMap: true // クリア後なのでサイトマップはスキップ
@@ -242,14 +232,44 @@ export const CacheManagement: React.FC = () => {
         totalAttempted: warmupData.totalPages,
         succeeded: warmupData.warmedUp,
         failed: warmupData.failed,
-        failedDetails: warmupData.failedDetails
+        failedDetails: warmupData.failedDetails,
+        failureAnalysis: warmupData.debug?.failureAnalysis,
+        processingTime: warmupData.debug?.processingTime
       });
 
       if (warmupResponse.ok) {
-        setMessage(`✅ 完了: ${warmupData.warmedUp}ページを事前読み込みしました`);
+        setProgress({ 
+          current: warmupData.totalPages, 
+          total: warmupData.totalPages, 
+          succeeded: warmupData.warmedUp, 
+          failed: warmupData.failed, 
+          phase: 'complete' 
+        });
+        
+        let resultMessage = `✅ 完了: ${warmupData.warmedUp}/${warmupData.totalPages}ページを事前読み込みしました`;
         if (warmupData.failed > 0) {
-          setMessage(prev => `${prev} (失敗: ${warmupData.failed}ページ)`);
+          resultMessage += ` (失敗: ${warmupData.failed}ページ)`;
+          
+          // 失敗の詳細を表示
+          if (warmupData.debug?.failureAnalysis) {
+            const analysis = warmupData.debug.failureAnalysis;
+            const details = [];
+            if (analysis.rateLimited) details.push(`レート制限: ${analysis.rateLimited}`);
+            if (analysis.timeout) details.push(`タイムアウト: ${analysis.timeout}`);
+            if (analysis.notFound) details.push(`見つからない: ${analysis.notFound}`);
+            if (analysis.other) details.push(`その他: ${analysis.other}`);
+            
+            if (details.length > 0) {
+              resultMessage += `\n詳細: ${details.join(', ')}`;
+            }
+          }
         }
+        
+        if (warmupData.debug?.processingTime) {
+          resultMessage += `\n処理時間: ${warmupData.debug.processingTime}`;
+        }
+        
+        setMessage(resultMessage);
       } else {
         setMessage(`❌ ウォームアップエラー: ${warmupData.error}`);
       }
@@ -261,6 +281,8 @@ export const CacheManagement: React.FC = () => {
       setMessage(`❌ エラー: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setLoading(false);
+      // 完了後数秒でプログレスを非表示
+      setTimeout(() => setProgress(null), 5000);
     }
   };
 
@@ -272,27 +294,17 @@ export const CacheManagement: React.FC = () => {
     try {
       const token = getAuthToken();
       
-      // まず完全なページリストを取得
-      console.log('[CacheManagement] Getting complete page list before warmup...');
-      let pagesResponse = await fetch('/api/get-complete-page-list');
+      // まず現在のページリストを取得
+      console.log('[CacheManagement] Getting page list before warmup...');
+      const pagesResponse = await fetch('/api/cache-get-pages');
       
       let pageIds: string[] = [];
       if (pagesResponse.ok) {
         const pagesData = await pagesResponse.json();
         pageIds = pagesData.pageIds || [];
-        console.log(`[CacheManagement] Retrieved ${pageIds.length} page IDs (source: ${pagesData.source})`);
+        console.log(`[CacheManagement] Retrieved ${pageIds.length} page IDs`);
       } else {
-        // フォールバック: cache-get-pagesを使用
-        console.log('[CacheManagement] Falling back to cache-get-pages...');
-        pagesResponse = await fetch('/api/cache-get-pages');
-        
-        if (pagesResponse.ok) {
-          const pagesData = await pagesResponse.json();
-          pageIds = pagesData.pageIds || [];
-          console.log(`[CacheManagement] Retrieved ${pageIds.length} page IDs from cache`);
-        } else {
-          console.log('[CacheManagement] Failed to get page list, using fallback');
-        }
+        console.log('[CacheManagement] Failed to get page list, using fallback');
       }
 
       // キャッシュウォームアップを実行
@@ -563,10 +575,45 @@ export const CacheManagement: React.FC = () => {
         </div>
       </details>
 
+      {/* プログレス表示 */}
+      {progress && (
+        <div className={styles.progressContainer}>
+          <div className={styles.progressHeader}>
+            <span className={styles.progressPhase}>
+              {progress.phase === 'preparing' && '📄 準備中...'}
+              {progress.phase === 'clearing' && '🗑️ キャッシュをクリア中...'}
+              {progress.phase === 'warming' && '🔥 ウォームアップ中...'}
+              {progress.phase === 'complete' && '✅ 完了'}
+            </span>
+            {progress.total > 0 && (
+              <span className={styles.progressNumbers}>
+                {progress.current}/{progress.total} ページ
+              </span>
+            )}
+          </div>
+          {progress.total > 0 && (
+            <>
+              <div className={styles.progressBar}>
+                <div 
+                  className={styles.progressFill} 
+                  style={{ width: `${(progress.current / progress.total) * 100}%` }}
+                />
+              </div>
+              <div className={styles.progressStats}>
+                <span className={styles.progressSuccess}>✅ 成功: {progress.succeeded}</span>
+                {progress.failed > 0 && (
+                  <span className={styles.progressFailed}>❌ 失敗: {progress.failed}</span>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
       {/* メッセージ表示 */}
       {message && (
         <div className={`${styles.message} ${message.includes('✓') || message.includes('完了') ? styles.successMessage : message.includes('❌') || message.includes('エラー') ? styles.errorMessage : styles.infoMessage}`}>
-          {message}
+          <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit', margin: 0 }}>{message}</pre>
         </div>
       )}
 

@@ -2,14 +2,113 @@
   max-width: 900px;
   margin: 0 auto;
   padding: 2rem;
-  padding-top: 4rem; /* ヘッダーの高さを考慮した余白 */
+  padding-top: 1rem;
+}
+
+/* プログレス表示 */
+.progressContainer {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.progressHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.progressPhase {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.progressNumbers {
+  font-size: 0.875rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.progressBar {
+  width: 100%;
+  height: 20px;
+  background: #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
+  border-radius: 10px;
+  transition: width 0.5s ease-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.progressFill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.progressStats {
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.875rem;
+}
+
+.progressSuccess {
+  color: #16a34a;
+  font-weight: 500;
+}
+
+.progressFailed {
+  color: #dc2626;
+  font-weight: 500;
 }
 
 .pageTitle {
   font-size: 2rem;
   font-weight: 700;
   color: #1f2937;
-  margin-top: 0;
   margin-bottom: 1.5rem;
   text-align: center;
 }
@@ -50,17 +149,16 @@
 .statusBar {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  border-radius: 12px;
   padding: 1rem 1.5rem;
-  margin-bottom: 2rem;
+  border-radius: 12px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-.statusLeft,
-.statusRight {
+.statusLeft {
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -74,68 +172,46 @@
 
 .indicatorGreen,
 .indicatorRed {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  position: relative;
+  box-shadow: 0 0 4px currentColor;
 }
 
 .indicatorGreen {
-  background: #22c55e;
-  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
+  background: #10b981;
   animation: pulse 2s infinite;
 }
 
 .indicatorRed {
   background: #ef4444;
-  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
 }
 
 @keyframes pulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
+    box-shadow: 0 0 4px #10b981;
   }
-  70% {
-    box-shadow: 0 0 0 10px rgba(34, 197, 94, 0);
+  50% {
+    box-shadow: 0 0 12px #10b981;
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+    box-shadow: 0 0 4px #10b981;
   }
+}
+
+.statusRight {
+  font-size: 0.875rem;
 }
 
 .lastUpdate {
-  font-size: 0.875rem;
   opacity: 0.9;
 }
 
-.status {
-  background: #f5f5f5;
-  border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 2rem;
-  display: flex;
-  gap: 2rem;
-  flex-wrap: wrap;
-}
-
-.statusItem {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-}
-
-.connected {
-  color: #22c55e;
-  font-weight: bold;
-}
-
-.disconnected {
-  color: #ef4444;
-  font-weight: bold;
-}
-
-/* 統計コンテナ */
+/* キャッシュ統計 */
 .statsContainer {
+  background: #fafafa;
+  border-radius: 12px;
+  padding: 1.5rem;
   margin-bottom: 2rem;
 }
 
@@ -143,29 +219,20 @@
   font-size: 1.25rem;
   font-weight: 600;
   color: #1f2937;
-  margin-bottom: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  margin: 0 0 1rem 0;
 }
 
 .statsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
 }
 
 .statCard {
   background: white;
   border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 1.5rem;
-  transition: all 0.3s ease;
-}
-
-.statCard:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  padding: 1.25rem;
 }
 
 .statHeader {
@@ -173,8 +240,6 @@
   align-items: center;
   gap: 0.75rem;
   margin-bottom: 1rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid #f3f4f6;
 }
 
 .statIcon {
@@ -184,22 +249,24 @@
 .statHeader h4 {
   margin: 0;
   font-size: 1rem;
-  color: #6b7280;
-  font-weight: 500;
+  color: #374151;
 }
 
 .statDetails {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.5rem;
 }
 
 .statRow {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: #6b7280;
   font-size: 0.875rem;
+}
+
+.statRow span {
+  color: #6b7280;
 }
 
 .statRow strong {
@@ -211,117 +278,80 @@
   color: #10b981 !important;
 }
 
-.stats {
-  background: #ffffff;
-  border: 1px solid #e5e5e5;
-  border-radius: 8px;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
+.connected {
+  color: #10b981 !important;
 }
 
-.stats h3 {
-  margin-top: 0;
-  margin-bottom: 1rem;
-  color: #333;
-}
-
-.statsSection {
-  margin-bottom: 1.5rem;
-}
-
-.statsSection:last-child {
-  margin-bottom: 0;
-}
-
-.statsSection h4 {
-  margin-top: 0;
-  margin-bottom: 0.5rem;
-  color: #666;
-  font-size: 0.9rem;
-  text-transform: uppercase;
-}
-
-.statsSection ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.statsSection li {
-  padding: 0.25rem 0;
-  color: #666;
-}
-
-/* メインアクション */
+/* メイン操作セクション */
 .mainActionSection {
-  margin: 2.5rem 0;
+  margin-bottom: 2rem;
 }
 
 .mainActionTitle {
   font-size: 1.5rem;
   font-weight: 600;
   color: #1f2937;
-  margin-bottom: 1.5rem;
+  margin: 0 0 1rem 0;
   text-align: center;
 }
 
 .mainActionCard {
   background: white;
   border: 2px solid #e5e7eb;
-  border-radius: 16px;
-  padding: 2rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
 }
 
 .mainActionButton {
   width: 100%;
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 1.5rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 1.5rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  margin-bottom: 1.5rem;
+  gap: 1rem;
+  transition: all 0.2s;
 }
 
 .mainActionButton:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 16px -4px rgba(102, 126, 234, 0.4);
 }
 
 .mainActionButton:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
 .mainActionIcon {
-  font-size: 3rem;
+  font-size: 2rem;
 }
 
 .mainActionContent {
   text-align: left;
-  flex: 1;
 }
 
 .mainActionName {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
+  font-size: 1.25rem;
+  margin-bottom: 0.25rem;
 }
 
 .mainActionDescription {
-  font-size: 1rem;
+  font-size: 0.875rem;
   opacity: 0.9;
+  font-weight: normal;
 }
 
 .mainActionExplain {
-  background: #f9fafb;
-  border-radius: 8px;
-  padding: 1rem 1.5rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
 }
 
 .mainActionExplain h4 {
@@ -333,31 +363,32 @@
 .mainActionExplain ul {
   margin: 0;
   padding-left: 1.5rem;
-  color: #6b7280;
 }
 
 .mainActionExplain li {
   margin-bottom: 0.5rem;
+  color: #6b7280;
+  font-size: 0.875rem;
 }
 
 /* 詳細操作セクション */
 .advancedSection {
-  margin: 2rem 0;
+  background: #f9fafb;
   border: 1px solid #e5e7eb;
   border-radius: 12px;
   overflow: hidden;
+  margin-bottom: 2rem;
 }
 
 .advancedSummary {
-  padding: 1rem 1.5rem;
-  background: #f9fafb;
+  padding: 1.25rem 1.5rem;
   cursor: pointer;
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-weight: 500;
-  color: #6b7280;
-  transition: background 0.2s;
+  color: #4b5563;
+  user-select: none;
 }
 
 .advancedSummary:hover {
@@ -365,7 +396,8 @@
 }
 
 .chevron {
-  transition: transform 0.3s ease;
+  transition: transform 0.2s;
+  font-size: 0.875rem;
 }
 
 details[open] .chevron {
@@ -373,14 +405,12 @@ details[open] .chevron {
 }
 
 .advancedContent {
-  padding: 1.5rem;
-  background: white;
-  border-top: 1px solid #e5e7eb;
+  padding: 0 1.5rem 1.5rem;
 }
 
 .advancedGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 1rem;
 }
 
@@ -388,51 +418,16 @@ details[open] .chevron {
   text-align: center;
 }
 
-.advancedCard .button {
-  width: 100%;
-  margin-bottom: 0.75rem;
-}
-
-.buttonDescription {
-  font-size: 0.875rem;
-  color: #6b7280;
-  line-height: 1.4;
-}
-
-.buttonDescription small {
-  color: #9ca3af;
-}
-
-.actions {
-  background: #f9fafb;
-  border-radius: 8px;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.actions h3 {
-  margin-top: 0;
-  margin-bottom: 1rem;
-  color: #333;
-}
-
-.buttons {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-}
-
-/* ボタンスタイル */
 .button {
-  background: white;
-  color: #4b5563;
+  width: 100%;
+  padding: 0.75rem 1rem;
   border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 0.75rem 1.25rem;
+  background: white;
+  border-radius: 8px;
   font-size: 0.875rem;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
-  font-weight: 500;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -440,14 +435,8 @@ details[open] .chevron {
 }
 
 .button:hover:not(:disabled) {
+  border-color: #9ca3af;
   background: #f9fafb;
-  border-color: #d1d5db;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.button:active:not(:disabled) {
-  transform: translateY(0);
 }
 
 .button:disabled {
@@ -455,84 +444,39 @@ details[open] .chevron {
   cursor: not-allowed;
 }
 
+.warmupButton:hover:not(:disabled) {
+  border-color: #60a5fa;
+  background: #eff6ff;
+}
+
+.dangerButton:hover:not(:disabled) {
+  border-color: #f87171;
+  background: #fef2f2;
+}
+
 .buttonIcon {
   font-size: 1.125rem;
 }
 
-/* プライマリボタン */
-.primaryButton {
-  background: white;
-  color: #5b21b6;
-  border: none;
-  padding: 1.5rem;
-  font-size: 1rem;
-  border-radius: 14px;
-  flex-direction: row;
-  justify-content: flex-start;
-  gap: 1rem;
+.buttonDescription {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+  line-height: 1.4;
 }
 
-.primaryButton:hover:not(:disabled) {
-  background: #faf5ff;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.15);
-}
-
-.primaryButton .buttonIcon {
-  font-size: 2rem;
-}
-
-.buttonTitle {
-  font-size: 1.125rem;
-  font-weight: 600;
-  margin-bottom: 0.25rem;
-}
-
-.buttonSubtitle {
-  font-size: 0.875rem;
-  color: #9ca3af;
-  font-weight: 400;
-}
-
-/* ウォームアップボタン */
-.warmupButton {
-  background: #ecfdf5;
-  color: #10b981;
-  border-color: #10b981;
-}
-
-.warmupButton:hover:not(:disabled) {
-  background: #d1fae5;
-  border-color: #059669;
-}
-
-/* 危険ボタン */
-.dangerButton {
-  background: #fef2f2;
-  color: #ef4444;
-  border-color: #ef4444;
-}
-
-.dangerButton:hover:not(:disabled) {
-  background: #fee2e2;
-  border-color: #dc2626;
-}
-
-/* メッセージ */
+/* メッセージ表示 */
 .message {
-  border-radius: 10px;
-  padding: 1rem 1.25rem;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
   margin: 1.5rem 0;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  animation: slideIn 0.3s ease-out;
+  animation: slideInMessage 0.3s ease-out;
 }
 
-@keyframes slideIn {
+@keyframes slideInMessage {
   from {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -540,188 +484,73 @@ details[open] .chevron {
   }
 }
 
-.infoMessage {
-  background: #e0f2fe;
-  border: 1px solid #7dd3fc;
-  color: #0369a1;
-}
-
 .successMessage {
   background: #d1fae5;
-  border: 1px solid #86efac;
-  color: #15803d;
+  border: 1px solid #6ee7b7;
+  color: #065f46;
 }
 
 .errorMessage {
   background: #fee2e2;
   border: 1px solid #fca5a5;
-  color: #dc2626;
+  color: #991b1b;
 }
 
-/* ヘルプセクション */
-.helpContainer {
+.infoMessage {
+  background: #e0e7ff;
+  border: 1px solid #a5b4fc;
+  color: #3730a3;
+}
+
+/* API設定セクション */
+.apiSection {
+  background: #1f2937;
+  border: 1px solid #374151;
+  border-radius: 12px;
+  overflow: hidden;
   margin-top: 3rem;
 }
 
-.helpDetails {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-.helpSummary {
-  padding: 1rem 1.5rem;
+.apiSummary {
+  padding: 1.25rem 1.5rem;
   cursor: pointer;
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 0.75rem;
   font-weight: 500;
-  color: #4b5563;
-  background: #f9fafb;
-  transition: background 0.2s;
+  color: #e5e7eb;
+  user-select: none;
 }
 
-.helpSummary:hover {
-  background: #f3f4f6;
+.apiSummary:hover {
+  background: #374151;
 }
 
-.helpIcon {
-  font-size: 1.25rem;
-}
-
-.helpContent {
-  padding: 1.5rem;
-  border-top: 1px solid #e5e7eb;
-}
-
-.helpSection {
-  margin-bottom: 2rem;
-}
-
-.helpSection:last-child {
-  margin-bottom: 0;
-}
-
-.helpSection h4 {
-  margin-top: 0;
-  margin-bottom: 1rem;
-  color: #374151;
-  font-size: 1rem;
-}
-
-.definitionList {
-  margin: 0;
-}
-
-.definitionList dt {
-  font-weight: 600;
-  color: #374151;
-  margin-bottom: 0.25rem;
-}
-
-.definitionList dd {
-  margin-left: 0;
-  margin-bottom: 1rem;
-  color: #6b7280;
-  font-size: 0.875rem;
-  line-height: 1.5;
+.apiContent {
+  padding: 0 1.5rem 1.5rem;
 }
 
 .codeBlock {
   margin-bottom: 1.5rem;
 }
 
+.codeBlock:last-child {
+  margin-bottom: 0;
+}
+
 .codeHeader {
-  background: #374151;
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 8px 8px 0 0;
   font-size: 0.875rem;
-  font-weight: 500;
-}
-
-/* APIセクション */
-.apiSection {
-  margin: 2rem 0;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-.apiSummary {
-  padding: 1rem 1.5rem;
-  background: #f9fafb;
-  cursor: pointer;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-weight: 500;
-  color: #6b7280;
-  transition: background 0.2s;
-}
-
-.apiSummary:hover {
-  background: #f3f4f6;
-}
-
-.apiContent {
-  padding: 1.5rem;
-  background: white;
-  border-top: 1px solid #e5e7eb;
+  color: #9ca3af;
+  margin-bottom: 0.5rem;
 }
 
 .code {
-  background: #1e1e1e;
-  color: #d4d4d4;
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 6px;
   padding: 1rem;
-  border-radius: 0 0 8px 8px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #e2e8f0;
   overflow-x: auto;
-  font-size: 0.8rem;
-  line-height: 1.6;
-  margin: 0;
-  white-space: pre-wrap;
-}
-
-@media (max-width: 640px) {
-  .container {
-    padding: 1rem;
-    padding-top: 3rem; /* モバイルでもヘッダーの高さを考慮 */
-  }
-  
-  .pageTitle {
-    font-size: 1.5rem;
-  }
-  
-  .buttons {
-    grid-template-columns: 1fr;
-  }
-  
-  .status {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  
-  .statusBar {
-    flex-direction: column;
-    gap: 0.75rem;
-    padding: 0.75rem 1rem;
-  }
-  
-  .mainActionButton {
-    flex-direction: column;
-    text-align: center;
-  }
-  
-  .mainActionIcon {
-    font-size: 2.5rem;
-  }
-  
-  .mainActionContent {
-    text-align: center;
-  }
-  
-  .advancedGrid {
-    grid-template-columns: 1fr;
-  }
 }
