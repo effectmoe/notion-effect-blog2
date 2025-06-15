@@ -38,9 +38,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
     
     // シンプルに：すべてのページを平等に扱う
-    // 重複を削除して最初の30ページを取得（十分な数）
+    // 重複を削除してすべてのページを返す
     const uniquePageIds = [...new Set(pageIds)];
-    const selectedPageIds = uniquePageIds.slice(0, 30);
+    const selectedPageIds = uniquePageIds; // すべてのページを返す
     
     res.status(200).json({
       success: true,

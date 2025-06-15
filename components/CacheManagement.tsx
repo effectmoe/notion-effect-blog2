@@ -198,24 +198,37 @@ export const CacheManagement: React.FC = () => {
       
       // 4. キャッシュウォームアップを実行
       console.log('[CacheManagement] Step 3: Warming up cache...');
+      const warmupRequestBody = {
+        pageIds: pageIds.length > 0 ? pageIds : undefined,
+        skipSiteMap: true // クリア後なのでサイトマップはスキップ
+      };
+      console.log('[CacheManagement] Warmup request body:', {
+        hasPageIds: !!warmupRequestBody.pageIds,
+        pageIdsCount: warmupRequestBody.pageIds?.length || 0,
+        skipSiteMap: warmupRequestBody.skipSiteMap
+      });
+      
       const warmupResponse = await fetch('/api/cache-warmup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          pageIds: pageIds.length > 0 ? pageIds : undefined,
-          skipSiteMap: true // クリア後なのでサイトマップはスキップ
-        }),
+        body: JSON.stringify(warmupRequestBody),
       });
 
       const warmupData = await warmupResponse.json();
+      console.log('[CacheManagement] Warmup response:', warmupData);
 
       if (warmupResponse.ok) {
         setMessage(`✅ 完了: ${warmupData.warmedUp}ページを事前読み込みしました`);
         if (warmupData.failed > 0) {
           setMessage(prev => `${prev} (失敗: ${warmupData.failed}ページ)`);
+        }
+        
+        // Debug info
+        if (warmupData.debug) {
+          console.log('[CacheManagement] Warmup debug info:', warmupData.debug);
         }
       } else {
         setMessage(`❌ ウォームアップエラー: ${warmupData.error}`);

@@ -27,10 +27,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (providedPageIds && Array.isArray(providedPageIds) && providedPageIds.length > 0) {
       console.log(`[Cache Warmup] Using ${providedPageIds.length} provided page IDs`);
       pageIds = providedPageIds.filter(id => typeof id === 'string' && id.trim());
+      console.log(`[Cache Warmup] After filtering: ${pageIds.length} valid page IDs`);
     }
     
     // Check if we should skip getSiteMap (e.g., right after cache clear)
-    const skipSiteMap = req.body?.skipSiteMap || false || pageIds.length > 0;
+    // Fixed: Only skip if explicitly requested OR if we have provided page IDs
+    const skipSiteMap = req.body?.skipSiteMap === true || pageIds.length > 0;
     
     if (!skipSiteMap) {
       try {
@@ -52,8 +54,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             .filter(id => typeof id === 'string' && isValidPageId(id))
             .map(id => normalizePageId(id));
           
-          // シンプルに最初の30ページを取得（すべてのページを平等に扱う）
-          pageIds = allPageIds.slice(0, 30);
+          // シンプルにすべてのページを取得
+          pageIds = allPageIds; // すべてのページをウォームアップ
           console.log('[Cache Warmup] Found pages in canonicalPageMap:', pageIds.length);
         }
       } catch (error) {
@@ -62,24 +64,31 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     } else {
       console.log('[Cache Warmup] Skipping site map lookup as requested');
-      useFallback = true;
+      // Only use fallback if we don't have any page IDs
+      if (pageIds.length === 0) {
+        useFallback = true;
+      }
     }
     
     // ページIDが取得できない場合は、重要なページIDを使用
-    if (pageIds.length === 0 || useFallback) {
+    if (pageIds.length === 0 && useFallback) {
       console.log('[Cache Warmup] Using fallback strategy');
+      console.log('[Cache Warmup] Current pageIds length:', pageIds.length);
+      console.log('[Cache Warmup] useFallback:', useFallback);
       
       // フォールバック: 環境変数から取得
       const envPageIds = process.env.IMPORTANT_PAGE_IDS?.split(',').filter(Boolean) || [];
+      console.log('[Cache Warmup] Environment IMPORTANT_PAGE_IDS:', envPageIds.length);
       
       const rootPageId = process.env.NOTION_PAGE_ID;
       if (rootPageId && isValidPageId(rootPageId)) {
         envPageIds.unshift(normalizePageId(rootPageId));
       }
       
-      pageIds = envPageIds.slice(0, 30);
+      pageIds = envPageIds; // すべての環境変数ページIDを使用
       
       console.log('[Cache Warmup] Using fallback page IDs:', pageIds.length);
+      console.log('[Cache Warmup] Fallback IDs sample:', pageIds.slice(0, 3).map(id => id.substring(0, 8) + '...'));
     }
 
     console.log(`[Cache Warmup] Warming up cache for ${pageIds.length} pages`);
