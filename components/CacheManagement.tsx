@@ -451,6 +451,60 @@ export const CacheManagement: React.FC = () => {
     }
   };
 
+  // デバッグ用のウォームアップテスト
+  const handleDebugWarmup = async () => {
+    setLoading(true);
+    setMessage('');
+
+    try {
+      const token = getAuthToken();
+      
+      // まず現在のページリストを取得
+      const pagesResponse = await fetch('/api/cache-get-pages');
+      let pageIds: string[] = [];
+      if (pagesResponse.ok) {
+        const pagesData = await pagesResponse.json();
+        pageIds = pagesData.pageIds || [];
+      }
+
+      const response = await fetch('/api/debug-cache-warmup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          pageIds: pageIds.slice(0, 5) // 最初の5ページをテスト
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log('[CacheManagement] Debug results:', data);
+        
+        let debugMessage = `🔍 デバッグ結果:\n`;
+        debugMessage += `成功率: ${data.summary.successRate.toFixed(1)}% (${data.summary.succeeded}/${data.summary.total})\n`;
+        debugMessage += `平均時間: ${data.summary.averageTime.toFixed(0)}ms\n`;
+        
+        if (Object.keys(data.failurePatterns).length > 0) {
+          debugMessage += `\n失敗パターン:\n`;
+          Object.entries(data.failurePatterns).forEach(([pattern, pages]) => {
+            debugMessage += `- ${pattern} (${(pages as string[]).length}件)\n`;
+          });
+        }
+        
+        setMessage(debugMessage);
+      } else {
+        setMessage(`❌ デバッグエラー: ${data.error}`);
+      }
+    } catch (error) {
+      setMessage(`❌ エラー: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className={styles.container}>
       <h1 className={styles.pageTitle}>キャッシュ管理</h1>
@@ -648,6 +702,21 @@ export const CacheManagement: React.FC = () => {
               <p className={styles.buttonDescription}>
                 特定のパターンに一致するキャッシュをクリアします。
                 <br /><small>※ 開発者向け</small>
+              </p>
+            </div>
+            
+            <div className={styles.advancedCard}>
+              <button
+                onClick={handleDebugWarmup}
+                disabled={loading}
+                className={styles.button}
+              >
+                <span className={styles.buttonIcon}>🐛</span>
+                <span>デバッグテスト</span>
+              </button>
+              <p className={styles.buttonDescription}>
+                少数のページでウォームアップをテストして詳細なデバッグ情報を表示します。
+                <br /><small>※ トラブルシューティング用</small>
               </p>
             </div>
           </div>

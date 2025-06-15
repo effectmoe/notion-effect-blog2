@@ -117,13 +117,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       console.log('[Cache Warmup] Fallback IDs sample:', pageIds.slice(0, 3).map(id => id.substring(0, 8) + '...'));
     }
 
-    // バッチ処理の設定（60秒のタイムアウトを活用）
-    const BATCH_SIZE = 5; // 一度に処理するページ数
-    const DELAY_BETWEEN_BATCHES = 800; // バッチ間の待機時間（ミリ秒）
-    const RETRY_COUNT = 3; // リトライ回数
-    const RETRY_DELAY = 1500; // リトライ前の待機時間（ミリ秒）
-    const PAGE_TIMEOUT = 8000; // ページ取得のタイムアウト（8秒）
-    const MAX_PAGES_PER_REQUEST = 50; // 1リクエストで処理する最大ページ数
+    // バッチ処理の設定（より保守的な設定）
+    const BATCH_SIZE = 3; // 一度に処理するページ数（より少なく）
+    const DELAY_BETWEEN_BATCHES = 1200; // バッチ間の待機時間（ミリ秒）
+    const RETRY_COUNT = 2; // リトライ回数（より少なく）
+    const RETRY_DELAY = 2000; // リトライ前の待機時間（ミリ秒）
+    const PAGE_TIMEOUT = 10000; // ページ取得のタイムアウト（10秒）
+    const MAX_PAGES_PER_REQUEST = 30; // 1リクエストで処理する最大ページ数（より少なく）
 
     // 処理ページ数を制限（必要に応じて）
     if (pageIds.length > MAX_PAGES_PER_REQUEST) {
@@ -171,7 +171,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           return { pageId: pageIdOrSlug, success: true };
         } catch (error: any) {
           const isLastAttempt = attempt === retries;
-          console.error(`[Cache Warmup] Failed to fetch page ${pageIdOrSlug} (attempt ${attempt}):`, error.message);
+          console.error(`[Cache Warmup] Failed to fetch page ${pageIdOrSlug} (attempt ${attempt}):`, {
+            message: error.message,
+            status: error.status,
+            code: error.code,
+            name: error.name,
+            type: error.constructor.name,
+            stack: error.stack?.split('\n').slice(0, 2).join('\n')
+          });
           
           // レート制限エラーの場合は長めに待つ
           if (error.status === 429 || error.code === 'rate_limited') {
