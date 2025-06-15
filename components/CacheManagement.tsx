@@ -161,11 +161,17 @@ export const CacheManagement: React.FC = () => {
     }
   };
 
+  // 自動段階処理のための状態
+  const [isAutoProcessing, setIsAutoProcessing] = useState(false);
+  const [autoProcessingStop, setAutoProcessingStop] = useState(false);
+
   // キャッシュクリアとウォームアップを一連の流れで実行
   const handleClearAndWarmup = async () => {
     setLoading(true);
     setMessage('');
     setProgress({ current: 0, total: 0, succeeded: 0, failed: 0, phase: 'preparing' });
+    setIsAutoProcessing(false);
+    setAutoProcessingStop(false);
 
     try {
       const token = getAuthToken();
@@ -451,6 +457,109 @@ export const CacheManagement: React.FC = () => {
     }
   };
 
+  // 自動全ページウォームアップ
+  const handleAutoWarmup = async () => {
+    setLoading(true);
+    setMessage('');
+    setProgress({ current: 0, total: 0, succeeded: 0, failed: 0, phase: 'preparing' });
+    setIsAutoProcessing(true);
+    setAutoProcessingStop(false);
+
+    try {
+      const token = getAuthToken();
+      
+      // まず現在のページリストを取得
+      console.log('[CacheManagement] Getting page list for auto warmup...');
+      const pagesResponse = await fetch('/api/cache-get-pages');
+      
+      let pageIds: string[] = [];
+      if (pagesResponse.ok) {
+        const pagesData = await pagesResponse.json();
+        pageIds = pagesData.pageIds || [];
+        console.log(`[CacheManagement] Retrieved ${pageIds.length} page IDs for auto processing`);
+      }
+
+      if (pageIds.length === 0) {
+        setMessage('⚠️ ページリストの取得に失敗しました');
+        return;
+      }
+
+      let totalSucceeded = 0;
+      let totalFailed = 0;
+      let currentIndex = 0;
+      const originalTotal = pageIds.length;
+      
+      setProgress({ current: 0, total: originalTotal, succeeded: 0, failed: 0, phase: 'warming' });
+      setMessage(`🔥 自動ウォームアップ開始: ${originalTotal}ページを段階的に処理します`);
+
+      // 全ページを段階的に処理
+      while (currentIndex < pageIds.length && !autoProcessingStop) {
+        const batchSize = Math.min(10, pageIds.length - currentIndex);
+        const batchPageIds = pageIds.slice(currentIndex, currentIndex + batchSize);
+        
+        console.log(`[CacheManagement] Auto processing batch: ${currentIndex + 1}-${currentIndex + batchSize} of ${originalTotal}`);
+        
+        const warmupResponse = await fetch('/api/cache-warmup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            pageIds: batchPageIds,
+            skipSiteMap: true
+          }),
+        });
+
+        const warmupData = await warmupResponse.json();
+        
+        if (warmupResponse.ok) {
+          totalSucceeded += warmupData.warmedUp;
+          totalFailed += warmupData.failed;
+          currentIndex += batchSize;
+          
+          setProgress({
+            current: currentIndex,
+            total: originalTotal,
+            succeeded: totalSucceeded,
+            failed: totalFailed,
+            phase: currentIndex >= originalTotal ? 'complete' : 'warming'
+          });
+          
+          setMessage(`🔥 処理中: ${totalSucceeded}/${currentIndex}ページ成功 (失敗: ${totalFailed})`);
+          
+          // 次のバッチまで待機（最後のバッチ以外）
+          if (currentIndex < pageIds.length && !autoProcessingStop) {
+            console.log('[CacheManagement] Waiting 5 seconds before next batch...');
+            await new Promise(resolve => setTimeout(resolve, 5000));
+          }
+        } else {
+          console.error('[CacheManagement] Auto warmup batch failed:', warmupData.error);
+          totalFailed += batchSize;
+          break;
+        }
+      }
+      
+      setProgress(prev => prev ? { ...prev, phase: 'complete' } : null);
+      
+      if (autoProcessingStop) {
+        setMessage(`⏹️ 自動処理を停止しました: ${totalSucceeded}/${currentIndex}ページ完了 (失敗: ${totalFailed})`);
+      } else {
+        setMessage(`✅ 自動ウォームアップ完了: ${totalSucceeded}/${originalTotal}ページ成功 (失敗: ${totalFailed})`);
+      }
+      
+      // 統計を更新
+      setTimeout(fetchStats, 1000);
+      
+    } catch (error) {
+      setMessage(`❌ エラー: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setLoading(false);
+      setIsAutoProcessing(false);
+      setTimeout(() => setProgress(null), 5000);
+    }
+  };
+
   // デバッグ用のウォームアップテスト
   const handleDebugWarmup = async () => {
     setLoading(true);
@@ -653,6 +762,21 @@ export const CacheManagement: React.FC = () => {
             
             <div className={styles.advancedCard}>
               <button
+                onClick={handleAutoWarmup}
+                disabled={loading || isAutoProcessing}
+                className={`${styles.button} ${styles.warmupButton}`}
+              >
+                <span className={styles.buttonIcon}>🔄</span>
+                <span>自動全ページ処理</span>
+              </button>
+              <p className={styles.buttonDescription}>
+                全ページを10ページずつ自動的に処理します。
+                <br /><small>※ 完了まで数分かかります</small>
+              </p>
+            </div>
+            
+            <div className={styles.advancedCard}>
+              <button
                 onClick={() => handleClearCache('all')}
                 disabled={loading}
                 className={`${styles.button} ${styles.dangerButton}`}
@@ -745,6 +869,24 @@ export const CacheManagement: React.FC = () => {
               </span>
             )}
           </div>
+          {isAutoProcessing && progress.phase === 'warming' && (
+            <button
+              onClick={() => setAutoProcessingStop(true)}
+              className={styles.stopButton}
+              style={{
+                marginTop: '1rem',
+                padding: '0.5rem 1rem',
+                backgroundColor: '#ef4444',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '0.875rem'
+              }}
+            >
+              ⏹️ 自動処理を停止
+            </button>
+          )}
           {progress.total > 0 && (
             <>
               <div className={styles.progressBar}>
