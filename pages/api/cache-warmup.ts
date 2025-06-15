@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { getSiteMap } from '@/lib/get-site-map';
 import { getPage } from '@/lib/notion';
 import { getImportantPageIds } from '@/lib/get-important-pages';
+import { parsePageId } from 'notion-utils';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -83,6 +84,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     console.log(`[Cache Warmup] Warming up cache for ${pageIds.length} pages`);
+    console.log('[Cache Warmup] Page IDs to warm up:', pageIds.map(id => id.substring(0, 8) + '...'));
 
     if (pageIds.length === 0) {
       return res.status(200).json({
@@ -99,19 +101,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         try {
           console.log(`[Cache Warmup] Fetching page: ${pageIdOrSlug}`);
           
-          // Try to detect if it's a UUID or a slug
-          const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(pageIdOrSlug) ||
-                        /^[0-9a-f]{32}$/i.test(pageIdOrSlug);
+          // Use notion-utils to parse and validate the page ID
+          const parsedPageId = parsePageId(pageIdOrSlug);
           
-          if (!isUuid) {
-            // It's a slug, we need to find the actual page ID
-            // For now, we'll skip slugs that aren't UUIDs
-            console.log(`[Cache Warmup] Skipping non-UUID identifier: ${pageIdOrSlug}`);
-            return { pageId: pageIdOrSlug, success: false, error: 'Not a valid page ID' };
+          if (!parsedPageId) {
+            console.log(`[Cache Warmup] Invalid page ID: ${pageIdOrSlug}`);
+            return { pageId: pageIdOrSlug, success: false, error: 'Invalid page ID' };
           }
           
-          const result = await getPage(pageIdOrSlug);
-          console.log(`[Cache Warmup] Successfully fetched: ${pageIdOrSlug}`);
+          const result = await getPage(parsedPageId);
+          console.log(`[Cache Warmup] Successfully fetched: ${pageIdOrSlug} (parsed: ${parsedPageId})`);
           return { pageId: pageIdOrSlug, success: true };
         } catch (error) {
           console.error(`[Cache Warmup] Failed to fetch page ${pageIdOrSlug}:`, error.message);
@@ -131,6 +130,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         reason: r.status === 'rejected' ? r.reason : r.value?.error
       }));
 
+    console.log(`[Cache Warmup] Results: ${successful} successful, ${failed} failed out of ${pageIds.length} total`);
+    
     res.status(200).json({
       success: true,
       warmedUp: successful,
@@ -138,7 +139,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       message: `Cache warmed up for ${successful} pages`,
       pageIds: pageIds.slice(0, 5), // デバッグ用：最初の5ページIDを返す
       totalPages: pageIds.length,
-      failedDetails: failedDetails.slice(0, 3) // 最初の3つの失敗詳細
+      failedDetails: failedDetails.slice(0, 5), // 最初の5つの失敗詳細
+      debug: {
+        totalAttempted: pageIds.length,
+        successful,
+        failed,
+        sampleFailures: failedDetails.slice(0, 3)
+      }
     });
 
   } catch (error) {

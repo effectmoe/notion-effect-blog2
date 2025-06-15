@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getSiteMap } from '@/lib/get-site-map';
+import { parsePageId } from 'notion-utils';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -16,9 +17,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // canonicalPageMapは { [slug]: pageId } の形式なので、valuesを取得
     if (siteMap.canonicalPageMap && typeof siteMap.canonicalPageMap === 'object') {
       // スラッグではなく実際のページIDを取得
-      pageIds = Object.values(siteMap.canonicalPageMap);
-      console.log(`Found ${pageIds.length} pages in site map`);
-      console.log('Sample page IDs:', pageIds.slice(0, 3));
+      const allPageIds = Object.values(siteMap.canonicalPageMap);
+      console.log('All page IDs from canonicalPageMap:', allPageIds.slice(0, 5));
+      
+      pageIds = allPageIds.filter(id => {
+        // 有効なページIDのみをフィルタリング
+        if (typeof id !== 'string') {
+          console.log('Non-string page ID:', id);
+          return false;
+        }
+        const parsed = parsePageId(id);
+        if (!parsed) {
+          console.log('Failed to parse page ID:', id);
+        }
+        return !!parsed;
+      });
+      console.log(`Found ${pageIds.length} valid page IDs out of ${allPageIds.length} total in site map`);
+      console.log('Sample valid page IDs:', pageIds.slice(0, 3));
     }
     
     // ルートページIDを必ず含める
