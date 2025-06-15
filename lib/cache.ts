@@ -66,7 +66,10 @@ export async function getFromCache<T>(key: string): Promise<T | null> {
   // 2. Redisから取得
   if (redisClient) {
     try {
-      await redisClient.connect();
+      // 接続されていない場合は接続
+      if (redisClient.status !== 'ready') {
+        await redisClient.connect();
+      }
       const redisResult = await redisClient.get(key);
       if (redisResult) {
         console.log(`Cache hit (Redis): ${key}`);
@@ -97,7 +100,10 @@ export async function setToCache<T>(
   // 2. Redisに保存
   if (redisClient) {
     try {
-      await redisClient.connect();
+      // 接続されていない場合は接続
+      if (redisClient.status !== 'ready') {
+        await redisClient.connect();
+      }
       await redisClient.setex(key, ttlSeconds, JSON.stringify(value));
       console.log(`Cached to Redis: ${key}`);
     } catch (error) {
@@ -120,7 +126,10 @@ export async function invalidateCache(pattern: string): Promise<void> {
   // 2. Redisのクリア
   if (redisClient) {
     try {
-      await redisClient.connect();
+      // 接続されていない場合は接続
+      if (redisClient.status !== 'ready') {
+        await redisClient.connect();
+      }
       const keys = await redisClient.keys(`*${pattern}*`);
       if (keys.length > 0) {
         await redisClient.del(...keys);
@@ -223,7 +232,10 @@ export async function getCacheStats() {
 
   if (redisClient) {
     try {
-      await redisClient.connect();
+      // 接続されていない場合は接続
+      if (redisClient.status !== 'ready') {
+        await redisClient.connect();
+      }
       stats.redis.connected = redisClient.status === 'ready';
       
       if (stats.redis.connected) {
@@ -273,12 +285,19 @@ export async function warmupCache(pageIds: string[]) {
 
 // クリーンアップ処理
 export async function cleanupCache() {
-  // メモリキャッシュのクリア
-  memoryCache.clear();
-  
-  // Redis接続のクローズ
-  if (redisClient) {
-    await redisClient.quit();
+  try {
+    // メモリキャッシュのクリア
+    memoryCache.clear();
+    console.log('Memory cache cleared');
+    
+    // Redisキャッシュのクリア（接続は維持）
+    if (redisClient && redisClient.status === 'ready') {
+      await redisClient.flushdb();
+      console.log('Redis cache cleared');
+    }
+  } catch (error) {
+    console.error('Cleanup cache error:', error);
+    throw error;
   }
 }
 
