@@ -17,9 +17,7 @@ import { notion } from './notion-api'
 import { getPreviewImageMap } from './preview-images'
 import { findMissingBlocks } from './fetch-missing-blocks'
 import { CachedNotionAPI } from './cache'
-import { patchFAQRecordMap } from './patch-faq-recordmap'
 import { filterTestCollections } from './filter-test-collections'
-import { debugCollectionView } from './debug-collection'
 
 // キャッシュ付きAPIインスタンスを作成
 const cachedNotion = new CachedNotionAPI({
@@ -65,8 +63,8 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
     chunkNumber: 0
   }) as ExtendedRecordMap
   
-  // FAQマスターのrecordMapを修正
-  recordMap = patchFAQRecordMap(recordMap)
+  // FAQマスターのrecordMapを修正 - 一時的に無効化
+  // recordMap = patchFAQRecordMap(recordMap)
   
   // FAQコレクションの明示的なクエリ実行 - 一時的にコメントアウト
   // const faqCollectionId = '212b802c-b0c6-8046-b4ee-000b2833619c';
@@ -189,10 +187,6 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
   // Filter out test collections and blocks
   recordMap = filterTestCollections(recordMap)
   
-  // Debug FAQ collection view
-  if (process.env.NODE_ENV === 'development') {
-    debugCollectionView(recordMap, '213b802cb0c680ea91c9e30f610943da'); // 新しいFAQリンクビュー
-  }
 
   return recordMap
 }
