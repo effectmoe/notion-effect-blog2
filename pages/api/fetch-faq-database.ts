@@ -13,7 +13,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const notion = new NotionAPI({
-      authToken: process.env.NOTION_TOKEN,
+      authToken: process.env.NOTION_API_SECRET,
       activeUser: process.env.NOTION_ACTIVE_USER,
       userTimeZone: 'Asia/Tokyo'
     });

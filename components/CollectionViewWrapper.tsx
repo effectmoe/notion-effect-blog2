@@ -46,15 +46,17 @@ export const CollectionViewWrapper: React.FC<{ block: any; className?: string; c
     recordMapKeys: Object.keys(recordMap)
   })
   
-  // Special debug for FAQ Master
-  if (block.id === '212b802c-b0c6-80be-aa3a-e91428cbde58' || block.collection_id === '212b802c-b0c6-8046-b4ee-000b2833619c') {
+  // Special debug for FAQ Master (using actual block ID)
+  if (block.id === '212b802c-b0c6-80ea-b7ed-ef4459f38819' || block.collection_id === '212b802c-b0c6-8046-b4ee-000b2833619c') {
     console.log('🎯 FAQ Master block detected!', {
       blockId: block.id,
       collectionId: block.collection_id,
       viewIds: block.view_ids,
       hasRecordMap: !!recordMap,
       hasCollection: !!recordMap.collection,
-      hasCollectionView: !!recordMap.collection_view
+      hasCollectionView: !!recordMap.collection_view,
+      hasCollectionQuery: !!recordMap.collection_query?.[block.collection_id],
+      queryItemCount: recordMap.collection_query?.[block.collection_id]?.collection_group_results?.blockIds?.length || 0
     })
     
     // Add a visible marker in development
@@ -109,7 +111,7 @@ export const CollectionViewWrapper: React.FC<{ block: any; className?: string; c
     console.log(`Rendering Collection component for block ${block.id}`)
     
     // Special marker for FAQ Master in development
-    if (block.id === '212b802c-b0c6-80be-aa3a-e91428cbde58') {
+    if (block.id === '212b802c-b0c6-80ea-b7ed-ef4459f38819') {
       return (
         <>
           <div style={{ background: 'yellow', padding: '10px', margin: '10px 0' }}>

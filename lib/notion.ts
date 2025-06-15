@@ -18,10 +18,12 @@ import { getPreviewImageMap } from './preview-images'
 import { findMissingBlocks } from './fetch-missing-blocks'
 import { CachedNotionAPI } from './cache'
 import { patchFAQRecordMap } from './patch-faq-recordmap'
+import { filterTestCollections } from './filter-test-collections'
+import { debugCollectionView } from './debug-collection'
 
 // キャッシュ付きAPIインスタンスを作成
 const cachedNotion = new CachedNotionAPI({
-  authToken: process.env.NOTION_TOKEN,
+  authToken: process.env.NOTION_API_SECRET,
   defaultTTL: 3600 // 1時間
 })
 
@@ -66,31 +68,50 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
   // FAQマスターのrecordMapを修正
   recordMap = patchFAQRecordMap(recordMap)
   
-  // FAQコレクションを明示的にフェッチ
+  // FAQコレクションの明示的なクエリ実行
   const faqCollectionId = '212b802c-b0c6-8046-b4ee-000b2833619c';
-  if (!recordMap.collection || !recordMap.collection[faqCollectionId]) {
-    console.log('Fetching FAQ collection separately...');
+  const faqViewId = '212b802c-b0c6-8026-8290-000cee82ffad'; // 公開FAQ view
+  
+  // Check if FAQ collection query results are empty
+  if (!recordMap.collection_query?.[faqCollectionId]?.collection_group_results?.blockIds?.length) {
+    console.log('FAQ collection query results are empty, fetching collection data...');
     try {
-      const faqData = await api.getPage(faqCollectionId, {
-        fetchMissingBlocks: true,
-        fetchCollections: true,
-        signFileUrls: false
-      }) as ExtendedRecordMap;
+      // Try to get collection data using getCollectionData
+      const collectionView = {
+        id: faqViewId,
+        type: 'gallery' as const
+      };
       
-      // FAQコレクションデータをマージ
-      if (faqData.collection && faqData.collection[faqCollectionId]) {
-        if (!recordMap.collection) recordMap.collection = {};
-        recordMap.collection[faqCollectionId] = faqData.collection[faqCollectionId];
+      const faqData = await notion.getCollectionData(
+        faqCollectionId,
+        collectionView,
+        {
+          limit: 100,
+          searchQuery: '',
+          userTimeZone: 'Asia/Tokyo'
+        }
+      );
+      
+      if (faqData?.recordMap) {
+        // Merge the FAQ data into the main recordMap
+        recordMap = mergeRecordMaps(recordMap, faqData.recordMap);
         console.log('FAQ collection data merged successfully');
-      }
-      
-      // collection_queryもマージ
-      if (faqData.collection_query && faqData.collection_query[faqCollectionId]) {
+        
+        // Also ensure collection_query is populated
         if (!recordMap.collection_query) recordMap.collection_query = {};
-        recordMap.collection_query[faqCollectionId] = faqData.collection_query[faqCollectionId];
+        if (!recordMap.collection_query[faqCollectionId]) {
+          recordMap.collection_query[faqCollectionId] = {
+            collection_group_results: {
+              type: 'results',
+              blockIds: Object.keys(faqData.recordMap.block || {}).filter(id => id !== faqCollectionId),
+              aggregationResults: [],
+              total: Object.keys(faqData.recordMap.block || {}).length - 1
+            }
+          };
+        }
       }
     } catch (error) {
-      console.error('Failed to fetch FAQ collection:', error);
+      console.error('Failed to fetch FAQ collection data:', error);
     }
   }
   
@@ -167,6 +188,14 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
   }
 
   await getTweetsMap(recordMap)
+
+  // Filter out test collections and blocks
+  recordMap = filterTestCollections(recordMap)
+  
+  // Debug FAQ collection view
+  if (process.env.NODE_ENV === 'development') {
+    debugCollectionView(recordMap, '212b802c-b0c6-80ea-b7ed-ef4459f38819');
+  }
 
   return recordMap
 }

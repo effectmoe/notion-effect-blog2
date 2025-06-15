@@ -34,7 +34,7 @@ import { CustomPageLink } from './CustomPageLink'
 // import { CollectionViewWrapper } from './CollectionViewWrapper'
 import StructuredData from './StructuredData'
 import { AutoBreadcrumb } from './AutoBreadcrumb'
-import { FAQSection } from './FAQSection'
+import { NotionFAQ } from './NotionFAQ'
 import styles from './styles.module.css'
 
 // -----------------------------------------------------------------------------
@@ -488,9 +488,7 @@ export function NotionPage({
         
         {/* CafeKinesiページにFAQセクションを追加 */}
         {showFAQ && (
-          <div className={styles.faqContainer}>
-            <FAQSection />
-          </div>
+          <NotionFAQ blockId="212b802c-b0c6-80ea-b7ed-ef4459f38819" />
         )}
       </div>
 
