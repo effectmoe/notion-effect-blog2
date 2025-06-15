@@ -117,13 +117,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       console.log('[Cache Warmup] Fallback IDs sample:', pageIds.slice(0, 3).map(id => id.substring(0, 8) + '...'));
     }
 
-    // バッチ処理の設定（より保守的な設定）
-    const BATCH_SIZE = 3; // 一度に処理するページ数（より少なく）
-    const DELAY_BETWEEN_BATCHES = 1200; // バッチ間の待機時間（ミリ秒）
-    const RETRY_COUNT = 2; // リトライ回数（より少なく）
-    const RETRY_DELAY = 2000; // リトライ前の待機時間（ミリ秒）
-    const PAGE_TIMEOUT = 10000; // ページ取得のタイムアウト（10秒）
-    const MAX_PAGES_PER_REQUEST = 30; // 1リクエストで処理する最大ページ数（より少なく）
+    // バッチ処理の設定（最も保守的な設定）
+    const BATCH_SIZE = 1; // 一度に処理するページ数（順次処理）
+    const DELAY_BETWEEN_BATCHES = 2000; // バッチ間の待機時間（ミリ秒）
+    const RETRY_COUNT = 1; // リトライ回数（シンプル化）
+    const RETRY_DELAY = 3000; // リトライ前の待機時間（ミリ秒）
+    const PAGE_TIMEOUT = 15000; // ページ取得のタイムアウト（15秒）
+    const MAX_PAGES_PER_REQUEST = 20; // 1リクエストで処理する最大ページ数（さらに少なく）
 
     // 処理ページ数を制限（必要に応じて）
     if (pageIds.length > MAX_PAGES_PER_REQUEST) {
@@ -209,13 +209,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const results = [];
     const totalBatches = Math.ceil(pageIds.length / BATCH_SIZE);
     
-    console.log(`[Cache Warmup] Processing ${pageIds.length} pages in ${totalBatches} batches of ${BATCH_SIZE}`);
+    console.log(`[Cache Warmup] Processing ${pageIds.length} pages sequentially (1 page at a time with ${DELAY_BETWEEN_BATCHES}ms delay)`);
     
     for (let i = 0; i < pageIds.length; i += BATCH_SIZE) {
       const batch = pageIds.slice(i, i + BATCH_SIZE);
       const batchNumber = Math.floor(i / BATCH_SIZE) + 1;
       
-      console.log(`[Cache Warmup] Processing batch ${batchNumber}/${totalBatches} (${batch.length} pages)`);
+      console.log(`[Cache Warmup] Processing page ${batchNumber}/${totalBatches}`);
       
       // バッチ内の並列処理
       const batchResults = await Promise.allSettled(
@@ -231,10 +231,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       
       console.log(`[Cache Warmup] Progress: ${processedCount}/${pageIds.length} pages processed (${successCount} success, ${failCount} failed)`);
       
-      // 最後のバッチでない場合は待機
+      // 最後のページでない場合は待機
       if (i + BATCH_SIZE < pageIds.length) {
-        console.log(`[Cache Warmup] Waiting ${DELAY_BETWEEN_BATCHES}ms before next batch...`);
+        console.log(`[Cache Warmup] Waiting ${DELAY_BETWEEN_BATCHES}ms before next page...`);
         await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_BATCHES));
+      }
+      
+      // Vercelタイムアウト対策：50秒経過したら終了
+      const elapsedTime = Date.now() - startTime;
+      if (elapsedTime > 50000) {
+        console.log(`[Cache Warmup] Approaching Vercel timeout (${elapsedTime}ms), stopping early`);
+        break;
       }
     }
 
