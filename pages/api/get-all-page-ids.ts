@@ -24,8 +24,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     console.log('[GetAllPageIds] Starting to fetch all page IDs...');
     
-    // まずgetSiteMapを試す（これがビルド時と同じ方法）
-    const siteMap = await getSiteMap();
+    // まずgetSiteMapを試す（キャッシュをバイパスして最新のデータを取得）
+    const siteMap = await getSiteMap(true);
     
     let allPageIds: string[] = [];
     

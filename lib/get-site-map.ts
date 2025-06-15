@@ -9,11 +9,22 @@ import { notion } from './notion-api'
 
 const uuid = !!includeNotionIdInUrls
 
-export async function getSiteMap(): Promise<types.SiteMap> {
-  const partialSiteMap = await getAllPages(
-    config.rootNotionPageId,
-    config.rootNotionSpaceId
-  )
+export async function getSiteMap(bypassCache = false): Promise<types.SiteMap> {
+  let partialSiteMap;
+  
+  if (bypassCache) {
+    // キャッシュをバイパスして直接実装を呼ぶ
+    partialSiteMap = await getAllPagesImpl(
+      config.rootNotionPageId,
+      config.rootNotionSpaceId
+    )
+  } else {
+    // 通常はキャッシュされたバージョンを使用
+    partialSiteMap = await getAllPages(
+      config.rootNotionPageId,
+      config.rootNotionSpaceId
+    )
+  }
 
   return {
     site: config.site,
