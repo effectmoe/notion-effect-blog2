@@ -13,7 +13,8 @@ export const FAQNotionView: React.FC<FAQNotionViewProps> = ({
   blockId = '212b802c-b0c6-80ea-b7ed-ef4459f38819',
   viewId = '212b802c-b0c6-8026-8290-000cee82ffad' // 公開FAQビューのID
 }) => {
-  const { recordMap } = useNotionContext();
+  const ctx = useNotionContext();
+  const { recordMap } = ctx;
   
   // FAQマスターブロックを取得
   const block = recordMap.block[blockId];
@@ -48,7 +49,7 @@ export const FAQNotionView: React.FC<FAQNotionViewProps> = ({
   const collectionProps = {
     block: modifiedBlock,
     className: styles.faqCollection,
-    defaultViewId: viewId
+    ctx: ctx
   };
 
   return (
