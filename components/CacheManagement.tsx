@@ -175,6 +175,11 @@ export const CacheManagement: React.FC = () => {
       if (statusPollingInterval) {
         clearInterval(statusPollingInterval);
       }
+      // ジョブポーリングもクリーンアップ
+      if (jobPollingInterval) {
+        console.log('[CacheManagement] Cleaning up job polling interval on unmount');
+        clearInterval(jobPollingInterval);
+      }
     };
   }, []);
 
@@ -436,6 +441,13 @@ export const CacheManagement: React.FC = () => {
   
   // シンプルウォームアップ用のポーリング処理
   const startSimplePolling = () => {
+    // 既存のポーリングをクリア
+    if (jobPollingInterval) {
+      console.log('[CacheManagement] Clearing existing polling interval');
+      clearInterval(jobPollingInterval);
+      setJobPollingInterval(null);
+    }
+    
     let pollCount = 0;
     const maxPolls = 600; // 最大10分
     
@@ -451,6 +463,11 @@ export const CacheManagement: React.FC = () => {
         }
         
         const status = await response.json();
+        console.log('[CacheManagement] Poll status:', { 
+          isProcessing: status.isProcessing, 
+          processed: status.processed, 
+          total: status.total 
+        });
         
         // warmupJob形式に変換
         const jobStatus = {
@@ -470,6 +487,7 @@ export const CacheManagement: React.FC = () => {
         
         // 完了チェック
         if (!status.isProcessing && status.processed > 0) {
+          console.log('[CacheManagement] Warmup completed, stopping polling');
           clearInterval(interval);
           setJobPollingInterval(null);
           setLoading(false);
@@ -484,14 +502,29 @@ export const CacheManagement: React.FC = () => {
           
           setMessage(message);
           
+          // 履歴を保存
+          saveWarmupResult(status);
+          
           // エラーがあれば表示
           if (status.errors && status.errors.length > 0) {
             console.error('[CacheManagement] Recent errors:', status.errors);
           }
+          return; // 重要: ポーリングを確実に停止
+        }
+        
+        // エラー状態のチェック（処理が始まっていない場合）
+        if (!status.isProcessing && status.processed === 0) {
+          console.log('[CacheManagement] Warmup not started or failed');
+          clearInterval(interval);
+          setJobPollingInterval(null);
+          setLoading(false);
+          setMessage('❌ ウォームアップが開始されませんでした');
+          return;
         }
         
         pollCount++;
         if (pollCount >= maxPolls) {
+          console.log('[CacheManagement] Polling timeout');
           clearInterval(interval);
           setJobPollingInterval(null);
           setLoading(false);
@@ -500,6 +533,14 @@ export const CacheManagement: React.FC = () => {
         
       } catch (error) {
         console.error('[CacheManagement] Poll error:', error);
+        // エラーが連続する場合はポーリングを停止
+        pollCount++;
+        if (pollCount >= 5) {
+          clearInterval(interval);
+          setJobPollingInterval(null);
+          setLoading(false);
+          setMessage('❌ ステータス取得エラー');
+        }
       }
     }, 1000); // 1秒ごと
     

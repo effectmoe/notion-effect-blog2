@@ -47,6 +47,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+  // キャッシュを無効化
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate')
+  res.setHeader('Pragma', 'no-cache')
+  res.setHeader('Expires', '0')
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end()
@@ -189,9 +193,15 @@ async function startBackgroundProcessing() {
   console.log('[Warmup] Starting background processing...')
   
   const processNextBatch = async () => {
-    if (!warmupState.isProcessing || warmupState.processed >= warmupState.total) {
+    if (!warmupState.isProcessing) {
+      console.log('[Warmup] Processing already stopped')
+      return
+    }
+    
+    if (warmupState.processed >= warmupState.total) {
       warmupState.isProcessing = false
-      console.log('[Warmup] Background processing completed')
+      warmupState.lastUpdate = Date.now()
+      console.log('[Warmup] Background processing completed - all pages processed')
       return
     }
 
@@ -241,8 +251,10 @@ async function startBackgroundProcessing() {
         // 少し待ってから次のバッチを処理（サーバー負荷軽減）
         setTimeout(processNextBatch, 1000)
       } else {
+        // 全ページ処理完了
         warmupState.isProcessing = false
-        console.log('[Warmup] All pages processed')
+        warmupState.lastUpdate = Date.now()
+        console.log('[Warmup] All pages processed - setting isProcessing to false')
       }
       
     } catch (error: any) {
@@ -351,6 +363,13 @@ async function getStatus(req: NextApiRequest, res: NextApiResponse) {
   const progress = warmupState.total > 0
     ? Math.round((warmupState.processed / warmupState.total) * 100)
     : 0
+
+  console.log('[Warmup] Status request:', {
+    isProcessing: warmupState.isProcessing,
+    processed: warmupState.processed,
+    total: warmupState.total,
+    progress: progress
+  })
 
   return res.status(200).json({
     ...warmupState,
