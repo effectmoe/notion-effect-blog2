@@ -373,6 +373,48 @@ export async function cleanupCache() {
   }
 }
 
+// 複数のキャッシュキーを一度に確認
+export async function checkCacheExists(keys: string[]): Promise<Map<string, boolean>> {
+  const result = new Map<string, boolean>();
+  
+  for (const key of keys) {
+    const cached = memoryCache.get(key);
+    const exists = cached !== undefined;
+    result.set(key, exists);
+  }
+  
+  return result;
+}
+
+// キャッシュ統計の取得
+export function getCacheStatistics() {
+  let totalSize = 0;
+  let validCount = 0;
+  let expiredCount = 0;
+  const now = Date.now();
+  
+  // メモリキャッシュの全エントリを確認
+  const entries = Array.from(memoryCache.entries ? memoryCache.entries() : []);
+  
+  for (const [key, value] of entries) {
+    if (value && typeof value === 'object') {
+      try {
+        totalSize += JSON.stringify(value).length;
+        validCount++;
+      } catch (e) {
+        // JSON変換エラーは無視
+      }
+    }
+  }
+  
+  return {
+    totalEntries: memoryCache.size,
+    validEntries: validCount,
+    expiredEntries: expiredCount,
+    estimatedSizeKB: Math.round(totalSize / 1024)
+  };
+}
+
 // エクスポート
 export default {
   get: getFromCache,
@@ -382,5 +424,7 @@ export default {
   stats: getCacheStats,
   warmup: warmupCache,
   cleanup: cleanupCache,
+  checkExists: checkCacheExists,
+  statistics: getCacheStatistics,
   CachedNotionAPI,
 };

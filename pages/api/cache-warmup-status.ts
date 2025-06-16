@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { warmupJobs } from './cache-warmup-start';
+import { getJobStatus as getFastJobStatus } from './cache-warmup-fast';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -12,6 +13,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ error: 'Invalid jobId' });
   }
   
+  // まず高速ジョブを確認
+  const fastJob = getFastJobStatus(jobId);
+  if (fastJob) {
+    const progress = fastJob.total > 0 ? Math.round((fastJob.processed / fastJob.total) * 100) : 0;
+    const elapsedSeconds = Math.floor((Date.now() - fastJob.startTime) / 1000);
+    
+    return res.status(200).json({
+      jobId,
+      status: fastJob.status,
+      progress,
+      total: fastJob.total,
+      processed: fastJob.processed,
+      succeeded: fastJob.succeeded,
+      failed: fastJob.failed,
+      skipped: fastJob.skipped,
+      elapsedSeconds,
+      isComplete: fastJob.status === 'completed' || fastJob.status === 'failed',
+      isFastJob: true
+    });
+  }
+  
+  // 既存のジョブを確認
   const job = warmupJobs.get(jobId);
   
   if (!job) {

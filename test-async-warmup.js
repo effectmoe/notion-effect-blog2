@@ -44,9 +44,9 @@ async function testAsyncWarmup() {
     const clearData = await clearResponse.json();
     console.log('   Cache cleared successfully\n');
 
-    // Step 3: Start async warmup job
-    console.log('3. Starting async warmup job...');
-    const warmupResponse = await fetch(`${BASE_URL}/api/cache-warmup-start`, {
+    // Step 3: Start fast async warmup job
+    console.log('3. Starting FAST async warmup job...');
+    const warmupResponse = await fetch(`${BASE_URL}/api/cache-warmup-fast`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -100,9 +100,13 @@ async function testAsyncWarmup() {
           console.log(`   [${progressBar}] ${status.progress}%`);
           console.log(`   Status: ${status.status}`);
           console.log(`   Processed: ${status.processed}/${status.total} pages`);
-          console.log(`   Success: ${status.succeeded} | Failed: ${status.failed}`);
-          console.log(`   Success Rate: ${status.successRate}%`);
-          console.log(`   Batch: ${status.currentBatch}/${status.totalBatches}`);
+          console.log(`   Success: ${status.succeeded} | Failed: ${status.failed}${status.skipped ? ` | Skipped: ${status.skipped}` : ''}`);
+          if (status.successRate !== undefined) {
+            console.log(`   Success Rate: ${status.successRate}%`);
+          }
+          if (status.currentBatch && status.totalBatches) {
+            console.log(`   Batch: ${status.currentBatch}/${status.totalBatches}`);
+          }
           
           if (status.elapsedSeconds && status.estimatedSecondsRemaining) {
             console.log(`   Time: ${Math.floor(status.elapsedSeconds / 60)}m ${status.elapsedSeconds % 60}s elapsed, ~${Math.ceil(status.estimatedSecondsRemaining / 60)}m remaining`);
@@ -116,12 +120,15 @@ async function testAsyncWarmup() {
         }
         
         // Check if job is complete
-        if (status.status === 'completed' || status.status === 'failed') {
+        if (status.isComplete) {
           console.log('\n=== Job Complete ===');
           console.log(`Final Status: ${status.status}`);
           console.log(`Total Pages: ${status.total}`);
           console.log(`Processed: ${status.processed}`);
-          console.log(`Success: ${status.succeeded} (${status.successRate}%)`);
+          console.log(`Success: ${status.succeeded}`);
+          if (status.skipped) {
+            console.log(`Skipped (cached): ${status.skipped}`);
+          }
           console.log(`Failed: ${status.failed}`);
           
           const duration = status.elapsedSeconds;

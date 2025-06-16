@@ -42,17 +42,20 @@ interface WarmupJob {
   jobId: string;
   status: string;
   progress: number;
-  successRate: number;
+  successRate?: number;
   total: number;
   processed: number;
   succeeded: number;
   failed: number;
-  currentBatch: number;
-  totalBatches: number;
+  skipped?: number;
+  currentBatch?: number;
+  totalBatches?: number;
   elapsedSeconds: number;
-  estimatedSecondsRemaining: number | null;
-  errors: Array<{ pageId: string; error: string }>;
-  errorSummary: Record<string, number>;
+  estimatedSecondsRemaining?: number | null;
+  errors?: Array<{ pageId: string; error: string }>;
+  errorSummary?: Record<string, number>;
+  isComplete?: boolean;
+  isFastJob?: boolean;
 }
 
 export const CacheManagement: React.FC = () => {
@@ -132,13 +135,16 @@ export const CacheManagement: React.FC = () => {
           setWarmupJob(status);
           
           // 完了時の処理
-          if (status.status === 'completed' || status.status === 'failed') {
+          if (status.isComplete) {
             clearInterval(interval);
             setJobPollingInterval(null);
             setLoading(false);
             
             if (status.status === 'completed') {
-              setMessage(`✅ ウォームアップ完了: ${status.succeeded}/${status.total}ページ (成功率: ${status.successRate}%)`);
+              const message = status.skipped > 0 
+                ? `✅ ウォームアップ完了: ${status.succeeded}/${status.total}ページ (スキップ: ${status.skipped}ページ)`
+                : `✅ ウォームアップ完了: ${status.succeeded}/${status.total}ページ`;
+              setMessage(message);
             } else {
               setMessage(`❌ ウォームアップ失敗`);
             }
@@ -147,7 +153,7 @@ export const CacheManagement: React.FC = () => {
       } catch (error) {
         console.error('[CacheManagement] Job status poll error:', error);
       }
-    }, 2000); // 2秒ごと
+    }, 1000); // 1秒ごと（高速ポーリング）
     
     setJobPollingInterval(interval);
     
@@ -333,12 +339,12 @@ export const CacheManagement: React.FC = () => {
       // 3. 少し待つ
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // 4. 非同期ウォームアップジョブを開始
-      console.log('[CacheManagement] Step 3: Starting warmup job...');
+      // 4. 非同期ウォームアップジョブを開始（高速版）
+      console.log('[CacheManagement] Step 3: Starting fast warmup job...');
       setProgress(prev => prev ? { ...prev, phase: 'warming' } : null);
-      setMessage('🔥 ウォームアップジョブを開始中...');
+      setMessage('🚀 高速ウォームアップを開始中...');
       
-      const warmupResponse = await fetch('/api/cache-warmup-start', {
+      const warmupResponse = await fetch('/api/cache-warmup-fast', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -873,7 +879,7 @@ export const CacheManagement: React.FC = () => {
             <span className={styles.progressPhase}>
               {progress?.phase === 'preparing' && '📄 準備中...'}
               {progress?.phase === 'clearing' && '🗑️ キャッシュをクリア中...'}
-              {(progress?.phase === 'warming' || processingStatus?.isProcessing || warmupJob?.status === 'processing') && '🔥 ウォームアップ中...'}
+              {(progress?.phase === 'warming' || processingStatus?.isProcessing || warmupJob?.status === 'processing' || warmupJob?.status === 'running') && '🔥 ウォームアップ中...'}
               {(progress?.phase === 'complete' || warmupJob?.status === 'completed') && !processingStatus?.isProcessing && '✅ 完了'}
               {warmupJob?.status === 'failed' && '❌ 失敗'}
               {warmupJob?.status === 'pending' && '⏳ 開始待機中...'}
@@ -917,6 +923,9 @@ export const CacheManagement: React.FC = () => {
               </div>
               <div className={styles.progressStats}>
                 <span className={styles.progressSuccess}>✅ 成功: {processingStatus?.succeeded || progress?.succeeded || warmupJob?.succeeded || 0}</span>
+                {(warmupJob?.skipped || 0) > 0 && (
+                  <span className={styles.progressSkipped}>⏭️ スキップ: {warmupJob.skipped}</span>
+                )}
                 {(processingStatus?.failed || progress?.failed || warmupJob?.failed || 0) > 0 && (
                   <span className={styles.progressFailed}>❌ 失敗: {processingStatus?.failed || progress?.failed || warmupJob?.failed || 0}</span>
                 )}
