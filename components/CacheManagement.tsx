@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useRealtimeUpdates } from '@/hooks/useRealtimeUpdates';
+import { Tooltip } from './Tooltip';
 import styles from './CacheManagement.module.css';
 
 interface CacheStats {
@@ -911,50 +912,56 @@ export const CacheManagement: React.FC = () => {
         <h2 className={styles.mainActionTitle}>🎯 通常使用するのはこれだけ！</h2>
         <div className={styles.mainActionCard}>
           <div className={styles.mainActionButtons}>
-            <button
-              onClick={handleOptimizedWarmup}
-              disabled={loading}
-              className={styles.mainActionButton}
-            >
-              <div className={styles.mainActionIcon}>🚀</div>
-              <div className={styles.mainActionContent}>
-                <div className={styles.mainActionName}>最適化ウォームアップ</div>
-                <div className={styles.mainActionDescription}>
-                  重複ページを除外して高速処理<br />
-                  <small>（推奨: 2-3分で完了）</small>
+            <Tooltip content="すべてのページを事前に読み込んでキャッシュに保存します。初回アクセス時の表示速度が大幅に向上します。">
+              <button
+                onClick={handleOptimizedWarmup}
+                disabled={loading}
+                className={styles.mainActionButton}
+              >
+                <div className={styles.mainActionIcon}>🚀</div>
+                <div className={styles.mainActionContent}>
+                  <div className={styles.mainActionName}>最適化ウォームアップ</div>
+                  <div className={styles.mainActionDescription}>
+                    重複ページを除外して高速処理<br />
+                    <small>（推奨: 2-3分で完了）</small>
+                  </div>
                 </div>
-              </div>
-            </button>
+              </button>
+            </Tooltip>
             
-            <button
-              onClick={handleClearAndWarmup}
-              disabled={loading}
-              className={styles.mainActionButton}
-            >
-              <div className={styles.mainActionIcon}>🔄</div>
-              <div className={styles.mainActionContent}>
-                <div className={styles.mainActionName}>クリア&ウォームアップ</div>
-                <div className={styles.mainActionDescription}>
-                  キャッシュ削除後に高速ウォームアップ<br />
-                  <small>（全ページを並列処理）</small>
+            <Tooltip content="既存のキャッシュをすべて削除してから、新しくキャッシュを作成します。Notionのコンテンツを大幅に更新した場合に使用してください。">
+              <button
+                onClick={handleClearAndWarmup}
+                disabled={loading}
+                className={styles.mainActionButton}
+              >
+                <div className={styles.mainActionIcon}>🔄</div>
+                <div className={styles.mainActionContent}>
+                  <div className={styles.mainActionName}>クリア&ウォームアップ</div>
+                  <div className={styles.mainActionDescription}>
+                    キャッシュ削除後に高速ウォームアップ<br />
+                    <small>（全ページを並列処理）</small>
+                  </div>
                 </div>
-              </div>
-            </button>
+              </button>
+            </Tooltip>
             
-            <button
-              onClick={handleAutoWarmup}
-              disabled={loading || isAutoProcessing}
-              className={`${styles.mainActionButton} ${styles.autoButton}`}
-            >
-              <div className={styles.mainActionIcon}>🚀</div>
-              <div className={styles.mainActionContent}>
-                <div className={styles.mainActionName}>全自動処理</div>
-                <div className={styles.mainActionDescription}>
-                  全ページを自動的に処理します<br />
-                  <small>（約6-8分で完了）</small>
+            <Tooltip content="すべてのページを段階的に処理します。サーバー負荷を分散しながら確実にキャッシュを作成します。">
+              <button
+                onClick={handleAutoWarmup}
+                disabled={loading || isAutoProcessing}
+                className={`${styles.mainActionButton} ${styles.autoButton}`}
+              >
+                <div className={styles.mainActionIcon}>🚀</div>
+                <div className={styles.mainActionContent}>
+                  <div className={styles.mainActionName}>全自動処理</div>
+                  <div className={styles.mainActionDescription}>
+                    全ページを自動的に処理します<br />
+                    <small>（約6-8分で完了）</small>
+                  </div>
                 </div>
-              </div>
-            </button>
+              </button>
+            </Tooltip>
           </div>
           
           <div className={styles.mainActionExplain}>
@@ -1171,6 +1178,12 @@ export const CacheManagement: React.FC = () => {
                     : warmupJob?.successRate
                     ? warmupJob.successRate
                     : Math.round(((progress?.succeeded || 0) / (progress?.current || 1)) * 100)}%
+                  {/* ヒント表示 */}
+                  {((processingStatus?.failed || progress?.failed || warmupJob?.failed || 0) > 0) && (
+                    <span style={{ fontSize: '0.75rem', color: '#6b7280', marginLeft: '0.5rem' }}>
+                      （削除されたページや権限のないページは失敗します）
+                    </span>
+                  )}
                 </div>
               )}
               {/* ジョブID表示（デバッグ用） */}
