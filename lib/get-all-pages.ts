@@ -1,5 +1,3 @@
-import * as types from 'notion-types';
-import { getAllPagesInSpace } from 'notion-utils';
 import { getSiteMap } from './get-site-map';
 
 // 重複を排除したページリストを取得

@@ -339,37 +339,30 @@ export const CacheManagement: React.FC = () => {
       // 3. 少し待つ
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // 4. 非同期ウォームアップジョブを開始（最適化版）
-      console.log('[CacheManagement] Step 3: Starting optimized warmup job...');
+      // 4. シンプルウォームアップを開始
+      console.log('[CacheManagement] Step 3: Starting simple warmup...');
       setProgress(prev => prev ? { ...prev, phase: 'warming' } : null);
-      setMessage('🚀 最適化ウォームアップを開始中...');
+      setMessage('🚀 ウォームアップを開始中...');
       
-      const warmupResponse = await fetch('/api/cache-warmup-optimized', {
+      const warmupResponse = await fetch('/api/cache-warmup-simple', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({ pageIds }),
+        }
       });
 
-      if (!warmupResponse.ok) {
-        const errorData = await warmupResponse.json();
-        throw new Error(`Warmup start failed: ${errorData.error}`);
-      }
-
-      const warmupData = await warmupResponse.json();
-      console.log('[CacheManagement] Warmup job started:', warmupData);
+      const warmupResult = await warmupResponse.json();
       
-      // 初期ステータスを取得
-      const statusResponse = await fetch(`/api/cache-warmup-status?jobId=${warmupData.jobId}`);
-      if (statusResponse.ok) {
-        const initialStatus = await statusResponse.json();
-        setWarmupJob(initialStatus);
-        setMessage(`🔥 ウォームアップ中... (ジョブID: ${warmupData.jobId})`);
+      if (!warmupResult.success) {
+        throw new Error(`Warmup start failed: ${warmupResult.error}`);
       }
 
-      // 注: ポーリングはuseEffectで自動的に開始される
+      console.log('[CacheManagement] Warmup started:', warmupResult);
+      setMessage(`🔥 ウォームアップ中... (${warmupResult.total}ページ)`);
+      
+      // ポーリング開始
+      startSimplePolling();
       
     } catch (error) {
       setMessage(`❌ エラー: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -378,7 +371,7 @@ export const CacheManagement: React.FC = () => {
     // loadingはジョブ完了時にuseEffectでfalseに設定される
   };
 
-  // 最適化されたウォームアップ（重複除外）
+  // シンプルなウォームアップ（重複除外・安定版）
   const handleOptimizedWarmup = async () => {
     setLoading(true);
     setMessage('');
@@ -386,10 +379,10 @@ export const CacheManagement: React.FC = () => {
     
     try {
       const token = getAuthToken();
-      console.log('[CacheManagement] Starting optimized warmup...');
+      console.log('[CacheManagement] Starting simple warmup...');
       
-      // 最適化ウォームアップを開始
-      const response = await fetch('/api/cache-warmup-optimized', {
+      // シンプルウォームアップを開始
+      const response = await fetch('/api/cache-warmup-simple', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -397,52 +390,100 @@ export const CacheManagement: React.FC = () => {
         }
       });
       
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to start warmup');
+      const result = await response.json();
+      
+      if (!result.success) {
+        if (result.state && result.state.isProcessing) {
+          // 既に処理中
+          setMessage('🔄 既にウォームアップが実行中です');
+          startSimplePolling();
+          return;
+        }
+        throw new Error(result.error || 'Failed to start warmup');
       }
       
-      const { total } = await response.json();
-      setMessage(`🚀 最適化ウォームアップ開始: ${total}ページ（重複除外済み）`);
+      setMessage(`🚀 ウォームアップ開始: ${result.total}ページ（重複除外済み）`);
       
-      // ステータスポーリング
-      const pollInterval = setInterval(async () => {
-        try {
-          const statusRes = await fetch('/api/cache-warmup-status?jobId=current');
-          const status = await statusRes.json();
-          
-          setWarmupJob(status);
-          
-          if (!status.isProcessing && status.processed > 0) {
-            clearInterval(pollInterval);
-            setJobPollingInterval(null);
-            setLoading(false);
-            
-            const message = `✅ ウォームアップ完了\n` +
-              `成功: ${status.succeeded}ページ\n` +
-              `スキップ: ${status.skipped}ページ（キャッシュ済み/重複）\n` +
-              `失敗: ${status.failed}ページ\n` +
-              `処理時間: ${status.elapsedSeconds}秒`;
-            
-            setMessage(message);
-            
-            // エラーサマリを表示
-            if (status.errorSummary && Object.keys(status.errorSummary).length > 0) {
-              console.log('[CacheManagement] Error summary:', status.errorSummary);
-            }
-          }
-        } catch (error) {
-          console.error('[CacheManagement] Status poll error:', error);
-        }
-      }, 1000); // 1秒ごと
-      
-      setJobPollingInterval(pollInterval);
+      // ステータスポーリング開始
+      startSimplePolling();
       
     } catch (error) {
-      console.error('[CacheManagement] Optimized warmup error:', error);
+      console.error('[CacheManagement] Simple warmup error:', error);
       setMessage(`❌ エラー: ${error instanceof Error ? error.message : 'Unknown error'}`);
       setLoading(false);
     }
+  };
+  
+  // シンプルウォームアップ用のポーリング処理
+  const startSimplePolling = () => {
+    let pollCount = 0;
+    const maxPolls = 600; // 最大10分
+    
+    const interval = setInterval(async () => {
+      try {
+        // ステータス取得（GETメソッド）
+        const response = await fetch('/api/cache-warmup-simple', {
+          method: 'GET'
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to get status');
+        }
+        
+        const status = await response.json();
+        
+        // warmupJob形式に変換
+        const jobStatus = {
+          jobId: 'simple',
+          status: status.isProcessing ? 'running' : 'completed',
+          progress: status.progress,
+          total: status.total,
+          processed: status.processed,
+          succeeded: status.succeeded,
+          failed: status.failed,
+          skipped: status.skipped,
+          elapsedSeconds: status.elapsed,
+          isComplete: !status.isProcessing
+        };
+        
+        setWarmupJob(jobStatus);
+        
+        // 完了チェック
+        if (!status.isProcessing && status.processed > 0) {
+          clearInterval(interval);
+          setJobPollingInterval(null);
+          setLoading(false);
+          
+          // 完了メッセージ
+          const message = `✅ ウォームアップ完了！\n` +
+            `処理: ${status.processed}/${status.total}\n` +
+            `成功: ${status.succeeded}\n` +
+            `スキップ: ${status.skipped}（キャッシュ済み/重複）\n` +
+            `失敗: ${status.failed}\n` +
+            `時間: ${status.elapsed}秒`;
+          
+          setMessage(message);
+          
+          // エラーがあれば表示
+          if (status.errors && status.errors.length > 0) {
+            console.error('[CacheManagement] Recent errors:', status.errors);
+          }
+        }
+        
+        pollCount++;
+        if (pollCount >= maxPolls) {
+          clearInterval(interval);
+          setJobPollingInterval(null);
+          setLoading(false);
+          setMessage('⏰ タイムアウト: 処理に時間がかかりすぎています');
+        }
+        
+      } catch (error) {
+        console.error('[CacheManagement] Poll error:', error);
+      }
+    }, 1000); // 1秒ごと
+    
+    setJobPollingInterval(interval);
   };
   
   // キャッシュウォームアップ
