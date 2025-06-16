@@ -86,6 +86,61 @@ export const CacheManagement: React.FC = () => {
   useEffect(() => {
     console.log('[CacheManagement] Component mounted');
     console.log('[CacheManagement] handleTestPageList exists:', typeof handleTestPageList === 'function');
+    
+    // デバッグ用のグローバル関数を設定
+    if (typeof window !== 'undefined') {
+      (window as any).debugWarmup = {
+        getState: () => ({
+          isLoading: loading,
+          warmupJob,
+          batchInterval: !!batchInterval,
+          jobPollingInterval: !!jobPollingInterval,
+          message
+        }),
+        forceProcessBatch: () => processBatch(),
+        startBatch: () => startBatchProcessing(),
+        stopBatch: () => {
+          if (batchInterval) {
+            clearInterval(batchInterval);
+            setBatchInterval(null);
+          }
+        },
+        checkStatus: async () => {
+          const res = await fetch('/api/cache-warmup-simple');
+          const data = await res.json();
+          console.log('API Status:', data);
+          return data;
+        },
+        testInit: async () => {
+          const token = getAuthToken();
+          const res = await fetch('/api/cache-warmup-simple', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({})
+          });
+          const data = await res.json();
+          console.log('Init result:', data);
+          return data;
+        },
+        testBatch: async () => {
+          const token = getAuthToken();
+          const res = await fetch('/api/cache-warmup-simple', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({ action: 'process' })
+          });
+          const data = await res.json();
+          console.log('Batch result:', data);
+          return data;
+        }
+      };
+    }
   }, []);
 
   // キャッシュ統計を取得
@@ -408,6 +463,7 @@ export const CacheManagement: React.FC = () => {
       console.log('[CacheManagement] Starting batch warmup...');
       
       // ステップ1: 初期化
+      console.log('[CacheManagement] Sending initialization request...');
       const initResponse = await fetch('/api/cache-warmup-simple', {
         method: 'POST',
         headers: {
@@ -417,7 +473,9 @@ export const CacheManagement: React.FC = () => {
         body: JSON.stringify({})
       });
       
+      console.log('[CacheManagement] Init response status:', initResponse.status);
       const initResult = await initResponse.json();
+      console.log('[CacheManagement] Init result:', initResult);
       
       if (!initResult.success) {
         if (initResult.state && initResult.state.isProcessing) {
@@ -466,8 +524,11 @@ export const CacheManagement: React.FC = () => {
   
   // バッチ処理
   const processBatch = async () => {
+    console.log('[CacheManagement] processBatch called');
     try {
       const token = getAuthToken();
+      console.log('[CacheManagement] Sending batch process request...');
+      
       const response = await fetch('/api/cache-warmup-simple', {
         method: 'POST',
         headers: {
@@ -477,7 +538,9 @@ export const CacheManagement: React.FC = () => {
         body: JSON.stringify({ action: 'process' })
       });
       
+      console.log('[CacheManagement] Batch response status:', response.status);
       const result = await response.json();
+      console.log('[CacheManagement] Batch result:', result);
       
       if (result.completed) {
         // 処理完了
@@ -487,6 +550,7 @@ export const CacheManagement: React.FC = () => {
         }
         
         console.log('[CacheManagement] Batch processing completed');
+        setMessage(`✅ 処理完了！ ${result.state?.succeeded || 0}/${result.state?.total || 0} 成功`);
       } else if (result.success === false && !result.state?.isProcessing) {
         // 処理が停止した
         if (batchInterval) {
@@ -494,6 +558,12 @@ export const CacheManagement: React.FC = () => {
           setBatchInterval(null);
         }
         console.log('[CacheManagement] Batch processing stopped');
+        setMessage('⚠️ 処理が停止しました');
+      } else {
+        // 処理継続中
+        const state = result.state || {};
+        console.log('[CacheManagement] Processing batch', state.currentBatch, 'of', Math.ceil(state.total / 3));
+        setMessage(`処理中... バッチ ${state.currentBatch}/${Math.ceil(state.total / 3)} (${state.processed}/${state.total}ページ)`);
       }
       
     } catch (error) {
@@ -502,6 +572,7 @@ export const CacheManagement: React.FC = () => {
         clearInterval(batchInterval);
         setBatchInterval(null);
       }
+      setMessage(`❌ バッチ処理エラー: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
