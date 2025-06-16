@@ -249,7 +249,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
       },
       recommendation: allPageIds.length > 0 ? 'Use getAllPageIds' : 
-                     siteMapPages.length > 0 ? 'Use getSiteMap' : 
+                     allPagesWithDetails.length > 0 ? 'Use getSiteMap' : 
                      'Check environment variables and Notion permissions',
       troubleshooting: {
         noPages: 'If no pages found, check:',
