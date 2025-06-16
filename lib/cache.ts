@@ -18,27 +18,64 @@ const memoryCache = new LRUCache<string, any>({
 
 // Redisクライアントの初期化
 let redisClient: Redis | null = null;
+let redisConnected = false;
 
-if (process.env.REDIS_URL) {
-  redisClient = new Redis(process.env.REDIS_URL, {
-    maxRetriesPerRequest: 3,
-    retryStrategy: (times) => {
-      if (times > 3) return null;
-      return Math.min(times * 100, 3000);
-    },
-    enableOfflineQueue: false,
-    lazyConnect: true,
-  });
+// Redis接続を試みる（ただしエラーでもアプリは動作継続）
+function initializeRedis() {
+  if (!process.env.REDIS_URL) {
+    console.warn('[Redis] No REDIS_URL configured. Using memory cache only.');
+    return;
+  }
 
-  redisClient.on('error', (err) => {
-    console.error('Redis error:', err);
-    // Redisエラー時はメモリキャッシュにフォールバック
-  });
+  try {
+    redisClient = new Redis(process.env.REDIS_URL, {
+      maxRetriesPerRequest: 3,
+      retryStrategy: (times) => {
+        if (times > 10) {
+          console.error('[Redis] Maximum retry attempts reached');
+          return null;
+        }
+        const delay = Math.min(times * 1000, 10000);
+        console.log(`[Redis] Retry attempt ${times}, waiting ${delay}ms`);
+        return delay;
+      },
+      enableOfflineQueue: true, // オフラインキューを有効化
+      lazyConnect: false, // 即座に接続を試みる
+      connectTimeout: 30000, // 30秒のタイムアウト
+      family: 4, // IPv4を強制（DNS解決の問題対策）
+      reconnectOnError: (err) => {
+        const targetErrors = ['READONLY', 'ECONNRESET', 'ETIMEDOUT'];
+        return targetErrors.some(e => err.message.includes(e));
+      },
+    });
 
-  redisClient.on('connect', () => {
-    console.log('Redis connected successfully');
-  });
+    redisClient.on('error', (err) => {
+      console.error('[Redis] Connection error:', err.message);
+      redisConnected = false;
+    });
+
+    redisClient.on('connect', () => {
+      console.log('[Redis] Connected successfully');
+      redisConnected = true;
+    });
+
+    redisClient.on('ready', () => {
+      console.log('[Redis] Ready to accept commands');
+      redisConnected = true;
+    });
+
+    redisClient.on('close', () => {
+      console.log('[Redis] Connection closed');
+      redisConnected = false;
+    });
+  } catch (error) {
+    console.error('[Redis] Failed to initialize:', error);
+    redisClient = null;
+  }
 }
+
+// Redis初期化
+initializeRedis();
 
 // キャッシュキー生成
 export function generateCacheKey(prefix: string, params: Record<string, any>): string {
@@ -63,13 +100,9 @@ export async function getFromCache<T>(key: string): Promise<T | null> {
     return memoryResult;
   }
 
-  // 2. Redisから取得
-  if (redisClient) {
+  // 2. Redisから取得（接続されている場合のみ）
+  if (redisClient && redisConnected) {
     try {
-      // 接続されていない場合は接続
-      if (redisClient.status !== 'ready' && redisClient.status !== 'connecting') {
-        await redisClient.connect();
-      }
       const redisResult = await redisClient.get(key);
       if (redisResult) {
         console.log(`Cache hit (Redis): ${key}`);
@@ -78,10 +111,12 @@ export async function getFromCache<T>(key: string): Promise<T | null> {
         memoryCache.set(key, parsed);
         return parsed;
       }
-    } catch (error) {
-      console.error('Redis get error:', error);
-      // エラー時は続行
+    } catch (error: any) {
+      console.error('[Redis] Get error:', error.message);
+      // エラー時は続行（メモリキャッシュにフォールバック）
     }
+  } else if (redisClient && !redisConnected) {
+    console.log('[Redis] Not connected, using memory cache only');
   }
 
   console.log(`Cache miss: ${key}`);
@@ -94,22 +129,21 @@ export async function setToCache<T>(
   value: T, 
   ttlSeconds: number = 3600
 ): Promise<void> {
-  // 1. メモリキャッシュに保存
+  // 1. メモリキャッシュに保存（常に実行）
   memoryCache.set(key, value, { ttl: ttlSeconds * 1000 });
+  console.log(`Cached to memory: ${key}`);
 
-  // 2. Redisに保存
-  if (redisClient) {
+  // 2. Redisに保存（接続されている場合のみ）
+  if (redisClient && redisConnected) {
     try {
-      // 接続されていない場合は接続
-      if (redisClient.status !== 'ready' && redisClient.status !== 'connecting') {
-        await redisClient.connect();
-      }
       await redisClient.setex(key, ttlSeconds, JSON.stringify(value));
       console.log(`Cached to Redis: ${key}`);
-    } catch (error) {
-      console.error('Redis set error:', error);
-      // エラー時は続行
+    } catch (error: any) {
+      console.error('[Redis] Set error:', error.message);
+      // エラー時は続行（メモリキャッシュは成功しているので）
     }
+  } else if (redisClient && !redisConnected) {
+    console.log('[Redis] Not connected, cached to memory only');
   }
 }
 
@@ -239,29 +273,27 @@ export async function getCacheStats() {
     }
   };
 
-  if (redisClient) {
+  if (redisClient && redisConnected) {
     try {
-      // 接続されていない場合は接続
-      if (redisClient.status !== 'ready' && redisClient.status !== 'connecting') {
-        await redisClient.connect();
-      }
-      stats.redis.connected = redisClient.status === 'ready';
+      stats.redis.connected = true;
       
-      if (stats.redis.connected) {
-        const info = await redisClient.info('memory');
-        const keyCount = await redisClient.dbsize();
-        
-        stats.redis.keyCount = keyCount;
-        
-        // メモリ使用量を解析
-        const memMatch = info.match(/used_memory:(\d+)/);
-        if (memMatch) {
-          stats.redis.memoryUsage = parseInt(memMatch[1], 10);
-        }
+      const info = await redisClient.info('memory');
+      const keyCount = await redisClient.dbsize();
+      
+      stats.redis.keyCount = keyCount;
+      
+      // メモリ使用量を解析
+      const memMatch = info.match(/used_memory:(\d+)/);
+      if (memMatch) {
+        stats.redis.memoryUsage = parseInt(memMatch[1], 10);
       }
-    } catch (error) {
-      console.error('Redis stats error:', error);
+    } catch (error: any) {
+      console.error('[Redis] Stats error:', error.message);
+      stats.redis.connected = false;
     }
+  } else {
+    stats.redis.connected = false;
+    console.log('[Redis] Not connected for stats');
   }
 
   return stats;

@@ -46,6 +46,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const startTime = Date.now();
     console.log('[Cache Warmup] Starting cache warmup process...');
     
+    // Redis接続状態を確認
+    const { getCacheStats } = await import('@/lib/cache');
+    const cacheStats = await getCacheStats();
+    const isRedisAvailable = cacheStats.redis.connected;
+    
+    console.log('[Cache Warmup] Redis status:', isRedisAvailable ? 'Connected' : 'Not available');
+    if (!isRedisAvailable) {
+      console.warn('[Cache Warmup] Redis is not available. Using memory cache only.');
+    }
+    
     // ステータスをリセット
     resetCacheStatus();
     
@@ -121,13 +131,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       console.log('[Cache Warmup] Fallback IDs sample:', pageIds.slice(0, 3).map(id => id.substring(0, 8) + '...'));
     }
 
-    // バッチ処理の設定（超保守的な設定）
-    const BATCH_SIZE = 5; // 一度に処理するページ数（5ページで最適化）
-    const DELAY_BETWEEN_BATCHES = 15000; // バッチ間の待機時間（15秒に増加してレート制限対策）
-    const RETRY_COUNT = 3; // リトライ回数（3回）
-    const RETRY_DELAY = 3000; // リトライ前の待機時間（3秒に増加）
-    const PAGE_TIMEOUT = 45000; // ページ取得のタイムアウト（45秒に延長）
-    const MAX_PAGES_PER_REQUEST = 10; // 1リクエストで処理する最大ページ数（10ページに制限）
+    // バッチ処理の設定（Redis接続状態に応じて調整）
+    const BATCH_SIZE = isRedisAvailable ? 5 : 3; // Redis不在時は小さめのバッチ
+    const DELAY_BETWEEN_BATCHES = isRedisAvailable ? 15000 : 20000; // Redis不在時は長めの遅延
+    const RETRY_COUNT = isRedisAvailable ? 3 : 2; // Redis不在時はリトライを減らす
+    const RETRY_DELAY = 3000; // リトライ前の待機時間（3秒）
+    const PAGE_TIMEOUT = 45000; // ページ取得のタイムアウト（45秒）
+    const MAX_PAGES_PER_REQUEST = isRedisAvailable ? 10 : 5; // Redis不在時は最大ページ数を制限
 
     // 処理ページ数を制限（必要に応じて）
     if (pageIds.length > MAX_PAGES_PER_REQUEST) {
