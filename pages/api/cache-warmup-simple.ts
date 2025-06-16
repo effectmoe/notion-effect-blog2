@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getAllPageIds } from '@/lib/get-all-pages'
 import { getSiteMap } from '@/lib/get-site-map'
+import { db } from '@/lib/db'
 
 // グローバルな処理状態（正常動作版と同じ構造）
 interface WarmupState {
@@ -17,27 +18,53 @@ interface WarmupState {
   pageIds: string[]
 }
 
-// モジュールレベルの状態変数（正常動作版と同じ）
-let warmupState: WarmupState = {
-  isProcessing: false,
-  startTime: 0,
-  total: 0,
-  processed: 0,
-  succeeded: 0,
-  failed: 0,
-  skipped: 0,
-  errors: [],
-  lastUpdate: Date.now(),
-  currentBatch: 0,
-  pageIds: []
+// シンプルで安全なキー名（namespaceで既に分離されている）
+const WARMUP_STATE_KEY = 'warmup:state'
+
+// 状態取得
+async function getWarmupState(): Promise<WarmupState> {
+  try {
+    const state = await db.get(WARMUP_STATE_KEY)
+    return state || {
+      isProcessing: false,
+      startTime: 0,
+      total: 0,
+      processed: 0,
+      succeeded: 0,
+      failed: 0,
+      skipped: 0,
+      errors: [],
+      lastUpdate: Date.now(),
+      currentBatch: 0,
+      pageIds: []
+    }
+  } catch (error) {
+    console.error('[Warmup] DB error:', error)
+    // デフォルト値を返す
+    return {
+      isProcessing: false,
+      startTime: 0,
+      total: 0,
+      processed: 0,
+      succeeded: 0,
+      failed: 0,
+      skipped: 0,
+      errors: [],
+      lastUpdate: Date.now(),
+      currentBatch: 0,
+      pageIds: []
+    }
+  }
 }
 
-// デバッグ用に状態を確認
-console.log('[Warmup] Script loaded, current state:', {
-  isProcessing: warmupState.isProcessing,
-  total: warmupState.total,
-  currentBatch: warmupState.currentBatch
-})
+// 状態保存
+async function saveWarmupState(state: WarmupState): Promise<void> {
+  try {
+    await db.set(WARMUP_STATE_KEY, state)
+  } catch (error) {
+    console.error('[Warmup] Save error:', error)
+  }
+}
 
 // Vercelの関数タイムアウト設定
 export const config = {
@@ -52,15 +79,18 @@ export const config = {
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   console.log(`[Warmup] ${req.method} request received`, req.body)
+  
+  // デバッグ用: リクエストごとに状態を確認
+  const currentState = await getWarmupState()
   console.log('[Warmup Debug] State before processing:', {
-    isProcessing: warmupState.isProcessing,
-    total: warmupState.total,
-    currentBatch: warmupState.currentBatch
+    isProcessing: currentState.isProcessing,
+    total: currentState.total,
+    currentBatch: currentState.currentBatch
   })
 
   // CORS対応
   res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
   // キャッシュを無効化
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate')
@@ -84,6 +114,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   } else if (req.method === 'GET') {
     // ステータス取得
     return getStatus(req, res)
+  } else if (req.method === 'DELETE') {
+    // 状態をリセット
+    return resetWarmup(req, res)
   } else {
     return res.status(405).json({ error: 'Method not allowed' })
   }
@@ -101,13 +134,16 @@ async function startWarmup(req: NextApiRequest, res: NextApiResponse) {
     return res.status(401).json({ error: 'Unauthorized' })
   }
   
+  // 現在の状態を取得
+  const currentState = await getWarmupState()
+  
   // 既に処理中の場合
-  if (warmupState.isProcessing) {
+  if (currentState.isProcessing) {
     console.log('[Warmup] Already processing')
     return res.status(200).json({
       success: false,
       message: 'Already processing',
-      state: warmupState
+      state: currentState
     })
   }
 
@@ -161,8 +197,8 @@ async function startWarmup(req: NextApiRequest, res: NextApiResponse) {
       pageIds = Array(20).fill(null).map((_, i) => `test-page-${i}`)
     }
 
-    // 状態を初期化
-    warmupState = {
+    // 新しい状態を作成
+    const newState: WarmupState = {
       isProcessing: true,  // 重要: 必ずtrueに設定
       startTime: Date.now(),
       total: pageIds.length,
@@ -175,13 +211,16 @@ async function startWarmup(req: NextApiRequest, res: NextApiResponse) {
       currentBatch: 0,
       pageIds: pageIds
     }
+    
+    // 状態をDBに保存
+    await saveWarmupState(newState)
 
     console.log(`[Warmup] Ready to process ${pageIds.length} pages`)
     console.log(`[Warmup] First few page IDs:`, pageIds.slice(0, 5))
     console.log('[Warmup] State after initialization:', {
-      isProcessing: warmupState.isProcessing,  // これがtrueになっているか確認
-      total: warmupState.total,
-      pageIdsLength: warmupState.pageIds.length
+      isProcessing: newState.isProcessing,  // これがtrueになっているか確認
+      total: newState.total,
+      pageIdsLength: newState.pageIds.length
     })
 
     return res.status(200).json({
@@ -203,6 +242,10 @@ async function startWarmup(req: NextApiRequest, res: NextApiResponse) {
 // バッチ処理（管理画面から定期的に呼ばれる）
 async function processBatch(req: NextApiRequest, res: NextApiResponse) {
   console.log('[Warmup] processBatch called')
+  
+  // 現在の状態を取得
+  const warmupState = await getWarmupState()
+  
   console.log('[Warmup] Current state:', {
     isProcessing: warmupState.isProcessing,
     currentBatch: warmupState.currentBatch,
@@ -236,6 +279,10 @@ async function processBatch(req: NextApiRequest, res: NextApiResponse) {
     // 処理完了
     warmupState.isProcessing = false
     warmupState.lastUpdate = Date.now()
+    
+    // 完了状態をDBに保存
+    await saveWarmupState(warmupState)
+    
     console.log('[Warmup] All batches completed')
     
     return res.status(200).json({
@@ -283,6 +330,9 @@ async function processBatch(req: NextApiRequest, res: NextApiResponse) {
     // 次のバッチへ
     warmupState.currentBatch++
     
+    // 更新された状態をDBに保存
+    await saveWarmupState(warmupState)
+    
     const response = {
       success: true,
       completed: false,
@@ -299,6 +349,9 @@ async function processBatch(req: NextApiRequest, res: NextApiResponse) {
     console.error('[Warmup] Batch error:', error)
     warmupState.errors.push(`Batch error: ${error.message}`)
     
+    // エラー状態もDBに保存
+    await saveWarmupState(warmupState)
+    
     return res.status(200).json({
       success: false,
       error: error.message,
@@ -308,7 +361,10 @@ async function processBatch(req: NextApiRequest, res: NextApiResponse) {
 }
 
 // ステータス取得
-function getStatus(req: NextApiRequest, res: NextApiResponse) {
+async function getStatus(req: NextApiRequest, res: NextApiResponse) {
+  // 現在の状態を取得
+  const warmupState = await getWarmupState()
+  
   const elapsed = warmupState.isProcessing 
     ? Math.round((Date.now() - warmupState.startTime) / 1000)
     : 0
@@ -334,6 +390,45 @@ function getStatus(req: NextApiRequest, res: NextApiResponse) {
 
   console.log('[Warmup] Status request:', response)
   return res.status(200).json(response)
+}
+
+// 状態リセット
+async function resetWarmup(req: NextApiRequest, res: NextApiResponse) {
+  console.log('[Warmup] Reset request received')
+  
+  // 認証チェック（オプション）
+  const authHeader = req.headers.authorization
+  const expectedToken = process.env.CACHE_CLEAR_TOKEN
+  
+  if (expectedToken && authHeader !== `Bearer ${expectedToken}`) {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
+  
+  // リセット状態を作成
+  const resetState: WarmupState = {
+    isProcessing: false,
+    startTime: 0,
+    total: 0,
+    processed: 0,
+    succeeded: 0,
+    failed: 0,
+    skipped: 0,
+    errors: [],
+    lastUpdate: Date.now(),
+    currentBatch: 0,
+    pageIds: []
+  }
+  
+  // DBに保存
+  await saveWarmupState(resetState)
+  
+  console.log('[Warmup] State reset completed')
+  
+  return res.status(200).json({
+    success: true,
+    message: 'Warmup state reset',
+    state: resetState
+  })
 }
 
 // 単一ページの処理（正常動作版と同じロジック）
