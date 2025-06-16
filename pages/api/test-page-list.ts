@@ -83,13 +83,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         // 方法1: properties.titleから取得
         if (pageBlock?.properties?.title) {
           const titleProperty = pageBlock.properties.title;
-            console.log(`[Page ${notionPageId}] Title property:`, JSON.stringify(titleProperty));
-            if (Array.isArray(titleProperty)) {
-              if (titleProperty.length > 0 && Array.isArray(titleProperty[0])) {
-                if (titleProperty[0].length > 0) {
-                  title = titleProperty[0][0];
-                  console.log(`[Page ${notionPageId}] Extracted title from properties.title:`, title);
-                }
+          console.log(`[Page ${notionPageId}] Title property:`, JSON.stringify(titleProperty));
+          if (Array.isArray(titleProperty)) {
+            if (titleProperty.length > 0 && Array.isArray(titleProperty[0])) {
+              if (titleProperty[0].length > 0) {
+                title = titleProperty[0][0];
+                console.log(`[Page ${notionPageId}] Extracted title from properties.title:`, title);
               }
             }
           }
