@@ -433,8 +433,14 @@ details[open] .chevron {
 
 .advancedGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .advancedGrid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .advancedCard {

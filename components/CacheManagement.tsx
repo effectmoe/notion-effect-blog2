@@ -1119,10 +1119,23 @@ export const CacheManagement: React.FC = () => {
       </details>
 
       {/* デバッグツールセクション */}
-      <div className={styles.debugSection} style={{ marginTop: '2rem' }}>
-        <h3 className={styles.sectionTitle}>🔍 デバッグツール</h3>
+      <div style={{ 
+        marginTop: '2rem',
+        backgroundColor: 'white',
+        borderRadius: '8px',
+        padding: '1.5rem',
+        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
+      }}>
+        <h3 style={{ 
+          fontSize: '1.25rem',
+          fontWeight: 'bold',
+          marginBottom: '1rem',
+          color: '#1f2937'
+        }}>
+          🔍 デバッグツール
+        </h3>
         
-        <div className={styles.debugCard} style={{ 
+        <div style={{ 
           border: '1px solid #e5e5e5', 
           borderRadius: '8px', 
           padding: '1.5rem',
