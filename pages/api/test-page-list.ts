@@ -19,15 +19,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     
     // サイトマップから取得を試みる
     console.log('[TestPageList] Trying getSiteMap...');
-    let siteMapPages: string[] = [];
     let siteMapError: string | null = null;
     let siteMap: any = null;
     try {
       siteMap = await getSiteMap();
-      if (siteMap?.canonicalPageMap) {
-        siteMapPages = Object.keys(siteMap.canonicalPageMap);
-      }
-      console.log(`[TestPageList] getSiteMap returned ${siteMapPages.length} pages`);
+      console.log('[TestPageList] Site map structure:', {
+        hasCanonicalPageMap: !!siteMap?.canonicalPageMap,
+        hasPageMap: !!siteMap?.pageMap,
+        sampleCanonicalEntry: siteMap?.canonicalPageMap ? Object.entries(siteMap.canonicalPageMap)[0] : null
+      });
     } catch (error: any) {
       siteMapError = error.message;
       console.error('[TestPageList] getSiteMap error:', error);
@@ -49,32 +49,47 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
     
     // 全ページの詳細情報を取得
-    const allPagesWithDetails = siteMapPages.map(pageId => {
-      try {
-        const siteMapData = siteMap?.pageMap?.[pageId];
-        const pageBlock = siteMapData?.block?.[pageId]?.value;
+    const allPagesWithDetails = [];
+    
+    if (siteMap?.canonicalPageMap) {
+      // canonicalPageMapの構造: { [url/slug]: pageId }
+      for (const [urlOrSlug, pageId] of Object.entries(siteMap.canonicalPageMap)) {
+        if (typeof pageId !== 'string') continue;
+        try {
+          // pageIdが実際のNotionページID
+          const notionPageId = pageId as string;
+          const siteMapData = siteMap?.pageMap?.[notionPageId];
+          const pageBlock = siteMapData?.block?.[notionPageId]?.value;
+          
+          console.log(`[TestPageList] Processing:`, {
+            urlOrSlug,
+            notionPageId,
+            hasPageData: !!siteMapData,
+            hasPageBlock: !!pageBlock
+          });
         
         // タイトルの取得（複数の方法を試す）
         let title = 'Untitled';
         
-        // デバッグ: ページブロック全体を確認
-        if (pageBlock) {
-          console.log(`[Page ${pageId}] Block type: ${pageBlock.type}`);
-          console.log(`[Page ${pageId}] Has properties: ${!!pageBlock.properties}`);
-          if (pageBlock.properties) {
-            console.log(`[Page ${pageId}] Property keys:`, Object.keys(pageBlock.properties));
+          // デバッグ: ページブロック全体を確認
+          if (pageBlock) {
+            console.log(`[Page ${notionPageId}] Block type: ${pageBlock.type}`);
+            console.log(`[Page ${notionPageId}] Has properties: ${!!pageBlock.properties}`);
+            if (pageBlock.properties) {
+              console.log(`[Page ${notionPageId}] Property keys:`, Object.keys(pageBlock.properties));
+            }
           }
-        }
         
         // 方法1: properties.titleから取得
         if (pageBlock?.properties?.title) {
           const titleProperty = pageBlock.properties.title;
-          console.log(`[Page ${pageId}] Title property:`, JSON.stringify(titleProperty));
-          if (Array.isArray(titleProperty)) {
-            if (titleProperty.length > 0 && Array.isArray(titleProperty[0])) {
-              if (titleProperty[0].length > 0) {
-                title = titleProperty[0][0];
-                console.log(`[Page ${pageId}] Extracted title from properties.title:`, title);
+            console.log(`[Page ${notionPageId}] Title property:`, JSON.stringify(titleProperty));
+            if (Array.isArray(titleProperty)) {
+              if (titleProperty.length > 0 && Array.isArray(titleProperty[0])) {
+                if (titleProperty[0].length > 0) {
+                  title = titleProperty[0][0];
+                  console.log(`[Page ${notionPageId}] Extracted title from properties.title:`, title);
+                }
               }
             }
           }
@@ -86,7 +101,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           for (const key of possibleTitleKeys) {
             const prop = pageBlock.properties[key];
             if (prop) {
-              console.log(`[Page ${pageId}] Found property ${key}:`, prop);
+              console.log(`[Page ${notionPageId}] Found property ${key}:`, prop);
               
               // プロパティの値を正しく取得
               if (Array.isArray(prop) && prop[0]) {
@@ -108,7 +123,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (title === 'Untitled' && pageBlock) {
           // format_pageからタイトルを取得
           if (pageBlock.format?.page_icon) {
-            console.log(`[Page ${pageId}] Has page icon:`, pageBlock.format.page_icon);
+            console.log(`[Page ${notionPageId}] Has page icon:`, pageBlock.format.page_icon);
           }
           
           // ページブロックのcontentから最初のテキストを取得
@@ -119,53 +134,84 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               if (firstBlock.type === 'header' || firstBlock.type === 'sub_header' || firstBlock.type === 'sub_sub_header') {
                 if (firstBlock.properties?.title?.[0]?.[0]) {
                   title = firstBlock.properties.title[0][0];
-                  console.log(`[Page ${pageId}] Got title from first header block:`, title);
+                  console.log(`[Page ${notionPageId}] Got title from first header block:`, title);
                 }
               }
             }
           }
         }
         
-        console.log(`[Page ${pageId}] Final title: '${title}', ID: '${pageId}'`);
-        
-        const url = siteMap?.canonicalPageMap?.[pageId] || `/${pageId.replace(/-/g, '')}`;
-        
-        // 最終的なページデータを作成
-        const result = {
-          id: pageId,  // 必ずUUID形式のID
-          title: title,  // 取得したタイトル
-          url,
-          type: pageBlock?.type || 'unknown',
-          hasContent: !!pageBlock?.content,
-          lastEdited: pageBlock?.last_edited_time ? 
-            new Date(pageBlock.last_edited_time).toLocaleString('ja-JP') : 
-            null
-        };
-        
-        // 検証: IDがUUID形式であることを確認
-        const isValidUUID = /^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i.test(pageId.replace(/-/g, ''));
-        if (!isValidUUID) {
-          console.warn(`[Page ${pageId}] WARNING: Page ID is not a valid UUID format!`);
+          // 2. コレクションの場合のタイトル取得
+          if (title === 'Untitled' && siteMapData?.collection) {
+            const collectionId = Object.keys(siteMapData.collection)[0];
+            const collection = siteMapData.collection[collectionId]?.value;
+            if (collection?.name) {
+              if (Array.isArray(collection.name) && collection.name[0]) {
+                title = collection.name[0][0] || collection.name[0] || 'Untitled';
+              } else if (typeof collection.name === 'string') {
+                title = collection.name;
+              }
+              console.log(`[Page ${notionPageId}] Got title from collection:`, title);
+            }
+          }
+          
+          // 3. URLスラッグから推測（最終手段）
+          if (title === 'Untitled' && urlOrSlug && urlOrSlug !== '/') {
+            // URLをタイトルとして使用（キャメルケースやハイフンを変換）
+            title = urlOrSlug
+              .replace(/^\//, '') // 先頭のスラッシュを削除
+              .replace(/-/g, ' ') // ハイフンをスペースに
+              .replace(/([a-z])([A-Z])/g, '$1 $2') // camelCaseをスペース区切りに
+              .split(' ')
+              .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+              .join(' ');
+            console.log(`[Page ${notionPageId}] Generated title from URL:`, title);
+          }
+          
+          console.log(`[Page ${notionPageId}] Final title: '${title}', ID: '${notionPageId}'`);
+          
+          // 最終的なページデータを作成
+          const result = {
+            id: notionPageId,           // 正しいNotionページID
+            title: title,               // 取得したタイトル
+            url: urlOrSlug,            // URL/スラッグ
+            slug: urlOrSlug,           // 明確にするため追加
+            type: pageBlock?.type || 'unknown',
+            hasContent: !!pageBlock?.content,
+            lastEdited: pageBlock?.last_edited_time ? 
+              new Date(pageBlock.last_edited_time).toLocaleString('ja-JP') : 
+              null
+          };
+          
+          // 検証: IDがUUID形式であることを確認
+          const isValidUUID = /^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i.test(notionPageId.replace(/-/g, ''));
+          if (!isValidUUID) {
+            console.warn(`[Page ${notionPageId}] WARNING: Page ID is not a valid UUID format!`);
+          }
+          
+          console.log(`[Page ${notionPageId}] Returning:`, { 
+            id: result.id, 
+            title: result.title,
+            url: result.url,
+            idIsUUID: isValidUUID,
+            titleLength: result.title.length 
+          });
+          
+          allPagesWithDetails.push(result);
+        } catch (e) {
+          console.error(`[Page ${pageId}] Error processing:`, e);
+          allPagesWithDetails.push({
+            id: pageId as string,
+            title: 'Untitled',
+            url: urlOrSlug,
+            slug: urlOrSlug,
+            type: 'unknown',
+            hasContent: false,
+            lastEdited: null
+          });
         }
-        
-        console.log(`[Page ${pageId}] Returning:`, { 
-          id: result.id, 
-          title: result.title,
-          idIsUUID: isValidUUID,
-          titleLength: result.title.length 
-        });
-        return result;
-      } catch (e) {
-        return {
-          id: pageId,
-          title: 'Untitled',
-          url: `/${pageId.replace(/-/g, '')}`,
-          type: 'unknown',
-          hasContent: false,
-          lastEdited: null
-        };
       }
-    });
+    }
     
     // タイトルでソート（Untitledは最後に）
     allPagesWithDetails.sort((a, b) => {
@@ -179,20 +225,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       success: true,
       environment: envCheck,
       results: {
-        pageCount: Math.max(siteMapPages.length, allPageIds.length),
+        pageCount: allPagesWithDetails.length,
         uniquePageCount: allPageIds.length,
-        duplicateCount: siteMapPages.length - allPageIds.length,
+        duplicateCount: Math.max(0, allPagesWithDetails.length - allPageIds.length),
         rootPageId: process.env.NOTION_ROOT_PAGE_ID || process.env.NOTION_PAGE_ID || 'Not set',
         siteMap: {
-          total: siteMapPages.length,
+          total: allPagesWithDetails.length,
           unique: allPageIds.length,
-          duplicates: siteMapPages.length - allPageIds.length,
+          duplicates: Math.max(0, allPagesWithDetails.length - allPageIds.length),
           pages: allPagesWithDetails
         },
-        message: `${allPageIds.length || siteMapPages.length}個のページが検出されました`,
+        message: `${allPagesWithDetails.length}個のページが検出されました`,
         siteMapDetails: {
-          count: siteMapPages.length,
-          sample: siteMapPages.slice(0, 5),
+          count: allPagesWithDetails.length,
+          sample: allPagesWithDetails.slice(0, 5).map(p => ({ id: p.id, title: p.title, url: p.url })),
           method: 'getSiteMap()',
           error: siteMapError
         },

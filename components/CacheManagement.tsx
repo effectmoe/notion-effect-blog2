@@ -1233,22 +1233,6 @@ export const CacheManagement: React.FC = () => {
                             全ページ一覧 ({pageListResult.siteMap.pages?.length || pageListResult.siteMap.sample?.length || 0}件)
                           </summary>
                           
-                          {/* デバッグ: 生データ表示 */}
-                          <div style={{
-                            marginBottom: '1rem',
-                            padding: '0.75rem',
-                            backgroundColor: '#fee2e2',
-                            border: '1px solid #fca5a5',
-                            borderRadius: '4px',
-                            fontSize: '0.75rem'
-                          }}>
-                            <strong>⚠️ デバッグ情報 - 最初のページの生データ:</strong>
-                            {(pageListResult.siteMap?.pages?.[0] || pageListResult.siteMap?.sample?.[0]) && (
-                              <pre style={{ marginTop: '0.5rem', whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}>
-                                {JSON.stringify(pageListResult.siteMap.pages?.[0] || pageListResult.siteMap.sample?.[0], null, 2)}
-                              </pre>
-                            )}
-                          </div>
                           
                           {/* 検索機能 */}
                           <div style={{ marginBottom: '0.75rem' }}>
@@ -1279,66 +1263,20 @@ export const CacheManagement: React.FC = () => {
                             {(() => {
                               const pages = pageListResult.siteMap.pages || pageListResult.siteMap.sample || [];
                               
-                              // データ検証と修正
-                              const correctedPages = pages.map((page: any, idx: number) => {
-                                // UUIDパターンの正規表現
-                                const uuidPattern = /^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i;
-                                
-                                // デバッグ: 最初の3件のページデータを詳しく表示
+                              // デバッグ: 最初の3件のページデータを表示
+                              pages.forEach((page: any, idx: number) => {
                                 if (idx < 3) {
-                                  console.log(`[Page ${idx + 1}] Raw data:`, {
+                                  console.log(`[Page ${idx + 1}] Data:`, {
                                     id: page.id,
                                     title: page.title,
                                     url: page.url,
+                                    slug: page.slug,
                                     type: page.type
                                   });
                                 }
-                                
-                                // IDがUUID形式でない場合、titleとidが入れ替わっている可能性がある
-                                const idIsUUID = uuidPattern.test(page.id.replace(/-/g, ''));
-                                const titleIsUUID = uuidPattern.test(page.title.replace(/-/g, ''));
-                                
-                                // 追加の検証: URLがIDを含んでいるか確認
-                                let needsSwap = false;
-                                
-                                // 方法1: IDがUUID形式でなく、titleがUUID形式の場合
-                                if (!idIsUUID && titleIsUUID) {
-                                  needsSwap = true;
-                                }
-                                
-                                // 方法2: URLがtitleのUUIDを含んでいる場合（titleが実際はID）
-                                if (page.url && titleIsUUID) {
-                                  const cleanTitle = page.title.replace(/-/g, '');
-                                  if (page.url.includes(cleanTitle)) {
-                                    needsSwap = true;
-                                  }
-                                }
-                                
-                                if (needsSwap) {
-                                  console.warn(`[CacheManagement] Swapped data detected for page ${idx + 1}:`, {
-                                    originalId: page.id,
-                                    originalTitle: page.title,
-                                    url: page.url,
-                                    reason: !idIsUUID && titleIsUUID ? 'ID is not UUID but title is' : 'URL contains title UUID'
-                                  });
-                                  // titleとidが入れ替わっている場合は修正
-                                  return {
-                                    ...page,
-                                    id: page.title,
-                                    title: page.id
-                                  };
-                                } else if (idx < 3) {
-                                  console.log(`[Page ${idx + 1}] Data looks correct:`, {
-                                    idIsUUID,
-                                    titleIsUUID,
-                                    urlContainsId: page.url ? page.url.includes(page.id.replace(/-/g, '')) : false
-                                  });
-                                }
-                                
-                                return page;
                               });
                               
-                              const filteredPages = correctedPages.filter((page: any) =>
+                              const filteredPages = pages.filter((page: any) =>
                                 page.title.toLowerCase().includes(pageSearchTerm.toLowerCase()) ||
                                 page.id.toLowerCase().includes(pageSearchTerm.toLowerCase())
                               );
@@ -1443,28 +1381,6 @@ export const CacheManagement: React.FC = () => {
                                     )}
                                   </div>
                                   
-                                  {/* デバッグ情報（一時的） */}
-                                  {index < 3 && (
-                                    <div style={{
-                                      marginTop: '0.5rem',
-                                      padding: '0.5rem',
-                                      backgroundColor: '#fef3c7',
-                                      fontSize: '0.75rem',
-                                      fontFamily: 'monospace',
-                                      whiteSpace: 'pre-wrap',
-                                      wordBreak: 'break-all',
-                                      border: '1px solid #fbbf24'
-                                    }}>
-                                      <strong>DEBUG ページ {index + 1}:</strong>
-                                      {JSON.stringify({ 
-                                        id: page.id, 
-                                        title: page.title,
-                                        url: page.url,
-                                        idLength: page.id.length,
-                                        titleLength: page.title.length
-                                      }, null, 2)}
-                                    </div>
-                                  )}
                                 </div>
                               ));
                             })()}
