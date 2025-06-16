@@ -937,7 +937,11 @@ export const CacheManagement: React.FC = () => {
             {(processingStatus?.total || progress?.total) > 0 && (
               <span className={styles.progressNumbers}>
                 {processingStatus?.processed || progress?.current || 0}/{processingStatus?.total || progress?.total || 0} ページ
-                {processingStatus?.currentBatch && ` (バッチ ${processingStatus.currentBatch}/${processingStatus.totalBatches})`}
+                {processingStatus?.currentBatch && processingStatus.totalBatches && (
+                  <span className={styles.batchInfo}>
+                    {` (バッチ ${processingStatus.currentBatch}/${processingStatus.totalBatches})`}
+                  </span>
+                )}
               </span>
             )}
           </div>
@@ -991,6 +995,12 @@ export const CacheManagement: React.FC = () => {
                       : {count}
                     </span>
                   ))}
+                </div>
+              )}
+              {/* 成功率の表示 */}
+              {(processingStatus?.processed || progress?.current || 0) > 0 && (
+                <div className={styles.successRate}>
+                  成功率: {Math.round(((processingStatus?.succeeded || progress?.succeeded || 0) / (processingStatus?.processed || progress?.current || 1)) * 100)}%
                 </div>
               )}
             </>

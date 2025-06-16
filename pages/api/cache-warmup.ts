@@ -122,11 +122,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // バッチ処理の設定（超保守的な設定）
-    const BATCH_SIZE = 5; // 一度に処理するページ数（5ページに減少）
-    const DELAY_BETWEEN_BATCHES = 10000; // バッチ間の待機時間（10秒に増加）
-    const RETRY_COUNT = 3; // リトライ回数（3回に増加）
-    const RETRY_DELAY = 2000; // リトライ前の待機時間（ミリ秒）
-    const PAGE_TIMEOUT = 30000; // ページ取得のタイムアウト（30秒に増加）
+    const BATCH_SIZE = 5; // 一度に処理するページ数（5ページで最適化）
+    const DELAY_BETWEEN_BATCHES = 15000; // バッチ間の待機時間（15秒に増加してレート制限対策）
+    const RETRY_COUNT = 3; // リトライ回数（3回）
+    const RETRY_DELAY = 3000; // リトライ前の待機時間（3秒に増加）
+    const PAGE_TIMEOUT = 45000; // ページ取得のタイムアウト（45秒に延長）
     const MAX_PAGES_PER_REQUEST = 10; // 1リクエストで処理する最大ページ数（10ページに制限）
 
     // 処理ページ数を制限（必要に応じて）
@@ -177,7 +177,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       
       for (let attempt = 1; attempt <= retries; attempt++) {
         try {
-          console.log(`[Cache Warmup] Fetching page: ${pageIdOrSlug} (attempt ${attempt}/${retries})`)
+          console.log(`[Cache Warmup] 🔄 Fetching page: ${pageIdOrSlug} (attempt ${attempt}/${retries})`)
           
           // タイムアウト付きでページを取得
           const result = await withTimeout(
@@ -211,9 +211,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             });
             await new Promise(resolve => setTimeout(resolve, retryAfter * 1000));
           } else if (!isLastAttempt) {
-            // 指数バックオフ
-            const backoffMs = Math.min(RETRY_DELAY * Math.pow(2, attempt - 1), 10000);
-            console.log(`[Cache Warmup] Retrying in ${backoffMs}ms...`);
+            // 指数バックオフ（より長い待機時間）
+            const backoffMs = Math.min(RETRY_DELAY * Math.pow(2, attempt - 1), 30000);
+            console.log(`[Cache Warmup] Retrying in ${backoffMs}ms (attempt ${attempt}/${retries})...`);
             await new Promise(resolve => setTimeout(resolve, backoffMs));
           }
           
@@ -283,12 +283,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const batchSuccesses = batchResults.filter(r => r.status === 'fulfilled' && r.value?.success);
       const batchFailures = batchResults.filter(r => r.status === 'rejected' || (r.status === 'fulfilled' && !r.value?.success));
       
-      console.log(`[Cache Warmup] Batch ${batchNumber} results:`, {
-        successes: batchSuccesses.map(r => r.status === 'fulfilled' ? r.value.pageId : 'unknown'),
-        failures: batchFailures.map(r => {
-          if (r.status === 'rejected') return { pageId: 'unknown', error: r.reason?.message || 'Unknown error' };
-          return { pageId: (r as any).value.pageId, error: (r as any).value.error, status: (r as any).value.status };
-        })
+      // 個別ページの結果をログ出力
+      batchResults.forEach((result, index) => {
+        const pageId = batch[index];
+        if (result.status === 'fulfilled' && result.value?.success) {
+          console.log(`[Cache Warmup] ✅ SUCCESS: ${pageId}`);
+        } else {
+          const error = result.status === 'rejected' ? result.reason : (result as any).value?.error;
+          console.log(`[Cache Warmup] ❌ FAILED: ${pageId} - ${error?.message || error || 'Unknown error'}`);
+        }
+      });
+      
+      console.log(`[Cache Warmup] Batch ${batchNumber} summary:`, {
+        total: batch.length,
+        succeeded: batchSuccesses.length,
+        failed: batchFailures.length,
+        successRate: `${Math.round((batchSuccesses.length / batch.length) * 100)}%`
       });
       
       // 進捗ログ
@@ -375,11 +385,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }, {} as Record<string, number>);
     
     // 詳細なエラーログを出力
-    console.log('[Cache Warmup] Detailed failure analysis:', failureAnalysis);
+    console.log('[Cache Warmup] 📊 Detailed failure analysis:', failureAnalysis);
     
     // 失敗ページの詳細（最初の10件のみ表示）
     if (failedDetails.length > 0) {
-      console.log(`[Cache Warmup] Failed page details (showing first 10 of ${failedDetails.length}):`, 
+      console.log(`[Cache Warmup] 📋 Failed page details (showing first 10 of ${failedDetails.length}):`, 
         failedDetails.slice(0, 10).map(detail => ({
           pageId: detail.pageId,
           error: detail.error?.substring(0, 100) + (detail.error?.length > 100 ? '...' : ''),
@@ -390,10 +400,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // 429エラーのページを特別に表示
       const rateLimitedPages = failedDetails.filter(d => d.status === '429' || d.error?.includes('rate_limited'));
       if (rateLimitedPages.length > 0) {
-        console.log(`[Cache Warmup] Rate limited pages (${rateLimitedPages.length}):`, 
+        console.log(`[Cache Warmup] ⏱️ Rate limited pages (${rateLimitedPages.length}):`, 
           rateLimitedPages.map(d => d.pageId)
         );
       }
+    }
+    
+    // 最終結果のサマリー
+    const successRate = successful > 0 ? Math.round((successful / pageIds.length) * 100) : 0;
+    console.log(`[Cache Warmup] 🎯 Final Results:`, {
+      totalPages: pageIds.length,
+      successful,
+      failed,
+      successRate: `${successRate}%`,
+      duration: `${Math.round((Date.now() - startTime) / 1000)}s`
+    });
+    
+    // 推奨事項
+    if (failureAnalysis.rateLimited > 0) {
+      console.log('[Cache Warmup] 💡 Recommendation: Increase DELAY_BETWEEN_BATCHES to reduce rate limiting');
+    }
+    if (failureAnalysis.timeout > 0) {
+      console.log('[Cache Warmup] 💡 Recommendation: Increase PAGE_TIMEOUT for slow pages');
     }
 
     // 元のページ数と制限後のページ数を記録
