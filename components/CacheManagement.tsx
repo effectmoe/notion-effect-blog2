@@ -420,14 +420,11 @@ export const CacheManagement: React.FC = () => {
         throw new Error(result.error || result.message || 'Failed to start warmup');
       }
       
-      if (result.needsProcessing) {
-        setMessage(`🚀 ウォームアップを初期化しました (${result.total}ページ)`);
-        // バッチ処理を開始
-        startBatchProcessing();
-      } else {
-        setLoading(false);
-        setMessage('処理するページがありません');
-      }
+      // 処理開始の成功メッセージ
+      setMessage(`🚀 ウォームアップを開始しました (${result.total}ページ)`);
+      
+      // ポーリングを開始（初期化が成功したらすぐにポーリングを開始）
+      startSimplePolling();
       
     } catch (error) {
       console.error('[CacheManagement] Simple warmup error:', error);
@@ -435,83 +432,7 @@ export const CacheManagement: React.FC = () => {
       setLoading(false);
     }
   };
-  
-  // バッチ処理（新しい関数）
-  const startBatchProcessing = () => {
-    let retryCount = 0;
-    const maxRetries = 3;
-    
-    const processBatchInterval = setInterval(async () => {
-      try {
-        // バッチ処理を実行
-        const token = getAuthToken();
-        const response = await fetch('/api/cache-warmup-simple', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-          body: JSON.stringify({ action: 'process' })
-        });
-        
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-        
-        const result = await response.json();
-        console.log('[CacheManagement] Batch result:', result);
-        
-        // ステータス更新
-        if (result.state) {
-          const status = result.state;
-          const statusText = `処理中: ${status.processed}/${status.total} ` +
-            `(成功: ${status.succeeded}, スキップ: ${status.skipped}, 失敗: ${status.failed}) ` +
-            `- ${Math.round((status.processed / status.total) * 100)}%`;
-          
-          setMessage(statusText);
-        }
-        
-        // 完了チェック
-        if (result.completed) {
-          clearInterval(processBatchInterval);
-          setLoading(false);
-          
-          const status = result.state;
-          const completionTime = Math.round((status.lastUpdate - status.startTime) / 1000);
-          const message = `✅ ウォームアップ完了！
-処理済み: ${status.processed}/${status.total}ページ
-成功: ${status.succeeded}
-スキップ: ${status.skipped}
-失敗: ${status.failed}
-処理時間: ${completionTime}秒`;
-          
-          setMessage(message);
-          
-          // 履歴を保存
-          saveWarmupResult(status);
-          
-          // エラーがあれば表示
-          if (status.errors && status.errors.length > 0) {
-            console.error('[CacheManagement] Errors during warmup:', status.errors);
-          }
-        }
-        
-        retryCount = 0; // 成功したらリトライカウントをリセット
-        
-      } catch (error: any) {
-        console.error('[CacheManagement] Batch error:', error);
-        retryCount++;
-        
-        if (retryCount >= maxRetries) {
-          clearInterval(processBatchInterval);
-          setLoading(false);
-          setMessage(`エラー: バッチ処理に失敗しました (${error.message})`);
-        }
-      }
-    }, 2000); // 2秒ごとにバッチ処理
-    
-    setJobPollingInterval(processBatchInterval);
-  };
+
   
   // シンプルウォームアップ用のポーリング処理
   const startSimplePolling = () => {

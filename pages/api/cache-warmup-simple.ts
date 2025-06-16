@@ -56,8 +56,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const { action } = req.body || {}
     
     if (action === 'process') {
-      // バッチ処理を実行
-      return processBatch(req, res)
+      // バックグラウンド処理に移行したため、ステータスのみ返す
+      return getStatus(req, res)
     } else {
       // ウォームアップ開始
       return startWarmup(req, res)
@@ -166,11 +166,13 @@ async function startWarmup(req: NextApiRequest, res: NextApiResponse) {
     console.log(`[Warmup] Ready to process ${pageIds.length} pages`)
     console.log(`[Warmup] First few page IDs:`, pageIds.slice(0, 5))
 
+    // バックグラウンドで処理を開始
+    startBackgroundProcessing()
+
     return res.status(200).json({
       success: true,
-      message: 'Warmup initialized',
-      total: pageIds.length,
-      needsProcessing: true
+      message: 'Warmup started',
+      total: pageIds.length
     })
 
   } catch (error: any) {
@@ -182,7 +184,80 @@ async function startWarmup(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-// バッチ処理（管理画面から定期的に呼ばれる）
+// バックグラウンド処理の開始
+async function startBackgroundProcessing() {
+  console.log('[Warmup] Starting background processing...')
+  
+  const processNextBatch = async () => {
+    if (!warmupState.isProcessing || warmupState.processed >= warmupState.total) {
+      warmupState.isProcessing = false
+      console.log('[Warmup] Background processing completed')
+      return
+    }
+
+    const BATCH_SIZE = 5
+    const startIdx = warmupState.processed
+    const endIdx = Math.min(startIdx + BATCH_SIZE, warmupState.pageIds.length)
+    const batch = warmupState.pageIds.slice(startIdx, endIdx)
+    
+    console.log(`[Warmup] Processing batch: pages ${startIdx}-${endIdx} of ${warmupState.total}`)
+
+    try {
+      // バッチ内のページを処理
+      const results = await Promise.allSettled(
+        batch.map(pageId => warmupSinglePage(pageId))
+      )
+      
+      // 結果を集計
+      results.forEach((result, index) => {
+        warmupState.processed++
+        warmupState.lastUpdate = Date.now()
+        const pageId = batch[index]
+        
+        if (result.status === 'fulfilled') {
+          if (result.value.skipped) {
+            warmupState.skipped++
+          } else if (result.value.success) {
+            warmupState.succeeded++
+          } else {
+            warmupState.failed++
+            if (result.value.error) {
+              warmupState.errors.push(`${pageId}: ${result.value.error}`)
+              if (warmupState.errors.length > 10) {
+                warmupState.errors = warmupState.errors.slice(-10)
+              }
+            }
+          }
+        } else {
+          warmupState.failed++
+          warmupState.errors.push(`${pageId}: ${result.reason}`)
+        }
+      })
+      
+      warmupState.currentBatch++
+      
+      // 次のバッチを処理
+      if (warmupState.processed < warmupState.total) {
+        // 少し待ってから次のバッチを処理（サーバー負荷軽減）
+        setTimeout(processNextBatch, 1000)
+      } else {
+        warmupState.isProcessing = false
+        console.log('[Warmup] All pages processed')
+      }
+      
+    } catch (error: any) {
+      console.error('[Warmup] Batch error:', error)
+      warmupState.errors.push(`Batch error: ${error.message}`)
+      // エラーがあっても次のバッチを処理
+      setTimeout(processNextBatch, 2000)
+    }
+  }
+  
+  // 最初のバッチを処理開始
+  processNextBatch()
+}
+
+// バッチ処理（管理画面から定期的に呼ばれる）- 廃止予定
 async function processBatch(req: NextApiRequest, res: NextApiResponse) {
   if (!warmupState.isProcessing) {
     return res.status(200).json({
