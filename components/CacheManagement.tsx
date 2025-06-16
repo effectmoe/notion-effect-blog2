@@ -38,15 +38,34 @@ interface CacheProcessingStatus {
   errorSummary: Record<string, number>;
 }
 
+interface WarmupJob {
+  jobId: string;
+  status: string;
+  progress: number;
+  successRate: number;
+  total: number;
+  processed: number;
+  succeeded: number;
+  failed: number;
+  currentBatch: number;
+  totalBatches: number;
+  elapsedSeconds: number;
+  estimatedSecondsRemaining: number | null;
+  errors: Array<{ pageId: string; error: string }>;
+  errorSummary: Record<string, number>;
+}
+
 export const CacheManagement: React.FC = () => {
   const [stats, setStats] = useState<CacheStats | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [progress, setProgress] = useState<WarmupProgress | null>(null);
   const [processingStatus, setProcessingStatus] = useState<CacheProcessingStatus | null>(null);
-  const [statusPollingInterval, setStatusPollingInterval] = useState<NodeJS.Timeout | null>(null);
+  const [statusPollingInterval, setStatusPollingInterval] = useState<ReturnType<typeof setInterval> | null>(null);
   const [isAutoProcessing, setIsAutoProcessing] = useState(false);
   const [autoProcessingStop, setAutoProcessingStop] = useState(false);
+  const [warmupJob, setWarmupJob] = useState<WarmupJob | null>(null);
+  const [jobPollingInterval, setJobPollingInterval] = useState<ReturnType<typeof setInterval> | null>(null);
   const { isConnected, lastUpdate, clearCache } = useRealtimeUpdates();
 
   // キャッシュ統計を取得
@@ -94,6 +113,50 @@ export const CacheManagement: React.FC = () => {
     const interval = setInterval(fetchProcessingStatus, 2000);
     setStatusPollingInterval(interval);
   };
+
+  // ジョブステータスのポーリング
+  useEffect(() => {
+    if (!warmupJob || warmupJob.status === 'completed' || warmupJob.status === 'failed') {
+      if (jobPollingInterval) {
+        clearInterval(jobPollingInterval);
+        setJobPollingInterval(null);
+      }
+      return;
+    }
+
+    const interval = setInterval(async () => {
+      try {
+        const response = await fetch(`/api/cache-warmup-status?jobId=${warmupJob.jobId}`);
+        if (response.ok) {
+          const status = await response.json();
+          setWarmupJob(status);
+          
+          // 完了時の処理
+          if (status.status === 'completed' || status.status === 'failed') {
+            clearInterval(interval);
+            setJobPollingInterval(null);
+            setLoading(false);
+            
+            if (status.status === 'completed') {
+              setMessage(`✅ ウォームアップ完了: ${status.succeeded}/${status.total}ページ (成功率: ${status.successRate}%)`);
+            } else {
+              setMessage(`❌ ウォームアップ失敗`);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('[CacheManagement] Job status poll error:', error);
+      }
+    }, 2000); // 2秒ごと
+    
+    setJobPollingInterval(interval);
+    
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [warmupJob?.jobId, warmupJob?.status]);
 
   useEffect(() => {
     fetchStats();
@@ -227,6 +290,7 @@ export const CacheManagement: React.FC = () => {
     setProgress({ current: 0, total: 0, succeeded: 0, failed: 0, phase: 'preparing' });
     setIsAutoProcessing(false);
     setAutoProcessingStop(false);
+    setWarmupJob(null);  // 既存のジョブをクリア
 
     try {
       const token = getAuthToken();
@@ -269,165 +333,43 @@ export const CacheManagement: React.FC = () => {
       // 3. 少し待つ
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // 4. キャッシュウォームアップを実行
-      console.log('[CacheManagement] Step 3: Warming up cache...');
+      // 4. 非同期ウォームアップジョブを開始
+      console.log('[CacheManagement] Step 3: Starting warmup job...');
       setProgress(prev => prev ? { ...prev, phase: 'warming' } : null);
+      setMessage('🔥 ウォームアップジョブを開始中...');
       
-      // ステータスポーリングを開始
-      startStatusPolling();
-      
-      const warmupBody = {
-        pageIds: pageIds.length > 0 ? pageIds : undefined,
-        skipSiteMap: true // クリア後なのでサイトマップはスキップ
-      };
-      console.log('[CacheManagement] Warmup request body:', warmupBody);
-      
-      const warmupResponse = await fetch('/api/cache-warmup', {
+      const warmupResponse = await fetch('/api/cache-warmup-start', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify(warmupBody),
+        body: JSON.stringify({ pageIds }),
       });
+
+      if (!warmupResponse.ok) {
+        const errorData = await warmupResponse.json();
+        throw new Error(`Warmup start failed: ${errorData.error}`);
+      }
 
       const warmupData = await warmupResponse.json();
-      console.log('[CacheManagement] Warmup response:', warmupData);
-      console.log('[CacheManagement] Warmup debug info:', {
-        totalAttempted: warmupData.totalPages,
-        succeeded: warmupData.warmedUp,
-        failed: warmupData.failed,
-        failedDetails: warmupData.failedDetails,
-        failureAnalysis: warmupData.debug?.failureAnalysis,
-        processingTime: warmupData.debug?.processingTime
-      });
-
-      if (warmupResponse.ok) {
-        // 残りのページがある場合は追加リクエストを送信
-        if (warmupData.needMoreRequests && warmupData.remainingPages > 0) {
-          let totalSucceeded = warmupData.warmedUp;
-          let totalFailed = warmupData.failed;
-          let totalProcessed = warmupData.totalPages;
-          const originalTotal = warmupData.debug?.originalPageCount || warmupData.totalPages;
-          
-          setProgress(prev => prev ? { 
-            ...prev, 
-            current: totalProcessed, 
-            total: originalTotal, 
-            succeeded: totalSucceeded, 
-            failed: totalFailed 
-          } : null);
-          
-          // 残りのページを処理するための追加リクエスト
-          const remainingPageIds = pageIds.slice(warmupData.totalPages);
-          let currentIndex = warmupData.totalPages;
-          
-          while (remainingPageIds.length > 0 && currentIndex < pageIds.length) {
-            const nextBatch = remainingPageIds.slice(0, warmupData.debug?.maxPagesPerRequest || 10);
-            remainingPageIds.splice(0, nextBatch.length);
-            
-            console.log(`[CacheManagement] Processing additional batch: ${nextBatch.length} pages`);
-            
-            try {
-              const additionalWarmupResponse = await fetch('/api/cache-warmup', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${token}`,
-                },
-                body: JSON.stringify({
-                  pageIds: nextBatch,
-                  skipSiteMap: true
-                }),
-              });
-
-              const additionalWarmupData = await additionalWarmupResponse.json();
-              
-              if (additionalWarmupResponse.ok) {
-                totalSucceeded += additionalWarmupData.warmedUp;
-                totalFailed += additionalWarmupData.failed;
-                totalProcessed += additionalWarmupData.totalPages;
-                
-                setProgress(prev => prev ? { 
-                  ...prev, 
-                  current: totalProcessed, 
-                  succeeded: totalSucceeded, 
-                  failed: totalFailed 
-                } : null);
-                
-                // もう残りがない場合は終了
-                if (!additionalWarmupData.needMoreRequests) {
-                  break;
-                }
-              } else {
-                console.error('[CacheManagement] Additional warmup failed:', additionalWarmupData.error);
-                break;
-              }
-            } catch (error) {
-              console.error('[CacheManagement] Additional warmup request failed:', error);
-              break;
-            }
-            
-            currentIndex += nextBatch.length;
-          }
-          
-          setProgress(prev => prev ? { ...prev, phase: 'complete' } : null);
-          
-          let resultMessage = `✅ 完了: ${totalSucceeded}/${originalTotal}ページを事前読み込みしました`;
-          if (totalFailed > 0) {
-            resultMessage += ` (失敗: ${totalFailed}ページ)`;
-          }
-          
-          setMessage(resultMessage);
-        } else {
-          // 単一リクエストで完了
-          setProgress({ 
-            current: warmupData.totalPages, 
-            total: warmupData.totalPages, 
-            succeeded: warmupData.warmedUp, 
-            failed: warmupData.failed, 
-            phase: 'complete' 
-          });
-          
-          let resultMessage = `✅ 完了: ${warmupData.warmedUp}/${warmupData.totalPages}ページを事前読み込みしました`;
-          if (warmupData.failed > 0) {
-            resultMessage += ` (失敗: ${warmupData.failed}ページ)`;
-            
-            // 失敗の詳細を表示
-            if (warmupData.debug?.failureAnalysis) {
-              const analysis = warmupData.debug.failureAnalysis;
-              const details = [];
-              if (analysis.rateLimited) details.push(`レート制限: ${analysis.rateLimited}`);
-              if (analysis.timeout) details.push(`タイムアウト: ${analysis.timeout}`);
-              if (analysis.notFound) details.push(`見つからない: ${analysis.notFound}`);
-              if (analysis.other) details.push(`その他: ${analysis.other}`);
-              
-              if (details.length > 0) {
-                resultMessage += `\n詳細: ${details.join(', ')}`;
-              }
-            }
-          }
-          
-          if (warmupData.debug?.processingTime) {
-            resultMessage += `\n処理時間: ${warmupData.debug.processingTime}`;
-          }
-          
-          setMessage(resultMessage);
-        }
-      } else {
-        setMessage(`❌ ウォームアップエラー: ${warmupData.error}`);
-      }
+      console.log('[CacheManagement] Warmup job started:', warmupData);
       
-      // 統計を更新
-      setTimeout(fetchStats, 1000);
+      // 初期ステータスを取得
+      const statusResponse = await fetch(`/api/cache-warmup-status?jobId=${warmupData.jobId}`);
+      if (statusResponse.ok) {
+        const initialStatus = await statusResponse.json();
+        setWarmupJob(initialStatus);
+        setMessage(`🔥 ウォームアップ中... (ジョブID: ${warmupData.jobId})`);
+      }
+
+      // 注: ポーリングはuseEffectで自動的に開始される
       
     } catch (error) {
       setMessage(`❌ エラー: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    } finally {
       setLoading(false);
-      // 完了後数秒でプログレスを非表示
-      setTimeout(() => setProgress(null), 5000);
     }
+    // loadingはジョブ完了時にuseEffectでfalseに設定される
   };
 
   // キャッシュウォームアップ
@@ -925,21 +867,23 @@ export const CacheManagement: React.FC = () => {
       </details>
 
       {/* プログレス表示 */}
-      {(progress || processingStatus?.isProcessing) && (
+      {(progress || processingStatus?.isProcessing || warmupJob) && (
         <div className={styles.progressContainer}>
           <div className={styles.progressHeader}>
             <span className={styles.progressPhase}>
               {progress?.phase === 'preparing' && '📄 準備中...'}
               {progress?.phase === 'clearing' && '🗑️ キャッシュをクリア中...'}
-              {(progress?.phase === 'warming' || processingStatus?.isProcessing) && '🔥 ウォームアップ中...'}
-              {progress?.phase === 'complete' && !processingStatus?.isProcessing && '✅ 完了'}
+              {(progress?.phase === 'warming' || processingStatus?.isProcessing || warmupJob?.status === 'processing') && '🔥 ウォームアップ中...'}
+              {(progress?.phase === 'complete' || warmupJob?.status === 'completed') && !processingStatus?.isProcessing && '✅ 完了'}
+              {warmupJob?.status === 'failed' && '❌ 失敗'}
+              {warmupJob?.status === 'pending' && '⏳ 開始待機中...'}
             </span>
-            {(processingStatus?.total || progress?.total) > 0 && (
+            {(processingStatus?.total || progress?.total || warmupJob?.total) > 0 && (
               <span className={styles.progressNumbers}>
-                {processingStatus?.processed || progress?.current || 0}/{processingStatus?.total || progress?.total || 0} ページ
-                {processingStatus?.currentBatch && processingStatus.totalBatches && (
+                {processingStatus?.processed || progress?.current || warmupJob?.processed || 0}/{processingStatus?.total || progress?.total || warmupJob?.total || 0} ページ
+                {(processingStatus?.currentBatch || warmupJob?.currentBatch) && (processingStatus?.totalBatches || warmupJob?.totalBatches) && (
                   <span className={styles.batchInfo}>
-                    {` (バッチ ${processingStatus.currentBatch}/${processingStatus.totalBatches})`}
+                    {` (バッチ ${processingStatus?.currentBatch || warmupJob?.currentBatch}/${processingStatus?.totalBatches || warmupJob?.totalBatches})`}
                   </span>
                 )}
               </span>
@@ -963,30 +907,31 @@ export const CacheManagement: React.FC = () => {
               ⏹️ 自動処理を停止
             </button>
           )}
-          {(processingStatus?.total || progress?.total) > 0 && (
+          {(processingStatus?.total || progress?.total || warmupJob?.total) > 0 && (
             <>
               <div className={styles.progressBar}>
                 <div 
                   className={styles.progressFill} 
-                  style={{ width: `${processingStatus?.progress || ((progress?.current || 0) / (progress?.total || 1)) * 100}%` }}
+                  style={{ width: `${processingStatus?.progress || warmupJob?.progress || ((progress?.current || 0) / (progress?.total || 1)) * 100}%` }}
                 />
               </div>
               <div className={styles.progressStats}>
-                <span className={styles.progressSuccess}>✅ 成功: {processingStatus?.succeeded || progress?.succeeded || 0}</span>
-                {(processingStatus?.failed || progress?.failed || 0) > 0 && (
-                  <span className={styles.progressFailed}>❌ 失敗: {processingStatus?.failed || progress?.failed || 0}</span>
+                <span className={styles.progressSuccess}>✅ 成功: {processingStatus?.succeeded || progress?.succeeded || warmupJob?.succeeded || 0}</span>
+                {(processingStatus?.failed || progress?.failed || warmupJob?.failed || 0) > 0 && (
+                  <span className={styles.progressFailed}>❌ 失敗: {processingStatus?.failed || progress?.failed || warmupJob?.failed || 0}</span>
                 )}
-                {processingStatus?.elapsedTime && (
-                  <span className={styles.progressTime}>⏱️ 経過: {Math.floor(processingStatus.elapsedTime / 60)}分{processingStatus.elapsedTime % 60}秒</span>
+                {(processingStatus?.elapsedTime || warmupJob?.elapsedSeconds) && (
+                  <span className={styles.progressTime}>⏱️ 経過: {Math.floor((processingStatus?.elapsedTime || warmupJob?.elapsedSeconds || 0) / 60)}分{(processingStatus?.elapsedTime || warmupJob?.elapsedSeconds || 0) % 60}秒</span>
                 )}
-                {processingStatus?.estimatedRemainingTime && processingStatus.estimatedRemainingTime > 0 && (
-                  <span className={styles.progressTime}>⏳ 残り: 約{Math.ceil(processingStatus.estimatedRemainingTime / 60)}分</span>
+                {(processingStatus?.estimatedRemainingTime || warmupJob?.estimatedSecondsRemaining) && (processingStatus?.estimatedRemainingTime || warmupJob?.estimatedSecondsRemaining) > 0 && (
+                  <span className={styles.progressTime}>⏳ 残り: 約{Math.ceil((processingStatus?.estimatedRemainingTime || warmupJob?.estimatedSecondsRemaining || 0) / 60)}分</span>
                 )}
               </div>
-              {processingStatus?.errorSummary && Object.keys(processingStatus.errorSummary).length > 0 && (
+              {((processingStatus?.errorSummary && Object.keys(processingStatus.errorSummary).length > 0) || 
+                (warmupJob?.errorSummary && Object.keys(warmupJob.errorSummary).length > 0)) && (
                 <div className={styles.errorSummary}>
                   <span className={styles.errorSummaryTitle}>エラー詳細:</span>
-                  {Object.entries(processingStatus.errorSummary).map(([type, count]) => (
+                  {Object.entries(processingStatus?.errorSummary || warmupJob?.errorSummary || {}).map(([type, count]) => (
                     <span key={type} className={styles.errorType}>
                       {type === 'rateLimited' && '⏱️ レート制限'}
                       {type === 'timeout' && '⏰ タイムアウト'}
@@ -998,9 +943,19 @@ export const CacheManagement: React.FC = () => {
                 </div>
               )}
               {/* 成功率の表示 */}
-              {(processingStatus?.processed || progress?.current || 0) > 0 && (
+              {(processingStatus?.processed || progress?.current || warmupJob?.processed || 0) > 0 && (
                 <div className={styles.successRate}>
-                  成功率: {Math.round(((processingStatus?.succeeded || progress?.succeeded || 0) / (processingStatus?.processed || progress?.current || 1)) * 100)}%
+                  成功率: {processingStatus?.processed 
+                    ? Math.round((processingStatus.succeeded / processingStatus.processed) * 100)
+                    : warmupJob?.successRate
+                    ? warmupJob.successRate
+                    : Math.round(((progress?.succeeded || 0) / (progress?.current || 1)) * 100)}%
+                </div>
+              )}
+              {/* ジョブID表示（デバッグ用） */}
+              {warmupJob?.jobId && (
+                <div className={styles.jobId} style={{ fontSize: '0.75rem', opacity: 0.6, marginTop: '0.5rem' }}>
+                  ジョブID: {warmupJob.jobId}
                 </div>
               )}
             </>
