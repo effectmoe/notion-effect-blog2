@@ -394,7 +394,10 @@ export const CacheManagement: React.FC = () => {
     // loadingはジョブ完了時にuseEffectでfalseに設定される
   };
 
-  // シンプルなウォームアップ（重複除外・安定版）
+  // バッチ処理インターバル
+  const [batchInterval, setBatchInterval] = useState<ReturnType<typeof setInterval> | null>(null);
+
+  // バッチ処理方式のウォームアップ
   const handleOptimizedWarmup = async () => {
     setLoading(true);
     setMessage('');
@@ -402,89 +405,103 @@ export const CacheManagement: React.FC = () => {
     
     try {
       const token = getAuthToken();
-      console.log('[CacheManagement] Starting simple warmup...');
+      console.log('[CacheManagement] Starting batch warmup...');
       
-      // シンプルウォームアップを開始
+      // ステップ1: 初期化
+      const initResponse = await fetch('/api/cache-warmup-simple', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({})
+      });
+      
+      const initResult = await initResponse.json();
+      
+      if (!initResult.success) {
+        if (initResult.state && initResult.state.isProcessing) {
+          // 既に処理中
+          setMessage('🔄 既にウォームアップが実行中です');
+          // 既存の処理を監視
+          startSimplePolling();
+          startBatchProcessing();
+          return;
+        }
+        throw new Error(initResult.message || 'Initialization failed');
+      }
+      
+      setMessage(`🚀 ${initResult.total}ページの処理を開始しました`);
+      
+      // ステップ2: バッチ処理を開始
+      if (initResult.needsProcessing) {
+        startBatchProcessing();
+      }
+      
+      // ポーリングも開始
+      startSimplePolling();
+      
+    } catch (error) {
+      console.error('[CacheManagement] Warmup error:', error);
+      setMessage(`❌ エラー: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setLoading(false);
+    }
+  };
+  
+  // バッチ処理を定期的に実行
+  const startBatchProcessing = () => {
+    // 既存のインターバルをクリア
+    if (batchInterval) {
+      clearInterval(batchInterval);
+      setBatchInterval(null);
+    }
+    
+    // 即座に最初のバッチを実行
+    processBatch();
+    
+    // 2秒ごとにバッチ処理を実行
+    const interval = setInterval(processBatch, 2000);
+    setBatchInterval(interval);
+  };
+  
+  // バッチ処理
+  const processBatch = async () => {
+    try {
+      const token = getAuthToken();
       const response = await fetch('/api/cache-warmup-simple', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
-        }
+        },
+        body: JSON.stringify({ action: 'process' })
       });
       
       const result = await response.json();
       
-      if (!result.success) {
-        if (result.state && result.state.isProcessing) {
-          // 既に処理中 - ユーザーに確認
-          const shouldReset = window.confirm(
-            'ウォームアップが既に実行中です。強制的にリセットして新しいウォームアップを開始しますか？\n\n' +
-            `処理時間: ${Math.round((result.timeRemaining || 0) / 1000)}秒残り`
-          );
-          
-          if (shouldReset) {
-            try {
-              // リセットAPIを呼び出し（新しいDELETEメソッドを使用）
-              const resetResponse = await fetch('/api/cache-warmup-simple', {
-                method: 'DELETE',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${token}`,
-                }
-              });
-              
-              const resetResult = await resetResponse.json();
-              if (!resetResponse.ok) {
-                throw new Error(`Reset failed: ${resetResult.error}`);
-              }
-              
-              setMessage('🔄 処理をリセットしました。再度ウォームアップを開始します...');
-              
-              // 少し待ってから再試行
-              await new Promise(resolve => setTimeout(resolve, 1000));
-              
-              // 再度ウォームアップを開始
-              const retryResponse = await fetch('/api/cache-warmup-simple', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${token}`,
-                }
-              });
-              
-              const retryResult = await retryResponse.json();
-              if (!retryResult.success) {
-                throw new Error(retryResult.error || retryResult.message || 'Failed to start warmup after reset');
-              }
-              
-              setMessage(`🚀 ウォームアップを開始しました (${retryResult.total}ページ)`);
-              startSimplePolling();
-              return;
-              
-            } catch (resetError) {
-              throw new Error(`Reset failed: ${resetError instanceof Error ? resetError.message : 'Unknown error'}`);
-            }
-          } else {
-            // ユーザーがキャンセルした場合、既存の処理を監視
-            setMessage('🔄 既存のウォームアップを監視中...');
-            startSimplePolling();
-            return;
-          }
+      if (result.completed) {
+        // 処理完了
+        if (batchInterval) {
+          clearInterval(batchInterval);
+          setBatchInterval(null);
         }
-        throw new Error(result.error || result.message || 'Failed to start warmup');
+        
+        console.log('[CacheManagement] Batch processing completed');
+      } else if (result.success === false && !result.state?.isProcessing) {
+        // 処理が停止した
+        if (batchInterval) {
+          clearInterval(batchInterval);
+          setBatchInterval(null);
+        }
+        console.log('[CacheManagement] Batch processing stopped');
       }
       
-      // 処理開始の成功メッセージ
-      setMessage(`🚀 ウォームアップを開始しました (${result.total}ページ)`);
-      
-      // ポーリングを開始（初期化が成功したらすぐにポーリングを開始）
-      startSimplePolling();
-      
     } catch (error) {
-      console.error('[CacheManagement] Simple warmup error:', error);
-      setMessage(`❌ エラー: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      setLoading(false);
+      console.error('[CacheManagement] Batch processing error:', error);
+      if (batchInterval) {
+        clearInterval(batchInterval);
+        setBatchInterval(null);
+      }
     }
   };
 
@@ -560,6 +577,12 @@ export const CacheManagement: React.FC = () => {
             failed: status.failed || 0,
             timestamp: Date.now()
           };
+        }
+        
+        // バッチ処理が必要で、処理が止まっている場合は再開
+        if (status.needsProcessing && !batchInterval) {
+          console.log('[CacheManagement] Restarting batch processing...');
+          startBatchProcessing();
         }
         
         // 完了チェック

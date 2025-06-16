@@ -1,19 +1,35 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getAllPageIds } from '@/lib/get-all-pages'
 import { getSiteMap } from '@/lib/get-site-map'
-import { initRedis, storage } from '@/lib/redis'
 
-// Notion APIレート制限の設定
-const RATE_LIMIT = {
-  requestsPerSecond: 3, // 1秒あたり3リクエストに制限
-  burstLimit: 10,      // バースト時の最大リクエスト数
-  retryAfter: 60000    // レート制限後の待機時間（1分）
+// グローバルな処理状態（正常動作版と同じ構造）
+interface WarmupState {
+  isProcessing: boolean
+  startTime: number
+  total: number
+  processed: number
+  succeeded: number
+  failed: number
+  skipped: number
+  errors: string[]
+  lastUpdate: number
+  currentBatch: number
+  pageIds: string[]
 }
 
-// 処理状態のキー
-const PROCESSING_KEY = 'warmup:processing'
-const PROGRESS_KEY = 'warmup:progress'
-const RATE_LIMIT_KEY = 'warmup:ratelimit'
+let warmupState: WarmupState = {
+  isProcessing: false,
+  startTime: 0,
+  total: 0,
+  processed: 0,
+  succeeded: 0,
+  failed: 0,
+  skipped: 0,
+  errors: [],
+  lastUpdate: Date.now(),
+  currentBatch: 0,
+  pageIds: []
+}
 
 // Vercelの関数タイムアウト設定
 export const config = {
@@ -26,86 +42,10 @@ export const config = {
   },
 }
 
-// レート制限付きリクエスト実行（リトライ回数制限付き）
-const MAX_RATE_LIMIT_RETRIES = 3
-
-async function rateLimitedRequest<T>(fn: () => Promise<T>, retryCount: number = 0): Promise<T> {
-  const now = Date.now()
-  const rateLimit = await storage.get(RATE_LIMIT_KEY) || { count: 0, resetAt: now }
-  
-  // レート制限のリセット
-  if (now > rateLimit.resetAt) {
-    rateLimit.count = 0
-    rateLimit.resetAt = now + 1000 // 1秒後にリセット
-  }
-  
-  // レート制限チェック
-  if (rateLimit.count >= RATE_LIMIT.requestsPerSecond) {
-    const waitTime = Math.min(rateLimit.resetAt - now, 5000) // 最大5秒待機
-    if (waitTime > 0) {
-      console.log(`[RateLimit] Waiting ${waitTime}ms before next request (retry ${retryCount}/${MAX_RATE_LIMIT_RETRIES})`)
-      await new Promise(resolve => setTimeout(resolve, waitTime))
-    }
-    
-    // リトライ回数チェック
-    if (retryCount >= MAX_RATE_LIMIT_RETRIES) {
-      throw new Error(`Rate limit retry exceeded after ${MAX_RATE_LIMIT_RETRIES} attempts`)
-    }
-    
-    return rateLimitedRequest(fn, retryCount + 1) // 再試行
-  }
-  
-  // リクエスト実行
-  try {
-    rateLimit.count++
-    await storage.set(RATE_LIMIT_KEY, rateLimit, 10)
-    
-    const result = await fn()
-    return result
-  } catch (error: any) {
-    if (error.status === 429) {
-      console.error('[RateLimit] 429 Too Many Requests - waiting 60s')
-      
-      // リトライ回数チェック
-      if (retryCount >= MAX_RATE_LIMIT_RETRIES) {
-        throw new Error(`Rate limit (429) retry exceeded after ${MAX_RATE_LIMIT_RETRIES} attempts`)
-      }
-      
-      await storage.set(RATE_LIMIT_KEY, { 
-        count: RATE_LIMIT.burstLimit, 
-        resetAt: now + RATE_LIMIT.retryAfter 
-      }, 60)
-      await new Promise(resolve => setTimeout(resolve, RATE_LIMIT.retryAfter))
-      return rateLimitedRequest(fn, retryCount + 1) // 再試行
-    }
-    throw error
-  }
-}
-
-// 起動時のクリーンアップ処理
-async function cleanupStaleProcessing() {
-  try {
-    const processingInfo = await storage.get(PROCESSING_KEY)
-    if (processingInfo) {
-      const elapsed = Date.now() - processingInfo.startTime
-      const STALE_TIMEOUT = 5 * 60 * 1000 // 5分
-      
-      if (elapsed > STALE_TIMEOUT) {
-        console.log(`[Warmup] Cleaning up stale processing state (${Math.round(elapsed / 1000)}s old)`)
-        await storage.delete(PROCESSING_KEY)
-        await storage.delete(PROGRESS_KEY)
-        await storage.delete(RATE_LIMIT_KEY)
-      }
-    }
-  } catch (error) {
-    console.error('[Warmup] Cleanup error:', error)
-  }
-}
-
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   // CORS対応
   res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS')
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
   // キャッシュを無効化
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate')
@@ -116,126 +56,47 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(200).end()
   }
 
-  // Redis初期化
-  await initRedis()
-  
-  // 起動時に古い処理をクリーンアップ
-  await cleanupStaleProcessing()
-  
-  // メソッド別処理
-  switch (req.method) {
-    case 'GET':
-      return handleStatus(req, res)
-    case 'POST':
-      return handleWarmup(req, res)
-    case 'DELETE':
-      return handleReset(req, res)
-    default:
-      return res.status(405).json({ error: 'Method not allowed' })
-  }
-}
-
-// ステータス確認
-async function handleStatus(req: NextApiRequest, res: NextApiResponse) {
-  const processing = await storage.get(PROCESSING_KEY)
-  const progress = await storage.get(PROGRESS_KEY) || { 
-    processed: 0, 
-    total: 0, 
-    errors: [],
-    succeeded: 0,
-    failed: 0,
-    skipped: 0
-  }
-  
-  const isProcessing = !!processing
-  const elapsed = processing ? Math.round((Date.now() - processing.startTime) / 1000) : 0
-  const progressPercent = progress.total > 0 ? Math.round((progress.processed / progress.total) * 100) : 0
-  
-  console.log('[Warmup] Status request:', {
-    isProcessing,
-    processed: progress.processed,
-    total: progress.total,
-    progress: progressPercent
-  })
-  
-  return res.status(200).json({
-    isProcessing,
-    startTime: processing?.startTime || 0,
-    total: progress.total,
-    processed: progress.processed,
-    succeeded: progress.succeeded,
-    failed: progress.failed,
-    skipped: progress.skipped,
-    errors: progress.errors || [],
-    lastUpdate: progress.lastUpdate || Date.now(),
-    currentBatch: progress.currentBatch || 0,
-    elapsed,
-    progress: progressPercent,
-    processingInfo: processing,
-    completedAt: progress.completedAt
-  })
-}
-
-// リセット処理
-async function handleReset(req: NextApiRequest, res: NextApiResponse) {
-  console.log('[Warmup] Force reset requested')
-  
-  // 認証チェック（オプション）
-  const authHeader = req.headers.authorization
-  const expectedToken = process.env.CACHE_CLEAR_TOKEN
-  
-  if (expectedToken && authHeader !== `Bearer ${expectedToken}`) {
-    return res.status(401).json({ error: 'Unauthorized' })
-  }
-  
-  await storage.delete(PROCESSING_KEY)
-  await storage.delete(PROGRESS_KEY)
-  await storage.delete(RATE_LIMIT_KEY)
-  
-  return res.status(200).json({
-    message: 'Processing state reset successfully',
-    timestamp: new Date().toISOString()
-  })
-}
-
-// ウォームアップ実行
-async function handleWarmup(req: NextApiRequest, res: NextApiResponse) {
-  // 認証チェック（オプション）
-  const authHeader = req.headers.authorization
-  const expectedToken = process.env.CACHE_CLEAR_TOKEN
-  
-  if (expectedToken && authHeader !== `Bearer ${expectedToken}`) {
-    return res.status(401).json({ error: 'Unauthorized' })
-  }
-  
-  const processingInfo = await storage.get(PROCESSING_KEY)
-  
-  // 既に処理中かチェック
-  if (processingInfo) {
-    const elapsed = Date.now() - processingInfo.startTime
-    const timeout = 5 * 60 * 1000 // 5分
+  if (req.method === 'POST') {
+    const { action } = req.body || {}
     
-    if (elapsed < timeout) {
-      return res.status(200).json({
-        success: false,
-        message: 'Already processing',
-        state: {
-          isProcessing: true,
-          startTime: processingInfo.startTime
-        },
-        timeRemaining: timeout - elapsed,
-        startTime: new Date(processingInfo.startTime).toISOString(),
-        elapsed: Math.floor(elapsed / 1000) + 's'
-      })
+    if (action === 'process') {
+      // バッチ処理を実行
+      return processBatch(req, res)
+    } else {
+      // ウォームアップ開始
+      return startWarmup(req, res)
     }
-    
-    // タイムアウトした場合は自動リセット
-    console.log('[Warmup] Processing timeout detected, auto-resetting')
-    await storage.delete(PROCESSING_KEY)
+  } else if (req.method === 'GET') {
+    // ステータス取得
+    return getStatus(req, res)
+  } else {
+    return res.status(405).json({ error: 'Method not allowed' })
+  }
+}
+
+// ウォームアップ開始（ページリストの準備のみ）
+async function startWarmup(req: NextApiRequest, res: NextApiResponse) {
+  console.log('[Warmup] Start request received')
+  
+  // 認証チェック（オプション）
+  const authHeader = req.headers.authorization
+  const expectedToken = process.env.CACHE_CLEAR_TOKEN
+  
+  if (expectedToken && authHeader !== `Bearer ${expectedToken}`) {
+    return res.status(401).json({ error: 'Unauthorized' })
   }
   
+  // 既に処理中の場合
+  if (warmupState.isProcessing) {
+    console.log('[Warmup] Already processing')
+    return res.status(200).json({
+      success: false,
+      message: 'Already processing',
+      state: warmupState
+    })
+  }
+
   try {
-    // ページリストを取得
     console.log('[Warmup] Getting page list...')
     console.log('[Warmup] Environment check:', {
       NOTION_ROOT_PAGE_ID: process.env.NOTION_ROOT_PAGE_ID ? 'Set' : 'Not set',
@@ -243,6 +104,7 @@ async function handleWarmup(req: NextApiRequest, res: NextApiResponse) {
       NEXT_PUBLIC_HOST: process.env.NEXT_PUBLIC_HOST
     })
     
+    // ページリスト取得（正常動作版と同じロジック）
     let pageIds: string[] = []
     
     // 方法1: サイトマップから取得
@@ -289,48 +151,32 @@ async function handleWarmup(req: NextApiRequest, res: NextApiResponse) {
         }
       })
     }
-    
-    // 処理開始
-    const startInfo = {
+
+    // 状態を初期化
+    warmupState = {
+      isProcessing: true,
       startTime: Date.now(),
-      instanceId: Math.random().toString(36).substring(7),
-      pid: process.pid
-    }
-    
-    await storage.set(PROCESSING_KEY, startInfo, 300) // 5分のTTL
-    
-    // 初期進捗を保存
-    const initialProgress = {
-      processed: 0,
       total: pageIds.length,
+      processed: 0,
       succeeded: 0,
       failed: 0,
       skipped: 0,
       errors: [],
       lastUpdate: Date.now(),
       currentBatch: 0,
-      pageIds: pageIds,
-      startTime: startInfo.startTime
+      pageIds: pageIds
     }
-    
-    await storage.set(PROGRESS_KEY, initialProgress, 3600) // 1時間のTTL
-    
+
     console.log(`[Warmup] Ready to process ${pageIds.length} pages`)
     console.log(`[Warmup] First few page IDs:`, pageIds.slice(0, 5))
-    
-    // バックグラウンドで処理を開始
-    processWarmup(startInfo, pageIds).catch(error => {
-      console.error('[Warmup] Background process error:', error)
-    })
-    
-    // レスポンスは即座に返す
+
     return res.status(200).json({
       success: true,
-      message: 'Warmup started',
+      message: 'Warmup initialized',
       total: pageIds.length,
-      instanceId: startInfo.instanceId
+      needsProcessing: true
     })
-    
+
   } catch (error: any) {
     console.error('[Warmup] Error:', error)
     return res.status(500).json({
@@ -340,197 +186,127 @@ async function handleWarmup(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-// ウォームアップ結果の型定義
-interface WarmupResult {
-  success: boolean
-  skipped: boolean
-  error?: string
-}
-
-// 実際のウォームアップ処理
-const MAX_PROCESSING_TIME = 10 * 60 * 1000 // 10分
-const MAX_CONSECUTIVE_ERRORS = 10
-
-async function processWarmup(startInfo: any, pageIds: string[]) {
-  const progress: {
-    processed: number
-    total: number
-    succeeded: number
-    failed: number
-    skipped: number
-    errors: any[]
-    lastUpdate: number
-    currentBatch: number
-    startTime: number
-    completedAt?: number
-  } = {
-    processed: 0,
-    total: pageIds.length,
-    succeeded: 0,
-    failed: 0,
-    skipped: 0,
-    errors: [] as any[],
-    lastUpdate: Date.now(),
-    currentBatch: 0,
-    startTime: startInfo.startTime
+// バッチ処理（管理画面から定期的に呼ばれる）
+async function processBatch(req: NextApiRequest, res: NextApiResponse) {
+  if (!warmupState.isProcessing) {
+    return res.status(200).json({
+      success: false,
+      message: 'Not processing'
+    })
   }
+
+  const BATCH_SIZE = 3 // 正常動作版と同じ
+  const startIdx = warmupState.currentBatch * BATCH_SIZE
+  const endIdx = Math.min(startIdx + BATCH_SIZE, warmupState.pageIds.length)
   
+  if (startIdx >= warmupState.pageIds.length) {
+    // 処理完了
+    warmupState.isProcessing = false
+    warmupState.lastUpdate = Date.now()
+    console.log('[Warmup] All batches completed')
+    
+    return res.status(200).json({
+      success: true,
+      completed: true,
+      state: warmupState
+    })
+  }
+
+  const batch = warmupState.pageIds.slice(startIdx, endIdx)
+  console.log(`[Warmup] Processing batch ${warmupState.currentBatch + 1}, pages ${startIdx}-${endIdx}`)
+
   try {
-    // ページ処理用のキューを作成（重複排除）
-    const uniquePageIds = Array.from(new Set(pageIds))
-    const processedPages = new Set<string>()
+    // バッチ内のページを処理
+    const results = await Promise.allSettled(
+      batch.map(pageId => warmupSinglePage(pageId))
+    )
     
-    console.log(`[Warmup] Starting background processing for ${uniquePageIds.length} unique pages`)
-    
-    const BATCH_SIZE = 5
-    let consecutiveErrors = 0
-    
-    for (let i = 0; i < uniquePageIds.length; i += BATCH_SIZE) {
-      // 処理時間チェック
-      const elapsed = Date.now() - startInfo.startTime
-      if (elapsed > MAX_PROCESSING_TIME) {
-        console.error(`[Warmup] Processing time exceeded ${MAX_PROCESSING_TIME}ms, aborting`)
-        progress.errors.push({
-          pageId: 'system',
-          error: 'Processing time exceeded 10 minutes',
-          timestamp: Date.now()
-        })
-        break
-      }
+    // 結果を集計
+    results.forEach((result, index) => {
+      warmupState.processed++
+      warmupState.lastUpdate = Date.now()
+      const pageId = batch[index]
       
-      const batch = uniquePageIds.slice(i, Math.min(i + BATCH_SIZE, uniquePageIds.length))
-      
-      console.log(`[Warmup] Processing batch: pages ${i}-${i + batch.length} of ${uniquePageIds.length}`)
-      
-      // バッチ内のページを並列処理
-      const batchResults = await Promise.allSettled(
-        batch.map(pageId => {
-          // 重複チェック
-          if (processedPages.has(pageId)) {
-            console.log(`[Warmup] Skipping duplicate page: ${pageId}`)
-            return Promise.resolve({ success: true, skipped: true, error: undefined } as WarmupResult)
-          }
-          
-          return rateLimitedRequest(async () => {
-            return warmupSinglePage(pageId)
-          })
-        })
-      )
-      
-      // 結果を集計
-      let batchErrorCount = 0
-      
-      batchResults.forEach((result, index) => {
-        const pageId = batch[index]
-        progress.processed++
-        progress.lastUpdate = Date.now()
-        
-        if (result.status === 'fulfilled') {
-          processedPages.add(pageId)
-          
-          if (result.value.skipped) {
-            progress.skipped++
-            consecutiveErrors = 0 // スキップは連続エラーをリセット
-          } else if (result.value.success) {
-            progress.succeeded++
-            consecutiveErrors = 0 // 成功は連続エラーをリセット
-          } else {
-            progress.failed++
-            batchErrorCount++
-            if (result.value.error) {
-              progress.errors.push({
-                pageId,
-                error: result.value.error,
-                timestamp: Date.now()
-              })
-              if (progress.errors.length > 10) {
-                progress.errors = progress.errors.slice(-10)
-              }
+      if (result.status === 'fulfilled') {
+        if (result.value.skipped) {
+          warmupState.skipped++
+        } else if (result.value.success) {
+          warmupState.succeeded++
+        } else {
+          warmupState.failed++
+          if (result.value.error) {
+            warmupState.errors.push(`${pageId}: ${result.value.error}`)
+            if (warmupState.errors.length > 10) {
+              warmupState.errors = warmupState.errors.slice(-10)
             }
           }
-        } else {
-          progress.failed++
-          batchErrorCount++
-          progress.errors.push({
-            pageId,
-            error: result.reason?.message || 'Unknown error',
-            timestamp: Date.now()
-          })
         }
-      })
-      
-      // 連続エラーチェック
-      if (batchErrorCount === batch.length) {
-        consecutiveErrors += batchErrorCount
-        console.error(`[Warmup] All ${batchErrorCount} pages in batch failed. Consecutive errors: ${consecutiveErrors}`)
       } else {
-        consecutiveErrors = 0
+        warmupState.failed++
+        warmupState.errors.push(`${pageId}: ${result.reason}`)
       }
-      
-      if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
-        console.error(`[Warmup] Too many consecutive errors (${consecutiveErrors}), aborting`)
-        progress.errors.push({
-          pageId: 'system',
-          error: `Aborted after ${consecutiveErrors} consecutive errors`,
-          timestamp: Date.now()
-        })
-        break
-      }
-      
-      progress.currentBatch++
-      
-      // 進捗を更新
-      await storage.set(PROGRESS_KEY, progress, 3600)
-      
-      // 処理継続の確認
-      const currentProcessing = await storage.get(PROCESSING_KEY)
-      if (!currentProcessing || currentProcessing.instanceId !== startInfo.instanceId) {
-        console.log('[Warmup] Processing cancelled by another instance')
-        break
-      }
-      
-      // エラーが多すぎる場合は中断
-      if (progress.errors.length > 50) {
-        console.error('[Warmup] Too many errors, aborting')
-        break
-      }
-      
-      // 次のバッチまで少し待つ（サーバー負荷軽減）
-      if (i + BATCH_SIZE < uniquePageIds.length) {
-        await new Promise(resolve => setTimeout(resolve, 1000))
-      }
-    }
-    
-    // 処理完了
-    console.log(`[Warmup] Completed: ${progress.processed}/${progress.total} pages`)
-    console.log(`[Warmup] Results - Succeeded: ${progress.succeeded}, Failed: ${progress.failed}, Skipped: ${progress.skipped}`)
-    
-  } catch (error) {
-    console.error('[Warmup] Process error:', error)
-    progress.errors.push({
-      pageId: 'system',
-      error: error instanceof Error ? error.message : 'Unknown error',
-      timestamp: Date.now()
     })
-  } finally {
-    // 処理状態をクリア
-    await storage.delete(PROCESSING_KEY)
     
-    // 最終進捗を保存
-    progress.completedAt = Date.now()
-    await storage.set(PROGRESS_KEY, progress, 3600)
+    // 次のバッチへ
+    warmupState.currentBatch++
     
-    console.log('[Warmup] All done - setting processing to false')
+    return res.status(200).json({
+      success: true,
+      completed: false,
+      processed: endIdx,
+      total: warmupState.pageIds.length,
+      state: warmupState
+    })
+    
+  } catch (error: any) {
+    console.error('[Warmup] Batch error:', error)
+    warmupState.errors.push(`Batch error: ${error.message}`)
+    warmupState.currentBatch++
+    
+    return res.status(200).json({
+      success: false,
+      error: error.message,
+      state: warmupState
+    })
   }
 }
 
-// 単一ページの処理（改善されたリトライロジック）
-const MAX_PAGE_RETRIES = 3
-const RETRY_DELAY = 2000 // 2秒
+// ステータス取得
+function getStatus(req: NextApiRequest, res: NextApiResponse) {
+  const elapsed = warmupState.isProcessing 
+    ? Math.round((Date.now() - warmupState.startTime) / 1000)
+    : 0
 
+  const progress = warmupState.total > 0
+    ? Math.round((warmupState.processed / warmupState.total) * 100)
+    : 0
+
+  console.log('[Warmup] Status request:', {
+    isProcessing: warmupState.isProcessing,
+    processed: warmupState.processed,
+    total: warmupState.total,
+    progress: progress
+  })
+
+  return res.status(200).json({
+    isProcessing: warmupState.isProcessing,
+    processed: warmupState.processed,
+    succeeded: warmupState.succeeded,
+    failed: warmupState.failed,
+    skipped: warmupState.skipped,
+    total: warmupState.total,
+    progress,
+    elapsed,
+    errors: warmupState.errors,
+    currentBatch: warmupState.currentBatch,
+    needsProcessing: warmupState.isProcessing && warmupState.currentBatch * 3 < warmupState.total
+  })
+}
+
+// 単一ページの処理（正常動作版と同じロジック）
 async function warmupSinglePage(
   pageId: string, 
-  retriesLeft: number = MAX_PAGE_RETRIES
+  retriesLeft: number = 2
 ): Promise<{
   success: boolean
   skipped: boolean
@@ -568,63 +344,28 @@ async function warmupSinglePage(
       return { success: true, skipped: false }
     }
     
-    // 重複エラーは成功として扱う（リトライ不要）
+    // 重複エラーは成功として扱う
     if (response.status === 409 || response.headers.get('x-duplicate-page')) {
-      console.log(`[Warmup] Duplicate page detected: ${pageId}`)
       return { success: true, skipped: true }
-    }
-    
-    // 404エラーはリトライ不要
-    if (response.status === 404) {
-      console.log(`[Warmup] Page not found: ${pageId}`)
-      return { 
-        success: false, 
-        skipped: false, 
-        error: 'Page not found (404)' 
-      }
     }
     
     // その他のエラー
     const errorText = await response.text()
-    throw new Error(`HTTP ${response.status}: ${errorText.substring(0, 100)}`)
+    throw new Error(`HTTP ${response.status}: ${errorText.slice(0, 100)}`)
     
   } catch (error: any) {
-    const currentRetry = MAX_PAGE_RETRIES - retriesLeft + 1
-    
-    // リトライ不要なエラー
-    if (error.message?.includes('duplicate canonical page id')) {
-      console.log(`[Warmup] Skipping duplicate: ${pageId}`)
-      return { 
-        success: false, 
-        skipped: true, 
-        error: 'duplicate' 
-      }
-    }
-    
     // リトライ可能な場合
-    if (retriesLeft > 0 && 
-        (error.name === 'AbortError' || 
-         error.message.includes('fetch') ||
-         error.message.includes('ECONNREFUSED') ||
-         error.message.includes('ETIMEDOUT'))) {
-      
-      console.log(`[Warmup] Retrying ${pageId} (attempt ${currentRetry}/${MAX_PAGE_RETRIES})`)
-      
-      // 段階的な待機時間（retry * 2秒）
-      const delay = currentRetry * RETRY_DELAY
-      await new Promise(resolve => setTimeout(resolve, delay))
-      
+    if (retriesLeft > 0 && (error.name === 'AbortError' || error.message.includes('fetch'))) {
+      console.log(`[Warmup] Retrying ${pageId} (${retriesLeft} retries left)`)
+      await new Promise(resolve => setTimeout(resolve, 2000))
       return warmupSinglePage(pageId, retriesLeft - 1)
     }
-    
-    // リトライ上限に達した場合
-    console.error(`[Warmup] Failed after ${MAX_PAGE_RETRIES} attempts: ${pageId} - ${error.message}`)
     
     // タイムアウトや接続エラー
     return { 
       success: false, 
       skipped: false, 
-      error: error.name === 'AbortError' ? 'Timeout' : error.message.substring(0, 100)
+      error: error.name === 'AbortError' ? 'Timeout' : error.message 
     }
   }
 }
