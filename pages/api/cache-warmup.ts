@@ -137,13 +137,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const RETRY_COUNT = isRedisAvailable ? 3 : 2; // Redis不在時はリトライを減らす
     const RETRY_DELAY = 3000; // リトライ前の待機時間（3秒）
     const PAGE_TIMEOUT = 45000; // ページ取得のタイムアウト（45秒）
-    const MAX_PAGES_PER_REQUEST = isRedisAvailable ? 10 : 5; // Redis不在時は最大ページ数を制限
-
-    // 処理ページ数を制限（必要に応じて）
-    if (pageIds.length > MAX_PAGES_PER_REQUEST) {
-      console.log(`[Cache Warmup] Limiting pages from ${pageIds.length} to ${MAX_PAGES_PER_REQUEST} for this request`);
-      pageIds = pageIds.slice(0, MAX_PAGES_PER_REQUEST);
-    }
+    // 処理ページ数の制限を削除（すべてのページを処理）
+    console.log(`[Cache Warmup] Will process all ${pageIds.length} pages in batches`);
 
     console.log(`[Cache Warmup] Warming up cache for ${pageIds.length} pages`);
     
@@ -465,7 +460,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         failureAnalysis,
         batchSize: BATCH_SIZE,
         totalBatches,
-        maxPagesPerRequest: MAX_PAGES_PER_REQUEST,
         processingTime: `${((Date.now() - startTime) / 1000).toFixed(1)}s`
       }
     });
