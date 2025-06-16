@@ -48,26 +48,63 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       console.error('[TestPageList] getAllPageIds error:', error);
     }
     
-    // サンプルページの詳細情報を取得
-    const samplePagesWithDetails = siteMapPages.slice(0, 10).map(pageId => {
+    // 全ページの詳細情報を取得
+    const allPagesWithDetails = siteMapPages.map(pageId => {
       try {
         const siteMapData = siteMap?.pageMap?.[pageId];
         const pageBlock = siteMapData?.block?.[pageId]?.value;
-        const title = pageBlock?.properties?.title?.[0]?.[0] || 'Untitled';
+        
+        // タイトルの取得（複数の方法を試す）
+        let title = 'Untitled';
+        
+        // 方法1: properties.titleから取得
+        if (pageBlock?.properties?.title) {
+          const titleProperty = pageBlock.properties.title;
+          if (Array.isArray(titleProperty) && titleProperty[0]?.[0]) {
+            title = titleProperty[0][0];
+          }
+        }
+        
+        // 方法2: propertiesの他のフィールドをチェック
+        if (title === 'Untitled' && pageBlock?.properties) {
+          const possibleTitleKeys = ['Name', 'name', 'NAME', 'タイトル', 'title'];
+          for (const key of possibleTitleKeys) {
+            if (pageBlock.properties[key]?.[0]?.[0]) {
+              title = pageBlock.properties[key][0][0];
+              break;
+            }
+          }
+        }
+        
         const url = siteMap?.canonicalPageMap?.[pageId] || `/${pageId.replace(/-/g, '')}`;
         
         return {
           id: pageId,
           title,
-          url
+          url,
+          type: pageBlock?.type || 'unknown',
+          hasContent: !!pageBlock?.content,
+          lastEdited: pageBlock?.last_edited_time ? 
+            new Date(pageBlock.last_edited_time).toLocaleString('ja-JP') : 
+            null
         };
       } catch (e) {
         return {
           id: pageId,
           title: 'Untitled',
-          url: `/${pageId.replace(/-/g, '')}`
+          url: `/${pageId.replace(/-/g, '')}`,
+          type: 'unknown',
+          hasContent: false,
+          lastEdited: null
         };
       }
+    });
+    
+    // タイトルでソート（Untitledは最後に）
+    allPagesWithDetails.sort((a, b) => {
+      if (a.title === 'Untitled' && b.title !== 'Untitled') return 1;
+      if (a.title !== 'Untitled' && b.title === 'Untitled') return -1;
+      return a.title.localeCompare(b.title, 'ja');
     });
 
     // デバッグ情報をレスポンス
@@ -83,7 +120,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           total: siteMapPages.length,
           unique: allPageIds.length,
           duplicates: siteMapPages.length - allPageIds.length,
-          sample: samplePagesWithDetails
+          pages: allPagesWithDetails
         },
         message: `${allPageIds.length || siteMapPages.length}個のページが検出されました`,
         siteMapDetails: {

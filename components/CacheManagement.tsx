@@ -79,6 +79,7 @@ export const CacheManagement: React.FC = () => {
   }>>([]);
   const [pageListResult, setPageListResult] = useState<any>(null);
   const [isTestingPageList, setIsTestingPageList] = useState(false);
+  const [pageSearchTerm, setPageSearchTerm] = useState('');
   const { isConnected, lastUpdate, clearCache } = useRealtimeUpdates();
 
   // デバッグ用のログ
@@ -1208,30 +1209,213 @@ export const CacheManagement: React.FC = () => {
                     {pageListResult.duplicateCount > 0 && (
                       <p style={{ color: '#f59e0b' }}>重複ページ: {pageListResult.duplicateCount}ページ</p>
                     )}
-                    {pageListResult.siteMap?.sample && pageListResult.siteMap.sample.length > 0 && (
-                      <details style={{ marginTop: '0.5rem' }}>
-                        <summary style={{ cursor: 'pointer', color: '#3b82f6' }}>
-                          サンプルページを表示
-                        </summary>
-                        <ul style={{ 
-                          marginTop: '0.5rem', 
-                          fontSize: '0.75rem', 
-                          listStyle: 'none', 
-                          padding: 0 
-                        }}>
-                          {pageListResult.siteMap.sample.map((page: any) => (
-                            <li key={page.id} style={{ 
-                              padding: '0.25rem 0', 
-                              borderBottom: '1px solid #f3f4f6',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              whiteSpace: 'nowrap'
-                            }}>
-                              {page.title} ({page.url})
-                            </li>
-                          ))}
-                        </ul>
-                      </details>
+                    {(pageListResult.siteMap?.pages || pageListResult.siteMap?.sample) && (
+                      <div style={{ marginTop: '1rem' }}>
+                        <details open>
+                          <summary style={{ 
+                            cursor: 'pointer', 
+                            color: '#3b82f6',
+                            fontWeight: '500',
+                            marginBottom: '0.5rem'
+                          }}>
+                            全ページ一覧 ({pageListResult.siteMap.pages?.length || pageListResult.siteMap.sample?.length || 0}件)
+                          </summary>
+                          
+                          {/* 検索機能 */}
+                          <div style={{ marginBottom: '0.75rem' }}>
+                            <input
+                              type="text"
+                              placeholder="ページタイトルで検索..."
+                              value={pageSearchTerm}
+                              onChange={(e) => setPageSearchTerm(e.target.value)}
+                              style={{
+                                width: '100%',
+                                padding: '0.5rem',
+                                border: '1px solid #e5e5e5',
+                                borderRadius: '4px',
+                                fontSize: '0.875rem'
+                              }}
+                            />
+                          </div>
+                          
+                          {/* ページリスト */}
+                          <div style={{ 
+                            maxHeight: '400px',
+                            overflowY: 'auto',
+                            border: '1px solid #e5e5e5',
+                            borderRadius: '6px',
+                            padding: '0.5rem',
+                            backgroundColor: '#f9fafb'
+                          }}>
+                            {(() => {
+                              const pages = pageListResult.siteMap.pages || pageListResult.siteMap.sample || [];
+                              const filteredPages = pages.filter((page: any) =>
+                                page.title.toLowerCase().includes(pageSearchTerm.toLowerCase()) ||
+                                page.id.toLowerCase().includes(pageSearchTerm.toLowerCase())
+                              );
+                              
+                              return filteredPages.map((page: any, index: number) => (
+                                <div key={page.id} style={{ 
+                                  padding: '0.75rem',
+                                  marginBottom: '0.5rem',
+                                  backgroundColor: 'white',
+                                  borderRadius: '4px',
+                                  border: '1px solid #e5e5e5'
+                                }}>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                      <h5 style={{ 
+                                        fontWeight: '500',
+                                        color: '#1f2937',
+                                        marginBottom: '0.25rem'
+                                      }}>
+                                        {index + 1}. {page.title}
+                                      </h5>
+                                      
+                                      <div style={{ 
+                                        display: 'flex', 
+                                        alignItems: 'center', 
+                                        gap: '0.5rem',
+                                        marginBottom: '0.25rem'
+                                      }}>
+                                        <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>ID:</span>
+                                        <code style={{ 
+                                          fontSize: '0.75rem',
+                                          backgroundColor: '#f3f4f6',
+                                          padding: '0.125rem 0.5rem',
+                                          borderRadius: '2px',
+                                          fontFamily: 'monospace'
+                                        }}>
+                                          {page.id}
+                                        </code>
+                                        <button
+                                          onClick={() => {
+                                            navigator.clipboard.writeText(page.id);
+                                            setMessage('✅ IDをコピーしました');
+                                            setTimeout(() => setMessage(''), 2000);
+                                          }}
+                                          style={{
+                                            fontSize: '0.75rem',
+                                            color: '#3b82f6',
+                                            cursor: 'pointer',
+                                            background: 'none',
+                                            border: 'none',
+                                            padding: '0'
+                                          }}
+                                          title="IDをコピー"
+                                        >
+                                          📋
+                                        </button>
+                                      </div>
+                                      
+                                      {page.url && (
+                                        <div style={{ fontSize: '0.75rem', marginBottom: '0.25rem' }}>
+                                          <a 
+                                            href={page.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            style={{ color: '#3b82f6', textDecoration: 'none' }}
+                                          >
+                                            {page.url}
+                                          </a>
+                                        </div>
+                                      )}
+                                      
+                                      {page.lastEdited && (
+                                        <div style={{ fontSize: '0.75rem', color: '#9ca3af' }}>
+                                          最終更新: {page.lastEdited}
+                                        </div>
+                                      )}
+                                    </div>
+                                    
+                                    {page.type && (
+                                      <span style={{
+                                        fontSize: '0.75rem',
+                                        padding: '0.25rem 0.5rem',
+                                        borderRadius: '4px',
+                                        backgroundColor: page.type === 'page' ? '#dbeafe' :
+                                                        page.type === 'collection_view_page' ? '#e9d5ff' :
+                                                        '#f3f4f6',
+                                        color: page.type === 'page' ? '#1e40af' :
+                                               page.type === 'collection_view_page' ? '#6b21a8' :
+                                               '#4b5563'
+                                      }}>
+                                        {page.type === 'page' ? 'ページ' :
+                                         page.type === 'collection_view_page' ? 'データベース' :
+                                         page.type}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              ));
+                            })()}
+                          </div>
+                          
+                          {/* エクスポート機能 */}
+                          <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem' }}>
+                            <button
+                              onClick={() => {
+                                const pages = pageListResult.siteMap.pages || pageListResult.siteMap.sample || [];
+                                const dataStr = JSON.stringify(pages, null, 2);
+                                const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                                const exportFileDefaultName = `notion-pages-${new Date().toISOString().split('T')[0]}.json`;
+                                
+                                const linkElement = document.createElement('a');
+                                linkElement.setAttribute('href', dataUri);
+                                linkElement.setAttribute('download', exportFileDefaultName);
+                                linkElement.click();
+                              }}
+                              style={{
+                                fontSize: '0.75rem',
+                                padding: '0.375rem 0.75rem',
+                                backgroundColor: '#10b981',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              JSONでエクスポート
+                            </button>
+                            
+                            <button
+                              onClick={() => {
+                                const pages = pageListResult.siteMap.pages || pageListResult.siteMap.sample || [];
+                                const csv = [
+                                  ['Index', 'Title', 'ID', 'URL', 'Type', 'Last Edited'].join(','),
+                                  ...pages.map((page: any, index: number) => [
+                                    index + 1,
+                                    `"${page.title.replace(/"/g, '""')}"`,
+                                    page.id,
+                                    page.url || '',
+                                    page.type || '',
+                                    page.lastEdited || ''
+                                  ].join(','))
+                                ].join('\n');
+                                
+                                const dataUri = 'data:text/csv;charset=utf-8,'+ encodeURIComponent(csv);
+                                const exportFileDefaultName = `notion-pages-${new Date().toISOString().split('T')[0]}.csv`;
+                                
+                                const linkElement = document.createElement('a');
+                                linkElement.setAttribute('href', dataUri);
+                                linkElement.setAttribute('download', exportFileDefaultName);
+                                linkElement.click();
+                              }}
+                              style={{
+                                fontSize: '0.75rem',
+                                padding: '0.375rem 0.75rem',
+                                backgroundColor: '#3b82f6',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              CSVでエクスポート
+                            </button>
+                          </div>
+                        </details>
+                      </div>
                     )}
                   </div>
                 </div>
