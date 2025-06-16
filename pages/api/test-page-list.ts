@@ -21,8 +21,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log('[TestPageList] Trying getSiteMap...');
     let siteMapPages: string[] = [];
     let siteMapError: string | null = null;
+    let siteMap: any = null;
     try {
-      const siteMap = await getSiteMap();
+      siteMap = await getSiteMap();
       if (siteMap?.canonicalPageMap) {
         siteMapPages = Object.keys(siteMap.canonicalPageMap);
       }
