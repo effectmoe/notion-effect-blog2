@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { warmupJobs } from './cache-warmup-start';
 import { getJobStatus as getFastJobStatus } from './cache-warmup-fast';
+import { getWarmupStatus as getOptimizedStatus } from './cache-warmup-optimized';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -13,7 +14,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ error: 'Invalid jobId' });
   }
   
-  // まず高速ジョブを確認
+  // 最適化版のステータスを確認（jobIdがない場合）
+  if (!jobId || jobId === 'current') {
+    const optimizedStatus = getOptimizedStatus();
+    if (optimizedStatus.isProcessing || optimizedStatus.processed > 0) {
+      return res.status(200).json({
+        jobId: 'optimized',
+        status: optimizedStatus.isProcessing ? 'running' : 'completed',
+        progress: optimizedStatus.progress,
+        total: optimizedStatus.total,
+        processed: optimizedStatus.processed,
+        succeeded: optimizedStatus.succeeded,
+        failed: optimizedStatus.failed,
+        skipped: optimizedStatus.skipped,
+        elapsedSeconds: optimizedStatus.elapsedSeconds,
+        isComplete: !optimizedStatus.isProcessing,
+        errorSummary: optimizedStatus.errorSummary,
+        recentErrors: optimizedStatus.recentErrors,
+        isOptimized: true
+      });
+    }
+  }
+  
+  // 高速ジョブを確認
   const fastJob = getFastJobStatus(jobId);
   if (fastJob) {
     const progress = fastJob.total > 0 ? Math.round((fastJob.processed / fastJob.total) * 100) : 0;

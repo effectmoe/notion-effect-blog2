@@ -339,12 +339,12 @@ export const CacheManagement: React.FC = () => {
       // 3. 少し待つ
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // 4. 非同期ウォームアップジョブを開始（高速版）
-      console.log('[CacheManagement] Step 3: Starting fast warmup job...');
+      // 4. 非同期ウォームアップジョブを開始（最適化版）
+      console.log('[CacheManagement] Step 3: Starting optimized warmup job...');
       setProgress(prev => prev ? { ...prev, phase: 'warming' } : null);
-      setMessage('🚀 高速ウォームアップを開始中...');
+      setMessage('🚀 最適化ウォームアップを開始中...');
       
-      const warmupResponse = await fetch('/api/cache-warmup-fast', {
+      const warmupResponse = await fetch('/api/cache-warmup-optimized', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -378,6 +378,73 @@ export const CacheManagement: React.FC = () => {
     // loadingはジョブ完了時にuseEffectでfalseに設定される
   };
 
+  // 最適化されたウォームアップ（重複除外）
+  const handleOptimizedWarmup = async () => {
+    setLoading(true);
+    setMessage('');
+    setWarmupJob(null);
+    
+    try {
+      const token = getAuthToken();
+      console.log('[CacheManagement] Starting optimized warmup...');
+      
+      // 最適化ウォームアップを開始
+      const response = await fetch('/api/cache-warmup-optimized', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        }
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to start warmup');
+      }
+      
+      const { total } = await response.json();
+      setMessage(`🚀 最適化ウォームアップ開始: ${total}ページ（重複除外済み）`);
+      
+      // ステータスポーリング
+      const pollInterval = setInterval(async () => {
+        try {
+          const statusRes = await fetch('/api/cache-warmup-status?jobId=current');
+          const status = await statusRes.json();
+          
+          setWarmupJob(status);
+          
+          if (!status.isProcessing && status.processed > 0) {
+            clearInterval(pollInterval);
+            setJobPollingInterval(null);
+            setLoading(false);
+            
+            const message = `✅ ウォームアップ完了\n` +
+              `成功: ${status.succeeded}ページ\n` +
+              `スキップ: ${status.skipped}ページ（キャッシュ済み/重複）\n` +
+              `失敗: ${status.failed}ページ\n` +
+              `処理時間: ${status.elapsedSeconds}秒`;
+            
+            setMessage(message);
+            
+            // エラーサマリを表示
+            if (status.errorSummary && Object.keys(status.errorSummary).length > 0) {
+              console.log('[CacheManagement] Error summary:', status.errorSummary);
+            }
+          }
+        } catch (error) {
+          console.error('[CacheManagement] Status poll error:', error);
+        }
+      }, 1000); // 1秒ごと
+      
+      setJobPollingInterval(pollInterval);
+      
+    } catch (error) {
+      console.error('[CacheManagement] Optimized warmup error:', error);
+      setMessage(`❌ エラー: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setLoading(false);
+    }
+  };
+  
   // キャッシュウォームアップ
   const handleWarmupCache = async () => {
     setLoading(true);
@@ -715,6 +782,21 @@ export const CacheManagement: React.FC = () => {
         <div className={styles.mainActionCard}>
           <div className={styles.mainActionButtons}>
             <button
+              onClick={handleOptimizedWarmup}
+              disabled={loading}
+              className={styles.mainActionButton}
+            >
+              <div className={styles.mainActionIcon}>🚀</div>
+              <div className={styles.mainActionContent}>
+                <div className={styles.mainActionName}>最適化ウォームアップ</div>
+                <div className={styles.mainActionDescription}>
+                  重複ページを除外して高速処理<br />
+                  <small>（推奨: 2-3分で完了）</small>
+                </div>
+              </div>
+            </button>
+            
+            <button
               onClick={handleClearAndWarmup}
               disabled={loading}
               className={styles.mainActionButton}
@@ -723,8 +805,8 @@ export const CacheManagement: React.FC = () => {
               <div className={styles.mainActionContent}>
                 <div className={styles.mainActionName}>クリア&ウォームアップ</div>
                 <div className={styles.mainActionDescription}>
-                  古いキャッシュを削除して、最新のデータを読み込みます<br />
-                  <small>（10ページずつ処理）</small>
+                  キャッシュ削除後に高速ウォームアップ<br />
+                  <small>（全ページを並列処理）</small>
                 </div>
               </div>
             </button>
