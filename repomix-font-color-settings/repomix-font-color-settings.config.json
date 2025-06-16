@@ -1,0 +1,38 @@
+{
+  "output": {
+    "filePath": "repomix-font-color-settings.xml",
+    "style": "xml",
+    "compress": true,
+    "removeComments": false,
+    "outputShowLineNumbers": true
+  },
+  "include": [
+    "**/pages/admin/font-settings.jsx",
+    "**/pages/admin/color-settings.jsx",
+    "**/components/FontSettingsPanel.jsx",
+    "**/components/FontSettingsPanel.module.css",
+    "**/components/ColorSettingsPanel.jsx",
+    "**/components/ColorSettingsPanel.module.css",
+    "**/components/FontStyler.jsx",
+    "**/components/ColorStyler.jsx",
+    "**/lib/font-customizer/**/*",
+    "**/lib/color-settings.js",
+    "**/lib/color-presets.js",
+    "**/lib/use-dark-mode.ts",
+    "**/public/fonts/**/*.css"
+  ],
+  "ignore": {
+    "customPatterns": [
+      "**/node_modules/**",
+      "**/.next/**",
+      "**/dist/**",
+      "**/build/**",
+      "**/*.log",
+      "**/coverage/**",
+      "**/.git/**",
+      "**/repomix*.xml",
+      "**/*summary.md",
+      "**/temp/**"
+    ]
+  }
+}
