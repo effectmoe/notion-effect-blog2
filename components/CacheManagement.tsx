@@ -131,8 +131,8 @@ export const CacheManagement: React.FC = () => {
     // 以下のコードは実行されない（warmupJobが設定されないため）
     
     return () => {
-      if (interval) {
-        clearInterval(interval);
+      if (jobPollingInterval) {
+        clearInterval(jobPollingInterval);
       }
     };
   }, [warmupJob?.jobId, warmupJob?.status]);
