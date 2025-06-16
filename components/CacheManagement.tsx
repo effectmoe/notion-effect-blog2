@@ -45,12 +45,14 @@ export const CacheManagement: React.FC = () => {
   const [progress, setProgress] = useState<WarmupProgress | null>(null);
   const [processingStatus, setProcessingStatus] = useState<CacheProcessingStatus | null>(null);
   const [statusPollingInterval, setStatusPollingInterval] = useState<NodeJS.Timeout | null>(null);
+  const [isAutoProcessing, setIsAutoProcessing] = useState(false);
+  const [autoProcessingStop, setAutoProcessingStop] = useState(false);
   const { isConnected, lastUpdate, clearCache } = useRealtimeUpdates();
 
   // キャッシュ統計を取得
   const fetchStats = async () => {
     try {
-      const response = await fetch('/api/cache-status');
+      const response = await fetch('/api/cache-stats');
       if (response.ok) {
         const data = await response.json();
         setStats(data);
@@ -216,9 +218,7 @@ export const CacheManagement: React.FC = () => {
     }
   };
 
-  // 自動段階処理のための状態
-  const [isAutoProcessing, setIsAutoProcessing] = useState(false);
-  const [autoProcessingStop, setAutoProcessingStop] = useState(false);
+  // 自動段階処理のための状態（上部で定義済み）
 
   // キャッシュクリアとウォームアップを一連の流れで実行
   const handleClearAndWarmup = async () => {
@@ -941,7 +941,7 @@ export const CacheManagement: React.FC = () => {
               </span>
             )}
           </div>
-          {isAutoProcessing && progress.phase === 'warming' && (
+          {isAutoProcessing && progress?.phase === 'warming' && (
             <button
               onClick={() => setAutoProcessingStop(true)}
               className={styles.stopButton}
