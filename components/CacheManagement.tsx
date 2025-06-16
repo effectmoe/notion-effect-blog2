@@ -1128,11 +1128,11 @@ export const CacheManagement: React.FC = () => {
           padding: '1.5rem',
           backgroundColor: '#f9fafb' 
         }}>
-          <h4 style={{ marginBottom: '0.5rem', fontSize: '1.1rem', fontWeight: '600' }}>
+          <h4 style={{ marginBottom: '0.5rem', fontSize: '1.1rem', fontWeight: '600', color: '#1f2937' }}>
             📋 ページリストテスト
           </h4>
           <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '1rem' }}>
-            現在認識されているNotionページの一覧を確認します。
+            現在認識されているNotionページの一覧を確認します。新しく追加したページが表示されない場合は、キャッシュクリアが必要です。
           </p>
           <button
             onClick={handleTestPageList}
@@ -1141,9 +1141,24 @@ export const CacheManagement: React.FC = () => {
             style={{
               backgroundColor: isTestingPageList ? '#9ca3af' : '#3b82f6',
               color: 'white',
-              padding: '0.5rem 1rem',
+              padding: '0.75rem 1.5rem',
               borderRadius: '6px',
-              fontSize: '0.875rem'
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              border: 'none',
+              cursor: isTestingPageList || loading ? 'not-allowed' : 'pointer',
+              transition: 'background-color 0.2s',
+              display: 'inline-block'
+            }}
+            onMouseEnter={(e) => {
+              if (!isTestingPageList && !loading) {
+                e.currentTarget.style.backgroundColor = '#2563eb'
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!isTestingPageList && !loading) {
+                e.currentTarget.style.backgroundColor = '#3b82f6'
+              }
             }}
           >
             {isTestingPageList ? '確認中...' : 'ページリストをテスト'}

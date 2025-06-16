@@ -305,12 +305,12 @@
 
 .mainActionButtons {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
   margin-bottom: 1.5rem;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .mainActionButtons {
     grid-template-columns: 1fr;
   }
