@@ -89,11 +89,15 @@ async function getAllPagesImpl(
       if (map[canonicalPageId]) {
         // you can have multiple pages in different collections that have the same id
         // TODO: we may want to error if neither entry is a collection page
-        console.warn('error duplicate canonical page id', {
-          canonicalPageId,
-          pageId,
-          existingPageId: map[canonicalPageId]
-        })
+        
+        // 重複チェックをスキップする設定
+        if (process.env.SKIP_DUPLICATE_CHECK !== 'true') {
+          console.warn('error duplicate canonical page id', {
+            canonicalPageId,
+            pageId,
+            existingPageId: map[canonicalPageId]
+          })
+        }
 
         return map
       } else {
