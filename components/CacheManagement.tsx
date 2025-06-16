@@ -1387,7 +1387,17 @@ export const CacheManagement: React.FC = () => {
                           </div>
                           
                           {/* エクスポート機能 */}
-                          <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem' }}>
+                          <div style={{ 
+                            marginTop: '0.75rem', 
+                            padding: '0.75rem',
+                            backgroundColor: '#f9fafb',
+                            border: '1px solid #e5e5e5',
+                            borderRadius: '6px'
+                          }}>
+                            <div style={{ marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: '500', color: '#4b5563' }}>
+                              📥 エクスポート:
+                            </div>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
                             <button
                               onClick={() => {
                                 const pages = pageListResult.siteMap.pages || pageListResult.siteMap.sample || [];
@@ -1410,7 +1420,7 @@ export const CacheManagement: React.FC = () => {
                                 cursor: 'pointer'
                               }}
                             >
-                              JSONでエクスポート
+                              📄 JSON
                             </button>
                             
                             <button
@@ -1428,13 +1438,18 @@ export const CacheManagement: React.FC = () => {
                                   ].join(','))
                                 ].join('\n');
                                 
-                                const dataUri = 'data:text/csv;charset=utf-8,'+ encodeURIComponent(csv);
-                                const exportFileDefaultName = `notion-pages-${new Date().toISOString().split('T')[0]}.csv`;
+                                // BOMを追加（Excelで日本語を正しく表示するため）
+                                const BOM = '\uFEFF';
+                                const csvContent = BOM + csv;
+                                
+                                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                                const url = URL.createObjectURL(blob);
                                 
                                 const linkElement = document.createElement('a');
-                                linkElement.setAttribute('href', dataUri);
-                                linkElement.setAttribute('download', exportFileDefaultName);
+                                linkElement.setAttribute('href', url);
+                                linkElement.setAttribute('download', `notion-pages-${new Date().toISOString().split('T')[0]}.csv`);
                                 linkElement.click();
+                                URL.revokeObjectURL(url);
                               }}
                               style={{
                                 fontSize: '0.75rem',
@@ -1446,8 +1461,40 @@ export const CacheManagement: React.FC = () => {
                                 cursor: 'pointer'
                               }}
                             >
-                              CSVでエクスポート
+                              📃 CSV (Excel対応)
                             </button>
+                            
+                            <button
+                              onClick={() => {
+                                const pages = pageListResult.siteMap.pages || pageListResult.siteMap.sample || [];
+                                const text = pages.map((page: any, index: number) => 
+                                  `${index + 1}. ${page.title}\n   ID: ${page.id}\n   URL: ${page.url || page.slug || 'N/A'}`
+                                ).join('\n\n');
+                                
+                                navigator.clipboard.writeText(text);
+                                setMessage('✅ ページリストをクリップボードにコピーしました');
+                                setTimeout(() => setMessage(''), 3000);
+                              }}
+                              style={{
+                                fontSize: '0.75rem',
+                                padding: '0.375rem 0.75rem',
+                                backgroundColor: '#6b7280',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              📋 テキストコピー
+                            </button>
+                            </div>
+                            
+                            {/* エクスポート形式の説明 */}
+                            <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: '#6b7280' }}>
+                              <div>• JSON: プログラムでの処理に適した形式</div>
+                              <div>• CSV: Excel等の表計算ソフトで開ける形式（日本語対応）</div>
+                              <div>• テキスト: メモ帳等で使えるシンプルな形式</div>
+                            </div>
                           </div>
                         </details>
                       </div>
