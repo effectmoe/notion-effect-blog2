@@ -38,6 +38,7 @@
     "@vercel/edge-config": "^1.4.0",
     "classnames": "^2.5.1",
     "date-fns": "^4.1.0",
+    "dotenv": "^16.5.0",
     "expiry-map": "^2.0.0",
     "fathom-client": "^3.4.1",
     "fontfaceobserver": "^2.3.0",
