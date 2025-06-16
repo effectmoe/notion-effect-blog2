@@ -169,7 +169,7 @@ export default function AdminPage() {
           padding: '1rem',
           backgroundColor: '#fee2e2',
           borderRadius: '0.25rem',
-          border: '1px solid '#fecaca'
+          border: '1px solid #fecaca'
         }}>
           <h4 style={{ fontWeight: '600', color: '#991b1b', marginBottom: '0.5rem' }}>
             ⚠️ 注意事項
