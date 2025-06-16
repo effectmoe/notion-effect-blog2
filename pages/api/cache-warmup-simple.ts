@@ -1,9 +1,23 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import { getAllPageIds } from '@/lib/get-all-pages';
-import { getSiteMap } from '@/lib/get-site-map';
+import { NextApiRequest, NextApiResponse } from 'next'
+import { getAllPageIds } from '@/lib/get-all-pages'
+import { getSiteMap } from '@/lib/get-site-map'
 
-// グローバルな処理状態（シンプル）
-let warmupState = {
+// グローバルな処理状態
+interface WarmupState {
+  isProcessing: boolean
+  startTime: number
+  total: number
+  processed: number
+  succeeded: number
+  failed: number
+  skipped: number
+  errors: string[]
+  lastUpdate: number
+  currentBatch: number
+  pageIds: string[]
+}
+
+let warmupState: WarmupState = {
   isProcessing: false,
   startTime: 0,
   total: 0,
@@ -11,92 +25,119 @@ let warmupState = {
   succeeded: 0,
   failed: 0,
   skipped: 0,
-  errors: [] as string[],
-  lastUpdate: Date.now()
-};
+  errors: [],
+  lastUpdate: Date.now(),
+  currentBatch: 0,
+  pageIds: []
+}
+
+// Vercelの関数タイムアウト設定
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '10mb',
+    },
+    // 最大実行時間を60秒に設定
+    externalResolver: true,
+  },
+}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   // CORS対応
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
 
   if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+    return res.status(200).end()
   }
 
   if (req.method === 'POST') {
-    // ウォームアップ開始
-    return startWarmup(req, res);
+    const { action } = req.body || {}
+    
+    if (action === 'process') {
+      // バッチ処理を実行
+      return processBatch(req, res)
+    } else {
+      // ウォームアップ開始
+      return startWarmup(req, res)
+    }
   } else if (req.method === 'GET') {
     // ステータス取得
-    return getStatus(req, res);
+    return getStatus(req, res)
   } else {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ error: 'Method not allowed' })
   }
 }
 
-// ウォームアップ開始
+// ウォームアップ開始（ページリストの準備のみ）
 async function startWarmup(req: NextApiRequest, res: NextApiResponse) {
+  console.log('[Warmup] Start request received')
+  
   // 認証チェック（オプション）
-  const authHeader = req.headers.authorization;
-  const expectedToken = process.env.CACHE_CLEAR_TOKEN;
+  const authHeader = req.headers.authorization
+  const expectedToken = process.env.CACHE_CLEAR_TOKEN
   
   if (expectedToken && authHeader !== `Bearer ${expectedToken}`) {
-    return res.status(401).json({ error: 'Unauthorized' });
+    return res.status(401).json({ error: 'Unauthorized' })
   }
-
+  
   // 既に処理中の場合
   if (warmupState.isProcessing) {
-    console.log('[Warmup] Already processing, returning current state');
+    console.log('[Warmup] Already processing')
     return res.status(200).json({
       success: false,
       message: 'Already processing',
       state: warmupState
-    });
+    })
   }
 
   try {
-    console.log('[Warmup] Starting cache warmup...');
+    console.log('[Warmup] Getting page list...')
     console.log('[Warmup] Environment check:', {
       NOTION_ROOT_PAGE_ID: process.env.NOTION_ROOT_PAGE_ID ? 'Set' : 'Not set',
       NOTION_ROOT_SPACE_ID: process.env.NOTION_ROOT_SPACE_ID ? 'Set' : 'Not set',
       NEXT_PUBLIC_HOST: process.env.NEXT_PUBLIC_HOST
-    });
+    })
     
-    // ページリスト取得（複数の方法を試す）
-    let pageIds: string[] = [];
+    // ページリスト取得
+    let pageIds: string[] = []
     
     // 方法1: サイトマップから取得
     try {
-      console.log('[Warmup] Trying getSiteMap...');
-      const siteMap = await getSiteMap();
-      
+      console.log('[Warmup] Trying getSiteMap...')
+      const siteMap = await getSiteMap()
       if (siteMap?.canonicalPageMap) {
-        pageIds = Object.keys(siteMap.canonicalPageMap);
-        console.log(`[Warmup] Got ${pageIds.length} pages from site map`);
+        pageIds = Object.keys(siteMap.canonicalPageMap)
+        console.log(`[Warmup] Got ${pageIds.length} pages from site map`)
       }
     } catch (error) {
-      console.error('[Warmup] Site map error:', error);
+      console.error('[Warmup] Site map error:', error)
     }
     
     // 方法2: getAllPageIdsから取得
     if (pageIds.length === 0) {
-      console.log('[Warmup] Trying getAllPageIds...');
+      console.log('[Warmup] Trying getAllPageIds...')
       try {
         pageIds = await getAllPageIds(
           process.env.NOTION_ROOT_PAGE_ID,
           process.env.NOTION_ROOT_SPACE_ID
-        );
-        console.log(`[Warmup] Got ${pageIds.length} pages from getAllPageIds`);
+        )
+        console.log(`[Warmup] Got ${pageIds.length} pages from getAllPageIds`)
       } catch (error) {
-        console.error('[Warmup] getAllPageIds error:', error);
+        console.error('[Warmup] getAllPageIds error:', error)
       }
+    }
+    
+    // 方法3: 最低限ルートページだけでも
+    if (pageIds.length === 0 && process.env.NOTION_ROOT_PAGE_ID) {
+      pageIds = [process.env.NOTION_ROOT_PAGE_ID]
+      console.log('[Warmup] Using only root page as fallback')
     }
     
     // ページが見つからない場合
     if (!pageIds || pageIds.length === 0) {
-      console.error('[Warmup] No pages found from any source!');
+      console.error('[Warmup] No pages found!')
       return res.status(200).json({
         success: false,
         message: 'No pages found. Check /api/test-page-list for debugging.',
@@ -104,10 +145,10 @@ async function startWarmup(req: NextApiRequest, res: NextApiResponse) {
           rootPageId: process.env.NOTION_ROOT_PAGE_ID,
           suggestion: 'Run /api/test-page-list to diagnose the issue'
         }
-      });
+      })
     }
 
-    // 状態をリセット
+    // 状態を初期化
     warmupState = {
       isProcessing: true,
       startTime: Date.now(),
@@ -117,35 +158,112 @@ async function startWarmup(req: NextApiRequest, res: NextApiResponse) {
       failed: 0,
       skipped: 0,
       errors: [],
-      lastUpdate: Date.now()
-    };
+      lastUpdate: Date.now(),
+      currentBatch: 0,
+      pageIds: pageIds
+    }
 
-    console.log(`[Warmup] Found ${pageIds.length} pages to process`);
-    console.log(`[Warmup] First few page IDs:`, pageIds.slice(0, 5));
-
-    // 非同期で処理開始
-    processAllPages(pageIds).then(() => {
-      warmupState.isProcessing = false;
-      warmupState.lastUpdate = Date.now();
-      console.log('[Warmup] Completed');
-    }).catch(error => {
-      console.error('[Warmup] Fatal error:', error);
-      warmupState.isProcessing = false;
-      warmupState.errors.push(`Fatal: ${error.message}`);
-    });
+    console.log(`[Warmup] Ready to process ${pageIds.length} pages`)
+    console.log(`[Warmup] First few page IDs:`, pageIds.slice(0, 5))
 
     return res.status(200).json({
       success: true,
-      message: 'Warmup started',
-      total: pageIds.length
-    });
+      message: 'Warmup initialized',
+      total: pageIds.length,
+      needsProcessing: true
+    })
 
   } catch (error: any) {
-    console.error('[Warmup] Error starting:', error);
+    console.error('[Warmup] Error:', error)
     return res.status(500).json({
       success: false,
       error: error.message
-    });
+    })
+  }
+}
+
+// バッチ処理（管理画面から定期的に呼ばれる）
+async function processBatch(req: NextApiRequest, res: NextApiResponse) {
+  if (!warmupState.isProcessing) {
+    return res.status(200).json({
+      success: false,
+      message: 'Not processing'
+    })
+  }
+
+  const BATCH_SIZE = 3 // Vercelのタイムアウトを考慮して小さめに
+  const startIdx = warmupState.currentBatch * BATCH_SIZE
+  const endIdx = Math.min(startIdx + BATCH_SIZE, warmupState.pageIds.length)
+  
+  if (startIdx >= warmupState.pageIds.length) {
+    // 処理完了
+    warmupState.isProcessing = false
+    warmupState.lastUpdate = Date.now()
+    console.log('[Warmup] All batches completed')
+    
+    return res.status(200).json({
+      success: true,
+      completed: true,
+      state: warmupState
+    })
+  }
+
+  const batch = warmupState.pageIds.slice(startIdx, endIdx)
+  console.log(`[Warmup] Processing batch ${warmupState.currentBatch + 1}, pages ${startIdx}-${endIdx}`)
+
+  try {
+    // バッチ内のページを処理
+    const results = await Promise.allSettled(
+      batch.map(pageId => warmupSinglePage(pageId))
+    )
+    
+    // 結果を集計
+    results.forEach((result, index) => {
+      warmupState.processed++
+      warmupState.lastUpdate = Date.now()
+      const pageId = batch[index]
+      
+      if (result.status === 'fulfilled') {
+        if (result.value.skipped) {
+          warmupState.skipped++
+        } else if (result.value.success) {
+          warmupState.succeeded++
+        } else {
+          warmupState.failed++
+          if (result.value.error) {
+            warmupState.errors.push(`${pageId}: ${result.value.error}`)
+            if (warmupState.errors.length > 10) {
+              warmupState.errors = warmupState.errors.slice(-10)
+            }
+          }
+        }
+      } else {
+        warmupState.failed++
+        warmupState.errors.push(`${pageId}: ${result.reason}`)
+      }
+    })
+    
+    // 次のバッチへ
+    warmupState.currentBatch++
+    
+    return res.status(200).json({
+      success: true,
+      completed: false,
+      processed: endIdx,
+      total: warmupState.pageIds.length,
+      state: warmupState
+    })
+    
+  } catch (error: any) {
+    console.error('[Warmup] Batch error:', error)
+    warmupState.errors.push(`Batch error: ${error.message}`)
+    warmupState.currentBatch++
+    
+    return res.status(200).json({
+      success: false,
+      error: error.message,
+      state: warmupState
+    })
   }
 }
 
@@ -153,83 +271,37 @@ async function startWarmup(req: NextApiRequest, res: NextApiResponse) {
 async function getStatus(req: NextApiRequest, res: NextApiResponse) {
   const elapsed = warmupState.isProcessing 
     ? Math.round((Date.now() - warmupState.startTime) / 1000)
-    : 0;
+    : 0
 
   const progress = warmupState.total > 0
     ? Math.round((warmupState.processed / warmupState.total) * 100)
-    : 0;
+    : 0
 
   return res.status(200).json({
     ...warmupState,
     elapsed,
-    progress
-  });
+    progress,
+    pageIds: undefined // ページIDリストは返さない（大きすぎるため）
+  })
 }
 
-// ページ処理
-async function processAllPages(pageIds: string[]) {
-  const BATCH_SIZE = 5;
-  const MAX_RETRIES = 2;
-  
-  for (let i = 0; i < pageIds.length; i += BATCH_SIZE) {
-    const batch = pageIds.slice(i, i + BATCH_SIZE);
-    
-    console.log(`[Warmup] Processing batch ${Math.floor(i/BATCH_SIZE) + 1}/${Math.ceil(pageIds.length/BATCH_SIZE)}`);
-    
-    // バッチ処理
-    const results = await Promise.allSettled(
-      batch.map(pageId => warmupSinglePage(pageId, MAX_RETRIES))
-    );
-    
-    // 結果集計
-    results.forEach((result, index) => {
-      warmupState.processed++;
-      warmupState.lastUpdate = Date.now();
-      const pageId = batch[index];
-      
-      if (result.status === 'fulfilled') {
-        if (result.value.skipped) {
-          warmupState.skipped++;
-        } else if (result.value.success) {
-          warmupState.succeeded++;
-        } else {
-          warmupState.failed++;
-          if (result.value.error) {
-            warmupState.errors.push(`${batch[index]}: ${result.value.error}`);
-            // エラーは最新の10件のみ保持
-            if (warmupState.errors.length > 10) {
-              warmupState.errors = warmupState.errors.slice(-10);
-            }
-          }
-        }
-      } else {
-        warmupState.failed++;
-        warmupState.errors.push(`${batch[index]}: ${result.reason}`);
-      }
-    });
-    
-    // 少し待機（負荷軽減）
-    await new Promise(resolve => setTimeout(resolve, 1000));
-  }
-}
-
-// 単一ページの処理（リトライ付き）
+// 単一ページの処理
 async function warmupSinglePage(
   pageId: string, 
   retriesLeft: number = 2
 ): Promise<{
-  success: boolean;
-  skipped: boolean;
-  error?: string;
+  success: boolean
+  skipped: boolean
+  error?: string
 }> {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 
                    process.env.NEXT_PUBLIC_HOST || 
-                   'http://localhost:3000';
+                   'http://localhost:3000'
     
     // タイムアウト設定
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000);
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 15000)
     
     // ページのURLを直接アクセスしてキャッシュウォームアップ
     const response = await fetch(`${baseUrl}/${pageId}`, {
@@ -239,36 +311,36 @@ async function warmupSinglePage(
         'x-skip-redis': 'true'  // Redisをスキップ
       },
       signal: controller.signal
-    });
+    })
     
-    clearTimeout(timeoutId);
+    clearTimeout(timeoutId)
     
     // キャッシュヒット
     if (response.status === 304) {
-      return { success: true, skipped: true };
+      return { success: true, skipped: true }
     }
     
     // 成功
     if (response.ok) {
       // HTMLレスポンスなのでJSONパースは不要
-      return { success: true, skipped: false };
+      return { success: true, skipped: false }
     }
     
     // 重複エラーは成功として扱う
     if (response.status === 409 || response.headers.get('x-duplicate-page')) {
-      return { success: true, skipped: true };
+      return { success: true, skipped: true }
     }
     
     // その他のエラー
-    const errorText = await response.text();
-    throw new Error(`HTTP ${response.status}: ${errorText}`);
+    const errorText = await response.text()
+    throw new Error(`HTTP ${response.status}: ${errorText}`)
     
   } catch (error: any) {
     // リトライ可能な場合
     if (retriesLeft > 0 && (error.name === 'AbortError' || error.message.includes('fetch'))) {
-      console.log(`[Warmup] Retrying ${pageId} (${retriesLeft} retries left)`);
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      return warmupSinglePage(pageId, retriesLeft - 1);
+      console.log(`[Warmup] Retrying ${pageId} (${retriesLeft} retries left)`)
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      return warmupSinglePage(pageId, retriesLeft - 1)
     }
     
     // タイムアウトや接続エラー
@@ -276,6 +348,6 @@ async function warmupSinglePage(
       success: false, 
       skipped: false, 
       error: error.name === 'AbortError' ? 'Timeout' : error.message 
-    };
+    }
   }
 }
