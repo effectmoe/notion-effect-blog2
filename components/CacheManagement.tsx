@@ -117,8 +117,9 @@ export const CacheManagement: React.FC = () => {
     setStatusPollingInterval(interval);
   };
 
-  // ジョブステータスのポーリング
+  // ジョブステータスのポーリング（レガシーコード - 新しいAPIでは使用しない）
   useEffect(() => {
+    // warmupJobは使用しないため、このuseEffectは実質無効
     if (!warmupJob || warmupJob.status === 'completed' || warmupJob.status === 'failed') {
       if (jobPollingInterval) {
         clearInterval(jobPollingInterval);
@@ -126,36 +127,8 @@ export const CacheManagement: React.FC = () => {
       }
       return;
     }
-
-    const interval = setInterval(async () => {
-      try {
-        const response = await fetch(`/api/cache-warmup-status?jobId=${warmupJob.jobId}`);
-        if (response.ok) {
-          const status = await response.json();
-          setWarmupJob(status);
-          
-          // 完了時の処理
-          if (status.isComplete) {
-            clearInterval(interval);
-            setJobPollingInterval(null);
-            setLoading(false);
-            
-            if (status.status === 'completed') {
-              const message = status.skipped > 0 
-                ? `✅ ウォームアップ完了: ${status.succeeded}/${status.total}ページ (スキップ: ${status.skipped}ページ)`
-                : `✅ ウォームアップ完了: ${status.succeeded}/${status.total}ページ`;
-              setMessage(message);
-            } else {
-              setMessage(`❌ ウォームアップ失敗`);
-            }
-          }
-        }
-      } catch (error) {
-        console.error('[CacheManagement] Job status poll error:', error);
-      }
-    }, 1000); // 1秒ごと（高速ポーリング）
     
-    setJobPollingInterval(interval);
+    // 以下のコードは実行されない（warmupJobが設定されないため）
     
     return () => {
       if (interval) {

@@ -250,7 +250,7 @@ async function warmupSinglePage(
     
     // 成功
     if (response.ok) {
-      await response.json();
+      // HTMLレスポンスなのでJSONパースは不要
       return { success: true, skipped: false };
     }
     
