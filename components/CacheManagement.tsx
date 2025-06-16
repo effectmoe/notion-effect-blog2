@@ -69,6 +69,13 @@ export const CacheManagement: React.FC = () => {
   const [autoProcessingStop, setAutoProcessingStop] = useState(false);
   const [warmupJob, setWarmupJob] = useState<WarmupJob | null>(null);
   const [jobPollingInterval, setJobPollingInterval] = useState<ReturnType<typeof setInterval> | null>(null);
+  const [warmupHistory, setWarmupHistory] = useState<Array<{
+    date: string;
+    total: number;
+    succeeded: number;
+    failed: number;
+    duration: number;
+  }>>([]);
   const { isConnected, lastUpdate, clearCache } = useRealtimeUpdates();
 
   // キャッシュ統計を取得
@@ -141,6 +148,17 @@ export const CacheManagement: React.FC = () => {
     fetchStats();
     // 30秒ごとに統計を更新
     const interval = setInterval(fetchStats, 30000);
+    
+    // ローカルストレージから履歴を読み込む
+    const savedHistory = localStorage.getItem('warmupHistory');
+    if (savedHistory) {
+      try {
+        setWarmupHistory(JSON.parse(savedHistory));
+      } catch (e) {
+        console.error('Failed to load warmup history:', e);
+      }
+    }
+    
     return () => {
       clearInterval(interval);
       // ステータスポーリングもクリーンアップ
@@ -149,6 +167,23 @@ export const CacheManagement: React.FC = () => {
       }
     };
   }, []);
+
+  // ウォームアップ結果の保存
+  const saveWarmupResult = (state: any) => {
+    const result = {
+      date: new Date().toLocaleString('ja-JP'),
+      total: state.total,
+      succeeded: state.succeeded,
+      failed: state.failed,
+      duration: Math.round((state.lastUpdate - state.startTime) / 1000)
+    };
+    
+    const newHistory = [result, ...warmupHistory].slice(0, 5); // 最新5件を保持
+    setWarmupHistory(newHistory);
+    
+    // ローカルストレージに保存
+    localStorage.setItem('warmupHistory', JSON.stringify(newHistory));
+  };
 
   // トークン取得のヘルパー関数
   const getAuthToken = () => {
@@ -441,6 +476,9 @@ export const CacheManagement: React.FC = () => {
 処理時間: ${completionTime}秒`;
           
           setMessage(message);
+          
+          // 履歴を保存
+          saveWarmupResult(status);
           
           // エラーがあれば表示
           if (status.errors && status.errors.length > 0) {
@@ -1180,6 +1218,38 @@ Secret: NOTION_WEBHOOK_SECRET環境変数に設定`}
           </div>
         </div>
       </details>
+
+      {/* ウォームアップ履歴 */}
+      {warmupHistory.length > 0 && (
+        <div style={{ marginTop: '2rem', padding: '1rem', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
+          <h3 style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '1rem', color: '#333' }}>
+            📊 ウォームアップ履歴
+          </h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {warmupHistory.map((item, index) => (
+              <div key={index} style={{ 
+                padding: '0.75rem', 
+                backgroundColor: 'white', 
+                borderRadius: '4px',
+                border: '1px solid #e1e4e8'
+              }}>
+                <div style={{ fontSize: '0.875rem', color: '#666', marginBottom: '0.25rem' }}>
+                  {item.date}
+                </div>
+                <div style={{ fontSize: '0.875rem', display: 'flex', gap: '1rem' }}>
+                  <span style={{ color: '#22c55e' }}>
+                    成功: {item.succeeded}/{item.total}件
+                  </span>
+                  {item.failed > 0 && (
+                    <span style={{ color: '#ef4444' }}>失敗: {item.failed}件</span>
+                  )}
+                  <span style={{ color: '#6b7280' }}>({item.duration}秒)</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
