@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getAllPageIds } from '@/lib/get-all-pages';
+import { getSiteMap } from '@/lib/get-site-map';
 
 // グローバルな処理状態（シンプル）
 let warmupState = {
@@ -15,6 +16,15 @@ let warmupState = {
 };
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  // CORS対応
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
   if (req.method === 'POST') {
     // ウォームアップ開始
     return startWarmup(req, res);
@@ -24,7 +34,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   } else {
     return res.status(405).json({ error: 'Method not allowed' });
   }
-}
 
 // ウォームアップ開始
 async function startWarmup(req: NextApiRequest, res: NextApiResponse) {
@@ -38,6 +47,7 @@ async function startWarmup(req: NextApiRequest, res: NextApiResponse) {
 
   // 既に処理中の場合
   if (warmupState.isProcessing) {
+    console.log('[Warmup] Already processing, returning current state');
     return res.status(200).json({
       success: false,
       message: 'Already processing',
@@ -46,22 +56,55 @@ async function startWarmup(req: NextApiRequest, res: NextApiResponse) {
   }
 
   try {
-    console.log('[Warmup Simple] Starting warmup process...');
+    console.log('[Warmup] Starting cache warmup...');
+    console.log('[Warmup] Environment check:', {
+      NOTION_ROOT_PAGE_ID: process.env.NOTION_ROOT_PAGE_ID ? 'Set' : 'Not set',
+      NOTION_ROOT_SPACE_ID: process.env.NOTION_ROOT_SPACE_ID ? 'Set' : 'Not set',
+      NEXT_PUBLIC_HOST: process.env.NEXT_PUBLIC_HOST
+    });
     
-    // ページリスト取得
-    const pageIds = await getAllPageIds(
-      process.env.NOTION_ROOT_PAGE_ID,
-      process.env.NOTION_ROOT_SPACE_ID
-    );
-
+    // ページリスト取得（複数の方法を試す）
+    let pageIds: string[] = [];
+    
+    // 方法1: サイトマップから取得
+    try {
+      console.log('[Warmup] Trying getSiteMap...');
+      const siteMap = await getSiteMap();
+      
+      if (siteMap?.canonicalPageMap) {
+        pageIds = Object.keys(siteMap.canonicalPageMap);
+        console.log(`[Warmup] Got ${pageIds.length} pages from site map`);
+      }
+    } catch (error) {
+      console.error('[Warmup] Site map error:', error);
+    }
+    
+    // 方法2: getAllPageIdsから取得
     if (pageIds.length === 0) {
-      return res.status(400).json({
+      console.log('[Warmup] Trying getAllPageIds...');
+      try {
+        pageIds = await getAllPageIds(
+          process.env.NOTION_ROOT_PAGE_ID,
+          process.env.NOTION_ROOT_SPACE_ID
+        );
+        console.log(`[Warmup] Got ${pageIds.length} pages from getAllPageIds`);
+      } catch (error) {
+        console.error('[Warmup] getAllPageIds error:', error);
+      }
+    }
+    
+    // ページが見つからない場合
+    if (!pageIds || pageIds.length === 0) {
+      console.error('[Warmup] No pages found from any source!');
+      return res.status(200).json({
         success: false,
-        error: 'No pages found'
+        message: 'No pages found. Check /api/test-page-list for debugging.',
+        debug: {
+          rootPageId: process.env.NOTION_ROOT_PAGE_ID,
+          suggestion: 'Run /api/test-page-list to diagnose the issue'
+        }
       });
     }
-
-    console.log(`[Warmup Simple] Found ${pageIds.length} unique pages`);
 
     // 状態をリセット
     warmupState = {
@@ -124,17 +167,16 @@ async function getStatus(req: NextApiRequest, res: NextApiResponse) {
 // ページ処理
 async function processAllPages(pageIds: string[]) {
   const BATCH_SIZE = 5;
+  const MAX_RETRIES = 2;
   
   for (let i = 0; i < pageIds.length; i += BATCH_SIZE) {
     const batch = pageIds.slice(i, i + BATCH_SIZE);
-    const batchNum = Math.floor(i/BATCH_SIZE) + 1;
-    const totalBatches = Math.ceil(pageIds.length/BATCH_SIZE);
     
-    console.log(`[Warmup Simple] Processing batch ${batchNum}/${totalBatches} (${batch.length} pages)`);
+    console.log(`[Warmup] Processing batch ${Math.floor(i/BATCH_SIZE) + 1}/${Math.ceil(pageIds.length/BATCH_SIZE)}`);
     
     // バッチ処理
     const results = await Promise.allSettled(
-      batch.map(pageId => warmupSinglePage(pageId))
+      batch.map(pageId => warmupSinglePage(pageId, MAX_RETRIES))
     );
     
     // 結果集計
@@ -146,43 +188,36 @@ async function processAllPages(pageIds: string[]) {
       if (result.status === 'fulfilled') {
         if (result.value.skipped) {
           warmupState.skipped++;
-          console.log(`[Warmup Simple] ⏭️ Skipped: ${pageId}`);
         } else if (result.value.success) {
           warmupState.succeeded++;
-          console.log(`[Warmup Simple] ✅ Success: ${pageId}`);
         } else {
           warmupState.failed++;
           if (result.value.error) {
-            warmupState.errors.push(`${pageId}: ${result.value.error}`);
-            console.log(`[Warmup Simple] ❌ Failed: ${pageId} - ${result.value.error}`);
+            warmupState.errors.push(`${batch[index]}: ${result.value.error}`);
+            // エラーは最新10件のみ保持
+            if (warmupState.errors.length > 10) {
+              warmupState.errors = warmupState.errors.slice(-10);
+            }
           }
         }
       } else {
         warmupState.failed++;
-        warmupState.errors.push(`${pageId}: ${result.reason}`);
-        console.log(`[Warmup Simple] ❌ Failed: ${pageId} - ${result.reason}`);
+        warmupState.errors.push(`${batch[index]}: ${result.reason}`);
       }
     });
     
-    // Keep only last 10 errors to avoid memory issues
-    if (warmupState.errors.length > 10) {
-      warmupState.errors = warmupState.errors.slice(-10);
-    }
-    
-    // 進捗ログ
-    const progress = Math.round((warmupState.processed / warmupState.total) * 100);
-    console.log(
-      `[Warmup Simple] Progress: ${warmupState.processed}/${warmupState.total} (${progress}%) - ` +
-      `Success: ${warmupState.succeeded}, Skip: ${warmupState.skipped}, Fail: ${warmupState.failed}`
-    );
+    // 少し待機（負荷軽減）
     
     // 少し待機（サーバー負荷軽減）
     await new Promise(resolve => setTimeout(resolve, 1000));
   }
 }
 
-// 単一ページの処理
-async function warmupSinglePage(pageId: string): Promise<{
+// 単一ページの処理（リトライ付き）
+async function warmupSinglePage(
+  pageId: string, 
+  retriesLeft: number = 2
+): Promise<{
   success: boolean;
   skipped: boolean;
   error?: string;
@@ -192,9 +227,6 @@ async function warmupSinglePage(pageId: string): Promise<{
                    process.env.NEXT_PUBLIC_HOST || 
                    'http://localhost:3000';
     
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15秒タイムアウト
-    
     const response = await fetch(`${baseUrl}/api/notion-page-info`, {
       method: 'POST',
       headers: {
@@ -203,40 +235,41 @@ async function warmupSinglePage(pageId: string): Promise<{
         'x-skip-redis': 'true'  // Redisをスキップ
       },
       body: JSON.stringify({ pageId }),
-      signal: controller.signal
+      signal: AbortSignal.timeout(15000) // 15秒タイムアウト
     });
-    
-    clearTimeout(timeoutId);
     
     if (response.status === 304) {
       return { success: true, skipped: true };
     }
     
-    if (!response.ok) {
-      // 重複エラーは成功として扱う
-      if (response.status === 409 || response.headers.get('x-duplicate-page')) {
-        return { success: true, skipped: true };
-      }
-      return { success: false, skipped: false, error: `HTTP ${response.status}` };
+    // 成功
+    if (response.ok) {
+      await response.json();
+      return { success: true, skipped: false };
     }
     
-    await response.json();
-    return { success: true, skipped: false };
-    
-  } catch (error: any) {
-    if (error.name === 'AbortError') {
-      return { success: false, skipped: false, error: 'Timeout' };
-    }
-    
-    // 重複エラーメッセージをチェック
-    if (error.message?.includes('duplicate')) {
+    // 重複エラーは成功として扱う
+    if (response.status === 409 || response.headers.get('x-duplicate-page')) {
       return { success: true, skipped: true };
     }
     
+    // その他のエラー
+    const errorText = await response.text();
+    throw new Error(`HTTP ${response.status}: ${errorText}`);
+    
+  } catch (error: any) {
+    // リトライ可能な場合
+    if (retriesLeft > 0 && (error.name === 'AbortError' || error.message.includes('fetch'))) {
+      console.log(`[Warmup] Retrying ${pageId} (${retriesLeft} retries left)`);
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      return warmupSinglePage(pageId, retriesLeft - 1);
+    }
+    
+    // タイムアウトや接続エラー
     return { 
       success: false, 
       skipped: false, 
-      error: error.message || 'Unknown error'
+      error: error.name === 'AbortError' ? 'Timeout' : error.message 
     };
   }
 }
