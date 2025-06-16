@@ -500,6 +500,8 @@ export const CacheManagement: React.FC = () => {
     
     let pollCount = 0;
     const maxPolls = 600; // 最大10分
+    let lastProgressUpdate = { processed: 0, failed: 0, timestamp: Date.now() };
+    let stuckCount = 0;
     
     const interval = setInterval(async () => {
       try {
@@ -535,6 +537,31 @@ export const CacheManagement: React.FC = () => {
         
         setWarmupJob(jobStatus);
         
+        // 進捗が停滞しているかチェック
+        const currentProgress = (status.processed || 0) + (status.failed || 0);
+        if (status.isProcessing && 
+            lastProgressUpdate.processed === status.processed && 
+            lastProgressUpdate.failed === status.failed) {
+          stuckCount++;
+          
+          if (stuckCount > 30) { // 30秒間進捗なし
+            console.warn('[CacheManagement] Progress appears to be stuck');
+            setMessage(prev => {
+              if (!prev.includes('⚠️ 進捗が停滞')) {
+                return prev + '\n⚠️ 進捗が停滞している可能性があります';
+              }
+              return prev;
+            });
+          }
+        } else {
+          stuckCount = 0;
+          lastProgressUpdate = {
+            processed: status.processed || 0,
+            failed: status.failed || 0,
+            timestamp: Date.now()
+          };
+        }
+        
         // 完了チェック
         if (!status.isProcessing && status.processed > 0) {
           console.log('[CacheManagement] Warmup completed, stopping polling');
@@ -543,12 +570,25 @@ export const CacheManagement: React.FC = () => {
           setLoading(false);
           
           // 完了メッセージ
-          const message = `✅ ウォームアップ完了！\n` +
+          const duration = status.completedAt ? 
+            Math.round((status.completedAt - status.startTime) / 1000) : 
+            status.elapsed;
+          
+          let message = `✅ ウォームアップ完了！\n` +
             `処理: ${status.processed}/${status.total}\n` +
             `成功: ${status.succeeded}\n` +
             `スキップ: ${status.skipped}（キャッシュ済み/重複）\n` +
             `失敗: ${status.failed}\n` +
-            `時間: ${status.elapsed}秒`;
+            `時間: ${duration}秒`;
+          
+          // エラーがあれば詳細を追加
+          if (status.errors && status.errors.length > 0) {
+            message += '\n\n⚠️ エラー詳細:';
+            status.errors.slice(-5).forEach((err: any) => {
+              const errorMsg = err.error || err.message || 'Unknown error';
+              message += `\n- ${err.pageId}: ${errorMsg}`;
+            });
+          }
           
           setMessage(message);
           

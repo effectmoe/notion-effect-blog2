@@ -26,8 +26,10 @@ export const config = {
   },
 }
 
-// レート制限付きリクエスト実行
-async function rateLimitedRequest<T>(fn: () => Promise<T>): Promise<T> {
+// レート制限付きリクエスト実行（リトライ回数制限付き）
+const MAX_RATE_LIMIT_RETRIES = 3
+
+async function rateLimitedRequest<T>(fn: () => Promise<T>, retryCount: number = 0): Promise<T> {
   const now = Date.now()
   const rateLimit = await storage.get(RATE_LIMIT_KEY) || { count: 0, resetAt: now }
   
@@ -39,10 +41,18 @@ async function rateLimitedRequest<T>(fn: () => Promise<T>): Promise<T> {
   
   // レート制限チェック
   if (rateLimit.count >= RATE_LIMIT.requestsPerSecond) {
-    const waitTime = rateLimit.resetAt - now
-    console.log(`[RateLimit] Waiting ${waitTime}ms before next request`)
-    await new Promise(resolve => setTimeout(resolve, waitTime))
-    return rateLimitedRequest(fn) // 再試行
+    const waitTime = Math.min(rateLimit.resetAt - now, 5000) // 最大5秒待機
+    if (waitTime > 0) {
+      console.log(`[RateLimit] Waiting ${waitTime}ms before next request (retry ${retryCount}/${MAX_RATE_LIMIT_RETRIES})`)
+      await new Promise(resolve => setTimeout(resolve, waitTime))
+    }
+    
+    // リトライ回数チェック
+    if (retryCount >= MAX_RATE_LIMIT_RETRIES) {
+      throw new Error(`Rate limit retry exceeded after ${MAX_RATE_LIMIT_RETRIES} attempts`)
+    }
+    
+    return rateLimitedRequest(fn, retryCount + 1) // 再試行
   }
   
   // リクエスト実行
@@ -55,14 +65,40 @@ async function rateLimitedRequest<T>(fn: () => Promise<T>): Promise<T> {
   } catch (error: any) {
     if (error.status === 429) {
       console.error('[RateLimit] 429 Too Many Requests - waiting 60s')
+      
+      // リトライ回数チェック
+      if (retryCount >= MAX_RATE_LIMIT_RETRIES) {
+        throw new Error(`Rate limit (429) retry exceeded after ${MAX_RATE_LIMIT_RETRIES} attempts`)
+      }
+      
       await storage.set(RATE_LIMIT_KEY, { 
         count: RATE_LIMIT.burstLimit, 
         resetAt: now + RATE_LIMIT.retryAfter 
       }, 60)
       await new Promise(resolve => setTimeout(resolve, RATE_LIMIT.retryAfter))
-      return rateLimitedRequest(fn) // 再試行
+      return rateLimitedRequest(fn, retryCount + 1) // 再試行
     }
     throw error
+  }
+}
+
+// 起動時のクリーンアップ処理
+async function cleanupStaleProcessing() {
+  try {
+    const processingInfo = await storage.get(PROCESSING_KEY)
+    if (processingInfo) {
+      const elapsed = Date.now() - processingInfo.startTime
+      const STALE_TIMEOUT = 5 * 60 * 1000 // 5分
+      
+      if (elapsed > STALE_TIMEOUT) {
+        console.log(`[Warmup] Cleaning up stale processing state (${Math.round(elapsed / 1000)}s old)`)
+        await storage.delete(PROCESSING_KEY)
+        await storage.delete(PROGRESS_KEY)
+        await storage.delete(RATE_LIMIT_KEY)
+      }
+    }
+  } catch (error) {
+    console.error('[Warmup] Cleanup error:', error)
   }
 }
 
@@ -82,6 +118,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // Redis初期化
   await initRedis()
+  
+  // 起動時に古い処理をクリーンアップ
+  await cleanupStaleProcessing()
   
   // メソッド別処理
   switch (req.method) {
@@ -309,6 +348,9 @@ interface WarmupResult {
 }
 
 // 実際のウォームアップ処理
+const MAX_PROCESSING_TIME = 10 * 60 * 1000 // 10分
+const MAX_CONSECUTIVE_ERRORS = 10
+
 async function processWarmup(startInfo: any, pageIds: string[]) {
   const progress: {
     processed: number
@@ -341,8 +383,21 @@ async function processWarmup(startInfo: any, pageIds: string[]) {
     console.log(`[Warmup] Starting background processing for ${uniquePageIds.length} unique pages`)
     
     const BATCH_SIZE = 5
+    let consecutiveErrors = 0
     
     for (let i = 0; i < uniquePageIds.length; i += BATCH_SIZE) {
+      // 処理時間チェック
+      const elapsed = Date.now() - startInfo.startTime
+      if (elapsed > MAX_PROCESSING_TIME) {
+        console.error(`[Warmup] Processing time exceeded ${MAX_PROCESSING_TIME}ms, aborting`)
+        progress.errors.push({
+          pageId: 'system',
+          error: 'Processing time exceeded 10 minutes',
+          timestamp: Date.now()
+        })
+        break
+      }
+      
       const batch = uniquePageIds.slice(i, Math.min(i + BATCH_SIZE, uniquePageIds.length))
       
       console.log(`[Warmup] Processing batch: pages ${i}-${i + batch.length} of ${uniquePageIds.length}`)
@@ -363,6 +418,8 @@ async function processWarmup(startInfo: any, pageIds: string[]) {
       )
       
       // 結果を集計
+      let batchErrorCount = 0
+      
       batchResults.forEach((result, index) => {
         const pageId = batch[index]
         progress.processed++
@@ -373,10 +430,13 @@ async function processWarmup(startInfo: any, pageIds: string[]) {
           
           if (result.value.skipped) {
             progress.skipped++
+            consecutiveErrors = 0 // スキップは連続エラーをリセット
           } else if (result.value.success) {
             progress.succeeded++
+            consecutiveErrors = 0 // 成功は連続エラーをリセット
           } else {
             progress.failed++
+            batchErrorCount++
             if (result.value.error) {
               progress.errors.push({
                 pageId,
@@ -390,6 +450,7 @@ async function processWarmup(startInfo: any, pageIds: string[]) {
           }
         } else {
           progress.failed++
+          batchErrorCount++
           progress.errors.push({
             pageId,
             error: result.reason?.message || 'Unknown error',
@@ -397,6 +458,24 @@ async function processWarmup(startInfo: any, pageIds: string[]) {
           })
         }
       })
+      
+      // 連続エラーチェック
+      if (batchErrorCount === batch.length) {
+        consecutiveErrors += batchErrorCount
+        console.error(`[Warmup] All ${batchErrorCount} pages in batch failed. Consecutive errors: ${consecutiveErrors}`)
+      } else {
+        consecutiveErrors = 0
+      }
+      
+      if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+        console.error(`[Warmup] Too many consecutive errors (${consecutiveErrors}), aborting`)
+        progress.errors.push({
+          pageId: 'system',
+          error: `Aborted after ${consecutiveErrors} consecutive errors`,
+          timestamp: Date.now()
+        })
+        break
+      }
       
       progress.currentBatch++
       
@@ -445,10 +524,13 @@ async function processWarmup(startInfo: any, pageIds: string[]) {
   }
 }
 
-// 単一ページの処理
+// 単一ページの処理（改善されたリトライロジック）
+const MAX_PAGE_RETRIES = 3
+const RETRY_DELAY = 2000 // 2秒
+
 async function warmupSinglePage(
   pageId: string, 
-  retriesLeft: number = 2
+  retriesLeft: number = MAX_PAGE_RETRIES
 ): Promise<{
   success: boolean
   skipped: boolean
@@ -486,28 +568,63 @@ async function warmupSinglePage(
       return { success: true, skipped: false }
     }
     
-    // 重複エラーは成功として扱う
+    // 重複エラーは成功として扱う（リトライ不要）
     if (response.status === 409 || response.headers.get('x-duplicate-page')) {
+      console.log(`[Warmup] Duplicate page detected: ${pageId}`)
       return { success: true, skipped: true }
+    }
+    
+    // 404エラーはリトライ不要
+    if (response.status === 404) {
+      console.log(`[Warmup] Page not found: ${pageId}`)
+      return { 
+        success: false, 
+        skipped: false, 
+        error: 'Page not found (404)' 
+      }
     }
     
     // その他のエラー
     const errorText = await response.text()
-    throw new Error(`HTTP ${response.status}: ${errorText}`)
+    throw new Error(`HTTP ${response.status}: ${errorText.substring(0, 100)}`)
     
   } catch (error: any) {
+    const currentRetry = MAX_PAGE_RETRIES - retriesLeft + 1
+    
+    // リトライ不要なエラー
+    if (error.message?.includes('duplicate canonical page id')) {
+      console.log(`[Warmup] Skipping duplicate: ${pageId}`)
+      return { 
+        success: false, 
+        skipped: true, 
+        error: 'duplicate' 
+      }
+    }
+    
     // リトライ可能な場合
-    if (retriesLeft > 0 && (error.name === 'AbortError' || error.message.includes('fetch'))) {
-      console.log(`[Warmup] Retrying ${pageId} (${retriesLeft} retries left)`)
-      await new Promise(resolve => setTimeout(resolve, 2000))
+    if (retriesLeft > 0 && 
+        (error.name === 'AbortError' || 
+         error.message.includes('fetch') ||
+         error.message.includes('ECONNREFUSED') ||
+         error.message.includes('ETIMEDOUT'))) {
+      
+      console.log(`[Warmup] Retrying ${pageId} (attempt ${currentRetry}/${MAX_PAGE_RETRIES})`)
+      
+      // 段階的な待機時間（retry * 2秒）
+      const delay = currentRetry * RETRY_DELAY
+      await new Promise(resolve => setTimeout(resolve, delay))
+      
       return warmupSinglePage(pageId, retriesLeft - 1)
     }
+    
+    // リトライ上限に達した場合
+    console.error(`[Warmup] Failed after ${MAX_PAGE_RETRIES} attempts: ${pageId} - ${error.message}`)
     
     // タイムアウトや接続エラー
     return { 
       success: false, 
       skipped: false, 
-      error: error.name === 'AbortError' ? 'Timeout' : error.message 
+      error: error.name === 'AbortError' ? 'Timeout' : error.message.substring(0, 100)
     }
   }
 }
