@@ -37,7 +37,7 @@ export const CollectionViewWrapper: React.FC<{ block: any; className?: string; c
     blockId: block.id,
     blockType: block.type,
     viewIds: block.view_ids,
-    collectionId: block.collection_id,
+    collectionId: (block as any).collection_id,
     recordMapKeys: Object.keys(recordMap)
   })
 
@@ -45,8 +45,8 @@ export const CollectionViewWrapper: React.FC<{ block: any; className?: string; c
   let collectionId = getBlockCollectionId(block, recordMap)
   
   // If getBlockCollectionId didn't work, try direct access
-  if (!collectionId && block.collection_id) {
-    collectionId = block.collection_id
+  if (!collectionId && (block as any).collection_id) {
+    collectionId = (block as any).collection_id
   }
   
   // NEW: Use our hardcoded mapping as a fallback
@@ -90,7 +90,7 @@ export const CollectionViewWrapper: React.FC<{ block: any; className?: string; c
         console.log('Parent block info:', {
           parentId: parentBlock.id,
           parentType: parentBlock.type,
-          parentCollectionId: parentBlock.collection_id
+          parentCollectionId: (parentBlock as any).collection_id
         })
       }
     }
@@ -98,7 +98,7 @@ export const CollectionViewWrapper: React.FC<{ block: any; className?: string; c
   
   // NEW: Create a modified block with collection_id if we found one but block doesn't have it
   let modifiedBlock = block
-  if (!block.collection_id && collectionId) {
+  if (!(block as any).collection_id && collectionId) {
     modifiedBlock = {
       ...block,
       collection_id: collectionId,
