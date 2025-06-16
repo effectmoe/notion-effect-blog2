@@ -1,5 +1,6 @@
 import { ExtendedRecordMap } from 'notion-types'
 import { getBlockCollectionId } from 'notion-utils'
+import { getCollectionIdForBlock } from './collection-id-mapping'
 
 /**
  * Recursively finds all blocks that need additional data fetching
@@ -58,7 +59,15 @@ export function findMissingBlocks(recordMap: ExtendedRecordMap): {
     
     // Check collection view blocks
     if (block.type === 'collection_view' || block.type === 'collection_view_page') {
-      const collectionId = getBlockCollectionId(block, recordMap) || (block as any).collection_id
+      let collectionId = getBlockCollectionId(block, recordMap) || (block as any).collection_id
+      
+      // Try our mapping if no collection ID found
+      if (!collectionId) {
+        collectionId = getCollectionIdForBlock(block.id)
+        if (collectionId) {
+          console.log(`Found collection ID ${collectionId} from mapping for block ${block.id}`)
+        }
+      }
       
       if (collectionId && !recordMap.collection?.[collectionId]) {
         missingCollections.push(collectionId)

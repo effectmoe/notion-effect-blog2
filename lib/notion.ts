@@ -130,6 +130,50 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
       console.error('Error fetching missing blocks:', error)
     }
   }
+  
+  // If we still have missing collections, try to fetch them directly
+  if (missingCollections.length > 0) {
+    console.log(`Attempting to fetch ${missingCollections.length} missing collections...`)
+    
+    try {
+      // Fetch collection data for missing collections
+      for (const collectionId of missingCollections) {
+        try {
+          // Find a view ID for this collection
+          let viewId: string | undefined
+          for (const [blockId, blockData] of Object.entries(recordMap.block || {})) {
+            const block = blockData.value
+            if (block?.type === 'collection_view' && 
+                ((block as any).collection_id === collectionId || 
+                 (await import('./collection-id-mapping')).getCollectionIdForBlock(block.id) === collectionId)) {
+              viewId = (block as any).view_ids?.[0]
+              break
+            }
+          }
+          
+          if (viewId) {
+            console.log(`Fetching collection ${collectionId} with view ${viewId}`)
+            const collectionData = await (notion as any).getCollectionData(
+              collectionId,
+              viewId,
+              { limit: 50 }
+            )
+            
+            if (collectionData?.recordMap) {
+              recordMap = mergeRecordMaps(recordMap, collectionData.recordMap)
+              console.log(`Successfully fetched collection ${collectionId}`)
+            }
+          } else {
+            console.warn(`No view ID found for collection ${collectionId}`)
+          }
+        } catch (error) {
+          console.error(`Failed to fetch collection ${collectionId}:`, error)
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching missing collections:', error)
+    }
+  }
 
   if (navigationStyle !== 'default') {
     // ensure that any pages linked to in the custom navigation header have
