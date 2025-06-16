@@ -17,7 +17,8 @@ interface WarmupState {
   pageIds: string[]
 }
 
-let warmupState: WarmupState = {
+// エクスポートしてリセット機能で使用できるようにする
+export let warmupState: WarmupState = {
   isProcessing: false,
   startTime: 0,
   total: 0,
@@ -30,6 +31,9 @@ let warmupState: WarmupState = {
   currentBatch: 0,
   pageIds: []
 }
+
+// タイムアウト設定（5分）
+const PROCESSING_TIMEOUT = 5 * 60 * 1000
 
 // Vercelの関数タイムアウト設定
 export const config = {
@@ -86,14 +90,22 @@ async function startWarmup(req: NextApiRequest, res: NextApiResponse) {
     return res.status(401).json({ error: 'Unauthorized' })
   }
   
-  // 既に処理中の場合
+  // 既に処理中の場合（タイムアウトチェック付き）
   if (warmupState.isProcessing) {
-    console.log('[Warmup] Already processing')
-    return res.status(200).json({
-      success: false,
-      message: 'Already processing',
-      state: warmupState
-    })
+    // タイムアウトチェック
+    if (warmupState.startTime && Date.now() - warmupState.startTime > PROCESSING_TIMEOUT) {
+      console.log('[Warmup] Processing timeout detected, resetting flag')
+      warmupState.isProcessing = false
+      warmupState.startTime = 0
+    } else {
+      console.log('[Warmup] Already processing - returning status')
+      return res.status(200).json({
+        success: false,
+        message: 'Already processing',
+        state: warmupState,
+        timeRemaining: PROCESSING_TIMEOUT - (Date.now() - warmupState.startTime)
+      })
+    }
   }
 
   try {
@@ -181,6 +193,9 @@ async function startWarmup(req: NextApiRequest, res: NextApiResponse) {
 
   } catch (error: any) {
     console.error('[Warmup] Error:', error)
+    // エラー時にフラグをリセット
+    warmupState.isProcessing = false
+    warmupState.startTime = 0
     return res.status(500).json({
       success: false,
       error: error.message

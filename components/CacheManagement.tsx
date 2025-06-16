@@ -417,10 +417,60 @@ export const CacheManagement: React.FC = () => {
       
       if (!result.success) {
         if (result.state && result.state.isProcessing) {
-          // 既に処理中
-          setMessage('🔄 既にウォームアップが実行中です');
-          startSimplePolling();
-          return;
+          // 既に処理中 - ユーザーに確認
+          const shouldReset = window.confirm(
+            'ウォームアップが既に実行中です。強制的にリセットして新しいウォームアップを開始しますか？\n\n' +
+            `処理時間: ${Math.round((result.timeRemaining || 0) / 1000)}秒残り`
+          );
+          
+          if (shouldReset) {
+            try {
+              // リセットAPIを呼び出し
+              const resetResponse = await fetch('/api/cache-warmup-reset', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`,
+                }
+              });
+              
+              const resetResult = await resetResponse.json();
+              if (!resetResponse.ok) {
+                throw new Error(`Reset failed: ${resetResult.error}`);
+              }
+              
+              setMessage('🔄 処理をリセットしました。再度ウォームアップを開始します...');
+              
+              // 少し待ってから再試行
+              await new Promise(resolve => setTimeout(resolve, 1000));
+              
+              // 再度ウォームアップを開始
+              const retryResponse = await fetch('/api/cache-warmup-simple', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`,
+                }
+              });
+              
+              const retryResult = await retryResponse.json();
+              if (!retryResult.success) {
+                throw new Error(retryResult.error || retryResult.message || 'Failed to start warmup after reset');
+              }
+              
+              setMessage(`🚀 ウォームアップを開始しました (${retryResult.total}ページ)`);
+              startSimplePolling();
+              return;
+              
+            } catch (resetError) {
+              throw new Error(`Reset failed: ${resetError instanceof Error ? resetError.message : 'Unknown error'}`);
+            }
+          } else {
+            // ユーザーがキャンセルした場合、既存の処理を監視
+            setMessage('🔄 既存のウォームアップを監視中...');
+            startSimplePolling();
+            return;
+          }
         }
         throw new Error(result.error || result.message || 'Failed to start warmup');
       }
