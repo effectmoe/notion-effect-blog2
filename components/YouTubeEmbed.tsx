@@ -33,10 +33,7 @@ export const YouTubeEmbed: React.FC<YouTubeEmbedProps> = ({
   
   const videoId = getVideoId(url)
   
-  console.log('[YouTubeEmbed] Processing URL:', { url, videoId })
-  
   if (!videoId) {
-    console.error('[YouTubeEmbed] Failed to extract video ID from URL:', url)
     return (
       <div className={`bg-gray-100 rounded-lg p-8 text-center ${className}`}>
         <p className="text-gray-600">無効なYouTube URLです</p>
@@ -61,43 +58,18 @@ export const YouTubeEmbed: React.FC<YouTubeEmbedProps> = ({
     `https://img.youtube.com/vi/${videoId}/default.jpg`
   ]
   
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    const failedUrl = thumbnailUrls[currentThumbIndex]
-    const imgElement = e.currentTarget
-    
-    console.error(`[YouTubeEmbed] Failed to load thumbnail for video ${videoId}:`, {
-      failedUrl,
-      attemptNumber: currentThumbIndex + 1,
-      totalAttempts: thumbnailUrls.length,
-      originalUrl: url,
-      errorType: 'image_load_error',
-      imgSrc: imgElement.src,
-      imgComplete: imgElement.complete,
-      imgNaturalWidth: imgElement.naturalWidth,
-      imgNaturalHeight: imgElement.naturalHeight
-    })
-    
-    // Check if this might be a WebP URL that got through somehow
-    if (failedUrl.includes('webp') || imgElement.src.includes('webp')) {
-      console.error('[YouTubeEmbed] WARNING: WebP format detected in URL!', {
-        failedUrl,
-        imgSrc: imgElement.src
-      })
-    }
+  const handleImageError = () => {
+    console.log(`[YouTubeEmbed] Failed to load thumbnail ${currentThumbIndex}: ${thumbnailUrls[currentThumbIndex]}`)
     
     if (currentThumbIndex < thumbnailUrls.length - 1) {
       setCurrentThumbIndex(currentThumbIndex + 1)
     } else {
-      console.error(`[YouTubeEmbed] All thumbnail attempts failed for video ${videoId}`)
       setImageError(true)
     }
   }
   
   const handleImageLoad = () => {
-    console.log(`[YouTubeEmbed] Successfully loaded thumbnail for video ${videoId}:`, {
-      quality: ['maxresdefault', 'sddefault', 'hqdefault', 'mqdefault', 'default'][currentThumbIndex],
-      url: thumbnailUrls[currentThumbIndex]
-    })
+    console.log(`[YouTubeEmbed] Successfully loaded thumbnail: ${thumbnailUrls[currentThumbIndex]}`)
   }
   
   return (
@@ -117,13 +89,6 @@ export const YouTubeEmbed: React.FC<YouTubeEmbedProps> = ({
               onError={handleImageError}
               onLoad={handleImageLoad}
               loading="lazy"
-              onLoadStart={() => {
-                console.log(`[YouTubeEmbed] Starting to load image:`, {
-                  videoId,
-                  url: thumbnailUrls[currentThumbIndex],
-                  attemptNumber: currentThumbIndex + 1
-                })
-              }}
             />
             {/* プレイボタンオーバーレイ */}
             <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300">

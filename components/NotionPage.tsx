@@ -32,7 +32,7 @@ import { Header } from './Header'
 import { FormulaPropertyDebug } from './FormulaPropertyDebug'
 import { CustomPageLink } from './CustomPageLink'
 import { YouTubeEmbed } from './YouTubeEmbed'
-import { CollectionViewWrapper } from './CollectionViewWrapper'
+// import { CollectionViewWrapper } from './CollectionViewWrapper'
 import StructuredData from './StructuredData'
 import styles from './styles.module.css'
 
@@ -98,14 +98,14 @@ const Code = dynamic(() =>
 )
 
 // データベースビューコンポーネント
-// const Collection = dynamic(() =>
-//   import('react-notion-x/build/third-party/collection').then(
-//     (m) => m.Collection
-//   ),
-//   {
-//     ssr: false
-//   }
-// )
+const Collection = dynamic(() =>
+  import('react-notion-x/build/third-party/collection').then(
+    (m) => m.Collection
+  ),
+  {
+    ssr: false
+  }
+)
 
 // 数式コンポーネント
 const Equation = dynamic(() =>
@@ -268,65 +268,11 @@ export function NotionPage({
       nextLegacyImage: Image,
       nextLink: Link,
       Code,
-      Collection: CollectionViewWrapper,
+      Collection,
       Equation,
       Pdf,
       Modal,
       Tweet,
-      // Custom YouTube Embed component for better error handling
-      Video: ({ block, className }) => {
-        const { format } = block as any
-        const source = format?.display_source || format?.url || ''
-        
-        console.log('[NotionPage] Video block:', { 
-          blockId: block.id, 
-          type: block.type, 
-          source,
-          format 
-        })
-        
-        // Check if it's a YouTube video
-        if (source && (source.includes('youtube.com') || source.includes('youtu.be'))) {
-          return <YouTubeEmbed url={source} className={className} />
-        }
-        
-        // For non-YouTube videos, use default video tag
-        return (
-          <video
-            className={className}
-            controls
-            preload="metadata"
-            src={source}
-          />
-        )
-      },
-      // Handle embed blocks that might contain YouTube videos
-      Embed: ({ block, className }) => {
-        const { format } = block as any
-        const source = format?.display_source || format?.url || ''
-        
-        console.log('[NotionPage] Embed block:', { 
-          blockId: block.id, 
-          type: block.type, 
-          source,
-          format 
-        })
-        
-        // Check if it's a YouTube embed
-        if (source && (source.includes('youtube.com') || source.includes('youtu.be'))) {
-          return <YouTubeEmbed url={source} className={className} />
-        }
-        
-        // For other embeds, use iframe
-        return (
-          <iframe
-            className={className}
-            src={source}
-            style={{ width: '100%', height: '500px', border: 'none' }}
-            allowFullScreen
-          />
-        )
-      },
       // Notionのデフォルトヘッダーをカスタムヘッダーとして使わない
       Header: () => null, // ヘッダーを非表示にする
       propertyLastEditedTimeValue,

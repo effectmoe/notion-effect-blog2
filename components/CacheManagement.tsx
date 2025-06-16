@@ -86,61 +86,6 @@ export const CacheManagement: React.FC = () => {
   useEffect(() => {
     console.log('[CacheManagement] Component mounted');
     console.log('[CacheManagement] handleTestPageList exists:', typeof handleTestPageList === 'function');
-    
-    // デバッグ用のグローバル関数を設定
-    if (typeof window !== 'undefined') {
-      (window as any).debugWarmup = {
-        getState: () => ({
-          isLoading: loading,
-          warmupJob,
-          batchInterval: !!batchInterval,
-          jobPollingInterval: !!jobPollingInterval,
-          message
-        }),
-        forceProcessBatch: () => processBatch(),
-        startBatch: () => startBatchProcessing(),
-        stopBatch: () => {
-          if (batchInterval) {
-            clearInterval(batchInterval);
-            setBatchInterval(null);
-          }
-        },
-        checkStatus: async () => {
-          const res = await fetch('/api/cache-warmup-simple');
-          const data = await res.json();
-          console.log('API Status:', data);
-          return data;
-        },
-        testInit: async () => {
-          const token = getAuthToken();
-          const res = await fetch('/api/cache-warmup-simple', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`,
-            },
-            body: JSON.stringify({})
-          });
-          const data = await res.json();
-          console.log('Init result:', data);
-          return data;
-        },
-        testBatch: async () => {
-          const token = getAuthToken();
-          const res = await fetch('/api/cache-warmup-simple', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`,
-            },
-            body: JSON.stringify({ action: 'process' })
-          });
-          const data = await res.json();
-          console.log('Batch result:', data);
-          return data;
-        }
-      };
-    }
   }, []);
 
   // キャッシュ統計を取得
@@ -229,11 +174,6 @@ export const CacheManagement: React.FC = () => {
       // ステータスポーリングもクリーンアップ
       if (statusPollingInterval) {
         clearInterval(statusPollingInterval);
-      }
-      // ジョブポーリングもクリーンアップ
-      if (jobPollingInterval) {
-        console.log('[CacheManagement] Cleaning up job polling interval on unmount');
-        clearInterval(jobPollingInterval);
       }
     };
   }, []);
@@ -449,10 +389,7 @@ export const CacheManagement: React.FC = () => {
     // loadingはジョブ完了時にuseEffectでfalseに設定される
   };
 
-  // バッチ処理インターバル
-  const [batchInterval, setBatchInterval] = useState<ReturnType<typeof setInterval> | null>(null);
-
-  // バッチ処理方式のウォームアップ
+  // シンプルなウォームアップ（重複除外・安定版）
   const handleOptimizedWarmup = async () => {
     setLoading(true);
     setMessage('');
@@ -460,136 +397,126 @@ export const CacheManagement: React.FC = () => {
     
     try {
       const token = getAuthToken();
-      console.log('[CacheManagement] Starting batch warmup...');
+      console.log('[CacheManagement] Starting simple warmup...');
       
-      // ステップ1: 初期化
-      console.log('[CacheManagement] Sending initialization request...');
-      const initResponse = await fetch('/api/cache-warmup-simple', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({})
-      });
-      
-      console.log('[CacheManagement] Init response status:', initResponse.status);
-      const initResult = await initResponse.json();
-      console.log('[CacheManagement] Init result:', initResult);
-      
-      if (!initResult.success) {
-        if (initResult.state && initResult.state.isProcessing) {
-          // 既に処理中
-          setMessage('🔄 既にウォームアップが実行中です');
-          // 既存の処理を監視
-          startSimplePolling();
-          startBatchProcessing();
-          return;
-        }
-        throw new Error(initResult.message || 'Initialization failed');
-      }
-      
-      setMessage(`🚀 ${initResult.total}ページの処理を開始しました`);
-      
-      // ステップ2: バッチ処理を開始
-      if (initResult.needsProcessing) {
-        startBatchProcessing();
-      }
-      
-      // ポーリングも開始
-      startSimplePolling();
-      
-    } catch (error) {
-      console.error('[CacheManagement] Warmup error:', error);
-      setMessage(`❌ エラー: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      setLoading(false);
-    }
-  };
-  
-  // バッチ処理を定期的に実行
-  const startBatchProcessing = () => {
-    // 既存のインターバルをクリア
-    if (batchInterval) {
-      clearInterval(batchInterval);
-      setBatchInterval(null);
-    }
-    
-    // 即座に最初のバッチを実行
-    processBatch();
-    
-    // 2秒ごとにバッチ処理を実行
-    const interval = setInterval(processBatch, 2000);
-    setBatchInterval(interval);
-  };
-  
-  // バッチ処理
-  const processBatch = async () => {
-    console.log('[CacheManagement] processBatch called');
-    try {
-      const token = getAuthToken();
-      console.log('[CacheManagement] Sending batch process request...');
-      
+      // シンプルウォームアップを開始
       const response = await fetch('/api/cache-warmup-simple', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({ action: 'process' })
+        }
       });
       
-      console.log('[CacheManagement] Batch response status:', response.status);
       const result = await response.json();
-      console.log('[CacheManagement] Batch result:', result);
       
-      if (result.completed) {
-        // 処理完了
-        if (batchInterval) {
-          clearInterval(batchInterval);
-          setBatchInterval(null);
+      if (!result.success) {
+        if (result.state && result.state.isProcessing) {
+          // 既に処理中
+          setMessage('🔄 既にウォームアップが実行中です');
+          startSimplePolling();
+          return;
         }
-        
-        console.log('[CacheManagement] Batch processing completed');
-        setMessage(`✅ 処理完了！ ${result.state?.succeeded || 0}/${result.state?.total || 0} 成功`);
-      } else if (result.success === false && !result.state?.isProcessing) {
-        // 処理が停止した
-        if (batchInterval) {
-          clearInterval(batchInterval);
-          setBatchInterval(null);
-        }
-        console.log('[CacheManagement] Batch processing stopped');
-        setMessage('⚠️ 処理が停止しました');
+        throw new Error(result.error || result.message || 'Failed to start warmup');
+      }
+      
+      if (result.needsProcessing) {
+        setMessage(`🚀 ウォームアップを初期化しました (${result.total}ページ)`);
+        // バッチ処理を開始
+        startBatchProcessing();
       } else {
-        // 処理継続中
-        const state = result.state || {};
-        console.log('[CacheManagement] Processing batch', state.currentBatch, 'of', Math.ceil(state.total / 3));
-        setMessage(`処理中... バッチ ${state.currentBatch}/${Math.ceil(state.total / 3)} (${state.processed}/${state.total}ページ)`);
+        setLoading(false);
+        setMessage('処理するページがありません');
       }
       
     } catch (error) {
-      console.error('[CacheManagement] Batch processing error:', error);
-      if (batchInterval) {
-        clearInterval(batchInterval);
-        setBatchInterval(null);
-      }
-      setMessage(`❌ バッチ処理エラー: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error('[CacheManagement] Simple warmup error:', error);
+      setMessage(`❌ エラー: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setLoading(false);
     }
   };
-
+  
+  // バッチ処理（新しい関数）
+  const startBatchProcessing = () => {
+    let retryCount = 0;
+    const maxRetries = 3;
+    
+    const processBatchInterval = setInterval(async () => {
+      try {
+        // バッチ処理を実行
+        const token = getAuthToken();
+        const response = await fetch('/api/cache-warmup-simple', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({ action: 'process' })
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        
+        const result = await response.json();
+        console.log('[CacheManagement] Batch result:', result);
+        
+        // ステータス更新
+        if (result.state) {
+          const status = result.state;
+          const statusText = `処理中: ${status.processed}/${status.total} ` +
+            `(成功: ${status.succeeded}, スキップ: ${status.skipped}, 失敗: ${status.failed}) ` +
+            `- ${Math.round((status.processed / status.total) * 100)}%`;
+          
+          setMessage(statusText);
+        }
+        
+        // 完了チェック
+        if (result.completed) {
+          clearInterval(processBatchInterval);
+          setLoading(false);
+          
+          const status = result.state;
+          const completionTime = Math.round((status.lastUpdate - status.startTime) / 1000);
+          const message = `✅ ウォームアップ完了！
+処理済み: ${status.processed}/${status.total}ページ
+成功: ${status.succeeded}
+スキップ: ${status.skipped}
+失敗: ${status.failed}
+処理時間: ${completionTime}秒`;
+          
+          setMessage(message);
+          
+          // 履歴を保存
+          saveWarmupResult(status);
+          
+          // エラーがあれば表示
+          if (status.errors && status.errors.length > 0) {
+            console.error('[CacheManagement] Errors during warmup:', status.errors);
+          }
+        }
+        
+        retryCount = 0; // 成功したらリトライカウントをリセット
+        
+      } catch (error: any) {
+        console.error('[CacheManagement] Batch error:', error);
+        retryCount++;
+        
+        if (retryCount >= maxRetries) {
+          clearInterval(processBatchInterval);
+          setLoading(false);
+          setMessage(`エラー: バッチ処理に失敗しました (${error.message})`);
+        }
+      }
+    }, 2000); // 2秒ごとにバッチ処理
+    
+    setJobPollingInterval(processBatchInterval);
+  };
   
   // シンプルウォームアップ用のポーリング処理
   const startSimplePolling = () => {
-    // 既存のポーリングをクリア
-    if (jobPollingInterval) {
-      console.log('[CacheManagement] Clearing existing polling interval');
-      clearInterval(jobPollingInterval);
-      setJobPollingInterval(null);
-    }
-    
     let pollCount = 0;
     const maxPolls = 600; // 最大10分
-    let lastProgressUpdate = { processed: 0, failed: 0, timestamp: Date.now() };
-    let stuckCount = 0;
     
     const interval = setInterval(async () => {
       try {
@@ -603,11 +530,6 @@ export const CacheManagement: React.FC = () => {
         }
         
         const status = await response.json();
-        console.log('[CacheManagement] Poll status:', { 
-          isProcessing: status.isProcessing, 
-          processed: status.processed, 
-          total: status.total 
-        });
         
         // warmupJob形式に変換
         const jobStatus = {
@@ -625,90 +547,30 @@ export const CacheManagement: React.FC = () => {
         
         setWarmupJob(jobStatus);
         
-        // 進捗が停滞しているかチェック
-        const currentProgress = (status.processed || 0) + (status.failed || 0);
-        if (status.isProcessing && 
-            lastProgressUpdate.processed === status.processed && 
-            lastProgressUpdate.failed === status.failed) {
-          stuckCount++;
-          
-          if (stuckCount > 30) { // 30秒間進捗なし
-            console.warn('[CacheManagement] Progress appears to be stuck');
-            setMessage(prev => {
-              if (!prev.includes('⚠️ 進捗が停滞')) {
-                return prev + '\n⚠️ 進捗が停滞している可能性があります';
-              }
-              return prev;
-            });
-          }
-        } else {
-          stuckCount = 0;
-          lastProgressUpdate = {
-            processed: status.processed || 0,
-            failed: status.failed || 0,
-            timestamp: Date.now()
-          };
-        }
-        
-        // バッチ処理が必要で、処理が止まっている場合は再開
-        if (status.needsProcessing && !batchInterval) {
-          console.log('[CacheManagement] Restarting batch processing...');
-          startBatchProcessing();
-        }
-        
         // 完了チェック
         if (!status.isProcessing && status.processed > 0) {
-          console.log('[CacheManagement] Warmup completed, stopping polling');
           clearInterval(interval);
           setJobPollingInterval(null);
           setLoading(false);
           
           // 完了メッセージ
-          const duration = status.completedAt ? 
-            Math.round((status.completedAt - status.startTime) / 1000) : 
-            status.elapsed;
-          
-          let message = `✅ ウォームアップ完了！\n` +
+          const message = `✅ ウォームアップ完了！\n` +
             `処理: ${status.processed}/${status.total}\n` +
             `成功: ${status.succeeded}\n` +
             `スキップ: ${status.skipped}（キャッシュ済み/重複）\n` +
             `失敗: ${status.failed}\n` +
-            `時間: ${duration}秒`;
-          
-          // エラーがあれば詳細を追加
-          if (status.errors && status.errors.length > 0) {
-            message += '\n\n⚠️ エラー詳細:';
-            status.errors.slice(-5).forEach((err: any) => {
-              const errorMsg = err.error || err.message || 'Unknown error';
-              message += `\n- ${err.pageId}: ${errorMsg}`;
-            });
-          }
+            `時間: ${status.elapsed}秒`;
           
           setMessage(message);
-          
-          // 履歴を保存
-          saveWarmupResult(status);
           
           // エラーがあれば表示
           if (status.errors && status.errors.length > 0) {
             console.error('[CacheManagement] Recent errors:', status.errors);
           }
-          return; // 重要: ポーリングを確実に停止
-        }
-        
-        // エラー状態のチェック（処理が始まっていない場合）
-        if (!status.isProcessing && status.processed === 0) {
-          console.log('[CacheManagement] Warmup not started or failed');
-          clearInterval(interval);
-          setJobPollingInterval(null);
-          setLoading(false);
-          setMessage('❌ ウォームアップが開始されませんでした');
-          return;
         }
         
         pollCount++;
         if (pollCount >= maxPolls) {
-          console.log('[CacheManagement] Polling timeout');
           clearInterval(interval);
           setJobPollingInterval(null);
           setLoading(false);
@@ -717,14 +579,6 @@ export const CacheManagement: React.FC = () => {
         
       } catch (error) {
         console.error('[CacheManagement] Poll error:', error);
-        // エラーが連続する場合はポーリングを停止
-        pollCount++;
-        if (pollCount >= 5) {
-          clearInterval(interval);
-          setJobPollingInterval(null);
-          setLoading(false);
-          setMessage('❌ ステータス取得エラー');
-        }
       }
     }, 1000); // 1秒ごと
     
