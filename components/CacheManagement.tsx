@@ -783,7 +783,19 @@ export const CacheManagement: React.FC = () => {
       const response = await fetch('/api/test-page-list');
       const result = await response.json();
       
+      console.log('[CacheManagement] Full API response:', result);
+      
       if (result.success) {
+        console.log('[CacheManagement] Setting pageListResult to:', result.results);
+        // デバッグ: 最初のページのデータを確認
+        if (result.results?.siteMap?.pages?.[0]) {
+          const firstPage = result.results.siteMap.pages[0];
+          console.log('[CacheManagement] First page data:', {
+            id: firstPage.id,
+            title: firstPage.title,
+            url: firstPage.url
+          });
+        }
         setPageListResult(result.results);
       } else {
         throw new Error(result.error);
@@ -1249,7 +1261,30 @@ export const CacheManagement: React.FC = () => {
                           }}>
                             {(() => {
                               const pages = pageListResult.siteMap.pages || pageListResult.siteMap.sample || [];
-                              const filteredPages = pages.filter((page: any) =>
+                              
+                              // データ検証と修正
+                              const correctedPages = pages.map((page: any) => {
+                                // UUIDパターンの正規表現
+                                const uuidPattern = /^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i;
+                                
+                                // IDがUUID形式でない場合、titleとidが入れ替わっている可能性がある
+                                const idIsUUID = uuidPattern.test(page.id.replace(/-/g, ''));
+                                const titleIsUUID = uuidPattern.test(page.title.replace(/-/g, ''));
+                                
+                                if (!idIsUUID && titleIsUUID) {
+                                  console.warn(`[CacheManagement] Swapped data detected for page:`, page);
+                                  // titleとidが入れ替わっている場合は修正
+                                  return {
+                                    ...page,
+                                    id: page.title,
+                                    title: page.id
+                                  };
+                                }
+                                
+                                return page;
+                              });
+                              
+                              const filteredPages = correctedPages.filter((page: any) =>
                                 page.title.toLowerCase().includes(pageSearchTerm.toLowerCase()) ||
                                 page.id.toLowerCase().includes(pageSearchTerm.toLowerCase())
                               );
@@ -1346,6 +1381,21 @@ export const CacheManagement: React.FC = () => {
                                       </span>
                                     )}
                                   </div>
+                                  
+                                  {/* デバッグ情報（一時的） */}
+                                  {process.env.NODE_ENV === 'development' && index === 0 && (
+                                    <div style={{
+                                      marginTop: '0.5rem',
+                                      padding: '0.5rem',
+                                      backgroundColor: '#fef3c7',
+                                      fontSize: '0.75rem',
+                                      fontFamily: 'monospace',
+                                      whiteSpace: 'pre-wrap',
+                                      wordBreak: 'break-all'
+                                    }}>
+                                      DEBUG: {JSON.stringify({ id: page.id, title: page.title }, null, 2)}
+                                    </div>
+                                  )}
                                 </div>
                               ));
                             })()}

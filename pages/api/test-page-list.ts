@@ -57,30 +57,83 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         // タイトルの取得（複数の方法を試す）
         let title = 'Untitled';
         
+        // デバッグ: ページブロック全体を確認
+        if (pageBlock) {
+          console.log(`[Page ${pageId}] Block type: ${pageBlock.type}`);
+          console.log(`[Page ${pageId}] Has properties: ${!!pageBlock.properties}`);
+          if (pageBlock.properties) {
+            console.log(`[Page ${pageId}] Property keys:`, Object.keys(pageBlock.properties));
+          }
+        }
+        
         // 方法1: properties.titleから取得
         if (pageBlock?.properties?.title) {
           const titleProperty = pageBlock.properties.title;
-          if (Array.isArray(titleProperty) && titleProperty[0]?.[0]) {
-            title = titleProperty[0][0];
+          console.log(`[Page ${pageId}] Title property:`, JSON.stringify(titleProperty));
+          if (Array.isArray(titleProperty)) {
+            if (titleProperty.length > 0 && Array.isArray(titleProperty[0])) {
+              if (titleProperty[0].length > 0) {
+                title = titleProperty[0][0];
+                console.log(`[Page ${pageId}] Extracted title from properties.title:`, title);
+              }
+            }
           }
         }
         
         // 方法2: propertiesの他のフィールドをチェック
         if (title === 'Untitled' && pageBlock?.properties) {
-          const possibleTitleKeys = ['Name', 'name', 'NAME', 'タイトル', 'title'];
+          const possibleTitleKeys = ['Name', 'name', 'NAME', 'タイトル', 'title', 'Title'];
           for (const key of possibleTitleKeys) {
-            if (pageBlock.properties[key]?.[0]?.[0]) {
-              title = pageBlock.properties[key][0][0];
-              break;
+            const prop = pageBlock.properties[key];
+            if (prop) {
+              console.log(`[Page ${pageId}] Found property ${key}:`, prop);
+              
+              // プロパティの値を正しく取得
+              if (Array.isArray(prop) && prop[0]) {
+                if (typeof prop[0] === 'string') {
+                  title = prop[0];
+                } else if (Array.isArray(prop[0]) && prop[0][0]) {
+                  title = prop[0][0];
+                }
+              } else if (typeof prop === 'string') {
+                title = prop;
+              }
+              
+              if (title !== 'Untitled') break;
             }
           }
         }
         
+        // 方法3: ページブロック自体の他のフィールドを確認
+        if (title === 'Untitled' && pageBlock) {
+          // format_pageからタイトルを取得
+          if (pageBlock.format?.page_icon) {
+            console.log(`[Page ${pageId}] Has page icon:`, pageBlock.format.page_icon);
+          }
+          
+          // ページブロックのcontentから最初のテキストを取得
+          if (pageBlock.content && Array.isArray(pageBlock.content)) {
+            const firstContentId = pageBlock.content[0];
+            if (firstContentId && siteMapData?.block?.[firstContentId]?.value) {
+              const firstBlock = siteMapData.block[firstContentId].value;
+              if (firstBlock.type === 'header' || firstBlock.type === 'sub_header' || firstBlock.type === 'sub_sub_header') {
+                if (firstBlock.properties?.title?.[0]?.[0]) {
+                  title = firstBlock.properties.title[0][0];
+                  console.log(`[Page ${pageId}] Got title from first header block:`, title);
+                }
+              }
+            }
+          }
+        }
+        
+        console.log(`[Page ${pageId}] Final title: '${title}', ID: '${pageId}'`);
+        
         const url = siteMap?.canonicalPageMap?.[pageId] || `/${pageId.replace(/-/g, '')}`;
         
-        return {
-          id: pageId,
-          title,
+        // 最終的なページデータを作成
+        const result = {
+          id: pageId,  // 必ずUUID形式のID
+          title: title,  // 取得したタイトル
           url,
           type: pageBlock?.type || 'unknown',
           hasContent: !!pageBlock?.content,
@@ -88,6 +141,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             new Date(pageBlock.last_edited_time).toLocaleString('ja-JP') : 
             null
         };
+        
+        // 検証: IDがUUID形式であることを確認
+        const isValidUUID = /^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i.test(pageId.replace(/-/g, ''));
+        if (!isValidUUID) {
+          console.warn(`[Page ${pageId}] WARNING: Page ID is not a valid UUID format!`);
+        }
+        
+        console.log(`[Page ${pageId}] Returning:`, { 
+          id: result.id, 
+          title: result.title,
+          idIsUUID: isValidUUID,
+          titleLength: result.title.length 
+        });
+        return result;
       } catch (e) {
         return {
           id: pageId,
