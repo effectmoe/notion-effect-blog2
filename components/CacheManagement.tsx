@@ -77,6 +77,8 @@ export const CacheManagement: React.FC = () => {
     failed: number;
     duration: number;
   }>>([]);
+  const [pageListResult, setPageListResult] = useState<any>(null);
+  const [isTestingPageList, setIsTestingPageList] = useState(false);
   const { isConnected, lastUpdate, clearCache } = useRealtimeUpdates();
 
   // キャッシュ統計を取得
@@ -765,6 +767,31 @@ export const CacheManagement: React.FC = () => {
     }
   };
 
+  // ページリストテスト機能
+  const handleTestPageList = async () => {
+    try {
+      setIsTestingPageList(true);
+      setPageListResult(null);
+      
+      const response = await fetch('/api/test-page-list');
+      const result = await response.json();
+      
+      if (result.success) {
+        setPageListResult(result.results);
+      } else {
+        throw new Error(result.error);
+      }
+    } catch (error: any) {
+      console.error('[CacheManagement] Page list test error:', error);
+      setPageListResult({
+        error: error.message,
+        pageCount: 0
+      });
+    } finally {
+      setIsTestingPageList(false);
+    }
+  };
+
   // デバッグ用のウォームアップテスト
   const handleDebugWarmup = async () => {
     setLoading(true);
@@ -1035,7 +1062,7 @@ export const CacheManagement: React.FC = () => {
                 className={styles.button}
               >
                 <span className={styles.buttonIcon}>📄</span>
-                <span>Notionキャッシュのみ</span>
+                <span>Notionキャッシュクリア</span>
               </button>
               <p className={styles.buttonDescription}>
                 Notion関連のキャッシュだけをクリアします。
@@ -1090,6 +1117,92 @@ export const CacheManagement: React.FC = () => {
           </div>
         </div>
       </details>
+
+      {/* デバッグツールセクション */}
+      <div className={styles.debugSection} style={{ marginTop: '2rem' }}>
+        <h3 className={styles.sectionTitle}>🔍 デバッグツール</h3>
+        
+        <div className={styles.debugCard} style={{ 
+          border: '1px solid #e5e5e5', 
+          borderRadius: '8px', 
+          padding: '1.5rem',
+          backgroundColor: '#f9fafb' 
+        }}>
+          <h4 style={{ marginBottom: '0.5rem', fontSize: '1.1rem', fontWeight: '600' }}>
+            📋 ページリストテスト
+          </h4>
+          <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '1rem' }}>
+            現在認識されているNotionページの一覧を確認します。
+          </p>
+          <button
+            onClick={handleTestPageList}
+            disabled={isTestingPageList || loading}
+            className={styles.button}
+            style={{
+              backgroundColor: isTestingPageList ? '#9ca3af' : '#3b82f6',
+              color: 'white',
+              padding: '0.5rem 1rem',
+              borderRadius: '6px',
+              fontSize: '0.875rem'
+            }}
+          >
+            {isTestingPageList ? '確認中...' : 'ページリストをテスト'}
+          </button>
+          
+          {pageListResult && (
+            <div style={{ 
+              marginTop: '1rem', 
+              padding: '1rem', 
+              backgroundColor: 'white', 
+              borderRadius: '6px',
+              border: '1px solid #e5e5e5'
+            }}>
+              {pageListResult.error ? (
+                <div style={{ color: '#ef4444' }}>
+                  エラー: {pageListResult.error}
+                </div>
+              ) : (
+                <div>
+                  <p style={{ color: '#059669', fontWeight: '600', marginBottom: '0.5rem' }}>
+                    {pageListResult.message || `${pageListResult.uniquePageCount || pageListResult.pageCount || 0}ページが検出されました`}
+                  </p>
+                  <div style={{ fontSize: '0.875rem', color: '#4b5563' }}>
+                    <p>ルートページID: {pageListResult.rootPageId || 'Not set'}</p>
+                    {pageListResult.duplicateCount > 0 && (
+                      <p style={{ color: '#f59e0b' }}>重複ページ: {pageListResult.duplicateCount}ページ</p>
+                    )}
+                    {pageListResult.siteMap?.sample && pageListResult.siteMap.sample.length > 0 && (
+                      <details style={{ marginTop: '0.5rem' }}>
+                        <summary style={{ cursor: 'pointer', color: '#3b82f6' }}>
+                          サンプルページを表示
+                        </summary>
+                        <ul style={{ 
+                          marginTop: '0.5rem', 
+                          fontSize: '0.75rem', 
+                          listStyle: 'none', 
+                          padding: 0 
+                        }}>
+                          {pageListResult.siteMap.sample.map((page: any) => (
+                            <li key={page.id} style={{ 
+                              padding: '0.25rem 0', 
+                              borderBottom: '1px solid #f3f4f6',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap'
+                            }}>
+                              {page.title} ({page.url})
+                            </li>
+                          ))}
+                        </ul>
+                      </details>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* プログレス表示 */}
       {(progress || processingStatus?.isProcessing || warmupJob) && (
