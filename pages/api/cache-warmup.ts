@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { getSiteMap } from '@/lib/get-site-map';
 import { getPage } from '@/lib/notion';
 import { normalizePageId, isValidPageId } from '@/lib/normalize-page-id';
+import { updateCacheStatus, resetCacheStatus } from './cache-status';
 
 // タイムアウト付きでPromiseを実行
 async function withTimeout<T>(
@@ -44,6 +45,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const startTime = Date.now();
     console.log('[Cache Warmup] Starting cache warmup process...');
+    
+    // ステータスをリセット
+    resetCacheStatus();
     
     let pageIds: string[] = [];
     let useFallback = false;
@@ -118,11 +122,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // バッチ処理の設定（超保守的な設定）
-    const BATCH_SIZE = 1; // 一度に処理するページ数（順次処理）
-    const DELAY_BETWEEN_BATCHES = 5000; // バッチ間の待機時間（5秒）
-    const RETRY_COUNT = 1; // リトライ回数（シンプル化）
-    const RETRY_DELAY = 3000; // リトライ前の待機時間（ミリ秒）
-    const PAGE_TIMEOUT = 15000; // ページ取得のタイムアウト（15秒）
+    const BATCH_SIZE = 5; // 一度に処理するページ数（5ページに減少）
+    const DELAY_BETWEEN_BATCHES = 10000; // バッチ間の待機時間（10秒に増加）
+    const RETRY_COUNT = 3; // リトライ回数（3回に増加）
+    const RETRY_DELAY = 2000; // リトライ前の待機時間（ミリ秒）
+    const PAGE_TIMEOUT = 30000; // ページ取得のタイムアウト（30秒に増加）
     const MAX_PAGES_PER_REQUEST = 10; // 1リクエストで処理する最大ページ数（10ページに制限）
 
     // 処理ページ数を制限（必要に応じて）
@@ -165,15 +169,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // リトライ機能付きのページ取得
     async function fetchPageWithRetry(pageIdOrSlug: string, retries = RETRY_COUNT): Promise<any> {
+      // ページIDを正規化してから使用（スコープをループの外に移動）
+      let pageIdToUse = pageIdOrSlug;
+      if (isValidPageId(pageIdOrSlug)) {
+        pageIdToUse = normalizePageId(pageIdOrSlug);
+      }
+      
       for (let attempt = 1; attempt <= retries; attempt++) {
         try {
-          console.log(`[Cache Warmup] Fetching page: ${pageIdOrSlug} (attempt ${attempt}/${retries})`);
-          
-          // ページIDを正規化してから使用
-          let pageIdToUse = pageIdOrSlug;
-          if (isValidPageId(pageIdOrSlug)) {
-            pageIdToUse = normalizePageId(pageIdOrSlug);
-          }
+          console.log(`[Cache Warmup] Fetching page: ${pageIdOrSlug} (attempt ${attempt}/${retries})`)
           
           // タイムアウト付きでページを取得
           const result = await withTimeout(
@@ -197,8 +201,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           
           // レート制限エラーの場合は長めに待つ
           if (error.status === 429 || error.code === 'rate_limited') {
-            const retryAfter = error.headers?.['retry-after'] || 60;
-            console.log(`[Cache Warmup] Rate limited. Waiting ${retryAfter} seconds...`);
+            const retryAfter = parseInt(error.headers?.['retry-after'] || '60');
+            console.log(`[Cache Warmup] Rate limited for ${pageIdOrSlug}. Waiting ${retryAfter} seconds...`);
+            console.log(`[Cache Warmup] Rate limit details:`, {
+              pageId: pageIdOrSlug,
+              headers: error.headers,
+              attempt: attempt,
+              willRetry: !isLastAttempt
+            });
             await new Promise(resolve => setTimeout(resolve, retryAfter * 1000));
           } else if (!isLastAttempt) {
             // 指数バックオフ
@@ -241,13 +251,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const results = [];
     const totalBatches = Math.ceil(pageIds.length / BATCH_SIZE);
     
-    console.log(`[Cache Warmup] Processing ${pageIds.length} pages sequentially (1 page at a time with ${DELAY_BETWEEN_BATCHES/1000}s delay)`);
+    console.log(`[Cache Warmup] Processing ${pageIds.length} pages in batches of ${BATCH_SIZE} with ${DELAY_BETWEEN_BATCHES/1000}s delay`);
+    
+    // 初期ステータスを設定
+    updateCacheStatus({
+      isProcessing: true,
+      total: pageIds.length,
+      processed: 0,
+      succeeded: 0,
+      failed: 0,
+      currentBatch: 0,
+      totalBatches,
+      startTime: new Date()
+    });
     
     for (let i = 0; i < pageIds.length; i += BATCH_SIZE) {
       const batch = pageIds.slice(i, i + BATCH_SIZE);
       const batchNumber = Math.floor(i / BATCH_SIZE) + 1;
       
-      console.log(`[Cache Warmup] Processing page ${batchNumber}/${totalBatches}`);
+      console.log(`[Cache Warmup] Processing batch ${batchNumber}/${totalBatches} (pages ${i + 1}-${Math.min(i + BATCH_SIZE, pageIds.length)} of ${pageIds.length})`);
+      console.log(`[Cache Warmup] Batch pages:`, batch);
       
       // バッチ内の並列処理
       const batchResults = await Promise.allSettled(
@@ -256,16 +279,42 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       
       results.push(...batchResults);
       
+      // バッチ結果の詳細ログ
+      const batchSuccesses = batchResults.filter(r => r.status === 'fulfilled' && r.value?.success);
+      const batchFailures = batchResults.filter(r => r.status === 'rejected' || (r.status === 'fulfilled' && !r.value?.success));
+      
+      console.log(`[Cache Warmup] Batch ${batchNumber} results:`, {
+        successes: batchSuccesses.map(r => r.status === 'fulfilled' ? r.value.pageId : 'unknown'),
+        failures: batchFailures.map(r => {
+          if (r.status === 'rejected') return { pageId: 'unknown', error: r.reason?.message || 'Unknown error' };
+          return { pageId: (r as any).value.pageId, error: (r as any).value.error, status: (r as any).value.status };
+        })
+      });
+      
       // 進捗ログ
       const processedCount = Math.min((batchNumber * BATCH_SIZE), pageIds.length);
       const successCount = results.filter(r => r.status === 'fulfilled' && r.value?.success).length;
       const failCount = results.filter(r => r.status === 'rejected' || (r.status === 'fulfilled' && !r.value?.success)).length;
       
-      console.log(`[Cache Warmup] Progress: ${processedCount}/${pageIds.length} pages processed (${successCount} success, ${failCount} failed)`);
+      console.log(`[Cache Warmup] Overall progress: ${processedCount}/${pageIds.length} pages processed (${successCount} success, ${failCount} failed)`);
       
-      // 最後のページでない場合は待機
+      // ステータスを更新
+      updateCacheStatus({
+        processed: processedCount,
+        succeeded: successCount,
+        failed: failCount,
+        currentBatch: batchNumber,
+        // 新しいエラーを追加
+        errors: batchFailures.map(r => {
+          const error = r.status === 'rejected' ? r.reason?.message || 'Unknown error' : (r as any).value.error;
+          const pageId = r.status === 'rejected' ? 'unknown' : (r as any).value.pageId;
+          return { pageId, error: String(error), timestamp: new Date() };
+        })
+      });
+      
+      // 最後のバッチでない場合は待機
       if (i + BATCH_SIZE < pageIds.length) {
-        console.log(`[Cache Warmup] Waiting ${DELAY_BETWEEN_BATCHES/1000}s before next page...`);
+        console.log(`[Cache Warmup] Waiting ${DELAY_BETWEEN_BATCHES/1000}s before next batch...`);
         await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_BATCHES));
       }
       
@@ -327,15 +376,38 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     
     // 詳細なエラーログを出力
     console.log('[Cache Warmup] Detailed failure analysis:', failureAnalysis);
-    console.log('[Cache Warmup] All failed page details:', failedDetails.map(detail => ({
-      pageId: detail.pageId,
-      error: detail.error,
-      status: detail.status
-    })));
+    
+    // 失敗ページの詳細（最初の10件のみ表示）
+    if (failedDetails.length > 0) {
+      console.log(`[Cache Warmup] Failed page details (showing first 10 of ${failedDetails.length}):`, 
+        failedDetails.slice(0, 10).map(detail => ({
+          pageId: detail.pageId,
+          error: detail.error?.substring(0, 100) + (detail.error?.length > 100 ? '...' : ''),
+          status: detail.status
+        }))
+      );
+      
+      // 429エラーのページを特別に表示
+      const rateLimitedPages = failedDetails.filter(d => d.status === '429' || d.error?.includes('rate_limited'));
+      if (rateLimitedPages.length > 0) {
+        console.log(`[Cache Warmup] Rate limited pages (${rateLimitedPages.length}):`, 
+          rateLimitedPages.map(d => d.pageId)
+        );
+      }
+    }
 
     // 元のページ数と制限後のページ数を記録
     const originalPageCount = req.body?.pageIds?.length || pageIds.length;
     const remainingPages = Math.max(0, originalPageCount - pageIds.length);
+    
+    // 最終ステータスを更新
+    updateCacheStatus({
+      isProcessing: false,
+      processed: results.length,
+      succeeded: successful,
+      failed,
+      lastUpdate: new Date()
+    });
 
     res.status(200).json({
       success: true,

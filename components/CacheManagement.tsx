@@ -24,11 +24,27 @@ interface WarmupProgress {
   phase: 'preparing' | 'clearing' | 'warming' | 'complete';
 }
 
+interface CacheProcessingStatus {
+  isProcessing: boolean;
+  total: number;
+  processed: number;
+  succeeded: number;
+  failed: number;
+  currentBatch: number;
+  totalBatches: number;
+  progress: number;
+  elapsedTime: number;
+  estimatedRemainingTime: number;
+  errorSummary: Record<string, number>;
+}
+
 export const CacheManagement: React.FC = () => {
   const [stats, setStats] = useState<CacheStats | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [progress, setProgress] = useState<WarmupProgress | null>(null);
+  const [processingStatus, setProcessingStatus] = useState<CacheProcessingStatus | null>(null);
+  const [statusPollingInterval, setStatusPollingInterval] = useState<NodeJS.Timeout | null>(null);
   const { isConnected, lastUpdate, clearCache } = useRealtimeUpdates();
 
   // キャッシュ統計を取得
@@ -44,11 +60,50 @@ export const CacheManagement: React.FC = () => {
     }
   };
 
+  // キャッシュ処理ステータスを取得
+  const fetchProcessingStatus = async () => {
+    try {
+      const response = await fetch('/api/cache-status');
+      if (response.ok) {
+        const data = await response.json();
+        setProcessingStatus(data);
+        
+        // 処理が完了したらポーリングを停止
+        if (!data.isProcessing && statusPollingInterval) {
+          clearInterval(statusPollingInterval);
+          setStatusPollingInterval(null);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch processing status:', error);
+    }
+  };
+
+  // ポーリングを開始
+  const startStatusPolling = () => {
+    if (statusPollingInterval) {
+      clearInterval(statusPollingInterval);
+    }
+    
+    // 即座に最初の取得
+    fetchProcessingStatus();
+    
+    // 2秒ごとにステータスを取得
+    const interval = setInterval(fetchProcessingStatus, 2000);
+    setStatusPollingInterval(interval);
+  };
+
   useEffect(() => {
     fetchStats();
     // 30秒ごとに統計を更新
     const interval = setInterval(fetchStats, 30000);
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      // ステータスポーリングもクリーンアップ
+      if (statusPollingInterval) {
+        clearInterval(statusPollingInterval);
+      }
+    };
   }, []);
 
   // トークン取得のヘルパー関数
@@ -217,6 +272,10 @@ export const CacheManagement: React.FC = () => {
       // 4. キャッシュウォームアップを実行
       console.log('[CacheManagement] Step 3: Warming up cache...');
       setProgress(prev => prev ? { ...prev, phase: 'warming' } : null);
+      
+      // ステータスポーリングを開始
+      startStatusPolling();
+      
       const warmupBody = {
         pageIds: pageIds.length > 0 ? pageIds : undefined,
         skipSiteMap: true // クリア後なのでサイトマップはスキップ
@@ -866,18 +925,19 @@ export const CacheManagement: React.FC = () => {
       </details>
 
       {/* プログレス表示 */}
-      {progress && (
+      {(progress || processingStatus?.isProcessing) && (
         <div className={styles.progressContainer}>
           <div className={styles.progressHeader}>
             <span className={styles.progressPhase}>
-              {progress.phase === 'preparing' && '📄 準備中...'}
-              {progress.phase === 'clearing' && '🗑️ キャッシュをクリア中...'}
-              {progress.phase === 'warming' && '🔥 ウォームアップ中...'}
-              {progress.phase === 'complete' && '✅ 完了'}
+              {progress?.phase === 'preparing' && '📄 準備中...'}
+              {progress?.phase === 'clearing' && '🗑️ キャッシュをクリア中...'}
+              {(progress?.phase === 'warming' || processingStatus?.isProcessing) && '🔥 ウォームアップ中...'}
+              {progress?.phase === 'complete' && !processingStatus?.isProcessing && '✅ 完了'}
             </span>
-            {progress.total > 0 && (
+            {(processingStatus?.total || progress?.total) > 0 && (
               <span className={styles.progressNumbers}>
-                {progress.current}/{progress.total} ページ
+                {processingStatus?.processed || progress?.current || 0}/{processingStatus?.total || progress?.total || 0} ページ
+                {processingStatus?.currentBatch && ` (バッチ ${processingStatus.currentBatch}/${processingStatus.totalBatches})`}
               </span>
             )}
           </div>
@@ -899,20 +959,40 @@ export const CacheManagement: React.FC = () => {
               ⏹️ 自動処理を停止
             </button>
           )}
-          {progress.total > 0 && (
+          {(processingStatus?.total || progress?.total) > 0 && (
             <>
               <div className={styles.progressBar}>
                 <div 
                   className={styles.progressFill} 
-                  style={{ width: `${(progress.current / progress.total) * 100}%` }}
+                  style={{ width: `${processingStatus?.progress || ((progress?.current || 0) / (progress?.total || 1)) * 100}%` }}
                 />
               </div>
               <div className={styles.progressStats}>
-                <span className={styles.progressSuccess}>✅ 成功: {progress.succeeded}</span>
-                {progress.failed > 0 && (
-                  <span className={styles.progressFailed}>❌ 失敗: {progress.failed}</span>
+                <span className={styles.progressSuccess}>✅ 成功: {processingStatus?.succeeded || progress?.succeeded || 0}</span>
+                {(processingStatus?.failed || progress?.failed || 0) > 0 && (
+                  <span className={styles.progressFailed}>❌ 失敗: {processingStatus?.failed || progress?.failed || 0}</span>
+                )}
+                {processingStatus?.elapsedTime && (
+                  <span className={styles.progressTime}>⏱️ 経過: {Math.floor(processingStatus.elapsedTime / 60)}分{processingStatus.elapsedTime % 60}秒</span>
+                )}
+                {processingStatus?.estimatedRemainingTime && processingStatus.estimatedRemainingTime > 0 && (
+                  <span className={styles.progressTime}>⏳ 残り: 約{Math.ceil(processingStatus.estimatedRemainingTime / 60)}分</span>
                 )}
               </div>
+              {processingStatus?.errorSummary && Object.keys(processingStatus.errorSummary).length > 0 && (
+                <div className={styles.errorSummary}>
+                  <span className={styles.errorSummaryTitle}>エラー詳細:</span>
+                  {Object.entries(processingStatus.errorSummary).map(([type, count]) => (
+                    <span key={type} className={styles.errorType}>
+                      {type === 'rateLimited' && '⏱️ レート制限'}
+                      {type === 'timeout' && '⏰ タイムアウト'}
+                      {type === 'notFound' && '❓ 見つからない'}
+                      {type === 'other' && '❌ その他'}
+                      : {count}
+                    </span>
+                  ))}
+                </div>
+              )}
             </>
           )}
         </div>
