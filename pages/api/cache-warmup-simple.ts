@@ -17,34 +17,26 @@ interface WarmupState {
   pageIds: string[]
 }
 
-// グローバル状態を確実に保持するためにglobalオブジェクトを使用
-declare global {
-  var warmupState: WarmupState | undefined
+// モジュールレベルの状態変数（正常動作版と同じ）
+let warmupState: WarmupState = {
+  isProcessing: false,
+  startTime: 0,
+  total: 0,
+  processed: 0,
+  succeeded: 0,
+  failed: 0,
+  skipped: 0,
+  errors: [],
+  lastUpdate: Date.now(),
+  currentBatch: 0,
+  pageIds: []
 }
 
-// グローバル状態の初期化
-if (!global.warmupState) {
-  console.log('[Warmup] Initializing global state')
-  global.warmupState = {
-    isProcessing: false,
-    startTime: 0,
-    total: 0,
-    processed: 0,
-    succeeded: 0,
-    failed: 0,
-    skipped: 0,
-    errors: [],
-    lastUpdate: Date.now(),
-    currentBatch: 0,
-    pageIds: []
-  }
-}
-
-// デバッグ用にグローバル状態を確認
+// デバッグ用に状態を確認
 console.log('[Warmup] Script loaded, current state:', {
-  isProcessing: global.warmupState.isProcessing,
-  total: global.warmupState.total,
-  currentBatch: global.warmupState.currentBatch
+  isProcessing: warmupState.isProcessing,
+  total: warmupState.total,
+  currentBatch: warmupState.currentBatch
 })
 
 // Vercelの関数タイムアウト設定
@@ -60,9 +52,10 @@ export const config = {
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   console.log(`[Warmup] ${req.method} request received`, req.body)
-  console.log('[Warmup] Global state before processing:', {
-    isProcessing: global.warmupState!.isProcessing,
-    total: global.warmupState!.total
+  console.log('[Warmup Debug] State before processing:', {
+    isProcessing: warmupState.isProcessing,
+    total: warmupState.total,
+    currentBatch: warmupState.currentBatch
   })
 
   // CORS対応
@@ -109,12 +102,12 @@ async function startWarmup(req: NextApiRequest, res: NextApiResponse) {
   }
   
   // 既に処理中の場合
-  if (global.warmupState!.isProcessing) {
+  if (warmupState.isProcessing) {
     console.log('[Warmup] Already processing')
     return res.status(200).json({
       success: false,
       message: 'Already processing',
-      state: global.warmupState
+      state: warmupState
     })
   }
 
@@ -169,8 +162,8 @@ async function startWarmup(req: NextApiRequest, res: NextApiResponse) {
     }
 
     // 状態を初期化
-    global.warmupState = {
-      isProcessing: true,
+    warmupState = {
+      isProcessing: true,  // 重要: 必ずtrueに設定
       startTime: Date.now(),
       total: pageIds.length,
       processed: 0,
@@ -185,10 +178,10 @@ async function startWarmup(req: NextApiRequest, res: NextApiResponse) {
 
     console.log(`[Warmup] Ready to process ${pageIds.length} pages`)
     console.log(`[Warmup] First few page IDs:`, pageIds.slice(0, 5))
-    console.log('[Warmup] State initialized:', {
-      isProcessing: global.warmupState.isProcessing,
-      total: global.warmupState.total,
-      pageIdsLength: global.warmupState.pageIds.length
+    console.log('[Warmup] State after initialization:', {
+      isProcessing: warmupState.isProcessing,  // これがtrueになっているか確認
+      total: warmupState.total,
+      pageIdsLength: warmupState.pageIds.length
     })
 
     return res.status(200).json({
@@ -211,48 +204,48 @@ async function startWarmup(req: NextApiRequest, res: NextApiResponse) {
 async function processBatch(req: NextApiRequest, res: NextApiResponse) {
   console.log('[Warmup] processBatch called')
   console.log('[Warmup] Current state:', {
-    isProcessing: global.warmupState!.isProcessing,
-    currentBatch: global.warmupState!.currentBatch,
-    total: global.warmupState!.total
+    isProcessing: warmupState.isProcessing,
+    currentBatch: warmupState.currentBatch,
+    total: warmupState.total
   })
 
-  if (!global.warmupState!.isProcessing) {
+  if (!warmupState.isProcessing) {
     console.log('[Warmup] Not processing - returning error')
     return res.status(200).json({
       success: false,
       message: 'Not processing',
       debug: {
-        isProcessing: global.warmupState!.isProcessing,
-        total: global.warmupState!.total,
+        isProcessing: warmupState.isProcessing,
+        total: warmupState.total,
         hint: 'Call POST /api/cache-warmup-simple first to initialize'
       }
     })
   }
 
   const BATCH_SIZE = 3 // 正常動作版と同じ
-  const startIdx = global.warmupState!.currentBatch * BATCH_SIZE
-  const endIdx = Math.min(startIdx + BATCH_SIZE, global.warmupState!.pageIds.length)
+  const startIdx = warmupState.currentBatch * BATCH_SIZE
+  const endIdx = Math.min(startIdx + BATCH_SIZE, warmupState.pageIds.length)
   
-  console.log(`[Warmup] Processing batch ${global.warmupState!.currentBatch + 1}`, {
+  console.log(`[Warmup] Processing batch ${warmupState.currentBatch + 1}`, {
     startIdx,
     endIdx,
-    totalPages: global.warmupState!.pageIds.length
+    totalPages: warmupState.pageIds.length
   })
 
-  if (startIdx >= global.warmupState!.pageIds.length) {
+  if (startIdx >= warmupState.pageIds.length) {
     // 処理完了
-    global.warmupState!.isProcessing = false
-    global.warmupState!.lastUpdate = Date.now()
+    warmupState.isProcessing = false
+    warmupState.lastUpdate = Date.now()
     console.log('[Warmup] All batches completed')
     
     return res.status(200).json({
       success: true,
       completed: true,
-      state: global.warmupState
+      state: warmupState
     })
   }
 
-  const batch = global.warmupState!.pageIds.slice(startIdx, endIdx)
+  const batch = warmupState.pageIds.slice(startIdx, endIdx)
   console.log(`[Warmup] Processing pages:`, batch.slice(0, 3))
 
   try {
@@ -263,40 +256,40 @@ async function processBatch(req: NextApiRequest, res: NextApiResponse) {
     
     // 結果を集計
     results.forEach((result, index) => {
-      global.warmupState!.processed++
-      global.warmupState!.lastUpdate = Date.now()
+      warmupState.processed++
+      warmupState.lastUpdate = Date.now()
       const pageId = batch[index]
       
       if (result.status === 'fulfilled') {
         if (result.value.skipped) {
-          global.warmupState!.skipped++
+          warmupState.skipped++
         } else if (result.value.success) {
-          global.warmupState!.succeeded++
+          warmupState.succeeded++
         } else {
-          global.warmupState!.failed++
+          warmupState.failed++
           if (result.value.error) {
-            global.warmupState!.errors.push(`${pageId}: ${result.value.error}`)
-            if (global.warmupState!.errors.length > 10) {
-              global.warmupState!.errors = global.warmupState!.errors.slice(-10)
+            warmupState.errors.push(`${pageId}: ${result.value.error}`)
+            if (warmupState.errors.length > 10) {
+              warmupState.errors = warmupState.errors.slice(-10)
             }
           }
         }
       } else {
-        global.warmupState!.failed++
-        global.warmupState!.errors.push(`${pageId}: ${result.reason}`)
+        warmupState.failed++
+        warmupState.errors.push(`${pageId}: ${result.reason}`)
       }
     })
     
     // 次のバッチへ
-    global.warmupState!.currentBatch++
+    warmupState.currentBatch++
     
     const response = {
       success: true,
       completed: false,
-      processed: global.warmupState!.processed,
-      total: global.warmupState!.total,
-      currentBatch: global.warmupState!.currentBatch,
-      state: global.warmupState
+      processed: warmupState.processed,
+      total: warmupState.total,
+      currentBatch: warmupState.currentBatch,
+      state: warmupState
     }
     
     console.log('[Warmup] Batch completed:', response)
@@ -304,39 +297,39 @@ async function processBatch(req: NextApiRequest, res: NextApiResponse) {
     
   } catch (error: any) {
     console.error('[Warmup] Batch error:', error)
-    global.warmupState!.errors.push(`Batch error: ${error.message}`)
+    warmupState.errors.push(`Batch error: ${error.message}`)
     
     return res.status(200).json({
       success: false,
       error: error.message,
-      state: global.warmupState
+      state: warmupState
     })
   }
 }
 
 // ステータス取得
 function getStatus(req: NextApiRequest, res: NextApiResponse) {
-  const elapsed = global.warmupState!.isProcessing 
-    ? Math.round((Date.now() - global.warmupState!.startTime) / 1000)
+  const elapsed = warmupState.isProcessing 
+    ? Math.round((Date.now() - warmupState.startTime) / 1000)
     : 0
 
-  const progress = global.warmupState!.total > 0
-    ? Math.round((global.warmupState!.processed / global.warmupState!.total) * 100)
+  const progress = warmupState.total > 0
+    ? Math.round((warmupState.processed / warmupState.total) * 100)
     : 0
 
   const response = {
-    isProcessing: global.warmupState!.isProcessing,
-    processed: global.warmupState!.processed,
-    succeeded: global.warmupState!.succeeded,
-    failed: global.warmupState!.failed,
-    skipped: global.warmupState!.skipped,
-    total: global.warmupState!.total,
+    isProcessing: warmupState.isProcessing,
+    processed: warmupState.processed,
+    succeeded: warmupState.succeeded,
+    failed: warmupState.failed,
+    skipped: warmupState.skipped,
+    total: warmupState.total,
     progress,
     elapsed,
-    errors: global.warmupState!.errors,
-    currentBatch: global.warmupState!.currentBatch,
-    needsProcessing: global.warmupState!.isProcessing && 
-                     global.warmupState!.currentBatch * 3 < global.warmupState!.total
+    errors: warmupState.errors,
+    currentBatch: warmupState.currentBatch,
+    needsProcessing: warmupState.isProcessing && 
+                     warmupState.currentBatch * 3 < warmupState.total
   }
 
   console.log('[Warmup] Status request:', response)
