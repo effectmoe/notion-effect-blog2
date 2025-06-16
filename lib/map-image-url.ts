@@ -9,6 +9,12 @@ export const mapImageUrl = (url: string | undefined, block: Block) => {
     return url
   }
 
+  // Skip processing for YouTube thumbnails - return them as-is
+  if (url.includes('ytimg.com') || url.includes('youtube.com/vi/')) {
+    console.log('[mapImageUrl] Skipping YouTube thumbnail URL:', url)
+    return url
+  }
+
   // キャッシュをチェック
   const cacheKey = CacheKeys.image(url)
   const cached = cacheManager.get<string>(cacheKey)
