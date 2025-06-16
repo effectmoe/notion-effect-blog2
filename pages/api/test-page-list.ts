@@ -12,6 +12,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       NOTION_ROOT_SPACE_ID: process.env.NOTION_ROOT_SPACE_ID || 'NOT SET',
       NOTION_API_KEY: process.env.NOTION_API_KEY ? 'SET' : 'NOT SET',
       NOTION_TOKEN: process.env.NOTION_TOKEN ? 'SET' : 'NOT SET',
+      NOTION_API_SECRET: process.env.NOTION_API_SECRET ? 'SET' : 'NOT SET',
     };
     
     console.log('[TestPageList] Environment:', envCheck);
@@ -46,18 +47,51 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       console.error('[TestPageList] getAllPageIds error:', error);
     }
     
+    // サンプルページの詳細情報を取得
+    const samplePagesWithDetails = siteMapPages.slice(0, 10).map(pageId => {
+      try {
+        const siteMapData = siteMap?.pageMap?.[pageId];
+        const pageBlock = siteMapData?.block?.[pageId]?.value;
+        const title = pageBlock?.properties?.title?.[0]?.[0] || 'Untitled';
+        const url = siteMap?.canonicalPageMap?.[pageId] || `/${pageId.replace(/-/g, '')}`;
+        
+        return {
+          id: pageId,
+          title,
+          url
+        };
+      } catch (e) {
+        return {
+          id: pageId,
+          title: 'Untitled',
+          url: `/${pageId.replace(/-/g, '')}`
+        };
+      }
+    });
+
     // デバッグ情報をレスポンス
     const response = {
       success: true,
       environment: envCheck,
       results: {
+        pageCount: Math.max(siteMapPages.length, allPageIds.length),
+        uniquePageCount: allPageIds.length,
+        duplicateCount: siteMapPages.length - allPageIds.length,
+        rootPageId: process.env.NOTION_ROOT_PAGE_ID || process.env.NOTION_PAGE_ID || 'Not set',
         siteMap: {
+          total: siteMapPages.length,
+          unique: allPageIds.length,
+          duplicates: siteMapPages.length - allPageIds.length,
+          sample: samplePagesWithDetails
+        },
+        message: `${allPageIds.length || siteMapPages.length}個のページが検出されました`,
+        siteMapDetails: {
           count: siteMapPages.length,
           sample: siteMapPages.slice(0, 5),
           method: 'getSiteMap()',
           error: siteMapError
         },
-        allPageIds: {
+        allPageIdsDetails: {
           count: allPageIds.length,
           sample: allPageIds.slice(0, 5),
           method: 'getAllPageIds()',

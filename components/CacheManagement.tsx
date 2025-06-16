@@ -81,6 +81,12 @@ export const CacheManagement: React.FC = () => {
   const [isTestingPageList, setIsTestingPageList] = useState(false);
   const { isConnected, lastUpdate, clearCache } = useRealtimeUpdates();
 
+  // デバッグ用のログ
+  useEffect(() => {
+    console.log('[CacheManagement] Component mounted');
+    console.log('[CacheManagement] handleTestPageList exists:', typeof handleTestPageList === 'function');
+  }, []);
+
   // キャッシュ統計を取得
   const fetchStats = async () => {
     try {
@@ -1147,35 +1153,38 @@ export const CacheManagement: React.FC = () => {
           <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '1rem' }}>
             現在認識されているNotionページの一覧を確認します。新しく追加したページが表示されない場合は、キャッシュクリアが必要です。
           </p>
-          <button
-            onClick={handleTestPageList}
-            disabled={isTestingPageList || loading}
-            className={styles.button}
-            style={{
-              backgroundColor: isTestingPageList ? '#9ca3af' : '#3b82f6',
-              color: 'white',
-              padding: '0.75rem 1.5rem',
-              borderRadius: '6px',
-              fontSize: '0.875rem',
-              fontWeight: '500',
-              border: 'none',
-              cursor: isTestingPageList || loading ? 'not-allowed' : 'pointer',
-              transition: 'background-color 0.2s',
-              display: 'inline-block'
-            }}
-            onMouseEnter={(e) => {
-              if (!isTestingPageList && !loading) {
-                e.currentTarget.style.backgroundColor = '#2563eb'
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!isTestingPageList && !loading) {
-                e.currentTarget.style.backgroundColor = '#3b82f6'
-              }
-            }}
-          >
-            {isTestingPageList ? '確認中...' : 'ページリストをテスト'}
-          </button>
+          <div style={{ marginBottom: '1rem' }}>
+            <button
+              onClick={handleTestPageList}
+              disabled={isTestingPageList || loading}
+              style={{
+                backgroundColor: isTestingPageList ? '#9ca3af' : '#3b82f6',
+                color: 'white',
+                padding: '0.75rem 1.5rem',
+                borderRadius: '6px',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                border: 'none',
+                cursor: isTestingPageList || loading ? 'not-allowed' : 'pointer',
+                transition: 'background-color 0.2s',
+                display: 'inline-block',
+                width: 'auto',
+                minWidth: '200px'
+              }}
+              onMouseEnter={(e) => {
+                if (!isTestingPageList && !loading) {
+                  e.currentTarget.style.backgroundColor = '#2563eb'
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isTestingPageList && !loading) {
+                  e.currentTarget.style.backgroundColor = '#3b82f6'
+                }
+              }}
+            >
+              {isTestingPageList ? '確認中...' : 'ページリストをテスト'}
+            </button>
+          </div>
           
           {pageListResult && (
             <div style={{ 
