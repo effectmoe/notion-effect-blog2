@@ -34,6 +34,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   } else {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+}
 
 // ウォームアップ開始
 async function startWarmup(req: NextApiRequest, res: NextApiResponse) {
@@ -119,15 +120,16 @@ async function startWarmup(req: NextApiRequest, res: NextApiResponse) {
       lastUpdate: Date.now()
     };
 
+    console.log(`[Warmup] Found ${pageIds.length} pages to process`);
+    console.log(`[Warmup] First few page IDs:`, pageIds.slice(0, 5));
+
     // 非同期で処理開始
     processAllPages(pageIds).then(() => {
       warmupState.isProcessing = false;
       warmupState.lastUpdate = Date.now();
-      const duration = (Date.now() - warmupState.startTime) / 1000;
-      console.log(`[Warmup Simple] ✅ Completed in ${duration.toFixed(1)}s`);
-      console.log(`[Warmup Simple] Results: Success=${warmupState.succeeded}, Skip=${warmupState.skipped}, Fail=${warmupState.failed}`);
+      console.log('[Warmup] Completed');
     }).catch(error => {
-      console.error('[Warmup Simple] ❌ Fatal error:', error);
+      console.error('[Warmup] Fatal error:', error);
       warmupState.isProcessing = false;
       warmupState.errors.push(`Fatal: ${error.message}`);
     });
@@ -139,7 +141,7 @@ async function startWarmup(req: NextApiRequest, res: NextApiResponse) {
     });
 
   } catch (error: any) {
-    console.error('[Warmup Simple] Start error:', error);
+    console.error('[Warmup] Error starting:', error);
     return res.status(500).json({
       success: false,
       error: error.message
@@ -194,7 +196,7 @@ async function processAllPages(pageIds: string[]) {
           warmupState.failed++;
           if (result.value.error) {
             warmupState.errors.push(`${batch[index]}: ${result.value.error}`);
-            // エラーは最新10件のみ保持
+            // エラーは最新の10件のみ保持
             if (warmupState.errors.length > 10) {
               warmupState.errors = warmupState.errors.slice(-10);
             }
@@ -207,8 +209,6 @@ async function processAllPages(pageIds: string[]) {
     });
     
     // 少し待機（負荷軽減）
-    
-    // 少し待機（サーバー負荷軽減）
     await new Promise(resolve => setTimeout(resolve, 1000));
   }
 }
@@ -231,19 +231,19 @@ async function warmupSinglePage(
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15000);
     
-    const response = await fetch(`${baseUrl}/api/notion-page-info`, {
-      method: 'POST',
+    // ページのURLを直接アクセスしてキャッシュウォームアップ
+    const response = await fetch(`${baseUrl}/${pageId}`, {
+      method: 'GET',
       headers: {
-        'Content-Type': 'application/json',
         'x-cache-warmup': 'true',
         'x-skip-redis': 'true'  // Redisをスキップ
       },
-      body: JSON.stringify({ pageId }),
       signal: controller.signal
     });
     
     clearTimeout(timeoutId);
     
+    // キャッシュヒット
     if (response.status === 304) {
       return { success: true, skipped: true };
     }
