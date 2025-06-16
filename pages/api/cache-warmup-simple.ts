@@ -301,9 +301,27 @@ async function handleWarmup(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
+// ウォームアップ結果の型定義
+interface WarmupResult {
+  success: boolean
+  skipped: boolean
+  error?: string
+}
+
 // 実際のウォームアップ処理
 async function processWarmup(startInfo: any, pageIds: string[]) {
-  const progress = {
+  const progress: {
+    processed: number
+    total: number
+    succeeded: number
+    failed: number
+    skipped: number
+    errors: any[]
+    lastUpdate: number
+    currentBatch: number
+    startTime: number
+    completedAt?: number
+  } = {
     processed: 0,
     total: pageIds.length,
     succeeded: 0,
@@ -335,7 +353,7 @@ async function processWarmup(startInfo: any, pageIds: string[]) {
           // 重複チェック
           if (processedPages.has(pageId)) {
             console.log(`[Warmup] Skipping duplicate page: ${pageId}`)
-            return Promise.resolve({ skipped: true })
+            return Promise.resolve({ success: true, skipped: true, error: undefined } as WarmupResult)
           }
           
           return rateLimitedRequest(async () => {
