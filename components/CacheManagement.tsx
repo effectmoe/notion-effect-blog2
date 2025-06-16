@@ -425,9 +425,9 @@ export const CacheManagement: React.FC = () => {
           
           if (shouldReset) {
             try {
-              // リセットAPIを呼び出し
-              const resetResponse = await fetch('/api/cache-warmup-reset', {
-                method: 'POST',
+              // リセットAPIを呼び出し（新しいDELETEメソッドを使用）
+              const resetResponse = await fetch('/api/cache-warmup-simple', {
+                method: 'DELETE',
                 headers: {
                   'Content-Type': 'application/json',
                   'Authorization': `Bearer ${token}`,

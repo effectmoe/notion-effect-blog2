@@ -66,6 +66,7 @@
     "react-notion-x": "^7.4.2",
     "react-tweet": "^3.2.1",
     "react-use": "^17.4.2",
+    "redis": "^4.6.0",
     "rss": "^1.2.2",
     "sharp": "^0.34.2",
     "socket.io": "^4.8.1",
