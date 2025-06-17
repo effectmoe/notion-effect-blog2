@@ -100,11 +100,18 @@ export default class MyDocument extends Document {
                   document.body.appendChild(fixScript);
                 }, 2000);
                 
-                // すべてのグループ化リストビューを修正
+                // リンクされたデータベースのグループ修正
                 setTimeout(function() {
-                  const fixAllScript = document.createElement('script');
-                  fixAllScript.src = '/fix-all-grouped-lists.js';
-                  document.body.appendChild(fixAllScript);
+                  const fixLinkedScript = document.createElement('script');
+                  fixLinkedScript.src = '/fix-linked-database-groups.js';
+                  document.body.appendChild(fixLinkedScript);
+                }, 2500);
+                
+                // Fix linked databases with groups
+                setTimeout(function() {
+                  const linkedDbScript = document.createElement('script');
+                  linkedDbScript.src = '/fix-linked-database-groups.js';
+                  document.body.appendChild(linkedDbScript);
                 }, 3000);
                 
                 // デバッグツール（開発環境のみ）
