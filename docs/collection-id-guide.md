@@ -972,11 +972,132 @@ function emergencyFix() {
 - [react-notion-x GitHub](https://github.com/NotionX/react-notion-x)
 - [notion-client Documentation](https://github.com/NotionX/notion-client)
 
+## ⚠️ 注意事項：ビューの自動切り替えについて
+
+### 避けるべきアプローチ
+
+#### ❌ ビューを強制的に変更するスクリプト
+
+```javascript
+// 悪い例：特定のビューを強制する
+function forceListView() {
+  const viewTabs = document.querySelectorAll('.notion-collection-view-tabs-content-item');
+  viewTabs.forEach(tab => {
+    if (tab.textContent.includes('リスト')) {
+      tab.click(); // ユーザーの選択を無視して強制変更
+    }
+  });
+}
+```
+
+**問題点：**
+1. **ユーザー体験の破壊** - Notionで設定したビューが無視される
+2. **データベース表示の干渉** - レンダリング中の操作により表示エラー
+3. **予期しない動作** - カレンダー、ギャラリー等の他ビューが使えない
+4. **パフォーマンス問題** - DOM操作によるレンダリング遅延
+
+### 実際に発生した問題
+
+```javascript
+// 問題のあったスクリプトの例
+// fix-database-views.js として実装されていた
+(function() {
+  // データベースのビューを自動的にリストビューに切り替える
+  function fixDatabaseViews() {
+    const collections = document.querySelectorAll('.notion-collection');
+    collections.forEach(collection => {
+      // ビュータブを探して強制的にクリック
+      const viewTabs = collection.querySelectorAll('.notion-collection-view-tabs-content-item');
+      // ... リストビューを探してクリック
+    });
+  }
+  
+  // 複数回実行してしまう
+  setTimeout(fixDatabaseViews, 500);
+  setTimeout(fixDatabaseViews, 1000);
+  // ...
+})();
+```
+
+**発生した問題：**
+- データベースが完全に表示されない
+- 初期レンダリングが中断される
+- ユーザーが選択したビューが勝手に変更される
+
+### ✅ 正しいアプローチ
+
+#### 1. Notionの設定を尊重する
+
+```javascript
+// 良い例：ビューの状態を読み取るだけ
+function getCurrentView() {
+  const activeTab = document.querySelector('.notion-collection-view-tabs-content-item-active');
+  if (activeTab) {
+    console.log('Current view:', activeTab.textContent);
+  }
+  // 変更はしない、情報取得のみ
+}
+```
+
+#### 2. ユーザーの操作をサポートする
+
+```javascript
+// ビュー切り替えボタンを追加（ユーザーが選択できる）
+function addViewSwitcher() {
+  const container = document.querySelector('.notion-collection');
+  if (!container) return;
+  
+  const switcher = document.createElement('div');
+  switcher.innerHTML = `
+    <button onclick="switchToView('list')">リスト表示</button>
+    <button onclick="switchToView('table')">テーブル表示</button>
+  `;
+  container.prepend(switcher);
+}
+```
+
+#### 3. エラーハンドリングの改善
+
+```javascript
+// データベース表示を妨げない安全な処理
+function safelyProcessDatabase() {
+  // レンダリング完了を待つ
+  if (document.readyState !== 'complete') {
+    window.addEventListener('load', safelyProcessDatabase);
+    return;
+  }
+  
+  // IntersectionObserverで表示を確認
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting && entry.target.offsetHeight > 0) {
+        // 表示が完了してから処理
+        console.log('Database rendered:', entry.target);
+      }
+    });
+  });
+  
+  document.querySelectorAll('.notion-collection').forEach(el => {
+    observer.observe(el);
+  });
+}
+```
+
+### 教訓
+
+1. **Notionの設定を上書きしない** - ユーザーが設定したビューは尊重する
+2. **DOM操作は慎重に** - 特に初期レンダリング中は避ける
+3. **ユーザーに選択肢を** - 自動化より操作性を重視
+4. **テストを十分に** - 本番環境での動作確認は必須
+
+---
+
 ## 🎯 まとめ
 
 1. **collection_idは重要** - データベース本体へのアクセスに必須
 2. **nullになる原因は様々** - リンクDB、権限、API制限など
 3. **複数の解決策がある** - コード対処、Notion設定、API修正
 4. **防御的プログラミング** - 常にフォールバックを用意
+5. **ユーザー設定を尊重** - 自動化は慎重に、ユーザーの選択を優先
 
 この問題に遭遇したら、まず診断ツールで原因を特定し、適切な解決策を選択してください。
