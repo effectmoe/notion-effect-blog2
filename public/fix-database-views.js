@@ -8,16 +8,34 @@
     const collections = document.querySelectorAll('.notion-collection');
     console.log(`Found ${collections.length} collections`);
     
+    // コレクションが見つからない場合は早期リターン
+    if (collections.length === 0) {
+      return;
+    }
+    
     collections.forEach((collection, index) => {
-      // ビューのドロップダウンを探す
+      // コレクションが正しくレンダリングされているか確認
+      if (!collection.offsetHeight) {
+        console.log(`Collection ${index}: Not yet rendered, skipping`);
+        return;
+      }
+      
+      // ビューのドロップダウンを探す（オプショナル）
       const viewDropdown = collection.querySelector('.notion-collection-view-dropdown');
       if (!viewDropdown) {
-        console.log(`Collection ${index}: No dropdown found`);
-        return;
+        console.log(`Collection ${index}: No dropdown found (might be single view)`);
+        // ドロップダウンがない場合でも続行
       }
       
       // リストビューのタブを探す
       const viewTabs = collection.querySelectorAll('.notion-collection-view-tabs-content-item');
+      
+      // タブが見つからない場合はスキップ
+      if (viewTabs.length === 0) {
+        console.log(`Collection ${index}: No view tabs found`);
+        return;
+      }
+      
       console.log(`Collection ${index}: Found ${viewTabs.length} view tabs`);
       
       let listViewTab = null;
@@ -48,16 +66,21 @@
       // リストビューが見つかり、まだアクティブでない場合はクリック
       if (listViewTab && !listViewTab.classList.contains('notion-collection-view-tabs-content-item-active')) {
         console.log(`[LIST] Switching to list view for collection ${index}`);
-        listViewTab.click();
         
-        // クリック後の確認
-        setTimeout(() => {
-          if (listViewTab.classList.contains('notion-collection-view-tabs-content-item-active')) {
-            console.log(`[SUCCESS] Successfully switched to list view`);
-          } else {
-            console.log(`[WARNING] Failed to switch view`);
-          }
-        }, 500);
+        try {
+          listViewTab.click();
+          
+          // クリック後の確認
+          setTimeout(() => {
+            if (listViewTab.classList.contains('notion-collection-view-tabs-content-item-active')) {
+              console.log(`[SUCCESS] Successfully switched to list view`);
+            } else {
+              console.log(`[WARNING] Failed to switch view`);
+            }
+          }, 500);
+        } catch (error) {
+          console.error(`[ERROR] Failed to click tab: ${error.message}`);
+        }
       } else if (listViewTab && listViewTab.classList.contains('notion-collection-view-tabs-content-item-active')) {
         console.log(`[SUCCESS] List view already active for collection ${index}`);
       }
@@ -100,12 +123,10 @@
     subtree: true
   });
   
-  // 初回実行（複数回実行して確実性を高める）
-  setTimeout(fixDatabaseViews, 500);
-  setTimeout(fixDatabaseViews, 1000);
-  setTimeout(fixDatabaseViews, 2000);
+  // 初回実行（遅延を増やしてデータベースのレンダリングを待つ）
   setTimeout(fixDatabaseViews, 3000);
   setTimeout(fixDatabaseViews, 5000);
+  setTimeout(fixDatabaseViews, 8000);
   
   // ページナビゲーション時の対応
   let lastUrl = location.href;

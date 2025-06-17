@@ -102,14 +102,12 @@ export default class MyDocument extends Document {
                   }, 2500);
                 }
                 
-                // データベースビューの修正 - 一時的に無効化
-                /*
+                // データベースビューの修正
                 setTimeout(function() {
                   const script4 = document.createElement('script');
                   script4.src = '/fix-database-views.js';
                   document.body.appendChild(script4);
-                }, 2000);
-                */
+                }, 3000); // 遅延を増やして確実にデータベースがレンダリングされるのを待つ
               });
             ` }} />
           </body>
