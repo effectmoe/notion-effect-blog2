@@ -18,7 +18,7 @@ export async function enhanceCollectionViews(
     if (!view) continue
 
     // Skip if already has query2 data
-    if (view.query2?.group_by) {
+    if ((view as any).query2?.group_by) {
       console.log(`[enhanceCollectionViews] View ${viewId} already has group_by`)
       continue
     }
@@ -33,9 +33,9 @@ export async function enhanceCollectionViews(
       // Find block that uses this view
       for (const [blockId, blockData] of Object.entries(recordMap.block)) {
         const block = blockData?.value
-        if (block?.view_ids?.includes(viewId)) {
-          collectionId = block.collection_id || 
-                        block.format?.collection_pointer?.id
+        if ((block as any)?.view_ids?.includes(viewId)) {
+          collectionId = (block as any).collection_id || 
+                        (block as any).format?.collection_pointer?.id
           
           // For FAQ Master specifically
           if (blockId === '212b802c-b0c6-80b3-b04a-fec4203ee8d7' || 
@@ -43,12 +43,12 @@ export async function enhanceCollectionViews(
             console.log(`[enhanceCollectionViews] Found FAQ Master, adding group_by`)
             
             // Add the group_by configuration
-            if (!view.query2) {
-              view.query2 = {}
+            if (!(view as any).query2) {
+              (view as any).query2 = {}
             }
             
             // Add grouping by category (property ID from the logs)
-            view.query2.group_by = {
+            (view as any).query2.group_by = {
               property: 'oa:|', // Category property ID
               type: 'select',
               value: {

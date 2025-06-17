@@ -24,7 +24,7 @@ export class EnhancedNotionAPI extends NotionAPI {
           
           // If this view should have grouping but doesn't have query2 data,
           // we need to fetch additional data
-          if (!view.query2 && view.format?.list_properties_v2) {
+          if (!view.query2 && (view.format as any)?.list_properties_v2) {
             console.log(`View ${viewId} might need group data`)
             
             // Try to get the collection ID
