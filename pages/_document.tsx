@@ -86,6 +86,13 @@ export default class MyDocument extends Document {
                   script3.src = '/force-toggle-open.js';
                   document.body.appendChild(script3);
                 }, 1500);
+                
+                // Force list view for all databases
+                setTimeout(function() {
+                  const script4 = document.createElement('script');
+                  script4.src = '/force-list-view.js';
+                  document.body.appendChild(script4);
+                }, 2000);
               });
             ` }} />
           </body>

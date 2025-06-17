@@ -297,6 +297,44 @@
   border-radius: 24px;
 }
 
+/* List view styles to ensure proper display */
+.notion-list-view {
+  width: 100%;
+}
+
+.notion-list-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+  width: 100%;
+}
+
+.notion-list-item-title {
+  flex: 1;
+  min-width: 0;
+}
+
+.notion-list-item-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+/* Ensure list view is visible in all contexts */
+.notion-collection-view-type-list {
+  display: block !important;
+}
+
+/* Force list view to be the default when available */
+.notion-collection-view-tabs-content > div:first-child:not(.notion-collection-view-type-list) {
+  display: none;
+}
+
+.notion-collection-view-tabs-content > .notion-collection-view-type-list {
+  display: block !important;
+}
+
 .notion-page-cover-wrapper {
   box-shadow: 2px 2px 8px 4px rgba(15, 15, 15, 0.1);
 }
