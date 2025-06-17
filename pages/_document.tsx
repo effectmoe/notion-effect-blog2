@@ -100,12 +100,12 @@ export default class MyDocument extends Document {
                   document.body.appendChild(fixScript);
                 }, 2000);
                 
-                // グループ構造を確保
+                // すべてのグループ化リストビューを修正
                 setTimeout(function() {
-                  const ensureScript = document.createElement('script');
-                  ensureScript.src = '/ensure-group-structure.js';
-                  document.body.appendChild(ensureScript);
-                }, 2500);
+                  const fixAllScript = document.createElement('script');
+                  fixAllScript.src = '/fix-all-grouped-lists.js';
+                  document.body.appendChild(fixAllScript);
+                }, 3000);
                 
                 // デバッグツール（開発環境のみ）
                 if (window.location.hostname === 'localhost') {
