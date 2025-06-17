@@ -17,6 +17,7 @@ import { notion } from './notion-api'
 import { getPreviewImageMap } from './preview-images'
 import { findMissingBlocks } from './fetch-missing-blocks'
 import { CachedNotionAPI } from './cache'
+import { enhanceCollectionViews } from './notion-enhanced-fetch'
 
 // キャッシュ付きAPIインスタンスを作成
 const cachedNotion = new CachedNotionAPI({
@@ -152,6 +153,9 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
   }
 
   await getTweetsMap(recordMap)
+
+  // Enhance collection views with group_by data for FAQ Master
+  recordMap = await enhanceCollectionViews(recordMap, notion)
 
   return recordMap
   } catch (error: any) {

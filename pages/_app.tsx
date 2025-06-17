@@ -22,6 +22,8 @@ import 'styles/toggle-gallery-fix.css'
 import 'styles/fix-grouped-lists.css'
 // universal database view fix
 import 'styles/fix-database-views.css'
+// FAQ Master specific styling
+import 'styles/fix-faq-master.css'
 
 import type { AppProps } from 'next/app'
 import * as Fathom from 'fathom-client'

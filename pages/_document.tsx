@@ -93,26 +93,56 @@ export default class MyDocument extends Document {
                   document.body.appendChild(script3);
                 }, 1500);
                 
-                // Fix grouped list views
+                // Comprehensive database rendering fix
                 setTimeout(function() {
-                  const fixScript = document.createElement('script');
-                  fixScript.src = '/fix-grouped-lists.js';
-                  document.body.appendChild(fixScript);
+                  const fixDbScript = document.createElement('script');
+                  fixDbScript.src = '/fix-database-rendering.js';
+                  document.body.appendChild(fixDbScript);
+                }, 1500);
+                
+                // Force render grouped lists
+                setTimeout(function() {
+                  const forceRenderScript = document.createElement('script');
+                  forceRenderScript.src = '/force-render-grouped-lists.js';
+                  document.body.appendChild(forceRenderScript);
                 }, 2000);
                 
-                // リンクされたデータベースのグループ修正
+                // Final FAQ Master fix
                 setTimeout(function() {
-                  const fixLinkedScript = document.createElement('script');
-                  fixLinkedScript.src = '/fix-linked-database-groups.js';
-                  document.body.appendChild(fixLinkedScript);
-                }, 2500);
+                  const finalFixScript = document.createElement('script');
+                  finalFixScript.src = '/fix-faq-master-final.js';
+                  document.body.appendChild(finalFixScript);
+                }, 1000);
                 
-                // Fix linked databases with groups
-                setTimeout(function() {
-                  const linkedDbScript = document.createElement('script');
-                  linkedDbScript.src = '/fix-linked-database-groups.js';
-                  document.body.appendChild(linkedDbScript);
-                }, 3000);
+                // 都道府県データベースの分析（開発環境のみ）
+                if (window.location.hostname === 'localhost') {
+                  setTimeout(function() {
+                    const analyzeScript = document.createElement('script');
+                    analyzeScript.src = '/analyze-prefecture-database.js';
+                    document.body.appendChild(analyzeScript);
+                  }, 3500);
+                  
+                  // Runtime recordMap analysis
+                  setTimeout(function() {
+                    const runtimeAnalysis = document.createElement('script');
+                    runtimeAnalysis.src = '/analyze-runtime-recordmap.js';
+                    document.body.appendChild(runtimeAnalysis);
+                  }, 4000);
+                  
+                  // FAQ Master debug
+                  setTimeout(function() {
+                    const faqDebug = document.createElement('script');
+                    faqDebug.src = '/debug-faq-master.js';
+                    document.body.appendChild(faqDebug);
+                  }, 4500);
+                  
+                  // FAQ DOM structure debug
+                  setTimeout(function() {
+                    const faqDomDebug = document.createElement('script');
+                    faqDomDebug.src = '/debug-faq-dom-structure.js';
+                    document.body.appendChild(faqDomDebug);
+                  }, 5000);
+                }
                 
                 // デバッグツール（開発環境のみ）
                 if (window.location.hostname === 'localhost') {
