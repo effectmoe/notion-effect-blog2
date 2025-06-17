@@ -99,8 +99,8 @@ const Code = dynamic(() =>
 
 // データベースビューコンポーネント
 const Collection = dynamic(() =>
-  import('./CollectionWithFallback').then(
-    (m) => m.CollectionWithFallback
+  import('react-notion-x/build/third-party/collection').then(
+    (m) => m.Collection
   ),
   {
     ssr: false

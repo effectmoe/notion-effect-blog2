@@ -96,12 +96,12 @@ export default class MyDocument extends Document {
                   }, 2500);
                 }
                 
-                // Force list view for all databases - 一時的に無効化
-                // setTimeout(function() {
-                //   const script4 = document.createElement('script');
-                //   script4.src = '/force-list-view.js';
-                //   document.body.appendChild(script4);
-                // }, 2000);
+                // データベースビューの修正
+                setTimeout(function() {
+                  const script4 = document.createElement('script');
+                  script4.src = '/fix-database-views.js';
+                  document.body.appendChild(script4);
+                }, 2000);
               });
             ` }} />
           </body>
