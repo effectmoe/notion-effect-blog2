@@ -87,6 +87,15 @@ export default class MyDocument extends Document {
                   document.body.appendChild(script3);
                 }, 1500);
                 
+                // デバッグツール（開発環境のみ）
+                if (window.location.hostname === 'localhost') {
+                  setTimeout(function() {
+                    const debugScript = document.createElement('script');
+                    debugScript.src = '/debug-collection-views.js';
+                    document.body.appendChild(debugScript);
+                  }, 2500);
+                }
+                
                 // Force list view for all databases - 一時的に無効化
                 // setTimeout(function() {
                 //   const script4 = document.createElement('script');

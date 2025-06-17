@@ -99,8 +99,8 @@ const Code = dynamic(() =>
 
 // データベースビューコンポーネント
 const Collection = dynamic(() =>
-  import('react-notion-x/build/third-party/collection').then(
-    (m) => m.Collection
+  import('./CollectionViewWrapperFixed').then(
+    (m) => m.CollectionViewWrapperFixed
   ),
   {
     ssr: false
