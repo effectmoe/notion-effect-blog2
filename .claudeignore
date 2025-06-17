@@ -1,0 +1,60 @@
+# バイナリファイル
+*.bin
+*.exe
+*.dll
+*.so
+*.dylib
+
+# 画像ファイル
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.bmp
+*.ico
+*.svg
+*.webp
+
+# アーカイブファイル
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+
+# ログファイル
+*.log
+logs/
+
+# 依存関係とキャッシュ
+node_modules/
+.git/
+.DS_Store
+.vscode/
+.idea/
+
+# 一時ファイル
+*.tmp
+*.temp
+*.cache
+*.swp
+*.swo
+
+# 動画ファイル
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.wmv
+
+# 音声ファイル
+*.mp3
+*.wav
+*.flac
+*.aac
+
+# フォントファイル
+*.ttf
+*.otf
+*.woff
+*.woff2
