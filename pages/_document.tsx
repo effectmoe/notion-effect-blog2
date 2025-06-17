@@ -59,14 +59,13 @@ export default class MyDocument extends Document {
             <NextScript />
             {/* Script with custom loading to avoid hydration issues */}
             <script dangerouslySetInnerHTML={{ __html: `
-              // Collectionエラーを抑制
-              (function() {
-                const script = document.createElement('script');
-                script.src = '/suppress-collection-errors.js';
-                document.head.appendChild(script);
-              })();
-              
               window.addEventListener('load', function() {
+                // Collectionエラーを抑制するスクリプトを遅延ロード
+                setTimeout(function() {
+                  const errorScript = document.createElement('script');
+                  errorScript.src = '/suppress-collection-errors.js';
+                  document.head.appendChild(errorScript);
+                }, 100);
                 setTimeout(function() {
                   const script = document.createElement('script');
                   script.src = '/inject-formula-simple.js';

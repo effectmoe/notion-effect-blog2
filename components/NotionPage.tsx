@@ -32,7 +32,7 @@ import { Header } from './Header'
 import { FormulaPropertyDebug } from './FormulaPropertyDebug'
 import { CustomPageLink } from './CustomPageLink'
 import { YouTubeEmbed } from './YouTubeEmbed'
-// import { CollectionViewWrapper } from './CollectionViewWrapper'
+import { EnhancedCollectionViewWrapper } from './EnhancedCollectionViewWrapper'
 import StructuredData from './StructuredData'
 import styles from './styles.module.css'
 
@@ -99,8 +99,8 @@ const Code = dynamic(() =>
 
 // データベースビューコンポーネント
 const Collection = dynamic(() =>
-  import('./CollectionViewSafe').then(
-    (m) => m.CollectionViewSafe
+  import('./EnhancedCollectionViewWrapper').then(
+    (m) => m.EnhancedCollectionViewWrapper
   ),
   {
     ssr: false
@@ -268,7 +268,7 @@ export function NotionPage({
       nextLegacyImage: Image,
       nextLink: Link,
       Code,
-      Collection,
+      Collection: EnhancedCollectionViewWrapper as any,
       Equation,
       Pdf,
       Modal,
