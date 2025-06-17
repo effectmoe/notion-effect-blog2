@@ -93,6 +93,20 @@ export default class MyDocument extends Document {
                   document.body.appendChild(script3);
                 }, 1500);
                 
+                // Fix grouped list views
+                setTimeout(function() {
+                  const fixScript = document.createElement('script');
+                  fixScript.src = '/fix-grouped-lists.js';
+                  document.body.appendChild(fixScript);
+                }, 2000);
+                
+                // Universal database view fix
+                setTimeout(function() {
+                  const dbFixScript = document.createElement('script');
+                  dbFixScript.src = '/fix-database-views.js';
+                  document.body.appendChild(dbFixScript);
+                }, 2500);
+                
                 // デバッグツール（開発環境のみ）
                 if (window.location.hostname === 'localhost') {
                   setTimeout(function() {
@@ -100,6 +114,13 @@ export default class MyDocument extends Document {
                     debugScript.src = '/debug-collection-views.js';
                     document.body.appendChild(debugScript);
                   }, 2500);
+                  
+                  // Grouped list view debugger
+                  setTimeout(function() {
+                    const groupedListDebug = document.createElement('script');
+                    groupedListDebug.src = '/debug-grouped-lists.js';
+                    document.body.appendChild(groupedListDebug);
+                  }, 3000);
                 }
                 
               });

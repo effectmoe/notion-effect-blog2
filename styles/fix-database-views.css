@@ -1,0 +1,124 @@
+/* Universal fix for all database grouped list views */
+
+/* Ensure all grouped list views are visible */
+.notion-collection-view-type-list .notion-collection-group,
+.notion-collection-view-type-list .notion-list-view-group {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative;
+  z-index: 1;
+}
+
+/* Fix group titles/headers */
+.notion-collection-group-title,
+.notion-list-view-group-header {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  padding: 12px 0 !important;
+  font-weight: 600 !important;
+  color: var(--fg-color) !important;
+  font-size: 1.1em !important;
+  border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+  margin-bottom: 8px;
+}
+
+/* Ensure group items container is visible */
+.notion-collection-group .notion-list-view,
+.notion-list-view-group-items {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  padding-left: 16px !important;
+}
+
+/* Fix individual items in groups */
+.notion-collection-group .notion-list-item,
+.notion-list-view-group .notion-list-item {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  padding: 4px 0;
+  align-items: center;
+}
+
+/* Ensure list view containers have proper dimensions */
+.notion-collection-view-type-list {
+  overflow: visible !important;
+  min-height: 100px;
+}
+
+.notion-collection-view-type-list .notion-list-view {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  overflow: visible !important;
+  min-height: 50px;
+}
+
+/* Fix for toggles containing grouped list views */
+details.notion-toggle:has(.notion-collection-view-type-list .notion-collection-group),
+details.notion-toggle:has(.notion-collection-view-type-list .notion-list-view-group) {
+  display: block !important;
+}
+
+/* Ensure proper spacing between groups */
+.notion-collection-group + .notion-collection-group,
+.notion-list-view-group + .notion-list-view-group {
+  margin-top: 24px;
+}
+
+/* Fix for hidden collections */
+.notion-collection[style*="display: none"],
+.notion-collection[style*="visibility: hidden"],
+.notion-collection-view[style*="display: none"],
+.notion-collection-view[style*="visibility: hidden"] {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Remove any height restrictions that might hide content */
+.notion-collection-view-type-list,
+.notion-collection-view-type-list * {
+  max-height: none !important;
+  height: auto !important;
+}
+
+/* Dark mode support */
+.dark-mode .notion-collection-group-title,
+.dark-mode .notion-list-view-group-header {
+  color: var(--fg-color) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .notion-collection-group .notion-list-view,
+  .notion-list-view-group-items {
+    padding-left: 12px !important;
+  }
+  
+  .notion-collection-group-title,
+  .notion-list-view-group-header {
+    font-size: 1em !important;
+    padding: 10px 0 !important;
+  }
+}
+
+/* Debug mode styles (can be removed in production) */
+body.debug-database-views .notion-collection-group,
+body.debug-database-views .notion-list-view-group {
+  border: 2px dashed #4CAF50 !important;
+  background: rgba(76, 175, 80, 0.05) !important;
+  padding: 8px !important;
+  margin: 8px 0 !important;
+}
+
+body.debug-database-views .notion-collection-group-title,
+body.debug-database-views .notion-list-view-group-header {
+  background: rgba(76, 175, 80, 0.1) !important;
+  padding: 8px !important;
+  border-radius: 4px !important;
+}

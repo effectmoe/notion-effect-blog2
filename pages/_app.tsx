@@ -18,6 +18,10 @@ import 'styles/instructor-gallery-responsive.css'
 import 'styles/instructor-gallery-improvements.css'
 // toggle gallery fix
 import 'styles/toggle-gallery-fix.css'
+// fix for grouped list views
+import 'styles/fix-grouped-lists.css'
+// universal database view fix
+import 'styles/fix-database-views.css'
 
 import type { AppProps } from 'next/app'
 import * as Fathom from 'fathom-client'
