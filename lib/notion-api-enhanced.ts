@@ -33,9 +33,9 @@ export class EnhancedNotionAPI extends NotionAPI {
             // Find the collection ID from blocks that use this view
             for (const [blockId, blockData] of Object.entries(recordMap.block)) {
               const block = blockData.value
-              if (block?.view_ids?.includes(viewId)) {
-                collectionId = block.collection_id || 
-                              block.format?.collection_pointer?.id
+              if ((block as any)?.view_ids?.includes(viewId)) {
+                collectionId = (block as any)?.collection_id || 
+                              (block as any)?.format?.collection_pointer?.id
                 break
               }
             }
@@ -73,7 +73,7 @@ export class EnhancedNotionAPI extends NotionAPI {
   isGroupedView(view: any): boolean {
     return !!(
       view?.query2?.group_by || 
-      view?.format?.list_properties_v2?.some((prop: any) => prop.property === 'group')
+      (view?.format as any)?.list_properties_v2?.some?.((prop: any) => prop?.property === 'group')
     )
   }
 }
