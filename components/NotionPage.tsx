@@ -99,8 +99,8 @@ const Code = dynamic(() =>
 
 // データベースビューコンポーネント
 const Collection = dynamic(() =>
-  import('./CollectionWithDefaultListView').then(
-    (m) => m.CollectionWithDefaultListView
+  import('react-notion-x/build/third-party/collection').then(
+    (m) => m.Collection
   ),
   {
     ssr: false

@@ -87,12 +87,12 @@ export default class MyDocument extends Document {
                   document.body.appendChild(script3);
                 }, 1500);
                 
-                // Force list view for all databases
-                setTimeout(function() {
-                  const script4 = document.createElement('script');
-                  script4.src = '/force-list-view.js';
-                  document.body.appendChild(script4);
-                }, 2000);
+                // Force list view for all databases - 一時的に無効化
+                // setTimeout(function() {
+                //   const script4 = document.createElement('script');
+                //   script4.src = '/force-list-view.js';
+                //   document.body.appendChild(script4);
+                // }, 2000);
               });
             ` }} />
           </body>
