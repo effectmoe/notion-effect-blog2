@@ -100,14 +100,12 @@ export default class MyDocument extends Document {
                   document.body.appendChild(fixScript);
                 }, 2000);
                 
-                // Universal database view fix - 一時的に無効化
-                /*
+                // グループ構造を確保
                 setTimeout(function() {
-                  const dbFixScript = document.createElement('script');
-                  dbFixScript.src = '/fix-database-views.js';
-                  document.body.appendChild(dbFixScript);
+                  const ensureScript = document.createElement('script');
+                  ensureScript.src = '/ensure-group-structure.js';
+                  document.body.appendChild(ensureScript);
                 }, 2500);
-                */
                 
                 // デバッグツール（開発環境のみ）
                 if (window.location.hostname === 'localhost') {
