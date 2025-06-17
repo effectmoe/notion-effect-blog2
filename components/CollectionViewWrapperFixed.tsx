@@ -55,49 +55,54 @@ export const CollectionViewWrapperFixed: React.FC<Props> = ({
       return recordMap
     }
     
-    // If collection_query doesn't have results, create dummy results
-    const collectionQuery = recordMap.collection_query?.[collectionId]
-    if (collectionQuery) {
-      const newCollectionQuery = { ...collectionQuery }
+    // Find actual collection items first
+    const collectionItems: string[] = []
+    Object.entries(recordMap.block).forEach(([blockId, blockData]) => {
+      const b = blockData?.value
+      if (b?.parent_id === collectionId || 
+          (b?.parent_table === 'collection' && b?.parent_id === collectionId)) {
+        collectionItems.push(blockId)
+      }
+    })
+    
+    // If no collection_query exists or it's missing data, create it
+    const existingQuery = recordMap.collection_query?.[collectionId] || {}
+    const newCollectionQuery: any = {}
+    
+    // For each view, ensure it has proper results
+    block.view_ids.forEach((viewId: string) => {
+      const existing = existingQuery[viewId]
       
-      // For each view, ensure it has a result
-      block.view_ids.forEach((viewId: string) => {
-        if (!newCollectionQuery[viewId]) {
-          newCollectionQuery[viewId] = {}
-        }
-        
-        // If no result, create a minimal one
-        if (!newCollectionQuery[viewId].result) {
-          // Find actual collection items
-          const collectionItems: string[] = []
-          Object.entries(recordMap.block).forEach(([blockId, blockData]) => {
-            const b = blockData?.value
-            if (b?.parent_id === collectionId || 
-                (b?.parent_table === 'collection' && b?.parent_id === collectionId)) {
-              collectionItems.push(blockId)
-            }
-          })
-          
-          newCollectionQuery[viewId].result = {
+      // Check if results exist and are valid
+      if (!existing || (existing as any).result === false || !(existing as any).result) {
+        // Create a proper query result
+        newCollectionQuery[viewId] = {
+          result: {
             type: 'table',
             blockIds: collectionItems,
             total: collectionItems.length,
             aggregationResults: [],
-            reducerResults: {}
+            reducerResults: {
+              collection_group_results: {
+                type: 'results',
+                blockIds: collectionItems
+              }
+            }
           }
         }
-      })
-      
-      return {
-        ...recordMap,
-        collection_query: {
-          ...recordMap.collection_query,
-          [collectionId]: newCollectionQuery
-        }
+      } else {
+        // Keep existing valid results
+        newCollectionQuery[viewId] = existing
+      }
+    })
+    
+    return {
+      ...recordMap,
+      collection_query: {
+        ...recordMap.collection_query,
+        [collectionId]: newCollectionQuery
       }
     }
-    
-    return recordMap
   }, [recordMap, collectionId, block.view_ids])
   
   // Create a modified context with the fixed recordMap
