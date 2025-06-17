@@ -74,16 +74,14 @@ import { FaMastodon } from '@react-icons/all-files/fa/FaMastodon'
 import { FaTwitter } from '@react-icons/all-files/fa/FaTwitter'
 import { FaYoutube } from '@react-icons/all-files/fa/FaYoutube'
 import { FaZhihu } from '@react-icons/all-files/fa/FaZhihu'
-import { IoMoonSharp } from '@react-icons/all-files/io5/IoMoonSharp'
-import { IoSunnyOutline } from '@react-icons/all-files/io5/IoSunnyOutline'
 import { FaInstagram } from '@react-icons/all-files/fa/FaInstagram'
 import { FaFacebook } from '@react-icons/all-files/fa/FaFacebook'
-⋮----
-import { useDarkMode } from '@/lib/use-dark-mode'
 ⋮----
 import styles from './styles.module.css'
 ⋮----
 // TODO: merge the data and icons from PageSocial with the social links in Footer
+⋮----
+// サーバーとクライアントで同じ年を使用（ビルド時の年）
 ⋮----
 href={`https://twitter.com/${config.twitter}`}
 ⋮----
@@ -100,32 +98,496 @@ href={`https://www.linkedin.com/in/${config.linkedin}`}
 href={`https://www.youtube.com/${config.youtube}`}
 </file>
 
-<file path=".env.example">
-# ------------------------------------------------------------------------------
-# This is an example .env file.
-#
-# All of these environment vars must be defined either in your environment or in
-# a local .env file in order to run this app.
-#
-# @see https://github.com/rolodato/dotenv-safe for more details.
-# ------------------------------------------------------------------------------
+<file path="components/Header.tsx">
+import React, { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
+import { FaGithub } from '@react-icons/all-files/fa/FaGithub'
+import { FaInstagram } from '@react-icons/all-files/fa/FaInstagram'
+import { FaFacebook } from '@react-icons/all-files/fa/FaFacebook'
+import { IoSearchOutline } from '@react-icons/all-files/io5/IoSearchOutline'
+import cs from 'classnames'
+⋮----
+import styles from './Header.module.css'
+import { MenuItem } from '@/lib/menu-utils'
+import { notionViews } from '@/lib/notion-views'
+import HamburgerMenu from './HamburgerMenu'
+⋮----
+// notionViewsからフォールバック用メニュー項目を生成
+⋮----
+type HeaderProps = {
+  menuItems?: MenuItem[]
+}
+⋮----
+// menuItemsがundefinedの場合はDEFAULT_MENU_ITEMSを使用する
+⋮----
+// 検索実行関数
+const handleSearch = async (e) =>
+⋮----
+// 検索前に結果をクリア
+⋮----
+// ハイブリッド検索APIを使用（チェックボックスでフィルタリング）
+⋮----
+// results.resultsが配列であることを確認
+⋮----
+// Enterキーで検索実行
+const handleKeyDown = (e) =>
+⋮----
+// スクロール検出用のイベントリスナー
+⋮----
+const handleScroll = () =>
+⋮----
+// 現在のページに基づいてアクティブなメニュー項目を判断
+const isActive = (url: string) =>
+⋮----
+// メニューの開閉を切り替える
+const toggleMenu = () =>
+⋮----
+// メニューを開くときは検索を閉じる
+⋮----
+// 検索の表示/非表示を切り替える
+const toggleSearch = () =>
+⋮----
+// 検索を開くときはメニューを閉じる
+⋮----
+// メニュー項目をクリックした時の処理
+const handleMenuItemClick = () =>
+⋮----
+// メニューを閉じる
+⋮----
+// ロゴコンポーネント
+const Logo = ()
+⋮----
+{/* ロゴ */}
+⋮----
+{/* デスクトップ用ナビゲーション - メニュー項目はハンバーガーメニューにのみ表示 */}
+⋮----
+{/* ここは空にして、メニュー項目はハンバーガーメニューにのみ表示する */}
+⋮----
+{/* ヘッダー右側の要素 */}
+⋮----
+{/* 検索ボタン */}
+⋮----
+{/* SNSリンク */}
+⋮----
+href={`https://instagram.com/${config.instagram}`}
+⋮----
+className=
+⋮----
+href={`https://facebook.com/${config.facebook}`}
+⋮----
+{/* ハンバーガーメニューボタン（常に表示） */}
+⋮----
+{/* 検索オーバーレイ */}
+⋮----
+{/* 検索結果 */}
+⋮----
+// ハイブリッド検索APIの結果からデータを抽出
+⋮----
+{/* 検索結果がない場合のメッセージ */}
+⋮----
+{/* モバイルメニュー（常に表示） */}
+{/* <div className={cs(
+        styles.mobileMenu,
+        menuOpen ? styles.mobileMenuOpen : styles.mobileMenuClosed
+      )}>
+        <nav className={styles.mobileNav}>
+          <ul className={styles.mobileNavList}>
+            {items.map((item) => (
+              <li key={item.id} className={styles.mobileNavItem}>
+                <Link 
+                  href={item.url} 
+                  className={cs(
+                    styles.mobileNavLink,
+                    isActive(item.url) && styles.activeMobileLink
+                  )}
+                  onClick={handleMenuItemClick}
+                >
+                  {item.emoji && (
+                    <span className={styles.menuItemEmoji}>{item.emoji}</span>
+                  )}
+                  {item.title}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div> */}
+</file>
 
-# Optional (for fathom analytics)
-#NEXT_PUBLIC_FATHOM_ID=
+<file path="lib/site-config.ts">
+export interface SiteConfig {
+  rootNotionPageId: string
+  rootNotionSpaceId?: string
 
-# Optional (for PostHog analytics)
-#NEXT_PUBLIC_POSTHOG_ID=
+  name: string
+  domain: string
+  author: string
+  description?: string
+  language?: string
 
-# Optional (for rendering tweets more efficiently)
-#TWITTER_ACCESS_TOKEN=
+  twitter?: string
+  github?: string
+  linkedin?: string
+  newsletter?: string
+  youtube?: string
+  zhihu?: string
+  mastodon?: string
+  instagram?: string
+  facebook?: string
 
-# Optional (for persisting preview images to redis)
-# NOTE: if you want to enable redis, only REDIS_HOST and REDIS_PASSWORD are required
-# NOTE: don't forget to set isRedisEnabled to true in the site.config.ts file
-#REDIS_HOST=
-#REDIS_PASSWORD=
-#REDIS_USER='default'
-#REDIS_NAMESPACE='preview-images'
+  defaultPageIcon?: string | null
+  defaultPageCover?: string | null
+  defaultPageCoverPosition?: number | null
+
+  isPreviewImageSupportEnabled?: boolean
+  isTweetEmbedSupportEnabled?: boolean
+  isRedisEnabled?: boolean
+  isSearchEnabled?: boolean
+
+  includeNotionIdInUrls?: boolean
+  pageUrlOverrides?: types.PageUrlOverridesMap
+  pageUrlAdditions?: types.PageUrlOverridesMap
+
+  navigationStyle?: types.NavigationStyle
+  navigationLinks?: Array<NavigationLink>
+}
+⋮----
+export interface NavigationLink {
+  title: string
+  pageId?: string
+  url?: string
+}
+⋮----
+export const siteConfig = (config: SiteConfig): SiteConfig =>
+</file>
+
+<file path="lib/types.ts">
+import { type ParsedUrlQuery } from 'node:querystring'
+⋮----
+import { type ExtendedRecordMap, type PageMap } from 'notion-types'
+⋮----
+export type NavigationStyle = 'default' | 'custom'
+⋮----
+export interface PageError {
+  message?: string
+  statusCode: number
+}
+⋮----
+export interface PageProps {
+  site?: Site
+  recordMap?: ExtendedRecordMap
+  pageId?: string
+  error?: PageError
+}
+⋮----
+export interface ExtendedTweetRecordMap extends ExtendedRecordMap {
+  tweets: Record<string, any>
+}
+⋮----
+export interface Params extends ParsedUrlQuery {
+  pageId: string
+}
+⋮----
+export interface Site {
+  name: string
+  domain: string
+
+  rootNotionPageId: string
+  rootNotionSpaceId: string
+
+  // settings
+  html?: string
+  fontFamily?: string
+  darkMode?: boolean
+  previewImages?: boolean
+
+  // opengraph metadata
+  description?: string
+  image?: string
+}
+⋮----
+// settings
+⋮----
+// opengraph metadata
+⋮----
+export interface SiteMap {
+  site: Site
+  pageMap: PageMap
+  canonicalPageMap: CanonicalPageMap
+}
+⋮----
+export interface CanonicalPageMap {
+  [canonicalPageId: string]: string
+}
+⋮----
+export interface PageUrlOverridesMap {
+  // maps from a URL path to the notion page id the page should be resolved to
+  // (this overrides the built-in URL path generation for these pages)
+  [pagePath: string]: string
+}
+⋮----
+// maps from a URL path to the notion page id the page should be resolved to
+// (this overrides the built-in URL path generation for these pages)
+⋮----
+export interface PageUrlOverridesInverseMap {
+  // maps from a notion page id to the URL path the page should be resolved to
+  // (this overrides the built-in URL path generation for these pages)
+  [pageId: string]: string
+}
+⋮----
+// maps from a notion page id to the URL path the page should be resolved to
+// (this overrides the built-in URL path generation for these pages)
+⋮----
+export interface NotionPageInfo {
+  pageId: string
+  title: string
+  image: string
+  imageObjectPosition: string
+  author: string
+  authorImage: string
+  detail: string
+}
+⋮----
+export interface SearchParams {
+  query: string
+  ancestorId?: string
+  filters?: {
+    isDeletedOnly?: boolean
+    excludeTemplates?: boolean
+    isNavigableOnly?: boolean
+    requireEditPermissions?: boolean
+    includePublicPagesWithoutExplicitAccess?: boolean
+    ancestorIds?: string[]
+    [key: string]: any
+  }
+  sort?: {
+    field: string
+    direction: 'asc' | 'desc'
+  }
+  limit?: number
+  searchUrlOverride?: string
+}
+⋮----
+export interface SearchResults {
+  results: Array<{
+    id: string
+    title: string
+    description?: string
+    url?: string
+    icon?: string
+    [key: string]: any
+  }>
+  total: number
+  recordMap: {
+    block: Record<string, any>
+    [key: string]: any
+  }
+  hasMore?: boolean
+}
+</file>
+
+<file path="pages/index.tsx">
+import { NotionPage } from '@/components/NotionPage'
+import { domain } from '@/lib/config'
+import { resolveNotionPage } from '@/lib/resolve-notion-page'
+import { getMenuItems } from '@/lib/menu-utils'
+⋮----
+export const getStaticProps = async () =>
+⋮----
+// NotionデータベースからMenuがtrueの項目を取得
+⋮----
+// propsにmenuItemsを追加
+⋮----
+// we don't want to publish the error version of this page, so
+// let next.js know explicitly that incremental SSG failed
+⋮----
+export default function NotionDomainPage(props)
+</file>
+
+<file path="pages/_app.tsx">
+// used for rendering equations (optional)
+⋮----
+// used for code syntax highlighting (optional)
+⋮----
+// core styles shared by all of react-notion-x (required)
+⋮----
+// global styles shared across the entire site
+⋮----
+// this might be better for dark mode
+// import 'prismjs/themes/prism-okaidia.css'
+// global style overrides for notion
+⋮----
+// global style overrides for prism theme (optional)
+⋮----
+// instructor gallery responsive styles (specific collection only)
+⋮----
+// instructor gallery improvements (font and spacing)
+⋮----
+// toggle gallery fix
+⋮----
+import type { AppProps } from 'next/app'
+⋮----
+import { useRouter } from 'next/router'
+import posthog from 'posthog-js'
+⋮----
+import { bootstrap } from '@/lib/bootstrap-client'
+import {
+  fathomConfig,
+  fathomId,
+  isServer,
+  posthogConfig,
+  posthogId
+} from '@/lib/config'
+import { getMenuItemsForStaticProps } from '@/lib/menu-utils'
+import { fillFormulaProperties } from '@/lib/fill-formula-properties'
+⋮----
+import dynamic from 'next/dynamic'
+import CriticalFontLoader from '@/components/CriticalFontLoader'
+⋮----
+// カスタムAppPropsの型定義を追加
+type CustomAppProps = AppProps & {
+  pageProps: {
+    menuItems?: any[]
+    [key: string]: any
+  }
+}
+⋮----
+export default function App(
+⋮----
+// クライアントサイドでのみbootstrapを実行
+⋮----
+function onRouteChangeComplete()
+⋮----
+// ページ遷移時に数式プロパティを入力
+⋮----
+// 初回読み込み時にも実行
+⋮----
+// FontStylerとColorStylerコンポーネントを追加してスタイルをカスタマイズ
+⋮----
+// サーバーサイドでメニュー項目を取得
+⋮----
+// 元のgetInitialPropsを実行
+⋮----
+// Notionからメニュー項目を取得
+⋮----
+// メニュー項目をページProps全体に追加
+</file>
+
+<file path="pages/[pageId].tsx">
+import { type GetStaticProps } from 'next'
+⋮----
+import { NotionPage } from '@/components/NotionPage'
+import { domain, isDev } from '@/lib/config'
+import { getSiteMap } from '@/lib/get-site-map'
+import { resolveNotionPage } from '@/lib/resolve-notion-page'
+import { getMenuItems } from '@/lib/menu-utils'
+import { type PageProps, type Params } from '@/lib/types'
+⋮----
+export const getStaticProps: GetStaticProps<PageProps, Params> = async (
+  context
+) =>
+⋮----
+// NotionデータベースからMenuがtrueの項目を取得
+⋮----
+// propsにmenuItemsを追加
+⋮----
+// we don't want to publish the error version of this page, so
+// let next.js know explicitly that incremental SSG failed
+⋮----
+export async function getStaticPaths()
+⋮----
+// paths: [],
+⋮----
+export default function NotionDomainDynamicPage(props)
+</file>
+
+<file path="site.config.ts">
+import { siteConfig } from './lib/site-config'
+⋮----
+// the site's root Notion page (required)
+⋮----
+// if you want to restrict pages to a single notion workspace (optional)
+// (this should be a Notion ID; see the docs for how to extract this)
+⋮----
+// basic site info (required)
+⋮----
+// open graph metadata (optional)
+⋮----
+// social usernames (optional)
+// twitter: 'aromatech_japan',
+// github: 'transitive-bullshit',
+⋮----
+// youtube: 'your_channel_id_or_name',
+// mastodon: '#', // optional mastodon profile URL, provides link verification
+// newsletter: '#', // optional newsletter URL
+// youtube: '#', // optional youtube channel name or `channel/UCGbXXXXXXXXXXXXXXXXXXXXXX`
+⋮----
+// default notion icon and cover images for site-wide consistency (optional)
+// page-specific values will override these site-wide defaults
+⋮----
+// whether or not to enable support for LQIP preview images (optional)
+⋮----
+// whether or not redis is enabled for caching generated preview images (optional)
+// NOTE: if you enable redis, you need to set the `REDIS_HOST` and `REDIS_PASSWORD`
+// environment variables. see the readme for more info
+⋮----
+// map of notion page IDs to URL paths (optional)
+// any pages defined here will override their default URL paths
+// example:
+//
+// pageUrlOverrides: {
+//   '/foo': '067dd719a912471ea9a3ac10710e7fdf',
+//   '/bar': '0be6efce9daf42688f65c76b89f8eb27'
+// }
+⋮----
+// whether to use the default notion navigation style or a custom one with links to
+// important pages. To use `navigationLinks`, set `navigationStyle` to `custom`.
+⋮----
+// navigationStyle: 'custom',
+// navigationLinks: [
+//   {
+//     title: 'About',
+//     pageId: 'f1199d37579b41cbabfc0b5174f4256a'
+//   },
+//   {
+//     title: 'Contact',
+//     pageId: '6a29ebcb935a4f0689fe661ab5f3b8d1'
+//   }
+// ]
+</file>
+
+<file path="tsconfig.json">
+{
+  "compilerOptions": {
+    "target": "es2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "moduleDetection": "force",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "baseUrl": ".",
+    "typeRoots": ["./node_modules/@types"],
+    "incremental": true,
+    "paths": {
+      "@/components/*": ["components/*"],
+      "@/lib/*": ["lib/*"],
+      "@/styles/*": ["styles/*"],
+      "@/hooks/*": ["hooks/*"],
+      "@/types/*": ["types/*"]
+    }
+  },
+  "exclude": ["node_modules"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "site.config.ts"]
+}
 </file>
 
 <file path="next.config.js">
@@ -135,13 +597,61 @@ export default withBundleAnalyzer({
 ⋮----
 ignoreDuringBuilds: true, // ビルド時のESLintエラーを無視
 ⋮----
-webpack: (config, _context) => {
+reactStrictMode: false, // ハイドレーションエラーを軽減
+staticPageGenerationTimeout: 600, // タイムアウトを10分に延長
+⋮----
+// Service Worker のサポート
+async headers() {
+⋮----
+// 画像最適化の設定
+⋮----
+minimumCacheTTL: 60 * 60 * 24 * 365, // 1年
+⋮----
+// パフォーマンス最適化
+⋮----
+// 実験的機能
+⋮----
+webpack: (config, context) => {
+⋮----
 // Workaround for ensuring that `react` and `react-dom` resolve correctly
 // when using a locally-linked version of `react-notion-x`.
 // @see https://github.com/vercel/next.js/issues/50391
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 config.resolve.alias.react = path.resolve(dirname, 'node_modules/react')
 config.resolve.alias['react-dom'] = path.resolve(
+⋮----
+// プロダクションビルドの最適化
+⋮----
+// モジュール連結の最適化
+⋮----
+// Tree shakingの強化
+⋮----
+// React Notion Xの動的インポート設定
+⋮----
+test(module) {
+return module.size() > 160000 &&
+/node_modules[\\/]/.test(module.identifier())
+⋮----
+name(module) {
+const moduleId = module.identifier()
+// Simple hash function without crypto
+⋮----
+const char = moduleId.charCodeAt(i)
+⋮----
+hash = hash & hash // Convert to 32bit integer
+⋮----
+return 'lib-' + Math.abs(hash).toString(16).substring(0, 8)
+⋮----
+// 不要なpolyfillの削除
+⋮----
+// Production時はCSSを最適化
+⋮----
+// CSSの最適化
+⋮----
+config.module.rules.forEach((rule) => {
+⋮----
+rule.oneOf.forEach((oneOfRule) => {
+if (oneOfRule.use?.loader?.includes('css-loader')) {
 ⋮----
 // See https://react-tweet.vercel.app/next#troubleshooting
 </file>
@@ -346,600 +856,28 @@ MIT © [Travis Fischer](https://transitivebullsh.it)
 Support my open source work by <a href="https://twitter.com/transitive_bs">following me on twitter <img src="https://storage.googleapis.com/saasify-assets/twitter-logo.svg" alt="twitter" height="24px" align="center"></a>
 </file>
 
-<file path="tsconfig.json">
-{
-  "compilerOptions": {
-    "target": "es2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": false,
-    "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "moduleDetection": "force",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "baseUrl": ".",
-    "typeRoots": ["./node_modules/@types"],
-    "incremental": true,
-    "paths": {
-      "@/components/*": ["components/*"],
-      "@/lib/*": ["lib/*"],
-      "@/styles/*": ["styles/*"]
-    }
-  },
-  "exclude": ["node_modules"],
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "site.config.ts"]
-}
-</file>
+<file path=".env.example">
+# Notion API設定
+NOTION_API_SECRET=your-notion-api-secret
+NOTION_PAGE_ID=your-root-page-id
 
-<file path="pages/[pageId].tsx">
-import { type GetStaticProps } from 'next'
-⋮----
-import { NotionPage } from '@/components/NotionPage'
-import { domain, isDev } from '@/lib/config'
-import { getSiteMap } from '@/lib/get-site-map'
-import { resolveNotionPage } from '@/lib/resolve-notion-page'
-import { getMenuItems } from '@/lib/menu-utils'
-import { type PageProps, type Params } from '@/lib/types'
-⋮----
-export const getStaticProps: GetStaticProps<PageProps, Params> = async (
-  context
-) =>
-⋮----
-// NotionデータベースからMenuがtrueの項目を取得
-⋮----
-// propsにmenuItemsを追加
-⋮----
-// we don't want to publish the error version of this page, so
-// let next.js know explicitly that incremental SSG failed
-⋮----
-export async function getStaticPaths()
-⋮----
-// paths: [],
-⋮----
-export default function NotionDomainDynamicPage(props)
-</file>
+# Webhook設定
+NOTION_WEBHOOK_SECRET=your-webhook-secret
+CACHE_CLEAR_TOKEN=your-cache-clear-token
+REVALIDATE_SECRET=your-revalidate-secret
 
-<file path="lib/site-config.ts">
-export interface SiteConfig {
-  rootNotionPageId: string
-  rootNotionSpaceId?: string
+# サイトURL（WebSocket用）
+NEXT_PUBLIC_SITE_URL=https://your-site.com
 
-  name: string
-  domain: string
-  author: string
-  description?: string
-  language?: string
+# Redis設定（オプション）
+REDIS_URL=redis://your-redis-url
+REDIS_HOST=your-redis-host
+REDIS_PORT=6379
+REDIS_PASSWORD=your-redis-password
 
-  twitter?: string
-  github?: string
-  linkedin?: string
-  newsletter?: string
-  youtube?: string
-  zhihu?: string
-  mastodon?: string
-  instagram?: string
-  facebook?: string
-
-  defaultPageIcon?: string | null
-  defaultPageCover?: string | null
-  defaultPageCoverPosition?: number | null
-
-  isPreviewImageSupportEnabled?: boolean
-  isTweetEmbedSupportEnabled?: boolean
-  isRedisEnabled?: boolean
-  isSearchEnabled?: boolean
-
-  includeNotionIdInUrls?: boolean
-  pageUrlOverrides?: types.PageUrlOverridesMap
-  pageUrlAdditions?: types.PageUrlOverridesMap
-
-  navigationStyle?: types.NavigationStyle
-  navigationLinks?: Array<NavigationLink>
-}
-⋮----
-export interface NavigationLink {
-  title: string
-  pageId?: string
-  url?: string
-}
-⋮----
-export const siteConfig = (config: SiteConfig): SiteConfig =>
-</file>
-
-<file path="site.config.ts">
-import { siteConfig } from './lib/site-config'
-⋮----
-// the site's root Notion page (required)
-⋮----
-// if you want to restrict pages to a single notion workspace (optional)
-// (this should be a Notion ID; see the docs for how to extract this)
-⋮----
-// basic site info (required)
-⋮----
-// open graph metadata (optional)
-⋮----
-// social usernames (optional)
-// twitter: 'transitive_bs',
-// github: 'transitive-bullshit',
-// linkedin: 'fisch2',
-⋮----
-// youtube: 'your_channel_id_or_name',
-// mastodon: '#', // optional mastodon profile URL, provides link verification
-// newsletter: '#', // optional newsletter URL
-// youtube: '#', // optional youtube channel name or `channel/UCGbXXXXXXXXXXXXXXXXXXXXXX`
-⋮----
-// default notion icon and cover images for site-wide consistency (optional)
-// page-specific values will override these site-wide defaults
-⋮----
-// whether or not to enable support for LQIP preview images (optional)
-⋮----
-// whether or not redis is enabled for caching generated preview images (optional)
-// NOTE: if you enable redis, you need to set the `REDIS_HOST` and `REDIS_PASSWORD`
-// environment variables. see the readme for more info
-⋮----
-// map of notion page IDs to URL paths (optional)
-// any pages defined here will override their default URL paths
-// example:
-//
-// pageUrlOverrides: {
-//   '/foo': '067dd719a912471ea9a3ac10710e7fdf',
-//   '/bar': '0be6efce9daf42688f65c76b89f8eb27'
-// }
-⋮----
-// whether to use the default notion navigation style or a custom one with links to
-// important pages. To use `navigationLinks`, set `navigationStyle` to `custom`.
-⋮----
-// navigationStyle: 'custom',
-// navigationLinks: [
-//   {
-//     title: 'About',
-//     pageId: 'f1199d37579b41cbabfc0b5174f4256a'
-//   },
-//   {
-//     title: 'Contact',
-//     pageId: '6a29ebcb935a4f0689fe661ab5f3b8d1'
-//   }
-// ]
-</file>
-
-<file path="lib/types.ts">
-import { type ParsedUrlQuery } from 'node:querystring'
-⋮----
-import { type ExtendedRecordMap, type PageMap } from 'notion-types'
-⋮----
-export type NavigationStyle = 'default' | 'custom'
-⋮----
-export interface PageError {
-  message?: string
-  statusCode: number
-}
-⋮----
-export interface PageProps {
-  site?: Site
-  recordMap?: ExtendedRecordMap
-  pageId?: string
-  error?: PageError
-}
-⋮----
-export interface ExtendedTweetRecordMap extends ExtendedRecordMap {
-  tweets: Record<string, any>
-}
-⋮----
-export interface Params extends ParsedUrlQuery {
-  pageId: string
-}
-⋮----
-export interface Site {
-  name: string
-  domain: string
-
-  rootNotionPageId: string
-  rootNotionSpaceId: string
-
-  // settings
-  html?: string
-  fontFamily?: string
-  darkMode?: boolean
-  previewImages?: boolean
-
-  // opengraph metadata
-  description?: string
-  image?: string
-}
-⋮----
-// settings
-⋮----
-// opengraph metadata
-⋮----
-export interface SiteMap {
-  site: Site
-  pageMap: PageMap
-  canonicalPageMap: CanonicalPageMap
-}
-⋮----
-export interface CanonicalPageMap {
-  [canonicalPageId: string]: string
-}
-⋮----
-export interface PageUrlOverridesMap {
-  // maps from a URL path to the notion page id the page should be resolved to
-  // (this overrides the built-in URL path generation for these pages)
-  [pagePath: string]: string
-}
-⋮----
-// maps from a URL path to the notion page id the page should be resolved to
-// (this overrides the built-in URL path generation for these pages)
-⋮----
-export interface PageUrlOverridesInverseMap {
-  // maps from a notion page id to the URL path the page should be resolved to
-  // (this overrides the built-in URL path generation for these pages)
-  [pageId: string]: string
-}
-⋮----
-// maps from a notion page id to the URL path the page should be resolved to
-// (this overrides the built-in URL path generation for these pages)
-⋮----
-export interface NotionPageInfo {
-  pageId: string
-  title: string
-  image: string
-  imageObjectPosition: string
-  author: string
-  authorImage: string
-  detail: string
-}
-⋮----
-export interface SearchParams {
-  query: string
-  ancestorId?: string
-  filters?: {
-    isDeletedOnly?: boolean
-    excludeTemplates?: boolean
-    isNavigableOnly?: boolean
-    requireEditPermissions?: boolean
-    includePublicPagesWithoutExplicitAccess?: boolean
-    ancestorIds?: string[]
-    [key: string]: any
-  }
-  sort?: {
-    field: string
-    direction: 'asc' | 'desc'
-  }
-  limit?: number
-  searchUrlOverride?: string
-}
-⋮----
-export interface SearchResults {
-  results: Array<{
-    id: string
-    title: string
-    description?: string
-    url?: string
-    icon?: string
-    [key: string]: any
-  }>
-  total: number
-  recordMap: {
-    block: Record<string, any>
-    [key: string]: any
-  }
-  hasMore?: boolean
-}
-</file>
-
-<file path="pages/_app.tsx">
-// used for rendering equations (optional)
-⋮----
-// used for code syntax highlighting (optional)
-⋮----
-// core styles shared by all of react-notion-x (required)
-⋮----
-// global styles shared across the entire site
-⋮----
-// this might be better for dark mode
-// import 'prismjs/themes/prism-okaidia.css'
-// global style overrides for notion
-⋮----
-// global style overrides for prism theme (optional)
-⋮----
-import type { AppProps } from 'next/app'
-⋮----
-import { useRouter } from 'next/router'
-import posthog from 'posthog-js'
-⋮----
-import { bootstrap } from '@/lib/bootstrap-client'
-import {
-  fathomConfig,
-  fathomId,
-  isServer,
-  posthogConfig,
-  posthogId
-} from '@/lib/config'
-import { getMenuItemsForStaticProps } from '@/lib/menu-utils'
-import FontStyler from '@/components/FontStyler'
-⋮----
-// カスタムAppPropsの型定義を追加
-type CustomAppProps = AppProps & {
-  pageProps: {
-    menuItems?: any[]
-    [key: string]: any
-  }
-}
-⋮----
-export default function App(
-⋮----
-function onRouteChangeComplete()
-⋮----
-// FontStylerコンポーネントを追加してフォントをカスタマイズ
-⋮----
-// サーバーサイドでメニュー項目を取得
-⋮----
-// 元のgetInitialPropsを実行
-⋮----
-? await appContext.Component.getInitialProps(appContext.ctx)
-⋮----
-// Notionからメニュー項目を取得
-⋮----
-const menuItems = await getMenuItemsForStaticProps()
-⋮----
-// メニュー項目をページProps全体に追加
-</file>
-
-<file path="package.json">
-{
-  "name": "nextjs-notion-starter-kit",
-  "version": "2.0.0",
-  "private": true,
-  "description": "The perfect starter kit for building beautiful websites with Next.js and Notion.",
-  "author": "Travis Fischer <travis@transitivebullsh.it>",
-  "repository": "transitive-bullshit/nextjs-notion-starter-kit",
-  "license": "MIT",
-  "engines": {
-    "node": ">=18"
-  },
-  "type": "module",
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "deploy": "vercel deploy",
-    "deps:upgrade": "[ -z $GITHUB_ACTIONS ] && pnpm up -L notion-client notion-types notion-utils react-notion-x || echo 'Skipping deps:update on CI'",
-    "deps:link": "[ -z $GITHUB_ACTIONS ] && run-s deps:link:* || echo 'Skipping deps:update on CI'",
-    "deps:unlink": "[ -z $GITHUB_ACTIONS ] && pnpm add notion-client notion-types notion-utils react-notion-x || echo 'Skipping deps:update on CI'",
-    "deps:link:notion-types": "pnpm link ../react-notion-x/packages/notion-types",
-    "deps:link:notion-utils": "pnpm link ../react-notion-x/packages/notion-utils",
-    "deps:link:notion-client": "pnpm link ../react-notion-x/packages/notion-client",
-    "deps:link:react-notion-x": "pnpm link ../react-notion-x/packages/react-notion-x",
-    "analyze": "cross-env ANALYZE=true next build",
-    "analyze:server": "cross-env BUNDLE_ANALYZE=server next build",
-    "analyze:browser": "cross-env BUNDLE_ANALYZE=browser next build",
-    "test": "run-p test:*",
-    "test:lint": "eslint .",
-    "test:prettier": "prettier '**/*.{js,jsx,ts,tsx}' --check"
-  },
-  "dependencies": {
-    "@fisch0920/use-dark-mode": "^2.4.0",
-    "@keyvhq/core": "^1.6.9",
-    "@keyvhq/redis": "^1.6.10",
-    "@react-icons/all-files": "^4.1.0",
-    "classnames": "^2.5.1",
-    "date-fns": "^4.1.0",
-    "expiry-map": "^2.0.0",
-    "fathom-client": "^3.4.1",
-    "framer-motion": "^12.7.3",
-    "katex": "^0.16.22",
-    "ky": "^1.7.2",
-    "lqip-modern": "^2.2.1",
-    "next": "^15.0.3",
-    "notion-client": "^7.1.3",
-    "notion-types": "^7.1.3",
-    "notion-utils": "^7.1.3",
-    "p-map": "^7.0.2",
-    "p-memoize": "^7.1.1",
-    "posthog-js": "^1.181.0",
-    "prismjs": "^1.30.0",
-    "react": "^18.2.0",
-    "react-body-classname": "^1.3.1",
-    "react-dom": "^18.2.0",
-    "react-notion-x": "^7.2.3",
-    "react-tweet": "^3.2.1",
-    "react-use": "^17.4.2",
-    "rss": "^1.2.2"
-  },
-  "devDependencies": {
-    "@eslint/js": "^9.24.0",
-    "@fisch0920/eslint-config": "^1.4.0",
-    "@next/bundle-analyzer": "^15.0.2",
-    "@next/eslint-plugin-next": "^15.3.0",
-    "@types/node": "^22.8.6",
-    "@types/react": "^18.0.21",
-    "@typescript-eslint/eslint-plugin": "^8.29.1",
-    "@typescript-eslint/parser": "^8.29.1",
-    "cross-env": "^7.0.2",
-    "eslint": "^8.57.1",
-    "npm-run-all2": "^7.0.1",
-    "prettier": "^3.3.3",
-    "typescript": "^5.6.3"
-  },
-  "overrides": {
-    "cacheable-request": {
-      "keyv": "npm:@keyvhq/core@~1.6.6"
-    }
-  }
-}
-</file>
-
-<file path="pages/index.tsx">
-import { NotionPage } from '@/components/NotionPage'
-import { domain } from '@/lib/config'
-import { resolveNotionPage } from '@/lib/resolve-notion-page'
-import { getMenuItems } from '@/lib/menu-utils'
-import { notionViews } from '@/lib/notion-views'
-⋮----
-export const getStaticProps = async () =>
-⋮----
-// NotionデータベースからMenuがtrueの項目を取得
-⋮----
-// propsにmenuItemsを追加
-⋮----
-// we don't want to publish the error version of this page, so
-// let next.js know explicitly that incremental SSG failed
-⋮----
-export default function NotionDomainPage(props)
-</file>
-
-<file path="components/Header.tsx">
-import React, { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { useRouter } from 'next/router'
-import { FaGithub } from '@react-icons/all-files/fa/FaGithub'
-import { FaInstagram } from '@react-icons/all-files/fa/FaInstagram'
-import { FaFacebook } from '@react-icons/all-files/fa/FaFacebook'
-import { IoMoonSharp } from '@react-icons/all-files/io5/IoMoonSharp'
-import { IoSunnyOutline } from '@react-icons/all-files/io5/IoSunnyOutline'
-import { IoSearchOutline } from '@react-icons/all-files/io5/IoSearchOutline'
-import cs from 'classnames'
-⋮----
-import { useDarkMode } from '@/lib/use-dark-mode'
-import styles from './Header.module.css'
-import { MenuItem } from '@/lib/menu-utils'
-import { notionViews } from '@/lib/notion-views'
-import HamburgerMenu from './HamburgerMenu'
-⋮----
-// notionViewsからフォールバック用メニュー項目を生成
-⋮----
-type HeaderProps = {
-  menuItems?: MenuItem[]
-}
-⋮----
-// menuItemsがundefinedの場合はDEFAULT_MENU_ITEMSを使用する
-⋮----
-// マウント状態の確認
-⋮----
-// 画面サイズのチェック
-const checkIsMobile = () =>
-⋮----
-// 初期チェック
-⋮----
-// リサイズイベントリスナーを設定
-⋮----
-// 検索実行関数
-const handleSearch = async (e) =>
-⋮----
-// 公式Notion APIを使用した検索エンドポイントを使用する
-⋮----
-// results.resultsが配列であることを確認
-⋮----
-// Enterキーで検索実行
-const handleKeyDown = (e) =>
-⋮----
-// スクロール検出用のイベントリスナー
-⋮----
-const handleScroll = () =>
-⋮----
-// ダークモード切り替え
-⋮----
-// 現在のページに基づいてアクティブなメニュー項目を判断
-const isActive = (url: string) =>
-⋮----
-// メニューの開閉を切り替える
-const toggleMenu = () =>
-⋮----
-// メニューを開くときは検索を閉じる
-⋮----
-// 検索の表示/非表示を切り替える
-const toggleSearch = () =>
-⋮----
-// 検索を開くときはメニューを閉じる
-⋮----
-// メニュー項目をクリックした時の処理
-const handleMenuItemClick = () =>
-⋮----
-// メニューを閉じる
-⋮----
-// ロゴコンポーネント
-const Logo = ()
-⋮----
-{/* ロゴ */}
-⋮----
-{/* デスクトップ用ナビゲーション - メニュー項目はハンバーガーメニューにのみ表示 */}
-⋮----
-{/* ここは空にして、メニュー項目はハンバーガーメニューにのみ表示する */}
-⋮----
-{/* ヘッダー右側の要素 */}
-⋮----
-{/* 検索ボタン */}
-⋮----
-{/* ダークモード切り替えボタン */}
-⋮----
-{/* SNSリンク */}
-⋮----
-href={`https://instagram.com/${config.instagram}`}
-⋮----
-className=
-⋮----
-href={`https://facebook.com/${config.facebook}`}
-⋮----
-{/* ハンバーガーメニューボタン（常に表示） */}
-⋮----
-{/* 検索オーバーレイ */}
-⋮----
-{/* 検索結果 */}
-⋮----
-// Notion APIの結果からデータを抽出
-⋮----
-// 公式APIのページオブジェクトからタイトルを取得する
-⋮----
-// 公式APIの構造の場合
-⋮----
-// ページのタイトル取得試行
-⋮----
-// ページの親がデータベースの場合
-⋮----
-// このページには他の方法でタイトルを取得する必要がある
-title = '無題のページ'; // デフォルト
-⋮----
-// 旧APIや他の形式の互換性
-⋮----
-// 最終的にタイトルの安全確保
-⋮----
-// 結果と一緒に提供されるURLを使用する
-⋮----
-{/* 検索結果がない場合のメッセージ */}
-⋮----
-{/* モバイルメニュー（常に表示） */}
-{/* <div className={cs(
-        styles.mobileMenu,
-        menuOpen ? styles.mobileMenuOpen : styles.mobileMenuClosed
-      )}>
-        <nav className={styles.mobileNav}>
-          <ul className={styles.mobileNavList}>
-            {items.map((item) => (
-              <li key={item.id} className={styles.mobileNavItem}>
-                <Link 
-                  href={item.url} 
-                  className={cs(
-                    styles.mobileNavLink,
-                    isActive(item.url) && styles.activeMobileLink
-                  )}
-                  onClick={handleMenuItemClick}
-                >
-                  {item.emoji && (
-                    <span className={styles.menuItemEmoji}>{item.emoji}</span>
-                  )}
-                  {item.title}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      </div> */}
+# 重要ページ設定（カンマ区切り、オプション）
+# キャッシュクリア後のフォールバック用
+IMPORTANT_PAGE_IDS=page-id-1,page-id-2,page-id-3
 </file>
 
 <file path="components/NotionPage.tsx">
@@ -951,7 +889,7 @@ import { useRouter } from 'next/router'
 import { type PageBlock } from 'notion-types'
 import { formatDate, getBlockTitle, getPageProperty } from 'notion-utils'
 ⋮----
-import BodyClassName from 'react-body-classname'
+// Removed BodyClassName to avoid hydration issues
 import {
   type NotionComponents,
   NotionRenderer,
@@ -963,7 +901,6 @@ import { useSearchParam } from 'react-use'
 import { mapImageUrl } from '@/lib/map-image-url'
 import { getCanonicalPageUrl, mapPageUrl } from '@/lib/map-page-url'
 import { searchNotion } from '@/lib/search-notion'
-import { useDarkMode } from '@/lib/use-dark-mode'
 ⋮----
 import { Footer } from './Footer'
 import { GitHubShareButton } from './GitHubShareButton'
@@ -973,6 +910,11 @@ import { Page404 } from './Page404'
 import { PageAside } from './PageAside'
 import { PageHead } from './PageHead'
 import { Header } from './Header'
+import { FormulaPropertyDebug } from './FormulaPropertyDebug'
+import { CustomPageLink } from './CustomPageLink'
+import { YouTubeEmbed } from './YouTubeEmbed'
+// import { CollectionViewWrapper } from './CollectionViewWrapper'
+import StructuredData from './StructuredData'
 import styles from './styles.module.css'
 ⋮----
 // -----------------------------------------------------------------------------
@@ -1006,6 +948,8 @@ const propertyLastEditedTimeValue = (
   defaultFn: () => React.ReactNode
 ) =>
 ⋮----
+// ハイドレーションエラーを避けるため、デフォルトの処理を使用
+⋮----
 const propertyDateValue = (
   { data, schema, pageHeader },
   defaultFn: () => React.ReactNode
@@ -1023,21 +967,184 @@ const getNavigationMenuItems = (site: types.Site) =>
 ⋮----
 menuItems // Notionデータベースからのメニューアイテムを受け取る
 ⋮----
+// lite mode is for oembed
+⋮----
+// Apply body classes after mount
+⋮----
+// useEffectを使用して空のリンクを非表示にし、プロパティを調査する
+// ハイドレーションエラーを避けるため、一時的にコメントアウト
+/*
+  React.useEffect(() => {
+    // 空のnotion-page-linkを削除する関数
+    const removeEmptyLinks = () => {
+      const emptyLinks = document.querySelectorAll('a.notion-list-item.notion-page-link')
+      
+      emptyLinks.forEach((link) => {
+        // リンク内にnotion-list-item-titleが存在しない場合は削除
+        if (!link.querySelector('.notion-list-item-title')) {
+          const anchorElement = link as HTMLAnchorElement
+          anchorElement.style.display = 'none'
+          anchorElement.setAttribute('data-hidden', 'true')
+        }
+      })
+    }
+    
+    
+    // 初回実行
+    removeEmptyLinks()
+    
+    // DOMの変更を監視
+    const observer = new MutationObserver(() => {
+      removeEmptyLinks()
+    })
+    
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    })
+    
+    return () => observer.disconnect()
+  }, [recordMap])
+  */
+⋮----
 // Notionのデフォルトヘッダーをカスタムヘッダーとして使わない
 Header: () => null, // ヘッダーを非表示にする
 ⋮----
+// Override PageLink to fix div-in-anchor hydration error
+⋮----
+// Remove custom Toggle to use default react-notion-x implementation
+// which might handle collection views better
+⋮----
 // ボディにNoNotionTabsクラスを追加
+// BodyClassNameコンポーネントを使用するため、直接操作は削除
+// React.useEffect(() => {
+//   document.body.classList.add('no-notion-tabs');
+//
+//   return () => {
+//     document.body.classList.remove('no-notion-tabs');
+//   };
+// }, []);
 ⋮----
 // ナビゲーションメニュー項目を取得
-⋮----
-// lite mode is for oembed
 ⋮----
 // const isRootPage =
 //   parsePageId(block?.id) === parsePageId(site?.rootNotionPageId)
 ⋮----
+// デバッグ用のグローバル変数設定をuseEffectに移動
+// 早期リターンの前に配置してフックの数を一定に保つ
+⋮----
 // add important objects to the window global for easy debugging
 ⋮----
+{/* 構造化データを自動追加 */}
+⋮----
+{/* All body class modifications moved to useEffect to avoid hydration issues */}
+⋮----
 {/* Notionレンダラー - 内部のヘッダーをnullに設定したので、カスタムヘッダーを外に配置 */}
+</file>
+
+<file path="package.json">
+{
+  "name": "nextjs-notion-starter-kit",
+  "version": "2.0.0",
+  "private": true,
+  "description": "The perfect starter kit for building beautiful websites with Next.js and Notion.",
+  "author": "Travis Fischer <travis@transitivebullsh.it>",
+  "repository": "transitive-bullshit/nextjs-notion-starter-kit",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build && npm run build:sw",
+    "build:sw": "node scripts/build-sw.js",
+    "start": "next start",
+    "deploy": "vercel deploy",
+    "deps:upgrade": "[ -z $GITHUB_ACTIONS ] && pnpm up -L notion-client notion-types notion-utils react-notion-x || echo 'Skipping deps:update on CI'",
+    "deps:link": "[ -z $GITHUB_ACTIONS ] && run-s deps:link:* || echo 'Skipping deps:update on CI'",
+    "deps:unlink": "[ -z $GITHUB_ACTIONS ] && pnpm add notion-client notion-types notion-utils react-notion-x || echo 'Skipping deps:update on CI'",
+    "deps:link:notion-types": "pnpm link ../react-notion-x/packages/notion-types",
+    "deps:link:notion-utils": "pnpm link ../react-notion-x/packages/notion-utils",
+    "deps:link:notion-client": "pnpm link ../react-notion-x/packages/notion-client",
+    "deps:link:react-notion-x": "pnpm link ../react-notion-x/packages/react-notion-x",
+    "analyze": "cross-env ANALYZE=true next build",
+    "analyze:server": "cross-env BUNDLE_ANALYZE=server next build",
+    "analyze:browser": "cross-env BUNDLE_ANALYZE=browser next build",
+    "test": "run-p test:*",
+    "test:lint": "eslint .",
+    "test:prettier": "prettier '**/*.{js,jsx,ts,tsx}' --check"
+  },
+  "dependencies": {
+    "@keyvhq/core": "^1.6.9",
+    "@keyvhq/redis": "^1.6.10",
+    "@notionhq/client": "^3.1.3",
+    "@react-icons/all-files": "^4.1.0",
+    "@vercel/edge-config": "^1.4.0",
+    "classnames": "^2.5.1",
+    "date-fns": "^4.1.0",
+    "expiry-map": "^2.0.0",
+    "fathom-client": "^3.4.1",
+    "fontfaceobserver": "^2.3.0",
+    "framer-motion": "^12.7.3",
+    "intersection-observer": "^0.12.2",
+    "ioredis": "^5.6.1",
+    "katex": "^0.16.22",
+    "ky": "^1.7.2",
+    "lodash": "^4.17.21",
+    "lqip-modern": "^2.2.1",
+    "lru-cache": "^11.1.0",
+    "next": "^15.0.3",
+    "notion-client": "^7.4.2",
+    "notion-types": "^7.4.2",
+    "notion-utils": "^7.4.2",
+    "p-limit": "^6.2.0",
+    "p-map": "^7.0.2",
+    "p-memoize": "^7.1.1",
+    "plaiceholder": "^3.0.0",
+    "posthog-js": "^1.181.0",
+    "prismjs": "^1.30.0",
+    "react": "^18.2.0",
+    "react-body-classname": "^1.3.1",
+    "react-dom": "^18.2.0",
+    "react-notion-x": "^7.4.2",
+    "react-tweet": "^3.2.1",
+    "react-use": "^17.4.2",
+    "rss": "^1.2.2",
+    "sharp": "^0.34.2",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
+    "web-vitals": "^5.0.2",
+    "workbox-expiration": "^7.3.0",
+    "workbox-precaching": "^7.3.0",
+    "workbox-routing": "^7.3.0",
+    "workbox-strategies": "^7.3.0",
+    "workbox-webpack-plugin": "^7.3.0",
+    "workbox-window": "^7.3.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.24.0",
+    "@fisch0920/eslint-config": "^1.4.0",
+    "@next/bundle-analyzer": "^15.3.3",
+    "@next/eslint-plugin-next": "^15.3.0",
+    "@types/lodash": "^4.17.17",
+    "@types/node": "^22.8.6",
+    "@types/react": "^18.0.21",
+    "@typescript-eslint/eslint-plugin": "^8.29.1",
+    "@typescript-eslint/parser": "^8.29.1",
+    "cross-env": "^7.0.2",
+    "eslint": "^8.57.1",
+    "npm-run-all2": "^7.0.1",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3",
+    "webpack-bundle-analyzer": "^4.10.2"
+  },
+  "overrides": {
+    "cacheable-request": {
+      "keyv": "npm:@keyvhq/core@~1.6.6"
+    }
+  }
+}
 </file>
 
 </files>

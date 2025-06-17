@@ -1,0 +1,1555 @@
+This file is a merged representation of a subset of the codebase, containing specifically included files and files not matching ignore patterns, combined into a single document by Repomix.
+The content has been processed where content has been compressed (code blocks are separated by ⋮---- delimiter).
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Only files matching these patterns are included: **/pages/admin.tsx, **/pages/admin/**/*.jsx, **/components/CacheManagement.tsx, **/components/CacheManagement.module.css, **/components/Tooltip.tsx, **/hooks/useRealtimeUpdates.ts, **/pages/api/cache-*.ts, **/pages/api/test-page-list.ts, **/pages/api/debug-cache-warmup.ts, **/lib/cache.ts, **/lib/rate-limiter.ts, **/components/PageHead.tsx, **/components/Footer.tsx, **/components/styles.module.css
+- Files matching these patterns are excluded: **/node_modules/**, **/.next/**, **/dist/**, **/build/**, **/*.log, **/coverage/**, **/.git/**, **/repomix*.xml, **/*summary.md, **/temp/**, **/*.bak
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Content has been compressed - code blocks are separated by ⋮---- delimiter
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+components/
+  CacheManagement.module.css
+  CacheManagement.tsx
+  Footer.tsx
+  PageHead.tsx
+  styles.module.css
+  Tooltip.tsx
+hooks/
+  useRealtimeUpdates.ts
+lib/
+  cache.ts
+  rate-limiter.ts
+pages/
+  admin/
+    color-settings.jsx
+    font-settings.jsx
+  api/
+    cache-clear.ts
+    cache-get-pages.ts
+    cache-stats.ts
+    cache-status.ts
+    cache-warmup-fast.ts
+    cache-warmup-optimized.ts
+    cache-warmup-simple.ts
+    cache-warmup-start.ts
+    cache-warmup-status.ts
+    cache-warmup.ts
+    debug-cache-warmup.ts
+    test-page-list.ts
+  admin.tsx
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="components/Footer.tsx">
+import { FaEnvelopeOpenText } from '@react-icons/all-files/fa/FaEnvelopeOpenText'
+import { FaGithub } from '@react-icons/all-files/fa/FaGithub'
+import { FaLinkedin } from '@react-icons/all-files/fa/FaLinkedin'
+import { FaMastodon } from '@react-icons/all-files/fa/FaMastodon'
+import { FaTwitter } from '@react-icons/all-files/fa/FaTwitter'
+import { FaYoutube } from '@react-icons/all-files/fa/FaYoutube'
+import { FaZhihu } from '@react-icons/all-files/fa/FaZhihu'
+import { FaInstagram } from '@react-icons/all-files/fa/FaInstagram'
+import { FaFacebook } from '@react-icons/all-files/fa/FaFacebook'
+⋮----
+import styles from './styles.module.css'
+⋮----
+// TODO: merge the data and icons from PageSocial with the social links in Footer
+⋮----
+// サーバーとクライアントで同じ年を使用（ビルド時の年）
+⋮----
+href={`https://twitter.com/${config.twitter}`}
+⋮----
+href={`https://instagram.com/${config.instagram}`}
+⋮----
+href={`https://facebook.com/${config.facebook}`}
+⋮----
+href={`https://zhihu.com/people/${config.zhihu}`}
+⋮----
+href={`https://github.com/${config.github}`}
+⋮----
+href={`https://www.linkedin.com/in/${config.linkedin}`}
+⋮----
+href={`https://www.youtube.com/${config.youtube}`}
+</file>
+
+<file path="pages/admin/color-settings.jsx">
+// pages/admin/color-settings.jsx
+⋮----
+// 管理画面の簡易認証
+const AdminColorSettings = () => {
+const [isAuthenticated, setIsAuthenticated] = useState(false);
+const [password, setPassword] = useState('');
+const [error, setError] = useState('');
+⋮----
+useEffect(() => {
+// セッションストレージから認証状態を確認
+const auth = sessionStorage.getItem('adminAuth');
+⋮----
+setIsAuthenticated(true);
+⋮----
+const handleLogin = (e) => {
+e.preventDefault();
+⋮----
+// 環境変数からパスワードを取得（デフォルト: your_admin_password）
+⋮----
+sessionStorage.setItem('adminAuth', 'true');
+setError('');
+⋮----
+setError('パスワードが正しくありません');
+⋮----
+const handleLogout = () => {
+setIsAuthenticated(false);
+sessionStorage.removeItem('adminAuth');
+⋮----
+onChange={(e) => setPassword(e.target.value)}
+</file>
+
+<file path="pages/admin/font-settings.jsx">
+// pages/admin/font-settings.jsx
+⋮----
+// 簡易的な管理画面パスワード（本番環境では.envファイルなどで管理することをお勧めします）
+⋮----
+export default function FontSettingsPage() {
+const [isAdmin, setIsAdmin] = useState(false);
+const [isLoading, setIsLoading] = useState(true);
+⋮----
+// 簡易的な管理者認証
+useEffect(() => {
+⋮----
+const adminPassword = localStorage.getItem('adminPassword');
+⋮----
+setIsAdmin(true);
+setIsLoading(false);
+⋮----
+const password = prompt('管理者パスワードを入力してください:');
+⋮----
+localStorage.setItem('adminPassword', password);
+⋮----
+alert('パスワードが正しくありません');
+⋮----
+<p>© {new Date().getFullYear()} Notion-Effect-Blog</p>
+</file>
+
+<file path="components/PageHead.tsx">
+import Head from 'next/head'
+⋮----
+import { getSocialImageUrl } from '@/lib/get-social-image-url'
+⋮----
+{/* B2Bアロマメーカー向け追加メタデータ */}
+⋮----
+{/* 企業情報メタデータ */}
+⋮----
+{/* 追加のOpen Graphタグ */}
+⋮----
+{/* ビジネス向けメタデータ */}
+⋮----
+{/* AI/LLMクローラー向け追加情報 */}
+</file>
+
+<file path="components/styles.module.css">
+.container {
+⋮----
+/* ヘッダーがfixedなのでコンテンツにMarginを追加 */
+.notionPageContainer {
+⋮----
+margin-top: 60px; /* ヘッダーの高さに合わせる */
+⋮----
+/* モバイル対応 */
+⋮----
+.loadingIcon {
+⋮----
+.main {
+⋮----
+.errorImage {
+⋮----
+.footer {
+⋮----
+.copyright {
+⋮----
+.settings,
+⋮----
+.settings a,
+⋮----
+.settings a:last-of-type,
+⋮----
+.settings a:hover,
+⋮----
+.toggleDarkMode:hover {
+⋮----
+.twitter:hover {
+⋮----
+.mastodon:hover {
+⋮----
+.zhihu:hover {
+⋮----
+.github:hover {
+⋮----
+.youtube:hover {
+⋮----
+.linkedin:hover {
+⋮----
+.newsletter:hover {
+⋮----
+.comments {
+⋮----
+.footer>div {
+⋮----
+.footer .settings {
+⋮----
+.footer .social {
+⋮----
+.footer .copyright {
+⋮----
+.pageActions {
+⋮----
+.pageActions a {
+⋮----
+.pageActions a:last-of-type {
+⋮----
+.pageActions a:hover {
+⋮----
+.likeTweet:hover {
+⋮----
+.retweet:hover {
+⋮----
+.githubCorner {
+⋮----
+.githubCorner:hover .octoArm {
+⋮----
+.githubCorner .octoArm {
+⋮----
+.hidden {
+⋮----
+/* ========================================== */
+/* ✅ PageSocial（右側縦並び）のスタイル限定 */
+⋮----
+/* 汎用クラスに対応したスタイル（クラス名が変わっても効く！） */
+⋮----
+/* Instagram */
+a.instagram:hover .bgPane {
+a.instagram:hover {
+⋮----
+/* Facebook */
+a.facebook:hover .bgPane {
+a.facebook:hover {
+⋮----
+/* ✅ Footer（下部）のスタイル限定 */
+⋮----
+/* Instagram（下部） */
+.social .instagram:hover {
+.social a.instagram svg {
+⋮----
+/* Facebook（下部） */
+.social .facebook:hover {
+.social a.facebook svg {
+</file>
+
+<file path="components/Tooltip.tsx">
+import React, { useState } from 'react';
+import styles from './Tooltip.module.css';
+⋮----
+interface TooltipProps {
+  children: React.ReactNode;
+  content: string;
+  position?: 'top' | 'bottom' | 'left' | 'right';
+}
+⋮----
+onMouseLeave=
+</file>
+
+<file path="lib/rate-limiter.ts">
+import { NextApiRequest, NextApiResponse } from 'next';
+⋮----
+// メモリベースのレート制限（本番環境ではRedisを推奨）
+⋮----
+export interface RateLimitConfig {
+  windowMs?: number; // 時間枠（ミリ秒）
+  max?: number; // 最大リクエスト数
+  message?: string; // エラーメッセージ
+  keyGenerator?: (req: NextApiRequest) => string; // キー生成関数
+}
+⋮----
+windowMs?: number; // 時間枠（ミリ秒）
+max?: number; // 最大リクエスト数
+message?: string; // エラーメッセージ
+keyGenerator?: (req: NextApiRequest) => string; // キー生成関数
+⋮----
+// デフォルト設定
+⋮----
+windowMs: 15 * 60 * 1000, // 15分
+max: 100, // 100リクエスト
+⋮----
+// IPアドレスまたは認証トークンをキーとして使用
+⋮----
+// レート制限ミドルウェア
+export function rateLimit(config: RateLimitConfig =
+⋮----
+// 現在のリクエスト情報を取得
+⋮----
+// 期限切れの場合はリセット
+⋮----
+// リクエスト数を増加
+⋮----
+// レート制限ヘッダーを設定
+⋮----
+// 制限を超えた場合
+⋮----
+// 次の処理へ
+⋮----
+// 特定のキーのカウントをリセット
+export function resetRateLimit(key: string): void
+⋮----
+// すべてのカウントをクリア
+export function clearAllRateLimits(): void
+⋮----
+// 定期的なクリーンアップ（メモリリーク防止）
+⋮----
+if (now > info.resetTime + 60000) { // 1分後に削除
+⋮----
+}, 60000); // 1分ごとに実行
+⋮----
+// プリセット設定
+⋮----
+// 厳しい制限（認証なしのエンドポイント用）
+⋮----
+windowMs: 15 * 60 * 1000, // 15分
+max: 10, // 10リクエスト
+⋮----
+// 通常の制限
+⋮----
+windowMs: 15 * 60 * 1000, // 15分
+max: 100, // 100リクエスト
+⋮----
+// 緩い制限（認証済みユーザー用）
+⋮----
+windowMs: 15 * 60 * 1000, // 15分
+max: 1000, // 1000リクエスト
+⋮----
+// Webhook用（頻繁な更新を想定）
+⋮----
+windowMs: 1 * 60 * 1000, // 1分
+max: 60, // 60リクエスト（1秒に1回）
+</file>
+
+<file path="pages/api/cache-warmup-fast.ts">
+import { NextApiRequest, NextApiResponse } from 'next';
+import { getFromCache } from '@/lib/cache';
+import { normalizePageId, isValidPageId } from '@/lib/normalize-page-id';
+⋮----
+// ジョブ管理（メモリ内）
+⋮----
+export default async function handler(req: NextApiRequest, res: NextApiResponse)
+⋮----
+// 認証チェック
+⋮----
+// ジョブ情報を記録
+⋮----
+// 非同期処理を開始（待たない）
+⋮----
+// 即座にレスポンス
+⋮----
+// 最適化されたウォームアップ処理
+async function processWarmupOptimized(jobId: string, pageIds: string[])
+⋮----
+// 設定
+const CONCURRENT_REQUESTS = 10;  // 同時実行数
+const REQUEST_TIMEOUT = 15000;   // 15秒タイムアウト
+⋮----
+// ページIDをチャンクに分割
+⋮----
+// 各チャンクを処理
+⋮----
+// チャンク内のページを並列処理
+⋮----
+// 結果を集計
+⋮----
+// 進捗ログ
+⋮----
+// 古いジョブをクリーンアップ
+⋮----
+// 個別ページの最適化処理
+async function processPageOptimized(
+  pageId: string, 
+  timeout: number
+): Promise<
+⋮----
+// ページIDを正規化
+⋮----
+// まずキャッシュを確認
+⋮----
+// キャッシュがない場合のみリクエスト
+⋮----
+'x-cache-control': 'max-age=7200' // 2時間キャッシュ
+⋮----
+// Not Modified = キャッシュ済み
+⋮----
+// 古いジョブのクリーンアップ
+function cleanupOldJobs()
+⋮----
+// ジョブステータス取得（エクスポート）
+export function getJobStatus(jobId: string)
+</file>
+
+<file path="pages/api/cache-warmup-optimized.ts">
+import { NextApiRequest, NextApiResponse } from 'next';
+import { getAllPageIds } from '@/lib/get-all-pages';
+⋮----
+// 処理状態の管理
+⋮----
+export default async function handler(req: NextApiRequest, res: NextApiResponse)
+⋮----
+// 認証チェック
+⋮----
+// 既に処理中の場合は拒否
+⋮----
+// 重複を除外したページリストを取得
+⋮----
+// 処理開始
+⋮----
+// 非同期で処理開始
+⋮----
+// 即座にレスポンス
+⋮----
+// 最適化されたバッチ処理
+async function processWarmupBatch(pageIds: string[])
+⋮----
+const CONCURRENT_LIMIT = 5;  // 同時実行数を減らして安定性重視
+const CHUNK_SIZE = 10;       // チャンクサイズ
+⋮----
+// チャンク分割
+⋮----
+// 各チャンクを順次処理
+⋮----
+// チャンク内で並列処理（制限付き）
+⋮----
+// 進捗ログ
+⋮----
+// 少し待機（サーバー負荷軽減）
+⋮----
+// バッチ処理
+async function processBatch(pageIds: string[])
+⋮----
+// 個別ページのウォームアップ
+async function warmupPage(pageId: string): Promise<
+⋮----
+const timeout = setTimeout(() => controller.abort(), 10000); // 10秒タイムアウト
+⋮----
+skipDuplicateCheck: true  // 重複チェックをスキップ
+⋮----
+// 304 = キャッシュ済み
+⋮----
+// 重複エラーは警告として処理を継続
+⋮----
+// エラーメッセージから重複エラーを検出
+⋮----
+// ステータス取得（エクスポート）
+export function getWarmupStatus()
+⋮----
+recentErrors: processingStatus.errors.slice(-5) // 最新5件のエラー
+</file>
+
+<file path="pages/api/cache-warmup-start.ts">
+import { NextApiRequest, NextApiResponse } from 'next';
+import { getPage } from '@/lib/notion';
+import { normalizePageId, isValidPageId } from '@/lib/normalize-page-id';
+⋮----
+// 処理ジョブの管理（メモリ内）
+⋮----
+// ジョブIDの生成（簡易版）
+function generateJobId(): string
+⋮----
+export default async function handler(req: NextApiRequest, res: NextApiResponse)
+⋮----
+// 認証チェック
+⋮----
+// ジョブIDを生成
+⋮----
+// ジョブ情報を保存
+⋮----
+// バックグラウンド処理を開始（非同期）
+⋮----
+// 即座にレスポンスを返す
+⋮----
+// バックグラウンド処理
+async function processWarmupAsync(jobId: string, pageIds: string[])
+⋮----
+const BATCH_DELAY = 5000; // 5秒
+⋮----
+// バッチ処理
+⋮----
+// 結果を集計
+⋮----
+error: error.substring(0, 200) // エラーメッセージを制限
+⋮----
+// 次のバッチまで待機
+⋮----
+// 古いジョブをクリーンアップ（1時間以上前のもの）
+⋮----
+async function processWarmupBatch(pageIds: string[]): Promise<any[]>
+⋮----
+// ページIDを正規化
+⋮----
+// getPageを直接呼び出してキャッシュに保存
+</file>
+
+<file path="pages/api/cache-clear.ts">
+import { NextApiRequest, NextApiResponse } from 'next';
+import cache from '@/lib/cache';
+import { rateLimit, rateLimitPresets } from '@/lib/rate-limiter';
+import { clearSiteMapCache } from '@/lib/get-site-map';
+import { clearNavigationCache } from '@/lib/notion';
+⋮----
+// レート制限を適用
+⋮----
+export default async function handler(req: NextApiRequest, res: NextApiResponse)
+⋮----
+// 簡易的な認証（本番環境では適切な認証を実装）
+⋮----
+// レート制限チェック（認証後）
+⋮----
+return; // レート制限でブロックされた
+⋮----
+// Get cache stats before clearing
+⋮----
+clearSiteMapCache(); // Clear pMemoize cache
+clearNavigationCache(); // Clear navigation cache
+⋮----
+// 全キャッシュクリア
+⋮----
+clearSiteMapCache(); // Clear pMemoize cache
+clearNavigationCache(); // Clear navigation cache
+⋮----
+// Get cache stats after clearing
+⋮----
+// Log the difference
+⋮----
+// Revalidate pages if clearing all or notion cache
+⋮----
+// Revalidate common pages
+⋮----
+// Get all page IDs from sitemap if available
+⋮----
+// Revalidate each path
+⋮----
+// Don't fail the whole request if revalidation fails
+⋮----
+// Service Workerのキャッシュもクリア（クライアントサイドで実行）
+</file>
+
+<file path="pages/api/cache-stats.ts">
+import { NextApiRequest, NextApiResponse } from 'next';
+import { getCacheStats } from '@/lib/cache-memory-only';
+⋮----
+export default async function handler(req: NextApiRequest, res: NextApiResponse)
+⋮----
+// メモリキャッシュの統計のみ返す
+</file>
+
+<file path="pages/api/cache-status.ts">
+import { NextApiRequest, NextApiResponse } from 'next';
+⋮----
+// メモリ内でキャッシュ処理の状態を保持
+⋮----
+// ステータスを更新する関数（cache-warmup.tsから呼び出される）
+export function updateCacheStatus(update: Partial<typeof cacheProcessingStatus>)
+⋮----
+// エラーリストは最新の50件のみ保持
+⋮----
+// ステータスをリセットする関数
+export function resetCacheStatus()
+⋮----
+// APIハンドラー
+export default async function handler(req: NextApiRequest, res: NextApiResponse)
+⋮----
+// 進捗率を計算
+⋮----
+// 経過時間を計算
+⋮----
+// 推定残り時間を計算
+⋮----
+// エラーの概要を追加
+</file>
+
+<file path="hooks/useRealtimeUpdates.ts">
+import { useCallback, useState } from 'react';
+import { useRouter } from 'next/router';
+⋮----
+// WebSocketを使わないシンプルなバージョン
+interface RealtimeUpdateOptions {
+  pageId?: string;
+  onUpdate?: (data: any) => void;
+  autoRefresh?: boolean;
+}
+⋮----
+export function useRealtimeUpdates(options: RealtimeUpdateOptions =
+⋮----
+const [isConnected, setIsConnected] = useState(false); // 常にfalse（WebSocketなし）
+⋮----
+// 手動リフレッシュ
+⋮----
+// キャッシュクリア
+⋮----
+// 少し待ってからリロード
+⋮----
+// デバッグ情報の取得（WebSocketなしバージョン）
+</file>
+
+<file path="pages/api/cache-warmup-status.ts">
+import { NextApiRequest, NextApiResponse } from 'next';
+import { warmupJobs } from './cache-warmup-start';
+import { getJobStatus as getFastJobStatus } from './cache-warmup-fast';
+import { getWarmupStatus as getOptimizedStatus } from './cache-warmup-optimized';
+⋮----
+export default async function handler(req: NextApiRequest, res: NextApiResponse)
+⋮----
+// 最適化版のステータスを確認（jobIdがない場合）
+⋮----
+// 高速ジョブを確認
+⋮----
+// 既存のジョブを確認
+⋮----
+// 進捗率の計算
+⋮----
+// 経過時間
+⋮----
+// 推定残り時間
+⋮----
+// 成功率
+⋮----
+errors: job.errors.slice(-10), // 最新の10件のエラー
+</file>
+
+<file path="pages/api/debug-cache-warmup.ts">
+import { NextApiRequest, NextApiResponse } from 'next';
+import { getSiteMap } from '@/lib/get-site-map';
+import { getPage } from '@/lib/notion';
+import { normalizePageId, isValidPageId } from '@/lib/normalize-page-id';
+⋮----
+export default async function handler(req: NextApiRequest, res: NextApiResponse)
+⋮----
+// 認証チェック
+⋮----
+// 少数のページでテスト
+⋮----
+// ページIDを正規化
+⋮----
+// 失敗パターンの分析
+</file>
+
+<file path="pages/admin.tsx">
+import { useRouter } from 'next/router';
+import { CacheManagement } from '@/components/CacheManagement';
+import { PageHead } from '@/components/PageHead';
+import { Footer } from '@/components/Footer';
+import styles from '@/components/styles.module.css';
+⋮----
+// セッションストレージから認証状態を確認
+⋮----
+const handleLogin = (e: React.FormEvent) =>
+⋮----
+// 簡易的なパスワード認証（本番環境では適切な認証システムを使用）
+⋮----
+const handleLogout = () =>
+⋮----
+// ヘルプセクションのコンポーネント
+⋮----
+{/* 基本的な使い方 */}
+⋮----
+{/* いつ使うか */}
+⋮----
+{/* 処理時間の目安 */}
+⋮----
+{/* 今後追加予定の機能 */}
+⋮----
+{/* デバッグツール */}
+⋮----
+{/* 注意事項 */}
+⋮----
+{/* ヘルプセクションの表示 */}
+</file>
+
+<file path="lib/cache.ts">
+import Redis from 'ioredis';
+import { LRUCache } from 'lru-cache';
+import { NotionAPI } from 'notion-client';
+⋮----
+// キャッシュレイヤーの優先順位:
+// 1. インメモリ (LRU) - 最速
+// 2. Redis - 分散対応
+// 3. ブラウザキャッシュ - Service Worker
+// 4. CDNキャッシュ - エッジ
+⋮----
+// インメモリキャッシュの設定
+⋮----
+max: 100, // 最大100エントリ
+ttl: 1000 * 60 * 5, // 5分
+⋮----
+// Redisクライアントの初期化
+⋮----
+// Redis接続を試みる（ただしエラーでもアプリは動作継続）
+function initializeRedis()
+⋮----
+enableOfflineQueue: true, // オフラインキューを有効化
+lazyConnect: false, // 即座に接続を試みる
+connectTimeout: 30000, // 30秒のタイムアウト
+family: 4, // IPv4を強制（DNS解決の問題対策）
+⋮----
+// Redis初期化
+⋮----
+// キャッシュキー生成
+export function generateCacheKey(prefix: string, params: Record<string, any>): string
+⋮----
+// マルチレイヤーキャッシュの取得
+export async function getFromCache<T>(key: string): Promise<T | null>
+⋮----
+// 1. メモリキャッシュから取得
+⋮----
+// 2. Redisから取得（接続されている場合のみ）
+⋮----
+// メモリキャッシュにも保存
+⋮----
+// エラー時は続行（メモリキャッシュにフォールバック）
+⋮----
+// マルチレイヤーキャッシュへの保存
+export async function setToCache<T>(
+  key: string, 
+  value: T, 
+  ttlSeconds: number = 3600
+): Promise<void>
+⋮----
+// 1. メモリキャッシュに保存（常に実行）
+⋮----
+// 2. Redisに保存（接続されている場合のみ）
+⋮----
+// エラー時は続行（メモリキャッシュは成功しているので）
+⋮----
+// キャッシュの無効化
+export async function invalidateCache(pattern: string): Promise<void>
+⋮----
+// 1. メモリキャッシュのクリア
+⋮----
+// 2. Redisのクリア
+⋮----
+// 接続されていない場合は接続
+⋮----
+// Notion APIのキャッシュラッパー
+export class CachedNotionAPI
+⋮----
+constructor(config?:
+⋮----
+this.defaultTTL = config?.defaultTTL || 3600; // デフォルト1時間
+⋮----
+async getPage(pageId: string, options?: any)
+⋮----
+// キャッシュから取得
+⋮----
+// APIから取得
+⋮----
+// キャッシュに保存
+⋮----
+async getBlocks(blockIds: string[])
+⋮----
+async getSignedFileUrls(urls: any[])
+⋮----
+// 署名付きURLは短めのTTL
+await setToCache(cacheKey, result, 300); // 5分
+⋮----
+async search(params: any)
+⋮----
+// 検索結果は短めのTTL
+await setToCache(cacheKey, result, 600); // 10分
+⋮----
+// キャッシュ統計情報
+export async function getCacheStats()
+⋮----
+// メモリ使用量を解析
+⋮----
+// キャッシュのウォームアップ
+export async function warmupCache(pageIds: string[])
+⋮----
+// クリーンアップ処理
+export async function cleanupCache()
+⋮----
+// メモリキャッシュの状態を確認
+⋮----
+// メモリキャッシュのクリア
+⋮----
+// Redisキャッシュのクリア（接続は維持）
+⋮----
+// 接続後にクリアを試みる
+⋮----
+// Redisエラーは無視して続行
+⋮----
+// 複数のキャッシュキーを一度に確認
+export async function checkCacheExists(keys: string[]): Promise<Map<string, boolean>>
+⋮----
+// キャッシュ統計の取得
+export function getCacheStatistics()
+⋮----
+// メモリキャッシュの全エントリを確認
+⋮----
+// JSON変換エラーは無視
+⋮----
+// エクスポート
+</file>
+
+<file path="pages/api/test-page-list.ts">
+import { NextApiRequest, NextApiResponse } from 'next';
+import { getAllPageIds } from '@/lib/get-all-pages';
+import { getSiteMap } from '@/lib/get-site-map';
+⋮----
+export default async function handler(req: NextApiRequest, res: NextApiResponse)
+⋮----
+// 環境変数チェック
+⋮----
+// サイトマップから取得を試みる
+⋮----
+// getAllPageIdsから取得を試みる
+⋮----
+// 全ページの詳細情報を取得
+⋮----
+// canonicalPageMapの構造: { [url/slug]: pageId }
+⋮----
+// pageIdが実際のNotionページID
+⋮----
+// タイトルの取得（複数の方法を試す）
+⋮----
+// デバッグ: ページブロック全体を確認
+⋮----
+// 方法1: properties.titleから取得
+⋮----
+// 方法2: propertiesの他のフィールドをチェック
+⋮----
+// プロパティの値を正しく取得
+⋮----
+// 方法3: ページブロック自体の他のフィールドを確認
+⋮----
+// format_pageからタイトルを取得
+⋮----
+// ページブロックのcontentから最初のテキストを取得
+⋮----
+// 2. コレクションの場合のタイトル取得
+⋮----
+// 3. URLスラッグから推測（最終手段）
+⋮----
+// URLをタイトルとして使用（キャメルケースやハイフンを変換）
+⋮----
+.replace(/^\//, '') // 先頭のスラッシュを削除
+.replace(/-/g, ' ') // ハイフンをスペースに
+.replace(/([a-z])([A-Z])/g, '$1 $2') // camelCaseをスペース区切りに
+⋮----
+// 最終的なページデータを作成
+⋮----
+id: notionPageId,           // 正しいNotionページID
+title: title,               // 取得したタイトル
+url: urlOrSlug,            // URL/スラッグ
+slug: urlOrSlug,           // 明確にするため追加
+⋮----
+// 検証: IDがUUID形式であることを確認
+⋮----
+// タイトルでソート（Untitledは最後に）
+⋮----
+// デバッグ情報をレスポンス
+</file>
+
+<file path="pages/api/cache-get-pages.ts">
+import { NextApiRequest, NextApiResponse } from 'next';
+import { getSiteMap } from '@/lib/get-site-map';
+import { normalizePageId, isValidPageId } from '@/lib/normalize-page-id';
+import { ALL_PAGE_IDS } from '@/lib/all-page-ids';
+⋮----
+export default async function handler(req: NextApiRequest, res: NextApiResponse)
+⋮----
+// canonicalPageMapからページIDを取得
+// canonicalPageMapは { [slug]: pageId } の形式なので、valuesを取得
+⋮----
+// スラッグではなく実際のページIDを取得
+⋮----
+// ハイフン付き・なし両方に対応し、一貫性のため正規化
+⋮----
+// ページIDが少ない場合は、完全なリストを使用
+⋮----
+// 完全なページリストから正規化して追加
+⋮----
+// 既存のページIDとマージ（重複を避ける）
+⋮----
+// ルートページIDを必ず含める（正規化して追加）
+⋮----
+// シンプルに：すべてのページを平等に扱う
+// 重複を削除してすべてのページを返す
+⋮----
+const selectedPageIds = uniquePageIds; // すべてのページを返す
+</file>
+
+<file path="components/CacheManagement.module.css">
+.container {
+⋮----
+/* プログレス表示 */
+.progressContainer {
+⋮----
+.progressHeader {
+⋮----
+.progressPhase {
+⋮----
+.progressNumbers {
+⋮----
+.progressBar {
+⋮----
+.progressFill {
+⋮----
+.progressFill::after {
+⋮----
+.progressStats {
+⋮----
+.progressSuccess {
+⋮----
+.progressFailed {
+⋮----
+.pageTitle {
+⋮----
+/* 説明セクション */
+.introSection {
+⋮----
+.introCard {
+⋮----
+.introCard h3 {
+⋮----
+.introCard p {
+⋮----
+.introCard strong {
+⋮----
+/* ステータスバー */
+.statusBar {
+⋮----
+.statusLeft {
+⋮----
+.statusIndicator {
+⋮----
+.indicatorGreen,
+⋮----
+.indicatorGreen {
+⋮----
+.indicatorRed {
+⋮----
+.statusRight {
+⋮----
+.lastUpdate {
+⋮----
+/* キャッシュ統計 */
+.statsContainer {
+⋮----
+.sectionTitle {
+⋮----
+.statsGrid {
+⋮----
+.statCard {
+⋮----
+.statHeader {
+⋮----
+.statIcon {
+⋮----
+.statHeader h4 {
+⋮----
+.statDetails {
+⋮----
+.statRow {
+⋮----
+.statRow span {
+⋮----
+.statRow strong {
+⋮----
+.hitRate {
+⋮----
+.connected {
+⋮----
+/* メイン操作セクション */
+.mainActionSection {
+⋮----
+.mainActionTitle {
+⋮----
+.mainActionCard {
+⋮----
+.mainActionButtons {
+⋮----
+.mainActionButton {
+⋮----
+.mainActionButton.autoButton {
+⋮----
+.mainActionButton:hover:not(:disabled) {
+⋮----
+.mainActionButton.autoButton:hover:not(:disabled) {
+⋮----
+.mainActionButton:disabled {
+⋮----
+.mainActionIcon {
+⋮----
+.mainActionContent {
+⋮----
+.mainActionName {
+⋮----
+.mainActionDescription {
+⋮----
+.mainActionExplain {
+⋮----
+.mainActionExplain h4 {
+⋮----
+.mainActionExplain ul {
+⋮----
+.mainActionExplain li {
+⋮----
+/* 詳細操作セクション */
+.advancedSection {
+⋮----
+.advancedSummary {
+⋮----
+.advancedSummary:hover {
+⋮----
+.chevron {
+⋮----
+details[open] .chevron {
+⋮----
+.advancedContent {
+⋮----
+.advancedGrid {
+⋮----
+.advancedCard {
+⋮----
+.button {
+⋮----
+.button:hover:not(:disabled) {
+⋮----
+.button:disabled {
+⋮----
+.warmupButton:hover:not(:disabled) {
+⋮----
+.dangerButton:hover:not(:disabled) {
+⋮----
+.buttonIcon {
+⋮----
+.buttonDescription {
+⋮----
+/* メッセージ表示 */
+.message {
+⋮----
+.successMessage {
+⋮----
+.errorMessage {
+⋮----
+.infoMessage {
+⋮----
+/* API設定セクション */
+.apiSection {
+⋮----
+.apiSummary {
+⋮----
+.apiSummary:hover {
+⋮----
+.apiContent {
+⋮----
+.codeBlock {
+⋮----
+.codeBlock:last-child {
+⋮----
+.codeHeader {
+⋮----
+.code {
+</file>
+
+<file path="pages/api/cache-warmup-simple.ts">
+import { NextApiRequest, NextApiResponse } from 'next'
+import { getAllPageIds } from '@/lib/get-all-pages'
+import { getSiteMap } from '@/lib/get-site-map'
+⋮----
+// グローバルな処理状態
+interface WarmupState {
+  isProcessing: boolean
+  startTime: number
+  total: number
+  processed: number
+  succeeded: number
+  failed: number
+  skipped: number
+  errors: string[]
+  lastUpdate: number
+  currentBatch: number
+  pageIds: string[]
+}
+⋮----
+// Vercelの関数タイムアウト設定
+⋮----
+// 最大実行時間を60秒に設定
+⋮----
+export default async function handler(req: NextApiRequest, res: NextApiResponse)
+⋮----
+// CORS対応
+⋮----
+// バッチ処理を実行
+⋮----
+// ウォームアップ開始
+⋮----
+// ステータス取得
+⋮----
+// ウォームアップ開始（ページリストの準備のみ）
+async function startWarmup(req: NextApiRequest, res: NextApiResponse)
+⋮----
+// 認証チェック（オプション）
+⋮----
+// 既に処理中の場合
+⋮----
+// ページリスト取得
+⋮----
+// 方法1: サイトマップから取得
+⋮----
+// 方法2: getAllPageIdsから取得
+⋮----
+// 方法3: 最低限ルートページだけでも
+⋮----
+// ページが見つからない場合
+⋮----
+// 状態を初期化
+⋮----
+// バッチ処理（管理画面から定期的に呼ばれる）
+async function processBatch(req: NextApiRequest, res: NextApiResponse)
+⋮----
+const BATCH_SIZE = 3 // Vercelのタイムアウトを考慮して小さめに
+⋮----
+// 処理完了
+⋮----
+// バッチ内のページを処理
+⋮----
+// 結果を集計
+⋮----
+// 次のバッチへ
+⋮----
+// ステータス取得
+async function getStatus(req: NextApiRequest, res: NextApiResponse)
+⋮----
+pageIds: undefined // ページIDリストは返さない（大きすぎるため）
+⋮----
+// 単一ページの処理
+async function warmupSinglePage(
+  pageId: string, 
+  retriesLeft: number = 2
+): Promise<
+⋮----
+// タイムアウト設定
+⋮----
+// ページのURLを直接アクセスしてキャッシュウォームアップ
+⋮----
+'x-skip-redis': 'true'  // Redisをスキップ
+⋮----
+// キャッシュヒット
+⋮----
+// 成功
+⋮----
+// HTMLレスポンスなのでJSONパースは不要
+⋮----
+// 重複エラーは成功として扱う
+⋮----
+// その他のエラー
+⋮----
+// リトライ可能な場合
+⋮----
+// タイムアウトや接続エラー
+</file>
+
+<file path="pages/api/cache-warmup.ts">
+import { NextApiRequest, NextApiResponse } from 'next';
+import { getSiteMap } from '@/lib/get-site-map';
+import { getPage } from '@/lib/notion';
+import { normalizePageId, isValidPageId } from '@/lib/normalize-page-id';
+import { updateCacheStatus, resetCacheStatus } from './cache-status';
+⋮----
+// タイムアウト付きでPromiseを実行
+async function withTimeout<T>(
+  promise: Promise<T>,
+  timeoutMs: number,
+  timeoutError: string = 'Operation timed out'
+): Promise<T>
+⋮----
+export default async function handler(req: NextApiRequest, res: NextApiResponse)
+⋮----
+// 認証チェック
+⋮----
+// Vercelのserverlessファンクションタイムアウト対策
+// vercel.jsonで60秒に設定済み
+const maxExecutionTime = 55000; // 55秒（安全マージン）
+⋮----
+// Redis接続状態を確認
+⋮----
+// ステータスをリセット
+⋮----
+// Check if specific page IDs were provided
+⋮----
+// Check if we should skip getSiteMap (e.g., right after cache clear)
+// Fixed: Only skip if explicitly requested OR if we have provided page IDs
+⋮----
+// 主要ページのIDを取得
+⋮----
+// デバッグ情報
+⋮----
+// canonicalPageMapからページIDを取得（values側が実際のページID）
+⋮----
+// シンプルにすべてのページを取得
+pageIds = allPageIds; // すべてのページをウォームアップ
+⋮----
+// Only use fallback if we don't have any page IDs
+⋮----
+// ページIDが取得できない場合は、重要なページIDを使用
+⋮----
+// フォールバック: 環境変数から取得
+⋮----
+pageIds = envPageIds; // すべての環境変数ページIDを使用
+⋮----
+// バッチ処理の設定（Redis接続状態に応じて調整）
+const BATCH_SIZE = isRedisAvailable ? 5 : 3; // Redis不在時は小さめのバッチ
+const DELAY_BETWEEN_BATCHES = isRedisAvailable ? 15000 : 20000; // Redis不在時は長めの遅延
+const RETRY_COUNT = isRedisAvailable ? 3 : 2; // Redis不在時はリトライを減らす
+const RETRY_DELAY = 3000; // リトライ前の待機時間（3秒）
+const PAGE_TIMEOUT = 45000; // ページ取得のタイムアウト（45秒）
+// 処理ページ数の制限を削除（すべてのページを処理）
+⋮----
+// ページIDの重複をチェック
+⋮----
+// 重複を除去
+⋮----
+// リトライ機能付きのページ取得
+async function fetchPageWithRetry(pageIdOrSlug: string, retries = RETRY_COUNT): Promise<any>
+⋮----
+// ページIDを正規化してから使用（スコープをループの外に移動）
+⋮----
+// タイムアウト付きでページを取得
+⋮----
+// レート制限エラーの場合は長めに待つ
+⋮----
+// 指数バックオフ（より長い待機時間）
+⋮----
+// 詳細なエラー情報をログ出力
+⋮----
+// バッチ処理でページを読み込み
+⋮----
+// 初期ステータスを設定
+⋮----
+// バッチ内の並列処理
+⋮----
+// バッチ結果の詳細ログ
+⋮----
+// 個別ページの結果をログ出力
+⋮----
+// 進捗ログ
+⋮----
+// ステータスを更新
+⋮----
+// 新しいエラーを追加
+⋮----
+// 最後のバッチでない場合は待機
+⋮----
+// Vercelタイムアウト対策：50秒経過したら終了
+⋮----
+// 失敗したページの詳細を取得
+⋮----
+// 成功したページのIDをログ出力
+⋮----
+// 失敗の種類を分析（より詳細に）
+⋮----
+// 詳細なエラーログを出力
+⋮----
+// 失敗ページの詳細（最初の10件のみ表示）
+⋮----
+// 429エラーのページを特別に表示
+⋮----
+// 最終結果のサマリー
+⋮----
+// 推奨事項
+⋮----
+// 元のページ数と制限後のページ数を記録
+⋮----
+// 最終ステータスを更新
+⋮----
+pageIds: pageIds.slice(0, 5), // デバッグ用：最初の5ページIDを返す
+⋮----
+failedDetails: failedDetails.slice(0, 10), // 最初の10個の失敗詳細
+⋮----
+// タイマーをクリア
+</file>
+
+<file path="components/CacheManagement.tsx">
+import React, { useState, useEffect } from 'react';
+import { useRealtimeUpdates } from '@/hooks/useRealtimeUpdates';
+import { Tooltip } from './Tooltip';
+import styles from './CacheManagement.module.css';
+⋮----
+interface CacheStats {
+  memory: {
+    size: number;
+    calculatedSize: number;
+    hits: number;
+    misses: number;
+  };
+  redis: {
+    connected: boolean;
+    keyCount: number;
+    memoryUsage: number;
+  };
+}
+⋮----
+interface WarmupProgress {
+  current: number;
+  total: number;
+  succeeded: number;
+  failed: number;
+  phase: 'preparing' | 'clearing' | 'warming' | 'complete';
+}
+⋮----
+interface CacheProcessingStatus {
+  isProcessing: boolean;
+  total: number;
+  processed: number;
+  succeeded: number;
+  failed: number;
+  currentBatch: number;
+  totalBatches: number;
+  progress: number;
+  elapsedTime: number;
+  estimatedRemainingTime: number;
+  errorSummary: Record<string, number>;
+}
+⋮----
+interface WarmupJob {
+  jobId: string;
+  status: string;
+  progress: number;
+  successRate?: number;
+  total: number;
+  processed: number;
+  succeeded: number;
+  failed: number;
+  skipped?: number;
+  currentBatch?: number;
+  totalBatches?: number;
+  elapsedSeconds: number;
+  estimatedSecondsRemaining?: number | null;
+  errors?: Array<{ pageId: string; error: string }>;
+  errorSummary?: Record<string, number>;
+  isComplete?: boolean;
+  isFastJob?: boolean;
+}
+⋮----
+// デバッグ用のログ
+⋮----
+// キャッシュ統計を取得
+const fetchStats = async () =>
+⋮----
+// キャッシュ処理ステータスを取得
+const fetchProcessingStatus = async () =>
+⋮----
+// 処理が完了したらポーリングを停止
+⋮----
+// ポーリングを開始
+const startStatusPolling = () =>
+⋮----
+// 即座に最初の取得
+⋮----
+// 2秒ごとにステータスを取得
+⋮----
+// ジョブステータスのポーリング（レガシーコード - 新しいAPIでは使用しない）
+⋮----
+// warmupJobは使用しないため、このuseEffectは実質無効
+⋮----
+// 以下のコードは実行されない（warmupJobが設定されないため）
+⋮----
+// 30秒ごとに統計を更新
+⋮----
+// ローカルストレージから履歴を読み込む
+⋮----
+// ステータスポーリングもクリーンアップ
+⋮----
+// ウォームアップ結果の保存
+const saveWarmupResult = (state: any) =>
+⋮----
+const newHistory = [result, ...warmupHistory].slice(0, 5); // 最新5件を保持
+⋮----
+// ローカルストレージに保存
+⋮----
+// トークン取得のヘルパー関数
+const getAuthToken = () =>
+⋮----
+// キャッシュクリア（タイプ別）
+const handleClearCache = async (type: string) =>
+⋮----
+// Log cache stats if available
+⋮----
+// Also clear Service Worker cache if clearing all
+⋮----
+// Also clear browser caches
+⋮----
+// 統計を更新
+⋮----
+// 自動段階処理のための状態（上部で定義済み）
+⋮----
+// キャッシュクリアとウォームアップを一連の流れで実行
+const handleClearAndWarmup = async () =>
+⋮----
+setWarmupJob(null);  // 既存のジョブをクリア
+⋮----
+// 1. まず現在のページリストを取得（キャッシュがある間に）
+⋮----
+// 2. キャッシュをクリア
+⋮----
+// 3. 少し待つ
+⋮----
+// 4. シンプルウォームアップを開始
+⋮----
+// ポーリング開始
+⋮----
+// loadingはジョブ完了時にuseEffectでfalseに設定される
+⋮----
+// シンプルなウォームアップ（重複除外・安定版）
+const handleOptimizedWarmup = async () =>
+⋮----
+// シンプルウォームアップを開始
+⋮----
+// 既に処理中
+⋮----
+// バッチ処理を開始
+⋮----
+// バッチ処理（新しい関数）
+const startBatchProcessing = () =>
+⋮----
+// バッチ処理を実行
+⋮----
+// ステータス更新
+⋮----
+// 完了チェック
+⋮----
+// 履歴を保存
+⋮----
+// エラーがあれば表示
+⋮----
+retryCount = 0; // 成功したらリトライカウントをリセット
+⋮----
+}, 2000); // 2秒ごとにバッチ処理
+⋮----
+// シンプルウォームアップ用のポーリング処理
+const startSimplePolling = () =>
+⋮----
+const maxPolls = 600; // 最大10分
+⋮----
+// ステータス取得（GETメソッド）
+⋮----
+// warmupJob形式に変換
+⋮----
+// 完了チェック
+⋮----
+// 完了メッセージ
+⋮----
+// エラーがあれば表示
+⋮----
+}, 1000); // 1秒ごと
+⋮----
+// キャッシュウォームアップ
+const handleWarmupCache = async () =>
+⋮----
+// まず現在のページリストを取得
+⋮----
+// キャッシュウォームアップを実行
+⋮----
+// 特定のパターンでキャッシュクリア
+const handleClearPattern = async () =>
+⋮----
+// 自動全ページウォームアップ
+const handleAutoWarmup = async () =>
+⋮----
+// まず現在のページリストを取得
+⋮----
+// 全ページを段階的に処理
+⋮----
+// 次のバッチまで待機（最後のバッチ以外）
+⋮----
+// 統計を更新
+⋮----
+// ページリストテスト機能
+const handleTestPageList = async () =>
+⋮----
+// デバッグ: 最初のページのデータを確認
+⋮----
+// デバッグ用のウォームアップテスト
+const handleDebugWarmup = async () =>
+⋮----
+// まず現在のページリストを取得
+⋮----
+pageIds: pageIds.slice(0, 5) // 最初の5ページをテスト
+⋮----
+{/* わかりやすい説明 */}
+⋮----
+{/* ステータスバー */}
+⋮----
+{/* キャッシュ統計 */}
+⋮----
+{/* メイン操作 */}
+⋮----
+{/* 詳細操作（通常は使わない） */}
+⋮----
+{/* デバッグツールセクション */}
+⋮----
+{/* 検索機能 */}
+⋮----
+onChange=
+⋮----
+{/* ページリスト */}
+⋮----
+// デバッグ: 最初の3件のページデータを表示
+⋮----
+{/* エクスポート機能 */}
+⋮----
+// BOMを追加（Excelで日本語を正しく表示するため）
+⋮----
+{/* エクスポート形式の説明 */}
+⋮----
+{/* プログレス表示 */}
+⋮----
+{/* API設定（開発者向け） */}
+⋮----
+{/* ウォームアップ履歴 */}
+</file>
+
+</files>
