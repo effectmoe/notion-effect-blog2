@@ -20,21 +20,9 @@
     "**/pages/index.tsx",
     "**/pages/_app.tsx",
     "**/pages/[pageId].tsx",
-    "**/pages/admin.tsx",
-    "**/pages/admin/**/*.jsx",
     "**/components/NotionPage.tsx",
     "**/components/Header.tsx",
-    "**/components/Footer.tsx",
-    "**/components/CacheManagement.tsx",
-    "**/components/FontSettingsPanel.jsx",
-    "**/components/ColorSettingsPanel.jsx",
-    "**/components/FontStyler.jsx",
-    "**/components/ColorStyler.jsx",
-    "**/hooks/useRealtimeUpdates.ts",
-    "**/pages/api/cache-*.ts",
-    "**/lib/cache.ts",
-    "**/lib/font-customizer/index.js",
-    "**/lib/color-settings.js"
+    "**/components/Footer.tsx"
   ],
   "ignore": {
     "customPatterns": [
