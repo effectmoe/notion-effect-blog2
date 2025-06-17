@@ -6,6 +6,8 @@
 
 # Next.js Notion Starter Kit
 
+Last updated: 2025-06-17
+
 > The perfect starter kit for building websites with Next.js and Notion.
 
 [![Build Status](https://github.com/transitive-bullshit/nextjs-notion-starter-kit/actions/workflows/build.yml/badge.svg)](https://github.com/transitive-bullshit/nextjs-notion-starter-kit/actions/workflows/build.yml) [![Prettier Code Formatting](https://img.shields.io/badge/code_style-prettier-brightgreen.svg)](https://prettier.io)
