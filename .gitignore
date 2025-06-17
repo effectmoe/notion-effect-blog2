@@ -47,3 +47,19 @@ yarn-error.log*
 
 # cache warmup
 .cache-warmup-failed-pages.json
+
+# debug and analysis files
+check-all-collections.js
+all-collections-check.json
+debug-*.js
+debug-*.json
+*-debug.json
+analyze-*.js
+*-analysis.json
+page-collections-debug.json
+database-health-report.json
+warmup-history.json
+
+# test scripts
+test-*.js
+test-*.mjs
