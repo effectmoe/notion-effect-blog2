@@ -99,8 +99,8 @@ const Code = dynamic(() =>
 
 // データベースビューコンポーネント
 const Collection = dynamic(() =>
-  import('./CollectionViewWrapperFixed').then(
-    (m) => m.CollectionViewWrapperFixed
+  import('./CollectionWithFallback').then(
+    (m) => m.CollectionWithFallback
   ),
   {
     ssr: false
