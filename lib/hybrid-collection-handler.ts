@@ -172,7 +172,8 @@ export async function handleCollectionWithHybridAPI(
               total: items.length
             }
             
-            recordMap.collection_query[collectionId][viewId] = groupedData
+            // TypeScriptの型チェックを回避するためにanyとしてキャスト
+            ;(recordMap.collection_query[collectionId] as any)[viewId] = groupedData
             console.log(`[HybridCollectionHandler] Added collection_query data for ${Object.keys(groupedData).length} groups`)
           }
         }
