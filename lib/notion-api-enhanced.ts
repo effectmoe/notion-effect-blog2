@@ -57,6 +57,18 @@ export class EnhancedNotionAPI extends NotionAPI {
                     console.log(`Added query2 data to view ${viewId}`)
                   }
                 }
+                
+                // IMPORTANT: Also merge collection_query data
+                if (collectionData?.result?.reducerResults) {
+                  if (!recordMap.collection_query) {
+                    recordMap.collection_query = {}
+                  }
+                  if (!recordMap.collection_query[collectionId]) {
+                    recordMap.collection_query[collectionId] = {}
+                  }
+                  recordMap.collection_query[collectionId][viewId] = collectionData.result.reducerResults
+                  console.log(`Added collection_query data for ${collectionId}/${viewId}`)
+                }
               } catch (error) {
                 console.error(`Failed to fetch collection data for ${viewId}:`, error)
               }

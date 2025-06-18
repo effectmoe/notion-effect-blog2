@@ -121,26 +121,28 @@ export default class MyDocument extends Document {
                   document.body.appendChild(groupingScript);
                 }, 2500);
                 
-                // Unified group fix - 都道府県DBの成功要因を全DBに適用
+                // グループ化修正スクリプトの最適化された読み込み順序
+                // 1. 基本的なグループ修正 (500ms)
                 setTimeout(function() {
                   const unifiedFixScript = document.createElement('script');
                   unifiedFixScript.src = '/unified-group-fix.js';
+                  unifiedFixScript.async = true;
                   document.body.appendChild(unifiedFixScript);
-                }, 1000);
+                }, 500);
                 
-                // FAQマスター専用修正スクリプト
+                // 2. グループレンダリング保証 (1500ms)
                 setTimeout(function() {
-                  const faqFixScript = document.createElement('script');
-                  faqFixScript.src = '/fix-faq-master-dedicated.js';
-                  document.body.appendChild(faqFixScript);
-                }, 800);
+                  const ensureGroupScript = document.createElement('script');
+                  ensureGroupScript.src = '/ensure-group-rendering.js';
+                  ensureGroupScript.async = true;
+                  document.body.appendChild(ensureGroupScript);
+                }, 1500);
                 
-                // グループ化されたDBをリストビューで表示
-                setTimeout(function() {
-                  const listViewScript = document.createElement('script');
-                  listViewScript.src = '/ensure-list-view-for-groups.js';
-                  document.body.appendChild(listViewScript);
-                }, 600);
+                // 3. クライアントサイドグループ化 (2500ms) - 既存のまま
+                
+                // 既存のスクリプトは削除または統合
+                // FAQマスター専用修正スクリプト - 削除（unified-group-fix.jsに統合済み）
+                // グループ化されたDBをリストビューで表示 - 削除（unified-group-fix.jsに統合済み）
                 
                 // 都道府県データベースの分析（開発環境のみ）
                 if (window.location.hostname === 'localhost') {

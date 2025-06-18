@@ -38,15 +38,28 @@ export async function handleCollectionWithHybridAPI(
     }
   }
   
-  // FAQマスターの特別処理
-  if (blockId === '212b802c-b0c6-80b3-b04a-fec4203ee8d7' || 
-      collectionId === '212b802c-b0c6-8014-9263-000b71bd252e') {
-    console.log(`[HybridCollectionHandler] FAQ Master detected, using official API`)
+  // FAQマスターとカフェキネシコンテンツの特別処理
+  const isTargetDatabase = (
+    blockId === '215b802c-b0c6-804a-8858-d72d4df6f128' || 
+    collectionId === '212b802c-b0c6-8014-9263-000b71bd252e' || // FAQマスター
+    blockId === '216b802c-b0c6-808f-ac1d-dbf03d973fec' ||
+    collectionId === '216b802c-b0c6-81c0-a940-000b2f6a23b3' // カフェキネシコンテンツ２
+  )
+  
+  if (isTargetDatabase) {
+    console.log(`[HybridCollectionHandler] Grouped database detected, using official API`)
     
     try {
+      // グループ化プロパティを決定
+      let sortProperty = 'カテゴリ'
+      if (blockId === '216b802c-b0c6-808f-ac1d-dbf03d973fec' || 
+          collectionId === '216b802c-b0c6-81c0-a940-000b2f6a23b3') {
+        sortProperty = 'Tags'  // Statusではなくタグでソート
+      }
+      
       // 公式APIでデータベースアイテムを取得
       const items = await notionHybrid.getDatabaseItems(collectionId, {
-        sorts: [{ property: 'カテゴリ', direction: 'ascending' }]
+        sorts: [{ property: sortProperty, direction: 'ascending' }]
       })
       
       if (items && Array.isArray(items)) {
@@ -108,14 +121,22 @@ export async function handleCollectionWithHybridAPI(
               view.format = {}
             }
             
-            // カテゴリでグループ化
-            const categoryPropId = 'oa:|' // カテゴリプロパティID
+            // グループ化プロパティを決定
+            let groupPropId = 'oa:|' // デフォルト: カテゴリ
+            let groupPropName = 'カテゴリ'
+            
+            // カフェキネシコンテンツ２の場合はTagsでグループ化
+            if (blockId === '216b802c-b0c6-808f-ac1d-dbf03d973fec' || 
+                collectionId === '216b802c-b0c6-81c0-a940-000b2f6a23b3') {
+              groupPropId = 'xaH>'  // Tags property ID
+              groupPropName = 'Tags'
+            }
             
             // collection_group_byを設定
-            view.format.collection_group_by = categoryPropId
+            view.format.collection_group_by = groupPropId
             
             // グループ情報を作成
-            const groups = generateGroupsFromItems(items, categoryPropId)
+            const groups = generateGroupsFromItems(items, groupPropId, groupPropName)
             view.format.collection_groups = groups
             
             // query2も維持（後方互換性のため）
@@ -123,11 +144,11 @@ export async function handleCollectionWithHybridAPI(
               view.query2 = {}
             }
             view.query2.group_by = {
-              property: categoryPropId,
+              property: groupPropId,
               type: 'select',
               value: {
                 type: 'select',
-                value: 'category'
+                value: groupPropName.toLowerCase()
               }
             }
             
@@ -150,10 +171,22 @@ export async function handleCollectionWithHybridAPI(
               
               // このグループに属するアイテムを収集
               const groupItems = items.filter(item => {
-                const itemCategory = item.properties?.['カテゴリ']?.select?.name || 
-                                   item.properties?.[categoryPropId]?.select?.name || 
-                                   'その他'
-                return itemCategory === groupValue
+                // selectプロパティの場合
+                let itemValue = item.properties?.[groupPropName]?.select?.name || 
+                                item.properties?.[groupPropId]?.select?.name
+                
+                // multi_selectプロパティの場合（Tags）
+                if (!itemValue) {
+                  const multiSelect = item.properties?.[groupPropName]?.multi_select || 
+                                     item.properties?.[groupPropId]?.multi_select
+                  if (multiSelect && multiSelect.length > 0) {
+                    // multi_selectの場合、タグのいずれかが一致すればtrue
+                    return multiSelect.some((tag: any) => tag.name === groupValue)
+                  }
+                }
+                
+                itemValue = itemValue || 'その他'
+                return itemValue === groupValue
               })
               
               groupedData[groupKey] = {
@@ -192,23 +225,39 @@ export async function handleCollectionWithHybridAPI(
 /**
  * アイテムからグループ情報を生成
  */
-function generateGroupsFromItems(items: any[], propertyId: string): any[] {
-  const groupMap = new Map<string, { value: string; count: number }>()
+function generateGroupsFromItems(items: any[], propertyId: string, propertyName: string): any[] {
+  const groupMap = new Map<string, { value: string; count: number; type: string }>()
   
   // アイテムをグループ化
   items.forEach(item => {
-    let groupValue = 'その他'
-    
-    // カテゴリ値を取得
-    if (item.properties?.['カテゴリ']?.select?.name) {
-      groupValue = item.properties['カテゴリ'].select.name
-    } else if (item.properties?.[propertyId]?.select?.name) {
-      groupValue = item.properties[propertyId].select.name
+    // selectプロパティの場合
+    if (item.properties?.[propertyName]?.select?.name || item.properties?.[propertyId]?.select?.name) {
+      const groupValue = item.properties?.[propertyName]?.select?.name || 
+                        item.properties?.[propertyId]?.select?.name || 
+                        'その他'
+      const current = groupMap.get(groupValue) || { value: groupValue, count: 0, type: 'select' }
+      current.count++
+      groupMap.set(groupValue, current)
     }
     
-    const current = groupMap.get(groupValue) || { value: groupValue, count: 0 }
-    current.count++
-    groupMap.set(groupValue, current)
+    // multi_selectプロパティの場合（Tags）
+    const multiSelect = item.properties?.[propertyName]?.multi_select || 
+                       item.properties?.[propertyId]?.multi_select
+    if (multiSelect && multiSelect.length > 0) {
+      multiSelect.forEach((tag: any) => {
+        const groupValue = tag.name
+        const current = groupMap.get(groupValue) || { value: groupValue, count: 0, type: 'multi_select' }
+        current.count++
+        groupMap.set(groupValue, current)
+      })
+    }
+    
+    // どちらのプロパティも見つからない場合
+    if (!item.properties?.[propertyName] && !item.properties?.[propertyId]) {
+      const current = groupMap.get('その他') || { value: 'その他', count: 0, type: 'select' }
+      current.count++
+      groupMap.set('その他', current)
+    }
   })
   
   // react-notion-xが期待する形式に変換
@@ -216,7 +265,7 @@ function generateGroupsFromItems(items: any[], propertyId: string): any[] {
     property: propertyId,
     hidden: false,
     value: {
-      type: 'select',
+      type: data.type,
       value
     }
   }))
