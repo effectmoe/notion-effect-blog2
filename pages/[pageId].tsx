@@ -1,29 +1,27 @@
 import { NotionPage } from '@/components/NotionPage'
+import { domain } from '@/lib/config'
+import { resolveNotionPage } from '@/lib/resolve-notion-page'
 
-// サーバーサイドレンダリングのみ使用（ビルド時のAPI呼び出しを回避）
-export const getServerSideProps = async (context) => {
-  const pageId = context.params.pageId as string
+// 静的生成に戻す（ビルド時は最小限のページのみ）
+export const getStaticProps = async (context) => {
+  const rawPageId = context.params.pageId as string
   
-  // ダミーデータを返してビルドを通す
-  return {
-    props: {
-      site: {
-        name: 'CafeKinesi',
-        domain: 'notion-effect-blog2.vercel.app',
-        rootNotionPageId: '1ceb802cb0c680f29369dba86095fb38',
-        rootNotionSpaceId: null
-      },
-      recordMap: {
-        block: {},
-        collection: {},
-        collection_view: {},
-        collection_query: {},
-        notion_user: {},
-        signed_urls: {}
-      },
-      pageId,
-      error: null
+  try {
+    const props = await resolveNotionPage(domain, rawPageId)
+    return { props }
+  } catch (err) {
+    console.error('page error', domain, rawPageId, err)
+    // エラー時は404を返す
+    return {
+      notFound: true
     }
+  }
+}
+
+export async function getStaticPaths() {
+  return {
+    paths: [],
+    fallback: 'blocking'
   }
 }
 
