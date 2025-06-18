@@ -61,9 +61,15 @@ export async function handleCollectionWithHybridAPI(
         recordMap.collection[collectionId] = {
           value: {
             id: collectionId,
+            version: 0,
             name: [['FAQマスター']],
-            schema: {} // スキーマは後で追加
-          },
+            schema: {}, // スキーマは後で追加
+            icon: '',
+            parent_id: blockId,
+            parent_table: 'block',
+            alive: true,
+            copied_from: ''
+          } as any, // 型の互換性のためanyにキャスト
           role: 'reader'
         }
         
@@ -76,8 +82,16 @@ export async function handleCollectionWithHybridAPI(
                 type: 'page',
                 properties: item.properties,
                 parent_id: collectionId,
-                parent_table: 'collection'
-              },
+                parent_table: 'collection',
+                version: 0,
+                created_time: Date.now(),
+                last_edited_time: Date.now(),
+                alive: true,
+                created_by_table: 'notion_user',
+                created_by_id: '',
+                last_edited_by_table: 'notion_user',
+                last_edited_by_id: ''
+              } as any, // 型の互換性のためanyにキャスト
               role: 'reader'
             }
           }
