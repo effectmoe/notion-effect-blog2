@@ -159,7 +159,8 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
   // Enhance collection views with group_by data for FAQ Master
   recordMap = await enhanceCollectionViews(recordMap, notion)
   
-  // サーバーサイドでグループ化HTMLを生成
+  // サーバーサイドでグループ化HTMLを生成 - 一時的に無効化
+  /*
   const groupedDatabases = [
     {
       blockId: '212b802c-b0c6-80b3-b04a-fec4203ee8d7',
@@ -176,7 +177,8 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
   
   // collection_queryデータを確保
   for (const db of groupedDatabases) {
-    if (recordMap.block[db.blockId]) {
+    const blockData = recordMap.block[db.blockId]
+    if (blockData && blockData.value) {
       // collection_queryが存在しない場合は作成
       if (!recordMap.collection_query) {
         recordMap.collection_query = {}
@@ -186,8 +188,8 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
       }
       
       // デフォルトのクエリ結果を追加
-      const block = recordMap.block[db.blockId].value as any
-      if (block.view_ids) {
+      const block = blockData.value as any
+      if (block && block.view_ids && Array.isArray(block.view_ids)) {
         for (const viewId of block.view_ids) {
           if (!recordMap.collection_query[db.collectionId][viewId]) {
             // 基本的なクエリ結果を作成
@@ -216,6 +218,7 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
       }
     }
   }
+  */
 
   return recordMap
   } catch (error: any) {

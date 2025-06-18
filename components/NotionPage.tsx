@@ -13,7 +13,7 @@ import {
   useNotionContext
 } from 'react-notion-x'
 import { EmbeddedTweet, TweetNotFound, TweetSkeleton } from 'react-tweet'
-import { useSearchParam } from 'react-use'
+// import { useSearchParam } from 'react-use'  // Removed to fix SSG issue
 
 import type * as types from '@/lib/types'
 import * as config from '@/lib/config'
@@ -201,9 +201,18 @@ export function NotionPage({
   pageId,
   menuItems // Notionデータベースからのメニューアイテムを受け取る
 }: types.PageProps & { menuItems?: any[] }) {
-  const router = useRouter()
-  const lite = useSearchParam('lite')
+  const router = typeof window !== 'undefined' ? useRouter() : null
   const [mounted, setMounted] = React.useState(false)
+  
+  // Get search params manually to avoid SSG issues
+  const [lite, setLite] = React.useState<string | null>(null)
+  
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      setLite(params.get('lite'))
+    }
+  }, [])
   
   // lite mode is for oembed
   const isLiteMode = lite === 'true'
@@ -341,7 +350,7 @@ export function NotionPage({
     }
   }, [pageId, recordMap, block])
 
-  if (router.isFallback) {
+  if (router?.isFallback) {
     return <Loading />
   }
 

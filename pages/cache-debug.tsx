@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { NextPage } from 'next'
 
+// Disable static generation for this page
+export const getServerSideProps = () => {
+  return { props: {} }
+}
+
 const CacheDebugPage: NextPage = () => {
   const [cacheData, setCacheData] = useState<any>(null)
   const [loading, setLoading] = useState(false)

@@ -79,7 +79,7 @@ type CustomAppProps = AppProps & {
 }
 
 export default function App({ Component, pageProps }: CustomAppProps) {
-  const router = useRouter()
+  const router = typeof window !== 'undefined' ? useRouter() : null
 
   React.useEffect(() => {
     // クライアントサイドでのみbootstrapを実行
@@ -109,7 +109,9 @@ export default function App({ Component, pageProps }: CustomAppProps) {
       posthog.init(posthogId, posthogConfig)
     }
 
-    router.events.on('routeChangeComplete', onRouteChangeComplete)
+    if (router) {
+      router.events.on('routeChangeComplete', onRouteChangeComplete)
+    }
     
     // 初回読み込み時にも実行
     if (!isServer) {
@@ -117,9 +119,11 @@ export default function App({ Component, pageProps }: CustomAppProps) {
     }
 
     return () => {
-      router.events.off('routeChangeComplete', onRouteChangeComplete)
+      if (router) {
+        router.events.off('routeChangeComplete', onRouteChangeComplete)
+      }
     }
-  }, [router.events])
+  }, [router])
 
   // FontStylerとColorStylerコンポーネントを追加してスタイルをカスタマイズ
   return (
@@ -134,7 +138,8 @@ export default function App({ Component, pageProps }: CustomAppProps) {
   )
 }
 
-// サーバーサイドでメニュー項目を取得
+// サーバーサイドでメニュー項目を取得 - 一時的に無効化
+/*
 App.getInitialProps = async (appContext: any) => {
   // 元のgetInitialPropsを実行
   const appProps = appContext.Component.getInitialProps
@@ -162,3 +167,4 @@ App.getInitialProps = async (appContext: any) => {
     }
   }
 }
+*/

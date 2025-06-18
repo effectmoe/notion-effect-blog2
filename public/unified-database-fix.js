@@ -179,7 +179,7 @@
     });
     
     // 既存のコンテンツを確認
-    const existingContent = faqBlock.querySelector('.notion-collection-view-type');
+    const existingContent = blockElement.querySelector('.notion-collection-view-type');
     if (existingContent && Object.keys(groups).length > 0) {
       // DOMを再構築
       let html = '<div class="notion-list-view"><div class="notion-list-collection">';
@@ -216,6 +216,7 @@
       html += '</div></div>';
       existingContent.innerHTML = html;
     }
+    });
   }
   
   /**
@@ -248,7 +249,7 @@
     // 修正をキューに追加（優先度順）
     queueFix('Basic Group Display', fixBasicGroupDisplay, 1);
     queueFix('Switch to List View', switchToListView, 2);
-    queueFix('FAQ Master Fix', fixFAQMaster, 3);
+    queueFix('Fix Grouped Databases', fixGroupedDatabases, 3);
     queueFix('Ensure Group Visibility', ensureGroupVisibility, 4);
     
     // キューを処理
