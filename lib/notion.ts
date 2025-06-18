@@ -159,11 +159,14 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
   recordMap = await enhanceCollectionViews(recordMap, notion)
   
   // FAQマスターの特別処理 - ハイブリッドAPIを使用
+  // 一時的に無効化 - データベース表示の問題を修正するため
+  /*
   const faqMasterBlockId = '212b802c-b0c6-80b3-b04a-fec4203ee8d7'
   if (recordMap.block[faqMasterBlockId]) {
     console.log('[getPage] Processing FAQ Master with hybrid API')
     recordMap = await handleCollectionWithHybridAPI(faqMasterBlockId, recordMap)
   }
+  */
 
   return recordMap
   } catch (error: any) {
