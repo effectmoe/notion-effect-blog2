@@ -93,10 +93,10 @@ export default class MyDocument extends Document {
                   document.body.appendChild(script3);
                 }, 1500);
                 
-                // 統合データベース修正スクリプト（すべての修正を順序立てて実行）
+                // 統合データベース修正スクリプト v2（構文エラー修正版）
                 setTimeout(function() {
                   const unifiedScript = document.createElement('script');
-                  unifiedScript.src = '/unified-database-fix.js';
+                  unifiedScript.src = '/unified-database-fix-v2.js';
                   document.body.appendChild(unifiedScript);
                 }, 500);
                 

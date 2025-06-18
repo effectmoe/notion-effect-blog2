@@ -174,8 +174,41 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
     }
   ]
   
+  // collection_queryデータを確保
   for (const db of groupedDatabases) {
     if (recordMap.block[db.blockId]) {
+      // collection_queryが存在しない場合は作成
+      if (!recordMap.collection_query) {
+        recordMap.collection_query = {}
+      }
+      if (!recordMap.collection_query[db.collectionId]) {
+        recordMap.collection_query[db.collectionId] = {}
+      }
+      
+      // デフォルトのクエリ結果を追加
+      const block = recordMap.block[db.blockId].value as any
+      if (block.view_ids) {
+        for (const viewId of block.view_ids) {
+          if (!recordMap.collection_query[db.collectionId][viewId]) {
+            // 基本的なクエリ結果を作成
+            const items = []
+            Object.entries(recordMap.block).forEach(([itemId, itemData]) => {
+              const itemBlock = itemData?.value
+              if (itemBlock?.parent_id === db.collectionId) {
+                items.push(itemId)
+              }
+            })
+            
+            recordMap.collection_query[db.collectionId][viewId] = {
+              type: 'results',
+              blockIds: items,
+              aggregations: [],
+              total: items.length
+            } as any
+          }
+        }
+      }
+      
       console.log(`[ServerSideRender] Processing ${db.name}`)
       const html = generateGroupedHTML(db.collectionId, recordMap)
       if (html) {
