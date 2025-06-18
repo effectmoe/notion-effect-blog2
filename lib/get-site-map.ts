@@ -10,6 +10,23 @@ import { notion } from './notion-api'
 const uuid = !!includeNotionIdInUrls
 
 export async function getSiteMap(bypassCache = false): Promise<types.SiteMap> {
+  // During build, return minimal sitemap to avoid excessive API calls
+  if (process.env.NODE_ENV === 'production' && !process.env.FORCE_FULL_BUILD) {
+    console.log('[SiteMap] Using minimal sitemap for production build')
+    return {
+      site: config.site,
+      canonicalPageMap: {
+        [config.rootNotionPageId]: config.rootNotionPageId
+      },
+      pageMap: {
+        [config.rootNotionPageId]: {
+          pageId: config.rootNotionPageId,
+          recordMap: null
+        }
+      }
+    } as types.SiteMap
+  }
+
   let partialSiteMap;
   
   if (bypassCache) {
