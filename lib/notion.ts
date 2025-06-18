@@ -23,7 +23,7 @@ import { handleCollectionWithHybridAPI } from './hybrid-collection-handler'
 // キャッシュ付きAPIインスタンスを作成
 const cachedNotion = new CachedNotionAPI({
   authToken: process.env.NOTION_TOKEN,
-  defaultTTL: 3600 // 1時間
+  defaultTTL: 1800 // 30分に統一
 })
 
 const getNavigationLinkPages = pMemoize(

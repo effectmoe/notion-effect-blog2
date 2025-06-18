@@ -128,6 +128,20 @@ export default class MyDocument extends Document {
                   document.body.appendChild(unifiedFixScript);
                 }, 1000);
                 
+                // FAQマスター専用修正スクリプト
+                setTimeout(function() {
+                  const faqFixScript = document.createElement('script');
+                  faqFixScript.src = '/fix-faq-master-dedicated.js';
+                  document.body.appendChild(faqFixScript);
+                }, 800);
+                
+                // グループ化されたDBをリストビューで表示
+                setTimeout(function() {
+                  const listViewScript = document.createElement('script');
+                  listViewScript.src = '/ensure-list-view-for-groups.js';
+                  document.body.appendChild(listViewScript);
+                }, 600);
+                
                 // 都道府県データベースの分析（開発環境のみ）
                 if (window.location.hostname === 'localhost') {
                   setTimeout(function() {
