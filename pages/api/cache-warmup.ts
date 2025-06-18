@@ -132,10 +132,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // バッチ処理の設定（Redis接続状態に応じて調整）
-    const BATCH_SIZE = isRedisAvailable ? 5 : 3; // Redis不在時は小さめのバッチ
-    const DELAY_BETWEEN_BATCHES = isRedisAvailable ? 15000 : 20000; // Redis不在時は長めの遅延
+    const BATCH_SIZE = isRedisAvailable ? 2 : 1; // 429エラー対策で大幅に削減
+    const DELAY_BETWEEN_BATCHES = isRedisAvailable ? 30000 : 45000; // 429エラー対策で遅延を大幅増加
     const RETRY_COUNT = isRedisAvailable ? 3 : 2; // Redis不在時はリトライを減らす
-    const RETRY_DELAY = 3000; // リトライ前の待機時間（3秒）
+    const RETRY_DELAY = 5000; // リトライ前の待機時間（5秒に増加）
     const PAGE_TIMEOUT = 45000; // ページ取得のタイムアウト（45秒）
     // 処理ページ数の制限を削除（すべてのページを処理）
     console.log(`[Cache Warmup] Will process all ${pageIds.length} pages in batches`);

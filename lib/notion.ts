@@ -19,11 +19,12 @@ import { findMissingBlocks } from './fetch-missing-blocks'
 import { CachedNotionAPI } from './cache'
 import { enhanceCollectionViews } from './notion-enhanced-fetch'
 import { handleCollectionWithHybridAPI } from './hybrid-collection-handler'
+import { generateGroupedHTML, injectGroupedHTML } from './server-side-group-renderer'
 
 // キャッシュ付きAPIインスタンスを作成
 const cachedNotion = new CachedNotionAPI({
   authToken: process.env.NOTION_TOKEN,
-  defaultTTL: 3600 // 1時間
+  defaultTTL: 1800 // 30分に統一
 })
 
 const getNavigationLinkPages = pMemoize(
@@ -43,7 +44,7 @@ const getNavigationLinkPages = pMemoize(
             signFileUrls: false
           }),
         {
-          concurrency: 4
+          concurrency: 2 // Reduced from 4 to avoid rate limiting
         }
       )
     }
@@ -112,7 +113,7 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
             return null
           }
         },
-        { concurrency: 3 }
+        { concurrency: 1 } // Reduced from 3 to avoid rate limiting
       )
       
       // Merge all fetched data
@@ -158,6 +159,7 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
   // Enhance collection views with group_by data for FAQ Master
   recordMap = await enhanceCollectionViews(recordMap, notion)
   
+<<<<<<< HEAD
   // グループ化されたコレクションのcollection_queryデータを手動で生成
   if (recordMap.collection_view) {
     // FAQマスターの処理
@@ -321,6 +323,65 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
   } catch (error) {
     console.error('[getPage] Error processing FAQ Master with hybrid API:', error)
     // エラーが発生しても処理を継続
+=======
+  // サーバーサイドでグループ化HTMLを生成
+  const groupedDatabases = [
+    {
+      blockId: '215b802c-b0c6-804a-8858-d72d4df6f128',
+      collectionId: '212b802c-b0c6-8014-9263-000b71bd252e',
+      name: 'FAQマスター'
+    },
+    // カフェキネシコンテンツ
+    {
+      blockId: '216b802c-b0c6-808f-ac1d-dbf03d973fec',
+      collectionId: '216b802c-b0c6-81c0-a940-000b2f6a23b3',
+      name: 'カフェキネシコンテンツ'
+    }
+  ]
+  
+  // collection_queryデータを確保
+  for (const db of groupedDatabases) {
+    const blockData = recordMap.block[db.blockId]
+    if (blockData && blockData.value) {
+      // collection_queryが存在しない場合は作成
+      if (!recordMap.collection_query) {
+        recordMap.collection_query = {}
+      }
+      if (!recordMap.collection_query[db.collectionId]) {
+        recordMap.collection_query[db.collectionId] = {}
+      }
+      
+      // デフォルトのクエリ結果を追加
+      const block = blockData.value as any
+      if (block && block.view_ids && Array.isArray(block.view_ids)) {
+        for (const viewId of block.view_ids) {
+          if (!recordMap.collection_query[db.collectionId][viewId]) {
+            // 基本的なクエリ結果を作成
+            const items = []
+            Object.entries(recordMap.block).forEach(([itemId, itemData]) => {
+              const itemBlock = itemData?.value
+              if (itemBlock?.parent_id === db.collectionId) {
+                items.push(itemId)
+              }
+            })
+            
+            recordMap.collection_query[db.collectionId][viewId] = {
+              type: 'results',
+              blockIds: items,
+              aggregations: [],
+              total: items.length
+            } as any
+          }
+        }
+      }
+      
+      console.log(`[ServerSideRender] Processing ${db.name}`)
+      const html = generateGroupedHTML(db.collectionId, recordMap)
+      if (html) {
+        recordMap = injectGroupedHTML(recordMap, db.blockId, html)
+      }
+    }
+>>>>>>> d691452def972bdba142af1807a5c59202e8ea17
   }
 
   return recordMap

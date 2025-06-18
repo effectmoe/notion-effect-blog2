@@ -14,17 +14,17 @@ type HeaderMenuProps = {
 }
 
 const HeaderMenu: React.FC<HeaderMenuProps> = ({ menuItems }) => {
-  const router = useRouter()
+  const router = typeof window !== 'undefined' ? useRouter() : null
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
 
   // 現在のページに基づいてアクティブなメニュー項目を判断
   const isActive = (url: string) => {
-    if (url === '/' && router.pathname === '/') {
+    if (url === '/' && router?.pathname === '/') {
       return true
     }
-    return router.pathname.startsWith(url) && url !== '/'
+    return router?.pathname?.startsWith(url) && url !== '/'
   }
 
   // ウィンドウサイズの変更を監視してモバイル表示を判断

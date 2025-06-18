@@ -15,12 +15,12 @@ export const PrefetchLink: React.FC<PrefetchLinkProps> = ({
   className,
   prefetchOnHover = true,
 }) => {
-  const router = useRouter();
+  const router = typeof window !== 'undefined' ? useRouter() : null;
   const prefetchTimeoutRef = useRef<NodeJS.Timeout>();
   const hasPrefetchedRef = useRef(false);
 
   const handleMouseEnter = () => {
-    if (prefetchOnHover && !hasPrefetchedRef.current) {
+    if (prefetchOnHover && !hasPrefetchedRef.current && router) {
       // 100ms待ってからプリフェッチ（誤ホバーを防ぐ）
       prefetchTimeoutRef.current = setTimeout(() => {
         router.prefetch(href);

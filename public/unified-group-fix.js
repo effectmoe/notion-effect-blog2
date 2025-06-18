@@ -70,6 +70,7 @@
         }
       }
       
+<<<<<<< HEAD
       // 6. FAQマスターとカフェキネシコンテンツの特別処理
       const normalizedBlockId = blockId.replace(/-/g, '');
       const targetDatabases = {
@@ -79,6 +80,12 @@
       
       if (targetDatabases[normalizedBlockId]) {
         console.log(`  🎯 ${targetDatabases[normalizedBlockId]} detected, applying special handling`);
+=======
+      // 6. FAQマスター特別処理
+      if (blockId === '212b802cb0c680eab7edef4459f38819' || 
+          blockId === '212b802c-b0c6-80ea-b7ed-ef4459f38819') {
+        console.log('  🎯 FAQ Master detected, applying special handling');
+>>>>>>> d691452def972bdba142af1807a5c59202e8ea17
         
         // ビューが空の場合、recordMapからデータを再構築
         if (!view.querySelector('.notion-list-item') && window.recordMap) {

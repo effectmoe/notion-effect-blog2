@@ -9,9 +9,12 @@ import { NotionAPI } from 'notion-client';
 // 4. CDNキャッシュ - エッジ
 
 // インメモリキャッシュの設定
+// 統一されたTTL設定（30分）
+const UNIFIED_CACHE_TTL = 1000 * 60 * 30;
+
 const memoryCache = new LRUCache<string, any>({
   max: 100, // 最大100エントリ
-  ttl: 1000 * 60 * 5, // 5分
+  ttl: UNIFIED_CACHE_TTL, // 30分に統一
   updateAgeOnGet: true,
   updateAgeOnHas: true,
 });
@@ -22,10 +25,16 @@ let redisConnected = false;
 
 // Redis接続を試みる（ただしエラーでもアプリは動作継続）
 function initializeRedis() {
+  // Redisを明示的に無効化（表示の安定性を優先）
+  console.log('[Cache] Using memory cache only (Redis disabled for stability)');
+  return;
+  
+  /* 将来Redisが必要になった場合のために残しておく
   if (!process.env.REDIS_URL) {
     console.warn('[Redis] No REDIS_URL configured. Using memory cache only.');
     return;
   }
+  */
 
   try {
     redisClient = new Redis(process.env.REDIS_URL, {
@@ -127,7 +136,7 @@ export async function getFromCache<T>(key: string): Promise<T | null> {
 export async function setToCache<T>(
   key: string, 
   value: T, 
-  ttlSeconds: number = 3600
+  ttlSeconds: number = UNIFIED_CACHE_TTL / 1000
 ): Promise<void> {
   // 1. メモリキャッシュに保存（常に実行）
   memoryCache.set(key, value, { ttl: ttlSeconds * 1000 });
@@ -191,7 +200,7 @@ export class CachedNotionAPI {
 
   constructor(config?: { authToken?: string; defaultTTL?: number }) {
     this.notion = new NotionAPI(config);
-    this.defaultTTL = config?.defaultTTL || 3600; // デフォルト1時間
+    this.defaultTTL = config?.defaultTTL || (UNIFIED_CACHE_TTL / 1000); // デフォルト30分に統一
   }
 
   async getPage(pageId: string, options?: any) {

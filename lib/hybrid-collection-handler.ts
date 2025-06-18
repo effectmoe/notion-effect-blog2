@@ -38,6 +38,7 @@ export async function handleCollectionWithHybridAPI(
     }
   }
   
+<<<<<<< HEAD
   // FAQマスターとカフェキネシコンテンツの特別処理
   const isTargetDatabase = (
     blockId === '215b802c-b0c6-804a-8858-d72d4df6f128' || 
@@ -48,6 +49,12 @@ export async function handleCollectionWithHybridAPI(
   
   if (isTargetDatabase) {
     console.log(`[HybridCollectionHandler] Grouped database detected, using official API`)
+=======
+  // FAQマスターの特別処理
+  if (blockId === '212b802c-b0c6-80ea-b7ed-ef4459f38819' || 
+      collectionId === '212b802c-b0c6-8046-b4ee-000b2833619c') {
+    console.log(`[HybridCollectionHandler] FAQ Master detected, using official API`)
+>>>>>>> d691452def972bdba142af1807a5c59202e8ea17
     
     try {
       // グループ化プロパティを決定
