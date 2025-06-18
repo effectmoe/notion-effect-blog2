@@ -19,6 +19,7 @@ import { findMissingBlocks } from './fetch-missing-blocks'
 import { CachedNotionAPI } from './cache'
 import { enhanceCollectionViews } from './notion-enhanced-fetch'
 import { handleCollectionWithHybridAPI } from './hybrid-collection-handler'
+import { generateGroupedHTML, injectGroupedHTML } from './server-side-group-renderer'
 
 // キャッシュ付きAPIインスタンスを作成
 const cachedNotion = new CachedNotionAPI({
@@ -158,15 +159,30 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
   // Enhance collection views with group_by data for FAQ Master
   recordMap = await enhanceCollectionViews(recordMap, notion)
   
-  // FAQマスターの特別処理 - ハイブリッドAPIを使用
-  // 一時的に無効化 - データベース表示の問題を修正するため
-  /*
-  const faqMasterBlockId = '212b802c-b0c6-80b3-b04a-fec4203ee8d7'
-  if (recordMap.block[faqMasterBlockId]) {
-    console.log('[getPage] Processing FAQ Master with hybrid API')
-    recordMap = await handleCollectionWithHybridAPI(faqMasterBlockId, recordMap)
+  // サーバーサイドでグループ化HTMLを生成
+  const groupedDatabases = [
+    {
+      blockId: '212b802c-b0c6-80b3-b04a-fec4203ee8d7',
+      collectionId: '212b802c-b0c6-8014-9263-000b71bd252e',
+      name: 'FAQマスター'
+    },
+    // カフェキネシコンテンツ（IDは後で確定）
+    // {
+    //   blockId: 'cafe-kinesi-block-id',
+    //   collectionId: 'cafe-kinesi-collection-id',
+    //   name: 'カフェキネシコンテンツ'
+    // }
+  ]
+  
+  for (const db of groupedDatabases) {
+    if (recordMap.block[db.blockId]) {
+      console.log(`[ServerSideRender] Processing ${db.name}`)
+      const html = generateGroupedHTML(db.collectionId, recordMap)
+      if (html) {
+        recordMap = injectGroupedHTML(recordMap, db.blockId, html)
+      }
+    }
   }
-  */
 
   return recordMap
   } catch (error: any) {
