@@ -93,6 +93,15 @@ export default class MyDocument extends Document {
                   document.body.appendChild(script3);
                 }, 1500);
                 
+                // 統合データベース修正スクリプト（すべての修正を順序立てて実行）
+                setTimeout(function() {
+                  const unifiedScript = document.createElement('script');
+                  unifiedScript.src = '/unified-database-fix.js';
+                  document.body.appendChild(unifiedScript);
+                }, 500);
+                
+                // 以下の個別スクリプトは統合スクリプトに含まれているため無効化
+                /*
                 // Comprehensive database rendering fix
                 setTimeout(function() {
                   const fixDbScript = document.createElement('script');
@@ -141,6 +150,7 @@ export default class MyDocument extends Document {
                   listViewScript.src = '/ensure-list-view-for-groups.js';
                   document.body.appendChild(listViewScript);
                 }, 600);
+                */
                 
                 // 都道府県データベースの分析（開発環境のみ）
                 if (window.location.hostname === 'localhost') {
