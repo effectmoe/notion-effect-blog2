@@ -1,31 +1,36 @@
+import * as React from 'react'
+import { GetStaticProps, InferGetStaticPropsType } from 'next'
+
 import { NotionPage } from '@/components/NotionPage'
 import { domain } from '@/lib/config'
-import { resolveNotionPage } from '@/lib/resolve-notion-page'
+import { getSiteMap } from '@/lib/get-site-map'
+import { getPage } from '@/lib/notion'
 
-// 静的生成に戻す
-export const getStaticProps = async () => {
+export const getStaticProps: GetStaticProps = async () => {
   try {
-    const props = await resolveNotionPage(domain)
-    return { props }
-  } catch (err) {
-    console.error('page error', domain, err)
-    // エラー時は基本的なデータを返す
+    const siteMap = await getSiteMap()
+    const pageId = Object.keys(siteMap.canonicalPageMap)[0]
+    const recordMap = await getPage(pageId)
+
     return {
       props: {
-        site: {
-          name: 'CafeKinesi',
-          domain: 'notion-effect-blog2.vercel.app',
-          rootNotionPageId: '1ceb802cb0c680f29369dba86095fb38',
-          rootNotionSpaceId: null
-        },
-        recordMap: null,
-        pageId: '1ceb802cb0c680f29369dba86095fb38',
-        error: err.message || 'Failed to load page'
-      }
+        recordMap
+      },
+      revalidate: 60
+    }
+  } catch (error) {
+    console.error('getStaticProps error:', error)
+    return {
+      props: {
+        recordMap: null
+      },
+      revalidate: 10
     }
   }
 }
 
-export default function NotionDomainPage(props) {
-  return <NotionPage {...props} />
+export default function NotionDomainIndexPage({
+  recordMap
+}: InferGetStaticPropsType<typeof getStaticProps>) {
+  return <NotionPage recordMap={recordMap} rootDomain={domain} />
 }

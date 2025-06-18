@@ -1,30 +1,67 @@
-import { NotionPage } from '@/components/NotionPage'
-import { domain } from '@/lib/config'
-import { resolveNotionPage } from '@/lib/resolve-notion-page'
+import React from 'react'
+import { GetServerSideProps, InferGetServerSidePropsType } from 'next'
+import { ExtendedRecordMap } from 'notion-types'
+import { getBlockTitle } from 'notion-utils'
 
-// 静的生成に戻す（ビルド時は最小限のページのみ）
-export const getStaticProps = async (context) => {
-  const rawPageId = context.params.pageId as string
-  
+import { NotionPage } from '@/components/NotionPage'
+import {
+  isPreviewImageSupportEnabled,
+  previewImagesEnabled
+} from '@/lib/config'
+import { notion } from '@/lib/notion-api'
+import { mapImageUrl } from '@/lib/map-image-url'
+import { getPreviewImageMap } from '@/lib/preview-images'
+import { getSiteMap } from '@/lib/get-site-map'
+
+export const getServerSideProps: GetServerSideProps<{
+  recordMap: ExtendedRecordMap
+  previewImagesMap?: Record<string, string>
+}> = async (context) => {
+  const rawPageId = context.params?.pageId as string
+
   try {
-    const props = await resolveNotionPage(domain, rawPageId)
-    return { props }
+    const pageId = rawPageId.replace(/-/g, '')
+    
+    let recordMap = await notion.getPage(pageId)
+
+    if (!recordMap) {
+      throw new Error('Failed to load page')
+    }
+
+    const keys = Object.keys(recordMap?.block || {})
+    const block = recordMap?.block?.[keys[0]]?.value
+
+    if (!block) {
+      throw new Error('Invalid recordMap')
+    }
+
+    const isBlogPost =
+      block.type === 'page' && block.parent_table === 'collection'
+
+    const previewImagesMap = isPreviewImageSupportEnabled
+      ? await getPreviewImageMap(recordMap)
+      : {}
+
+    return {
+      props: {
+        recordMap,
+        previewImagesMap
+      }
+    }
   } catch (err) {
-    console.error('page error', domain, rawPageId, err)
-    // エラー時は404を返す
+    console.error('page error', err)
+
     return {
       notFound: true
     }
   }
 }
 
-export async function getStaticPaths() {
-  return {
-    paths: [],
-    fallback: 'blocking'
-  }
-}
-
-export default function NotionDomainDynamicPage(props) {
-  return <NotionPage {...props} />
+export default function NotionDomainDynamicPage({
+  recordMap,
+  previewImagesMap
+}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+  return (
+    <NotionPage recordMap={recordMap} previewImagesMap={previewImagesMap} />
+  )
 }
