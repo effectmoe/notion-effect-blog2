@@ -44,7 +44,7 @@ const getNavigationLinkPages = pMemoize(
             signFileUrls: false
           }),
         {
-          concurrency: 4
+          concurrency: 2 // Reduced from 4 to avoid rate limiting
         }
       )
     }
@@ -113,7 +113,7 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
             return null
           }
         },
-        { concurrency: 3 }
+        { concurrency: 1 } // Reduced from 3 to avoid rate limiting
       )
       
       // Merge all fetched data
