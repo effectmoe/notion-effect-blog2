@@ -1,19 +1,38 @@
 import React from 'react'
-import { GetServerSideProps, InferGetServerSidePropsType } from 'next'
+import { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from 'next'
 import { ExtendedRecordMap } from 'notion-types'
-import { getBlockTitle } from 'notion-utils'
 
 import { NotionPage } from '@/components/NotionPage'
 import {
-  isPreviewImageSupportEnabled,
-  previewImagesEnabled
+  isPreviewImageSupportEnabled
 } from '@/lib/config'
-import { notion } from '@/lib/notion-api'
-import { mapImageUrl } from '@/lib/map-image-url'
-import { getPreviewImageMap } from '@/lib/preview-images'
 import { getSiteMap } from '@/lib/get-site-map'
+import { getPage } from '@/lib/notion'
+import { getPreviewImageMap } from '@/lib/preview-images'
 
-export const getServerSideProps: GetServerSideProps<{
+export const getStaticPaths: GetStaticPaths = async () => {
+  try {
+    const siteMap = await getSiteMap()
+    const paths = Object.keys(siteMap.canonicalPageMap).map((pageId) => ({
+      params: {
+        pageId
+      }
+    }))
+
+    return {
+      paths,
+      fallback: 'blocking'
+    }
+  } catch (error) {
+    console.error('getStaticPaths error:', error)
+    return {
+      paths: [],
+      fallback: 'blocking'
+    }
+  }
+}
+
+export const getStaticProps: GetStaticProps<{
   recordMap: ExtendedRecordMap
   previewImagesMap?: Record<string, string>
 }> = async (context) => {
@@ -21,8 +40,7 @@ export const getServerSideProps: GetServerSideProps<{
 
   try {
     const pageId = rawPageId.replace(/-/g, '')
-    
-    let recordMap = await notion.getPage(pageId)
+    const recordMap = await getPage(pageId)
 
     if (!recordMap) {
       throw new Error('Failed to load page')
@@ -35,9 +53,6 @@ export const getServerSideProps: GetServerSideProps<{
       throw new Error('Invalid recordMap')
     }
 
-    const isBlogPost =
-      block.type === 'page' && block.parent_table === 'collection'
-
     const previewImagesMap = isPreviewImageSupportEnabled
       ? await getPreviewImageMap(recordMap)
       : {}
@@ -46,7 +61,8 @@ export const getServerSideProps: GetServerSideProps<{
       props: {
         recordMap,
         previewImagesMap
-      }
+      },
+      revalidate: 60
     }
   } catch (err) {
     console.error('page error', err)
@@ -60,7 +76,7 @@ export const getServerSideProps: GetServerSideProps<{
 export default function NotionDomainDynamicPage({
   recordMap,
   previewImagesMap
-}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+}: InferGetStaticPropsType<typeof getStaticProps>) {
   return (
     <NotionPage recordMap={recordMap} previewImagesMap={previewImagesMap} />
   )
