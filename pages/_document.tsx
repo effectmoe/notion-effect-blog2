@@ -100,6 +100,13 @@ export default class MyDocument extends Document {
                   document.body.appendChild(unifiedScript);
                 }, 500);
                 
+                // 強制グループレンダリング
+                setTimeout(function() {
+                  const forceGroupScript = document.createElement('script');
+                  forceGroupScript.src = '/force-group-rendering.js';
+                  document.body.appendChild(forceGroupScript);
+                }, 1500);
+                
                 // 以下の個別スクリプトは統合スクリプトに含まれているため無効化
                 /*
                 // Comprehensive database rendering fix

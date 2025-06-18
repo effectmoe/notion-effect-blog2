@@ -138,8 +138,7 @@ export default function App({ Component, pageProps }: CustomAppProps) {
   )
 }
 
-// サーバーサイドでメニュー項目を取得 - 一時的に無効化
-/*
+// サーバーサイドでメニュー項目を取得
 App.getInitialProps = async (appContext: any) => {
   // 元のgetInitialPropsを実行
   const appProps = appContext.Component.getInitialProps
@@ -167,4 +166,3 @@ App.getInitialProps = async (appContext: any) => {
     }
   }
 }
-*/

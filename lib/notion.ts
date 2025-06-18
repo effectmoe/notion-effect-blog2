@@ -159,12 +159,11 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
   // Enhance collection views with group_by data for FAQ Master
   recordMap = await enhanceCollectionViews(recordMap, notion)
   
-  // サーバーサイドでグループ化HTMLを生成 - 一時的に無効化
-  /*
+  // サーバーサイドでグループ化HTMLを生成
   const groupedDatabases = [
     {
-      blockId: '212b802c-b0c6-80b3-b04a-fec4203ee8d7',
-      collectionId: '212b802c-b0c6-8014-9263-000b71bd252e',
+      blockId: '212b802c-b0c6-80ea-b7ed-ef4459f38819',
+      collectionId: '212b802c-b0c6-8046-b4ee-000b2833619c',
       name: 'FAQマスター'
     },
     // カフェキネシコンテンツ
@@ -218,7 +217,6 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
       }
     }
   }
-  */
 
   return recordMap
   } catch (error: any) {

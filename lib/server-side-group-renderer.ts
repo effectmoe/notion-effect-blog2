@@ -26,9 +26,9 @@ export function generateGroupedHTML(
   // 対象となるデータベース
   const targetDatabases = {
     // FAQマスター
-    '212b802c-b0c6-8014-9263-000b71bd252e': {
+    '212b802c-b0c6-8046-b4ee-000b2833619c': {
       groupByProperty: 'カテゴリ',
-      groupByPropertyId: 'oa:|',
+      groupByPropertyId: '\\y^V',
       displayName: 'FAQマスター'
     },
     // カフェキネシコンテンツ

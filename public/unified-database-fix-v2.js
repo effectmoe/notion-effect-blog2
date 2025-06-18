@@ -131,8 +131,8 @@
   function fixGroupedDatabases() {
     const databases = [
       {
-        blockId: '212b802c-b0c6-80b3-b04a-fec4203ee8d7',
-        collectionId: '212b802c-b0c6-8014-9263-000b71bd252e',
+        blockId: '212b802c-b0c6-80ea-b7ed-ef4459f38819',
+        collectionId: '212b802c-b0c6-8046-b4ee-000b2833619c',
         name: 'FAQマスター',
         groupByProperty: 'カテゴリ'
       },
@@ -145,9 +145,22 @@
     ];
     
     databases.forEach(db => {
-      const blockElement = document.querySelector(`.notion-block-${db.blockId}`);
+      // ハイフンを削除したIDも試す
+      const blockIdNoHyphens = db.blockId.replace(/-/g, '');
+      let blockElement = document.querySelector(`.notion-block-${db.blockId}`);
+      if (!blockElement) {
+        blockElement = document.querySelector(`.notion-block-${blockIdNoHyphens}`);
+      }
       
-      if (!blockElement || !window.recordMap) return;
+      if (!blockElement) {
+        console.log(`[UnifiedDatabaseFix v2] Block element not found for ${db.name} (tried both ${db.blockId} and ${blockIdNoHyphens})`);
+        return;
+      }
+      
+      if (!window.recordMap) {
+        console.log(`[UnifiedDatabaseFix v2] recordMap not available`);
+        return;
+      }
       
       const block = window.recordMap.block[db.blockId]?.value;
       if (!block) return;
@@ -214,6 +227,8 @@
       
       // 既存のコンテンツを確認
       const existingContent = blockElement.querySelector('.notion-collection-view-type');
+      console.log(`[UnifiedDatabaseFix v2] ${db.name} - Groups created: ${Object.keys(groups).length}, existingContent found: ${!!existingContent}`);
+      
       if (existingContent && Object.keys(groups).length > 0) {
         // DOMを再構築
         let html = '<div class="notion-list-view"><div class="notion-list-collection">';
