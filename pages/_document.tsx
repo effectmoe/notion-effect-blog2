@@ -114,6 +114,20 @@ export default class MyDocument extends Document {
                   document.body.appendChild(finalFixScript);
                 }, 1000);
                 
+                // Client-side grouping implementation
+                setTimeout(function() {
+                  const groupingScript = document.createElement('script');
+                  groupingScript.src = '/client-side-grouping.js';
+                  document.body.appendChild(groupingScript);
+                }, 2500);
+                
+                // Unified group fix - 都道府県DBの成功要因を全DBに適用
+                setTimeout(function() {
+                  const unifiedFixScript = document.createElement('script');
+                  unifiedFixScript.src = '/unified-group-fix.js';
+                  document.body.appendChild(unifiedFixScript);
+                }, 1000);
+                
                 // 都道府県データベースの分析（開発環境のみ）
                 if (window.location.hostname === 'localhost') {
                   setTimeout(function() {
@@ -135,6 +149,13 @@ export default class MyDocument extends Document {
                     faqDebug.src = '/debug-faq-master.js';
                     document.body.appendChild(faqDebug);
                   }, 4500);
+                  
+                  // FAQ Master structure debug
+                  setTimeout(function() {
+                    const faqStructureDebug = document.createElement('script');
+                    faqStructureDebug.src = '/debug-faq-structure.js';
+                    document.body.appendChild(faqStructureDebug);
+                  }, 5000);
                   
                   // FAQ DOM structure debug
                   setTimeout(function() {

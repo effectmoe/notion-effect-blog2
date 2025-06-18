@@ -700,4 +700,151 @@ view.query2.group_by = {
 - FAQアイテム数: 5件
 - カテゴリ数: 4（費用について、基本情報、資格について、講座について）
 
+---
+
+## 2025-06-18 追加作業（セッション3）
+
+### 15. TypeScript エラーの修正（Vercel デプロイエラー対応）
+
+**状況**: Vercelでのビルドエラーが発生。TypeScriptの厳格な型チェックでエラーが検出された。
+
+#### 修正したファイル:
+1. `/lib/notion-enhanced-fetch.ts`
+   - `(view.format as any)?.list_properties_v2` に型アサーションを追加
+   - `(block as any)?.view_ids` にオプショナルチェイニングを追加
+
+2. `/lib/notion-api-enhanced.ts`
+   - `(block as any)?.collection_id` にオプショナルチェイニングを追加
+   - `(block as any)?.format?.collection_pointer?.id` にオプショナルチェイニングを追加
+   - `(view?.format as any)?.list_properties_v2?.some?.()` に型アサーションとオプショナルチェイニングを追加
+
+**結果**: ビルドエラーが解消され、Vercelへのデプロイが成功するようになった。
+
+### 現在の状況
+
+**解決済み**:
+- TypeScriptのコンパイルエラー ✅
+- Vercelへのデプロイ問題 ✅
+
+**未解決**:
+- FAQマスターのグループ化表示問題（根本的な解決）❌
+- react-notion-xのグループ化サポート不足 ❌
+
+---
+
+## 2025-06-18 追加調査（セッション4）- ハイブリッドAPIアプローチ
+
+### 16. MCPサーバーのPerplexityを使用したAPI調査
+
+**調査内容**: Notion APIとreact-notion-xのグループ化サポートについて情報収集
+
+#### 判明したこと:
+
+1. **公式Notion APIの制限**:
+   - ビュー（views）をサポートしていない
+   - グループ化機能（group_by）は利用不可
+   - フィルターとソートのみサポート
+
+2. **react-notion-xの問題**:
+   - NotionのプライベートAPIの変更により、コレクションビューのサポートが壊れた
+   - `queryCollection`エンドポイントが影響を受けた
+   - グループ化されたリストビューのサポートは限定的
+
+3. **非公式notion-clientの可能性**:
+   - `query2`や`group_by`パラメータへのアクセスが可能
+   - `cv.get('query2')`で複雑なビューの構造を取得可能
+   - 内部的なNotionフォーマットへのアクセスが可能
+
+### 17. ハイブリッドAPIシステムの発見と活用
+
+**発見**: システムには既に`NotionHybridAPI`クラスが実装されており、公式APIと非公式APIの両方を使用可能
+
+#### 実装したファイル:
+
+1. **`/lib/hybrid-collection-handler.ts`**:
+   ```typescript
+   export async function handleCollectionWithHybridAPI(
+     blockId: string,
+     recordMap: ExtendedRecordMap
+   ): Promise<ExtendedRecordMap>
+   ```
+   - グループ化されたデータベースは公式APIから取得
+   - FAQマスターの特別処理を実装
+   - 静的グループ化HTML生成機能を追加
+
+2. **`/lib/notion.ts`の修正**:
+   - FAQマスターに対してハイブリッドAPIハンドラーを適用
+   - `handleCollectionWithHybridAPI`を呼び出し
+
+### 18. 都道府県データベースの成功要因の特定
+
+**調査方法**: Taskツールを使用して都道府県データベースの特別な処理を検索
+
+#### 成功要因:
+1. **CSS クラスの統一**: `notion-collection-group`クラスを使用
+2. **複数の修正スクリプト**: 異なるタイミングで実行される複数のスクリプト
+3. **特別なUIエンハンスメント**: `/prefecture-regional-ui.js`による追加処理
+4. **レンダリングタイミング**: 修正スクリプトと同期したタイミング
+
+### 19. クライアントサイド修正スクリプトの実装
+
+#### 作成したスクリプト:
+
+1. **`/public/client-side-grouping.js`**:
+   - DOMベースでのグループ化実装
+   - FAQマスター専用の処理
+   - カテゴリ別にアイテムを整理
+   - トグル機能付きグループUI
+
+2. **`/public/unified-group-fix.js`**:
+   - 都道府県データベースの成功要因を全データベースに適用
+   - 古いクラス名（`notion-list-view-group`）を新しいクラス名（`notion-collection-group`）に統一
+   - recordMapからのデータ再構築機能
+   - 複数回の実行とMutationObserverによる動的対応
+
+### 20. _document.tsxへの統合
+
+**追加したスクリプト読み込み**:
+```javascript
+// Client-side grouping implementation
+setTimeout(function() {
+  const groupingScript = document.createElement('script');
+  groupingScript.src = '/client-side-grouping.js';
+  document.body.appendChild(groupingScript);
+}, 2500);
+
+// Unified group fix - 都道府県DBの成功要因を全DBに適用
+setTimeout(function() {
+  const unifiedFixScript = document.createElement('script');
+  unifiedFixScript.src = '/unified-group-fix.js';
+  document.body.appendChild(unifiedFixScript);
+}, 1000);
+```
+
+### 実装のまとめ
+
+**3つのアプローチで問題に対処**:
+1. **サーバーサイド**: ハイブリッドAPIを使用して公式APIからデータを取得
+2. **クライアントサイド（早期）**: unified-group-fixで既存のグループを修正
+3. **クライアントサイド（後期）**: client-side-groupingで動的にグループ化
+
+**技術的な発見**:
+- react-notion-xは`query2.group_by`をサポートしていない
+- 都道府県データベースは特殊なレンダリング方法を使用
+- CSSクラス名の違いが表示問題の一因
+- ハイブリッドAPIアプローチが最も柔軟な解決策
+
+### 現在の状況
+
+**解決済み**:
+- TypeScriptのコンパイルエラー ✅
+- Vercelへのデプロイ問題 ✅
+- ハイブリッドAPIシステムの実装 ✅
+- クライアントサイドでの修正スクリプト ✅
+
+**次のステップ**:
+1. ローカルサーバーでの動作確認
+2. 必要に応じて修正スクリプトのタイミング調整
+3. 他のグループ化されたデータベースでのテスト
+
 以上が、グループ化されたリストビュー表示問題の完全な調査記録です。

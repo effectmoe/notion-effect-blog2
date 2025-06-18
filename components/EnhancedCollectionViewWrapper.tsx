@@ -108,6 +108,21 @@ export const EnhancedCollectionViewWrapper: React.FC<{ block: any; className?: s
     collectionName: collection.name?.[0]?.[0],
     isLinkedDatabase: !block.collection_id && !!collectionPointer
   })
+  
+  // FAQマスターの場合、詳細なデバッグ情報を出力
+  if (block.id === '212b802c-b0c6-80b3-b04a-fec4203ee8d7' || 
+      collectionId === '212b802c-b0c6-8014-9263-000b71bd252e') {
+    console.log('EnhancedCollectionViewWrapper: FAQ Master debug info', {
+      viewIds: block.view_ids,
+      hasCollectionView: !!collectionView,
+      viewType: collectionView?.type,
+      hasFormat: !!collectionView?.format,
+      hasCollectionGroupBy: !!(collectionView as any)?.format?.collection_group_by,
+      hasCollectionGroups: !!(collectionView as any)?.format?.collection_groups,
+      hasQuery2: !!(collectionView as any)?.query2,
+      hasQuery2GroupBy: !!(collectionView as any)?.query2?.group_by
+    })
+  }
 
   try {
     // For linked databases, we might need to pass additional context

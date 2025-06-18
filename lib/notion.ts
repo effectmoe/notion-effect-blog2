@@ -18,6 +18,7 @@ import { getPreviewImageMap } from './preview-images'
 import { findMissingBlocks } from './fetch-missing-blocks'
 import { CachedNotionAPI } from './cache'
 import { enhanceCollectionViews } from './notion-enhanced-fetch'
+import { handleCollectionWithHybridAPI } from './hybrid-collection-handler'
 
 // キャッシュ付きAPIインスタンスを作成
 const cachedNotion = new CachedNotionAPI({
@@ -156,6 +157,13 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
 
   // Enhance collection views with group_by data for FAQ Master
   recordMap = await enhanceCollectionViews(recordMap, notion)
+  
+  // FAQマスターの特別処理 - ハイブリッドAPIを使用
+  const faqMasterBlockId = '212b802c-b0c6-80b3-b04a-fec4203ee8d7'
+  if (recordMap.block[faqMasterBlockId]) {
+    console.log('[getPage] Processing FAQ Master with hybrid API')
+    recordMap = await handleCollectionWithHybridAPI(faqMasterBlockId, recordMap)
+  }
 
   return recordMap
   } catch (error: any) {
