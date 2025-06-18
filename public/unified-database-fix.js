@@ -126,15 +126,30 @@
   }
   
   /**
-   * 3. FAQマスター専用修正
+   * 3. FAQマスターとカフェキネシコンテンツの修正
    */
-  function fixFAQMaster() {
-    const FAQ_MASTER_BLOCK_ID = '212b802cb0c680b3b04afec4203ee8d7';
-    const faqBlock = document.querySelector(`.notion-block-${FAQ_MASTER_BLOCK_ID}`);
+  function fixGroupedDatabases() {
+    const databases = [
+      {
+        blockId: '212b802cb0c680b3b04afec4203ee8d7',
+        collectionId: '212b802c-b0c6-8014-9263-000b71bd252e',
+        name: 'FAQマスター',
+        groupByProperty: 'カテゴリ'
+      },
+      {
+        blockId: '216b802c-b0c6-808f-ac1d-dbf03d973fec',
+        collectionId: '216b802c-b0c6-81c0-a940-000b2f6a23b3',
+        name: 'カフェキネシコンテンツ',
+        groupByProperty: 'xaH>'
+      }
+    ];
     
-    if (!faqBlock || !window.recordMap) return;
-    
-    const block = window.recordMap.block[FAQ_MASTER_BLOCK_ID]?.value;
+    databases.forEach(db => {
+      const blockElement = document.querySelector(`.notion-block-${db.blockId}`);
+      
+      if (!blockElement || !window.recordMap) return;
+      
+      const block = window.recordMap.block[db.blockId]?.value;
     if (!block) return;
     
     const collectionId = block.collection_id || '212b802c-b0c6-8014-9263-000b71bd252e';

@@ -166,12 +166,12 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
       collectionId: '212b802c-b0c6-8014-9263-000b71bd252e',
       name: 'FAQマスター'
     },
-    // カフェキネシコンテンツ（IDは後で確定）
-    // {
-    //   blockId: 'cafe-kinesi-block-id',
-    //   collectionId: 'cafe-kinesi-collection-id',
-    //   name: 'カフェキネシコンテンツ'
-    // }
+    // カフェキネシコンテンツ
+    {
+      blockId: '216b802c-b0c6-808f-ac1d-dbf03d973fec',
+      collectionId: '216b802c-b0c6-81c0-a940-000b2f6a23b3',
+      name: 'カフェキネシコンテンツ'
+    }
   ]
   
   for (const db of groupedDatabases) {

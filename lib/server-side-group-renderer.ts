@@ -28,12 +28,13 @@ export function generateGroupedHTML(
     // FAQマスター
     '212b802c-b0c6-8014-9263-000b71bd252e': {
       groupByProperty: 'カテゴリ',
+      groupByPropertyId: 'oa:|',
       displayName: 'FAQマスター'
     },
-    // カフェキネシコンテンツ（ブロックIDから推測）
-    // 実際のIDは後で特定する必要がある
-    'cafe-kinesi-collection-id': {
-      groupByProperty: 'カテゴリ', // または適切なプロパティ名
+    // カフェキネシコンテンツ
+    '216b802c-b0c6-81c0-a940-000b2f6a23b3': {
+      groupByProperty: 'カテゴリ', // multi_selectプロパティ
+      groupByPropertyId: 'xaH>',
       displayName: 'カフェキネシコンテンツ'
     }
   }
@@ -70,11 +71,38 @@ export function generateGroupedHTML(
   // グループ化
   const groups: GroupData = {}
   items.forEach(item => {
-    const groupValue = item.properties?.[dbConfig.groupByProperty]?.select?.name || 'その他'
-    if (!groups[groupValue]) {
-      groups[groupValue] = []
+    // selectまたはmulti_selectプロパティから値を取得
+    let groupValues: string[] = []
+    
+    // プロパティ名で取得を試みる
+    const prop = item.properties?.[dbConfig.groupByProperty]
+    if (prop?.select?.name) {
+      groupValues = [prop.select.name]
+    } else if (prop?.multi_select) {
+      groupValues = prop.multi_select.map((opt: any) => opt.name)
     }
-    groups[groupValue].push(item)
+    
+    // プロパティIDでも試みる
+    if (groupValues.length === 0 && dbConfig.groupByPropertyId) {
+      const propById = item.properties?.[dbConfig.groupByPropertyId]
+      if (propById?.select?.name) {
+        groupValues = [propById.select.name]
+      } else if (propById?.multi_select) {
+        groupValues = propById.multi_select.map((opt: any) => opt.name)
+      }
+    }
+    
+    // グループに追加
+    if (groupValues.length === 0) {
+      groupValues = ['その他']
+    }
+    
+    groupValues.forEach(groupValue => {
+      if (!groups[groupValue]) {
+        groups[groupValue] = []
+      }
+      groups[groupValue].push(item)
+    })
   })
 
   // HTML生成
