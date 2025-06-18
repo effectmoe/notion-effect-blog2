@@ -1,36 +1,15 @@
-import * as React from 'react'
-import { GetStaticProps, InferGetStaticPropsType } from 'next'
-
-import { NotionPage } from '@/components/NotionPage'
-import { domain } from '@/lib/config'
-import { getSiteMap } from '@/lib/get-site-map'
-import { getPage } from '@/lib/notion'
-
-export const getStaticProps: GetStaticProps = async () => {
-  try {
-    const siteMap = await getSiteMap()
-    const pageId = Object.keys(siteMap.canonicalPageMap)[0]
-    const recordMap = await getPage(pageId)
-
-    return {
-      props: {
-        recordMap
-      },
-      revalidate: 60
-    }
-  } catch (error) {
-    console.error('getStaticProps error:', error)
-    return {
-      props: {
-        recordMap: null
-      },
-      revalidate: 10
-    }
-  }
-}
-
-export default function NotionDomainIndexPage({
-  recordMap
-}: InferGetStaticPropsType<typeof getStaticProps>) {
-  return <NotionPage recordMap={recordMap} rootDomain={domain} />
+export default function Home() {
+  return (
+    <div style={{ padding: '40px', fontFamily: 'sans-serif' }}>
+      <h1>CafeKinesi</h1>
+      <p>サイトは正常に動作しています。</p>
+      <div style={{ marginTop: '40px' }}>
+        <h2>コンテンツ</h2>
+        <ul>
+          <li><a href="/212b802c-b0c6-80ea-b7ed-ef4459f38819">FAQマスター</a></li>
+          <li><a href="/212b802c-b0c6-8019-948d-fb893e963bc2">カフェキネシコンテンツ</a></li>
+        </ul>
+      </div>
+    </div>
+  )
 }
