@@ -2,31 +2,6 @@ import { ExtendedRecordMap } from 'notion-types'
 import { notionHybrid } from './notion-api-hybrid'
 
 /**
- * アイテムからグループ情報を生成
- */
-function generateGroupsFromItems(items: any[], propertyId: string): any[] {
-  const groupsMap = new Map<string, any>()
-  
-  // 各アイテムからグループを抽出
-  items.forEach(item => {
-    const groupValue = item.properties?.['カテゴリ']?.select?.name || 
-                      item.properties?.[propertyId]?.select?.name
-    
-    if (groupValue && !groupsMap.has(groupValue)) {
-      groupsMap.set(groupValue, {
-        value: {
-          type: 'select',
-          value: groupValue
-        }
-      })
-    }
-  })
-  
-  // Map を配列に変換
-  return Array.from(groupsMap.values())
-}
-
-/**
  * ハイブリッドAPIを使用してコレクションビューを処理
  * グループ化されたデータベースは公式APIから取得し、
  * 通常のデータベースは非公式APIを使用
