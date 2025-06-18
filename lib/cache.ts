@@ -25,10 +25,16 @@ let redisConnected = false;
 
 // Redis接続を試みる（ただしエラーでもアプリは動作継続）
 function initializeRedis() {
+  // Redisを明示的に無効化（表示の安定性を優先）
+  console.log('[Cache] Using memory cache only (Redis disabled for stability)');
+  return;
+  
+  /* 将来Redisが必要になった場合のために残しておく
   if (!process.env.REDIS_URL) {
     console.warn('[Redis] No REDIS_URL configured. Using memory cache only.');
     return;
   }
+  */
 
   try {
     redisClient = new Redis(process.env.REDIS_URL, {
