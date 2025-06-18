@@ -107,6 +107,13 @@ export default class MyDocument extends Document {
                   document.body.appendChild(forceGroupScript);
                 }, 1500);
                 
+                // Unified group fix - 都道府県DBの成功要因を全DBに適用
+                setTimeout(function() {
+                  const unifiedFixScript = document.createElement('script');
+                  unifiedFixScript.src = '/unified-group-fix.js';
+                  document.body.appendChild(unifiedFixScript);
+                }, 1000);
+                
                 // 以下の個別スクリプトは統合スクリプトに含まれているため無効化
                 /*
                 // Comprehensive database rendering fix
@@ -136,13 +143,6 @@ export default class MyDocument extends Document {
                   groupingScript.src = '/client-side-grouping.js';
                   document.body.appendChild(groupingScript);
                 }, 2500);
-                
-                // Unified group fix - 都道府県DBの成功要因を全DBに適用
-                setTimeout(function() {
-                  const unifiedFixScript = document.createElement('script');
-                  unifiedFixScript.src = '/unified-group-fix.js';
-                  document.body.appendChild(unifiedFixScript);
-                }, 1000);
                 
                 // FAQマスター専用修正スクリプト
                 setTimeout(function() {
@@ -210,6 +210,13 @@ export default class MyDocument extends Document {
                     groupedListDebug.src = '/debug-grouped-lists.js';
                     document.body.appendChild(groupedListDebug);
                   }, 3000);
+                  
+                  // FAQマスター Block ID Debugger
+                  setTimeout(function() {
+                    const faqIdDebug = document.createElement('script');
+                    faqIdDebug.src = '/debug-faq-master-id.js';
+                    document.body.appendChild(faqIdDebug);
+                  }, 3500);
                 }
                 
               });

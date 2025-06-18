@@ -39,8 +39,8 @@ export async function handleCollectionWithHybridAPI(
   }
   
   // FAQマスターの特別処理
-  if (blockId === '212b802c-b0c6-80b3-b04a-fec4203ee8d7' || 
-      collectionId === '212b802c-b0c6-8014-9263-000b71bd252e') {
+  if (blockId === '212b802c-b0c6-80ea-b7ed-ef4459f38819' || 
+      collectionId === '212b802c-b0c6-8046-b4ee-000b2833619c') {
     console.log(`[HybridCollectionHandler] FAQ Master detected, using official API`)
     
     try {

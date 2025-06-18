@@ -12,10 +12,10 @@
     {
       name: 'FAQマスター',
       blockIds: [
-        '212b802c-b0c6-80ea-b7ed-ef4459f38819',
-        '212b802cb0c680eab7edef4459f38819'
+        '215b802c-b0c6-804a-8858-d72d4df6f128',
+        '215b802cb0c6804a8858d72d4df6f128'
       ],
-      collectionId: '212b802c-b0c6-8046-b4ee-000b2833619c',
+      collectionId: '212b802c-b0c6-8014-9263-000b71bd252e',
       groupProperty: 'カテゴリ'
     },
     {

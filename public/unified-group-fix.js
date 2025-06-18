@@ -71,8 +71,8 @@
       }
       
       // 6. FAQマスター特別処理
-      if (blockId === '212b802cb0c680b3b04afec4203ee8d7' || 
-          blockId === '212b802c-b0c6-80b3-b04a-fec4203ee8d7') {
+      if (blockId === '212b802cb0c680eab7edef4459f38819' || 
+          blockId === '212b802c-b0c6-80ea-b7ed-ef4459f38819') {
         console.log('  🎯 FAQ Master detected, applying special handling');
         
         // ビューが空の場合、recordMapからデータを再構築
