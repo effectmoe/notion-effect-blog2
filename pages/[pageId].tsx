@@ -45,8 +45,9 @@ export async function getStaticPaths() {
 
   const siteMap = await getSiteMap()
 
+  // ビルド時はページを事前生成せず、すべてオンデマンドで生成
   const staticPaths = {
-    paths: Object.keys(siteMap.canonicalPageMap).map((pageId) => ({
+    paths: [], // 空の配列でビルドを高速化
       params: {
         pageId
       }

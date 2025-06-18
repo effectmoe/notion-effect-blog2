@@ -4,20 +4,20 @@ import { ExtendedRecordMap } from 'notion-types'
 
 // Rate limiting configuration
 const RATE_LIMIT_CONFIG = {
-  // Notion API rate limits (approximate)
-  MAX_REQUESTS_PER_SECOND: 3,
-  MAX_REQUESTS_PER_MINUTE: 50,
+  // Notion API rate limits (approximate) - more conservative for build stability
+  MAX_REQUESTS_PER_SECOND: 1,
+  MAX_REQUESTS_PER_MINUTE: 30,
   
   // Retry configuration
   MAX_RETRIES: 3,
-  INITIAL_RETRY_DELAY: 2000, // 2 seconds
+  INITIAL_RETRY_DELAY: 5000, // 5 seconds
   MAX_RETRY_DELAY: 60000, // 60 seconds
   BACKOFF_MULTIPLIER: 2,
   
   // Queue configuration
-  QUEUE_CONCURRENCY: 2,
-  QUEUE_INTERVAL: 1000, // 1 second
-  QUEUE_INTERVAL_CAP: 5,
+  QUEUE_CONCURRENCY: 1,
+  QUEUE_INTERVAL: 2000, // 2 seconds
+  QUEUE_INTERVAL_CAP: 3,
 }
 
 // Track request counts for rate limiting
