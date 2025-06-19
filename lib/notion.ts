@@ -167,33 +167,41 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
     if (recordMap.collection_view[faqViewId]) {
       // FAQマスター用のcollection_queryデータを作成
       if (!recordMap.collection_query) recordMap.collection_query = {}
-      if (!recordMap.collection_query[faqCollectionId]) recordMap.collection_query[faqCollectionId] = {}
+      if (!recordMap.collection_query[faqCollectionId]) {
+        recordMap.collection_query[faqCollectionId] = {}
+      }
       
-      recordMap.collection_query[faqCollectionId][faqViewId] = {
+      // Cast to any to bypass TypeScript's strict checking for dynamic group keys
+      (recordMap.collection_query[faqCollectionId] as any)[faqViewId] = {
         'results:select:ユーザー管理': {
           type: 'results',
           blockIds: [],
-          total: 0
+          total: 0,
+          aggregationResults: []
         },
         'results:select:API': {
           type: 'results',
           blockIds: [],
-          total: 0
+          total: 0,
+          aggregationResults: []
         },
         'results:select:トラブルシューティング': {
           type: 'results',
           blockIds: [],
-          total: 0
+          total: 0,
+          aggregationResults: []
         },
         'results:select:その他': {
           type: 'results',
           blockIds: [],
-          total: 0
+          total: 0,
+          aggregationResults: []
         },
         'results:uncategorized': {
           type: 'results',
           blockIds: [],
-          total: 0
+          total: 0,
+          aggregationResults: []
         }
       }
       
@@ -211,15 +219,16 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
           
           const groupKey = categoryValue === 'uncategorized' ? 'results:uncategorized' : `results:select:${categoryValue}`
           
-          if (recordMap.collection_query[faqCollectionId][faqViewId][groupKey]) {
-            recordMap.collection_query[faqCollectionId][faqViewId][groupKey].blockIds.push(blockId)
-            recordMap.collection_query[faqCollectionId][faqViewId][groupKey].total++
+          if ((recordMap.collection_query[faqCollectionId] as any)[faqViewId][groupKey]) {
+            (recordMap.collection_query[faqCollectionId] as any)[faqViewId][groupKey].blockIds.push(blockId)
+            ;(recordMap.collection_query[faqCollectionId] as any)[faqViewId][groupKey].total++
           } else {
             // グループが存在しない場合は新規作成
-            recordMap.collection_query[faqCollectionId][faqViewId][groupKey] = {
+            (recordMap.collection_query[faqCollectionId] as any)[faqViewId][groupKey] = {
               type: 'results',
               blockIds: [blockId],
-              total: 1
+              total: 1,
+              aggregationResults: []
             }
           }
         }
@@ -235,43 +244,53 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
     if (recordMap.collection_view[cafeViewId]) {
       // ダミーのcollection_queryデータを作成（タグベースのグループ）
       if (!recordMap.collection_query) recordMap.collection_query = {}
-      if (!recordMap.collection_query[cafeCollectionId]) recordMap.collection_query[cafeCollectionId] = {}
+      if (!recordMap.collection_query[cafeCollectionId]) {
+        recordMap.collection_query[cafeCollectionId] = {}
+      }
       
-      recordMap.collection_query[cafeCollectionId][cafeViewId] = {
+      // Cast to any to bypass TypeScript's strict checking for dynamic group keys
+      (recordMap.collection_query[cafeCollectionId] as any)[cafeViewId] = {
         'results:multi_select:インストラクター': {
           type: 'results',
           blockIds: [],
-          total: 0
+          total: 0,
+          aggregationResults: []
         },
         'results:multi_select:ショッピング': {
           type: 'results',
           blockIds: [],
-          total: 0
+          total: 0,
+          aggregationResults: []
         },
         'results:multi_select:ブログ': {
           type: 'results',
           blockIds: [],
-          total: 0
+          total: 0,
+          aggregationResults: []
         },
         'results:multi_select:代表者': {
           type: 'results',
           blockIds: [],
-          total: 0
+          total: 0,
+          aggregationResults: []
         },
         'results:multi_select:会員ページ': {
           type: 'results',
           blockIds: [],
-          total: 0
+          total: 0,
+          aggregationResults: []
         },
         'results:multi_select:講座': {
           type: 'results',
           blockIds: [],
-          total: 0
+          total: 0,
+          aggregationResults: []
         },
         'results:uncategorized': {
           type: 'results',
           blockIds: [],
-          total: 0
+          total: 0,
+          aggregationResults: []
         }
       }
       
@@ -292,15 +311,16 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
             
             const groupKey = tagValue === 'uncategorized' ? 'results:uncategorized' : `results:multi_select:${tagValue}`
             
-            if (recordMap.collection_query[cafeCollectionId][cafeViewId][groupKey]) {
-              recordMap.collection_query[cafeCollectionId][cafeViewId][groupKey].blockIds.push(blockId)
-              recordMap.collection_query[cafeCollectionId][cafeViewId][groupKey].total++
+            if ((recordMap.collection_query[cafeCollectionId] as any)[cafeViewId][groupKey]) {
+              (recordMap.collection_query[cafeCollectionId] as any)[cafeViewId][groupKey].blockIds.push(blockId)
+              ;(recordMap.collection_query[cafeCollectionId] as any)[cafeViewId][groupKey].total++
             } else {
               // グループが存在しない場合は新規作成
-              recordMap.collection_query[cafeCollectionId][cafeViewId][groupKey] = {
+              (recordMap.collection_query[cafeCollectionId] as any)[cafeViewId][groupKey] = {
                 type: 'results',
                 blockIds: [blockId],
-                total: 1
+                total: 1,
+                aggregationResults: []
               }
             }
           }

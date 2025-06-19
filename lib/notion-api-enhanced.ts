@@ -66,7 +66,14 @@ export class EnhancedNotionAPI extends NotionAPI {
                   if (!recordMap.collection_query[collectionId]) {
                     recordMap.collection_query[collectionId] = {}
                   }
-                  recordMap.collection_query[collectionId][viewId] = collectionData.result.reducerResults
+                  // Wrap reducerResults in a proper CollectionQueryResult structure
+                  recordMap.collection_query[collectionId][viewId] = {
+                    type: view.type || 'reducer',
+                    total: collectionData.result.total || 0,
+                    blockIds: collectionData.result.blockIds || [],
+                    aggregationResults: collectionData.result.aggregationResults || [],
+                    reducerResults: collectionData.result.reducerResults
+                  }
                   console.log(`Added collection_query data for ${collectionId}/${viewId}`)
                 }
               } catch (error) {

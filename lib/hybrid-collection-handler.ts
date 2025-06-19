@@ -192,7 +192,7 @@ export async function handleCollectionWithHybridAPI(
               groupedData[groupKey] = {
                 type: 'results',
                 blockIds: groupItems.map(item => item.id),
-                aggregations: [],
+                aggregationResults: [],
                 total: groupItems.length
               }
             })
@@ -201,7 +201,7 @@ export async function handleCollectionWithHybridAPI(
             groupedData.results = {
               type: 'results',
               blockIds: items.map(item => item.id),
-              aggregations: [],
+              aggregationResults: [],
               total: items.length
             }
             
