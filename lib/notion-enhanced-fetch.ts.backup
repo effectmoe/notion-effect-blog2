@@ -58,8 +58,8 @@ export async function enhanceCollectionViews(
                         (block as any).format?.collection_pointer?.id
           
           // リンクされたデータベースの場合、view自体のcollection_pointerも確認
-          if (!collectionId && (view.format as any)?.collection_pointer?.id) {
-            collectionId = (view.format as any).collection_pointer.id
+          if (!collectionId && view.format?.collection_pointer?.id) {
+            collectionId = view.format.collection_pointer.id
             console.log(`[enhanceCollectionViews] Found collection_id in view format: ${collectionId}`)
           }
           break
