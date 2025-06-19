@@ -51,6 +51,9 @@ export default class MyDocument extends Document {
                 unicode-range: U+3000-303F, U+3040-309F, U+30A0-30FF, U+FF00-FFEF, U+4E00-9FAF;
               }
             ` }} />
+            
+            {/* グループ化コレクション修正CSS */}
+            <link rel='stylesheet' href='/styles/fix-grouped-collections.css' />
           </Head>
 
           <body>
@@ -100,47 +103,27 @@ export default class MyDocument extends Document {
                   document.body.appendChild(fixDbScript);
                 }, 1500);
                 
-                // Force render grouped lists
-                setTimeout(function() {
-                  const forceRenderScript = document.createElement('script');
-                  forceRenderScript.src = '/force-render-grouped-lists.js';
-                  document.body.appendChild(forceRenderScript);
-                }, 2000);
+                // 以下のスクリプトは汎用グループ化修正スクリプトに統合されました
+                // - force-render-grouped-lists.js
+                // - fix-faq-master-final.js
+                // - client-side-grouping.js
                 
-                // Final FAQ Master fix
+                // ========================================
+                // 汎用グループ化修正スクリプト v2
+                // すべてのグループ化されたデータベースに自動対応
+                // ========================================
                 setTimeout(function() {
-                  const finalFixScript = document.createElement('script');
-                  finalFixScript.src = '/fix-faq-master-final.js';
-                  document.body.appendChild(finalFixScript);
-                }, 1000);
-                
-                // Client-side grouping implementation
-                setTimeout(function() {
-                  const groupingScript = document.createElement('script');
-                  groupingScript.src = '/client-side-grouping.js';
-                  document.body.appendChild(groupingScript);
-                }, 2500);
-                
-                // Unified group fix - 都道府県DBの成功要因を全DBに適用
-                setTimeout(function() {
-                  const unifiedFixScript = document.createElement('script');
-                  unifiedFixScript.src = '/unified-group-fix.js';
-                  document.body.appendChild(unifiedFixScript);
-                }, 1000);
-                
-                // FAQマスター専用修正スクリプト
-                setTimeout(function() {
-                  const faqFixScript = document.createElement('script');
-                  faqFixScript.src = '/fix-faq-master-dedicated.js';
-                  document.body.appendChild(faqFixScript);
-                }, 800);
-                
-                // グループ化されたDBをリストビューで表示
-                setTimeout(function() {
-                  const listViewScript = document.createElement('script');
-                  listViewScript.src = '/ensure-list-view-for-groups.js';
-                  document.body.appendChild(listViewScript);
+                  const universalGroupFixScript = document.createElement('script');
+                  universalGroupFixScript.src = '/universal-group-fix-v2.js';
+                  universalGroupFixScript.defer = true;
+                  document.body.appendChild(universalGroupFixScript);
                 }, 600);
+                
+                // 既存のグループ化関連スクリプトは汎用スクリプトに統合済み
+                // - unified-group-fix.js → 統合済み
+                // - ensure-group-rendering.js → 統合済み
+                // - fix-faq-master-final.js → 統合済み
+                // - client-side-grouping.js → 統合済み
                 
                 // 都道府県データベースの分析（開発環境のみ）
                 if (window.location.hostname === 'localhost') {

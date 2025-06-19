@@ -1,0 +1,134 @@
+/**
+ * Notion グループ化されたコレクションの表示修正CSS
+ * react-notion-xが隠蔽する要素を強制的に表示
+ */
+
+/* グループ要素の強制表示 */
+.notion-collection-group,
+.notion-list-view-group,
+.notion-collection-grouped .notion-collection-group {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  margin-bottom: 1em;
+}
+
+/* インラインスタイルによる隠蔽を上書き */
+[style*="display: none"] .notion-collection-group,
+[style*="visibility: hidden"] .notion-collection-group,
+.notion-collection-group[style*="display: none"],
+.notion-collection-group[style*="visibility: hidden"] {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* グループタイトルのスタイリング */
+.notion-collection-group-title {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  padding: 0.75em 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  font-weight: 600;
+  font-size: 0.975em;
+  transition: background-color 200ms ease;
+  border-radius: 3px;
+  margin: 0 -0.5em;
+  padding-left: 0.5em;
+  padding-right: 0.5em;
+}
+
+.notion-collection-group-title:hover {
+  background-color: var(--bg-color-1, rgba(0, 0, 0, 0.03));
+}
+
+/* トグルアイコンのアニメーション */
+.notion-collection-group-toggle {
+  transition: transform 200ms ease;
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+}
+
+/* グループアイテムコンテナ */
+.notion-collection-group-items {
+  margin-left: 1.5em;
+  padding-top: 0.25em;
+}
+
+/* リストアイテムのスタイリング */
+.notion-collection-group-items .notion-list-item {
+  padding: 0.375em 0;
+  transition: background-color 200ms;
+}
+
+.notion-collection-group-items .notion-list-item a {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.25em 0.5em;
+  margin: 0 -0.5em;
+  border-radius: 3px;
+  transition: background-color 200ms;
+}
+
+.notion-collection-group-items .notion-list-item a:hover {
+  background-color: var(--bg-color-1, rgba(0, 0, 0, 0.03));
+}
+
+/* グループ化されたコレクション全体のスタイリング */
+.notion-collection-grouped {
+  padding: 0.5em 0;
+}
+
+/* カウント表示のスタイリング */
+.notion-collection-group-title span:last-child {
+  color: var(--fg-color-2, rgba(55, 53, 47, 0.65));
+  font-size: 0.875em;
+  font-weight: normal;
+}
+
+/* ダークモード対応 */
+.dark-mode .notion-collection-group-title:hover {
+  background-color: rgba(255, 255, 255, 0.055);
+}
+
+.dark-mode .notion-collection-group-items .notion-list-item a:hover {
+  background-color: rgba(255, 255, 255, 0.055);
+}
+
+.dark-mode .notion-collection-group-title span:last-child {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* モバイルレスポンシブ */
+@media (max-width: 640px) {
+  .notion-collection-group-title {
+    padding: 0.5em 0;
+    font-size: 0.95em;
+  }
+  
+  .notion-collection-group-items {
+    margin-left: 1em;
+  }
+  
+  .notion-collection-group-items .notion-list-item {
+    padding: 0.25em 0;
+  }
+}
+
+/* プリント時の表示 */
+@media print {
+  .notion-collection-group-items {
+    display: block !important;
+  }
+  
+  .notion-collection-group-toggle {
+    transform: rotate(90deg) !important;
+  }
+}
