@@ -1,0 +1,113 @@
+/* Fix for grouped list views not displaying properly */
+
+/* Ensure grouped collections are visible (new class names) */
+.notion-collection-group {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Fix for group titles */
+.notion-collection-group-title {
+  display: list-item !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  padding: 8px 0;
+  font-weight: 600;
+  color: var(--fg-color);
+}
+
+/* Ensure list items within groups are visible */
+.notion-collection-group .notion-list-item {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Also support old class names for backward compatibility */
+.notion-list-view-group {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.notion-list-view-group-header {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  padding: 8px 0;
+  font-weight: 600;
+  color: var(--fg-color);
+}
+
+.notion-list-view-group-items {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  padding-left: 16px;
+}
+
+.notion-list-view-group .notion-list-item {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Special handling for databases with Japanese names */
+.notion-collection:has(.notion-collection-header-title:contains("カフェキネシラバーズ")) .notion-list-view-group,
+.notion-collection:has(.notion-collection-header-title:contains("Cafe Kinesi")) .notion-list-view-group {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Debug styling to make groups more visible */
+.debug-grouped-lists .notion-list-view-group {
+  border: 2px solid red !important;
+  margin: 10px 0 !important;
+  padding: 10px !important;
+  background: rgba(255, 0, 0, 0.05) !important;
+}
+
+.debug-grouped-lists .notion-list-view-group-header {
+  background: rgba(255, 0, 0, 0.1) !important;
+  border-bottom: 1px solid red !important;
+}
+
+/* Fix potential z-index issues */
+.notion-list-view-group {
+  position: relative;
+  z-index: 1;
+}
+
+/* Fix potential overflow issues */
+.notion-collection-view-type-list {
+  overflow: visible !important;
+}
+
+.notion-list-view {
+  overflow: visible !important;
+}
+
+/* Ensure grouped list view containers have proper height */
+.notion-list-view:has(.notion-list-view-group) {
+  min-height: 100px;
+  height: auto !important;
+}
+
+/* Fix for empty group placeholders */
+.notion-list-view-group:empty {
+  display: none !important;
+}
+
+/* Responsive adjustments for grouped lists */
+@media (max-width: 768px) {
+  .notion-list-view-group-items {
+    padding-left: 12px;
+  }
+  
+  .notion-list-view-group-header {
+    padding: 6px 0;
+    font-size: 0.95em;
+  }
+}

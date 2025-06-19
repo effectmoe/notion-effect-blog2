@@ -1,0 +1,245 @@
+
+> nextjs-notion-starter-kit@2.0.0 dev
+> next dev
+
+   ▲ Next.js 15.3.3
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.1.6:3000
+   - Environments: .env.local, .env
+
+ ✓ Starting...
+ ✓ Ready in 995ms
+ ✓ Compiled /middleware in 189ms (107 modules)
+ ✓ Compiled /api/test-page-list in 423ms (192 modules)
+Notion API設定状況:
+- NOTION_API_BASE_URL: 未設定（デフォルト使用）
+- NOTION_API_SECRET: 設定済み
+[TestPageList] Starting test...
+[TestPageList] Environment: {
+  NOTION_ROOT_PAGE_ID: 'NOT SET',
+  NOTION_ROOT_SPACE_ID: 'NOT SET',
+  NOTION_API_KEY: 'NOT SET',
+  NOTION_TOKEN: 'NOT SET'
+}
+[TestPageList] Trying getSiteMap...
+
+notion getPage 1ceb802cb0c680f29369dba86095fb38
+
+notion getPage 213b802cb0c680e48425d6cef98cedd7
+
+notion getPage 1ceb802cb0c6814ab43eddb38e80f2e0
+
+notion getPage 20db802cb0c680e293d4fc46bf2dd823
+
+notion getPage 1ceb802cb0c681068bbdd7b2107891f5
+
+notion getPage 1ceb802cb0c681b89b3ac07b70b7f37f
+
+notion getPage 1d3b802cb0c680519714ffd510528bc0
+
+notion getPage 1d3b802cb0c680569ac6e94e37eebfbf
+
+notion getPage 1d3b802cb0c6805f959ec180966b2a45
+
+notion getPage 1d3b802cb0c680b78f23e50d60a8fe4b
+
+notion getPage 1d3b802cb0c680d5a093f49cfd1c675c
+
+notion getPage 1d3b802cb0c680e48557cffb5e357161
+
+notion getPage 20db802cb0c6810c89e8c7470da6294f
+
+notion getPage 20db802cb0c68111b31be046a8adbe3b
+
+notion getPage 20db802cb0c6811aa53ce09f5e86ca88
+
+notion getPage 20db802cb0c681279831dbf406ccea9d
+
+notion getPage 20db802cb0c68127b32fd007536ba033
+
+notion getPage 20db802cb0c68148b310c240c3ffe135
+
+notion getPage 20db802cb0c68154a666cff7124ba1ea
+
+notion getPage 20db802cb0c6815db7beea3076cbbd52
+
+notion getPage 20db802cb0c6815dba8ac5bdbac33eaf
+
+notion getPage 20db802cb0c68161951bf97ad4ad1ff5
+
+notion getPage 20db802cb0c681638438e7bc2bfef20d
+
+notion getPage 20db802cb0c681819afdfcac4b7c1c7b
+
+notion getPage 20db802cb0c6818b9ae2f2e203c11182
+
+notion getPage 20db802cb0c681948da2fb6799a60562
+
+notion getPage 20db802cb0c6819d9eb0c11066629375
+
+notion getPage 20db802cb0c681acbd69e74253c4509d
+
+notion getPage 20db802cb0c681b09f0efb5ee5873925
+
+notion getPage 20db802cb0c681bba89dc5870b8b4127
+
+notion getPage 20db802cb0c681c0a86cc3936428813c
+
+notion getPage 20db802cb0c681c19cd0ef1657bc7ca5
+
+notion getPage 20db802cb0c681c1b21ec61e5ab788f1
+
+notion getPage 20db802cb0c681d08baeec56aa7e3770
+
+notion getPage 20db802cb0c681d58679da53af19c5c7
+
+notion getPage 20db802cb0c681dcbd91ccbc81f29898
+
+notion getPage 20db802cb0c681e68c1dc3fc90e5c4cf
+
+notion getPage 20db802cb0c681f58d00c702e1241bc6
+
+notion getPage 20db802cb0c681fab510dd6ac5e90e62
+
+notion getPage 212b802cb0c68051accccaa61f27c8cd
+
+notion getPage 212b802cb0c6808887ebf9ab5017eb6b
+
+notion getPage 213b802cb0c6808fba84d668cf155624
+
+notion getPage 213b802cb0c680b9bd4dd1be176f5e44
+
+notion getPage 213b802cb0c680c6b6e4d70d789f56e3
+
+notion getPage 213b802cb0c680e985d0f62dd6704d0c
+
+notion getPage 213b802cb0c6802ba013c65200e3a916
+
+notion getPage 213b802cb0c680629d29f676e7785dff
+
+notion getPage 213b802cb0c6809c9ebee3df8e557c6e
+
+notion getPage 213b802cb0c680b4a1fddbd5b9ea7664
+
+notion getPage 213b802cb0c680bfa237df08bf444c11
+
+notion getPage 1d7b802cb0c68008812adc0d9d02ee2b
+
+notion getPage 1d7b802cb0c680e4b558f0972235e7df
+
+notion getPage 1d7b802cb0c680e9b07dc1f72720943d
+
+notion getPage 1d3b802cb0c6800dafecc3fecaba7390
+
+notion getPage 1d3b802cb0c68015b6ccedff201a74b3
+
+notion getPage 1d3b802cb0c6801ebda7cdc6b23eeb53
+
+notion getPage 1d3b802cb0c68051a2cffb181a4a2791
+
+notion getPage 1d3b802cb0c6805b9cabeb8615b15925
+
+notion getPage 1d3b802cb0c68072ad85d28f20f872b2
+
+notion getPage 1d3b802cb0c680878c35e934fd929559
+
+notion getPage 1d3b802cb0c6809caef0c62e43fd1897
+
+notion getPage 1d3b802cb0c680ac871fe4cb086f38cc
+
+notion getPage 1d3b802cb0c680b38774e396bfd5064b
+
+notion getPage 1d3b802cb0c680f48772d68a6ee06e8c
+
+notion getPage 1d3b802cb0c68004a1eef838406dfe27
+
+notion getPage 1d3b802cb0c6801f8f88d0ecf81c3fb3
+
+notion getPage 1d3b802cb0c68022a7c2d90275bdd2d8
+
+notion getPage 1d3b802cb0c680379d74cf04c000a8cd
+
+notion getPage 1d3b802cb0c68056801fdb6ef40c992b
+
+notion getPage 1d3b802cb0c6806b9d32dca8b87a8565
+
+notion getPage 1d3b802cb0c68074b25bd7e4fe78b586
+
+notion getPage 1d3b802cb0c6807dada9ebb498751127
+
+notion getPage 1d3b802cb0c680a598ddd446345e4f37
+
+notion getPage 1d3b802cb0c680b89d81c2b6c6e9996b
+
+notion getPage 1d3b802cb0c680bd92edd48ab7b76450
+
+notion getPage 1d3b802cb0c680e39059ff2e5d184214
+
+notion getPage 1d3b802cb0c680eea6e4e9d17521957c
+[TestPageList] getSiteMap returned 75 pages
+[TestPageList] Trying getAllPageIds...
+[Page List] Getting all page IDs...
+[Page List] Root page ID: undefined
+[Page List] Root space ID: undefined
+[Page List] ⚠️ Duplicate pages found for title "💰 講座料金はいくらですか？": [
+  '212b802c-b0c6-8051-accc-caa61f27c8cd',
+  '213b802c-b0c6-80b4-a1fd-dbd5b9ea7664'
+]
+[Page List] ⚠️ Duplicate pages found for title "❓ カフェキネシとは何ですか？": [
+  '212b802c-b0c6-8088-87eb-f9ab5017eb6b',
+  '213b802c-b0c6-802b-a013-c65200e3a916'
+]
+[Page List] ⚠️ Duplicate pages found for title "🎓 資格の有効期限は？": [
+  '213b802c-b0c6-808f-ba84-d668cf155624',
+  '213b802c-b0c6-8062-9d29-f676e7785dff'
+]
+[Page List] ⚠️ Duplicate pages found for title "⏰ 講座の所要時間は？": [
+  '213b802c-b0c6-80b9-bd4d-d1be176f5e44',
+  '213b802c-b0c6-809c-9ebe-e3df8e557c6e'
+]
+[Page List] ⚠️ Duplicate pages found for title "💻 オンライン受講は可能ですか？": [
+  '213b802c-b0c6-80e9-85d0-f62dd6704d0c',
+  '213b802c-b0c6-80bf-a237-df08bf444c11'
+]
+[Page List] ✅ Total pages in map: 77
+[Page List] ✅ Unique pages: 72
+[Page List] ⚠️ Duplicate pages excluded: 5
+[Page List] Excluded duplicate page IDs: [
+  '213b802c-b0c6-80b4-a1fd-dbd5b9ea7664',
+  '213b802c-b0c6-802b-a013-c65200e3a916',
+  '213b802c-b0c6-8062-9d29-f676e7785dff',
+  '213b802c-b0c6-809c-9ebe-e3df8e557c6e',
+  '213b802c-b0c6-80bf-a237-df08bf444c11'
+]
+[TestPageList] getAllPageIds returned 72 pages
+[TestPageList] Test complete: {
+  success: true,
+  environment: {
+    NOTION_ROOT_PAGE_ID: 'NOT SET',
+    NOTION_ROOT_SPACE_ID: 'NOT SET',
+    NOTION_API_KEY: 'NOT SET',
+    NOTION_TOKEN: 'NOT SET'
+  },
+  results: {
+    siteMap: { count: 75, sample: [Array], method: 'getSiteMap()', error: null },
+    allPageIds: {
+      count: 72,
+      sample: [Array],
+      method: 'getAllPageIds()',
+      error: null
+    }
+  },
+  recommendation: 'Use getAllPageIds',
+  troubleshooting: {
+    noPages: 'If no pages found, check:',
+    steps: [
+      '1. NOTION_ROOT_PAGE_ID is correct',
+      '2. NOTION_TOKEN or NOTION_API_KEY is set',
+      '3. The Notion integration has access to the pages',
+      '4. The root page has child pages'
+    ]
+  }
+}
+ GET /api/test-page-list 200 in 9404ms
+ ✓ Compiled in 84ms (168 modules)
+ ✓ Compiled in 36ms (168 modules)

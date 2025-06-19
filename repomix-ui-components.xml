@@ -1,0 +1,1820 @@
+This file is a merged representation of a subset of the codebase, containing specifically included files and files not matching ignore patterns, combined into a single document by Repomix.
+The content has been processed where content has been compressed (code blocks are separated by ⋮---- delimiter).
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Only files matching these patterns are included: **/components/**/*.tsx, **/components/**/*.jsx, **/components/**/*.css, **/styles/**/*.css, **/lib/font-customizer/**/*, **/lib/use-dark-mode.ts, **/lib/menu-utils.ts
+- Files matching these patterns are excluded: **/node_modules/**, **/.next/**, **/dist/**, **/build/**, **/*.log, **/coverage/**, **/.git/**, **/repomix*.xml, **/*summary.md, **/temp/**
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Content has been compressed - code blocks are separated by ⋮---- delimiter
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+components/
+  ErrorPage.tsx
+  FontSettingsPanel.jsx
+  FontStyler.jsx
+  Footer.tsx
+  GitHubShareButton.tsx
+  HamburgerMenu.module.css
+  HamburgerMenu.tsx
+  Header.module.css
+  Header.tsx
+  HeaderMenu.module.css
+  HeaderMenu.tsx
+  Loading.tsx
+  LoadingIcon.tsx
+  NotionPage.tsx
+  NotionPageHeader.tsx
+  NotionViewTabs.module.css
+  NotionViewTabs.tsx
+  Page404.tsx
+  PageActions.tsx
+  PageAside.tsx
+  PageHead.tsx
+  PageSocial.module.css
+  PageSocial.tsx
+  SimplifiedSearch.module.css
+  SimplifiedSearch.tsx
+  styles.module.css
+lib/
+  font-customizer/
+    font-settings.js
+    font-utils.js
+  menu-utils.ts
+  use-dark-mode.ts
+styles/
+  global.css
+  notion.css
+  prism-theme.css
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="components/ErrorPage.tsx">
+import { PageHead } from './PageHead'
+import styles from './styles.module.css'
+⋮----
+export function ErrorPage(
+</file>
+
+<file path="components/Footer.tsx">
+import { FaEnvelopeOpenText } from '@react-icons/all-files/fa/FaEnvelopeOpenText'
+import { FaGithub } from '@react-icons/all-files/fa/FaGithub'
+import { FaLinkedin } from '@react-icons/all-files/fa/FaLinkedin'
+import { FaMastodon } from '@react-icons/all-files/fa/FaMastodon'
+import { FaTwitter } from '@react-icons/all-files/fa/FaTwitter'
+import { FaYoutube } from '@react-icons/all-files/fa/FaYoutube'
+import { FaZhihu } from '@react-icons/all-files/fa/FaZhihu'
+import { IoMoonSharp } from '@react-icons/all-files/io5/IoMoonSharp'
+import { IoSunnyOutline } from '@react-icons/all-files/io5/IoSunnyOutline'
+import { FaInstagram } from '@react-icons/all-files/fa/FaInstagram'
+import { FaFacebook } from '@react-icons/all-files/fa/FaFacebook'
+⋮----
+import { useDarkMode } from '@/lib/use-dark-mode'
+⋮----
+import styles from './styles.module.css'
+⋮----
+// TODO: merge the data and icons from PageSocial with the social links in Footer
+⋮----
+href={`https://twitter.com/${config.twitter}`}
+⋮----
+href={`https://instagram.com/${config.instagram}`}
+⋮----
+href={`https://facebook.com/${config.facebook}`}
+⋮----
+href={`https://zhihu.com/people/${config.zhihu}`}
+⋮----
+href={`https://github.com/${config.github}`}
+⋮----
+href={`https://www.linkedin.com/in/${config.linkedin}`}
+⋮----
+href={`https://www.youtube.com/${config.youtube}`}
+</file>
+
+<file path="components/GitHubShareButton.tsx">
+import styles from './styles.module.css'
+</file>
+
+<file path="components/Loading.tsx">
+import { LoadingIcon } from './LoadingIcon'
+import styles from './styles.module.css'
+⋮----
+export function Loading()
+</file>
+
+<file path="components/LoadingIcon.tsx">
+import cs from 'classnames'
+⋮----
+import styles from './styles.module.css'
+⋮----
+className=
+</file>
+
+<file path="components/NotionPageHeader.tsx">
+import { IoMoonSharp } from '@react-icons/all-files/io5/IoMoonSharp'
+import { IoSunnyOutline } from '@react-icons/all-files/io5/IoSunnyOutline'
+import cs from 'classnames'
+⋮----
+import { Breadcrumbs, Header, Search, useNotionContext } from 'react-notion-x'
+⋮----
+import { isSearchEnabled, navigationLinks, navigationStyle } from '@/lib/config'
+import { useDarkMode } from '@/lib/use-dark-mode'
+⋮----
+import styles from './styles.module.css'
+</file>
+
+<file path="components/Page404.tsx">
+import { PageHead } from './PageHead'
+import styles from './styles.module.css'
+</file>
+
+<file path="components/PageActions.tsx">
+import { AiOutlineRetweet } from '@react-icons/all-files/ai/AiOutlineRetweet'
+import { IoHeartOutline } from '@react-icons/all-files/io5/IoHeartOutline'
+⋮----
+import styles from './styles.module.css'
+⋮----
+/**
+ * @see https://developer.twitter.com/en/docs/twitter-for-websites/web-intents/overview
+ */
+⋮----
+href={`https://twitter.com/intent/like?tweet_id=${tweet}`}
+⋮----
+href={`https://twitter.com/intent/retweet?tweet_id=${tweet}`}
+</file>
+
+<file path="components/PageHead.tsx">
+import Head from 'next/head'
+⋮----
+import { getSocialImageUrl } from '@/lib/get-social-image-url'
+</file>
+
+<file path="components/PageSocial.module.css">
+.pageSocial {
+⋮----
+.action {
+⋮----
+.action:last-child {
+⋮----
+.actionBg {
+⋮----
+.actionBg svg {
+⋮----
+.actionBgPane {
+⋮----
+.action:hover {
+⋮----
+.action:hover .actionBgPane {
+⋮----
+.action:hover svg {
+⋮----
+:global(.dark-mode) .action:hover svg {
+⋮----
+.facebook .actionBgPane {
+.facebook:hover {
+⋮----
+.twitter .actionBgPane {
+.twitter:hover {
+⋮----
+.linkedin .actionBgPane {
+.linkedin:hover {
+⋮----
+.github .actionBgPane {
+.github:hover {
+⋮----
+.youtube .actionBgPane {
+.youtube:hover {
+⋮----
+.medium .actionBgPane {
+.medium:hover {
+⋮----
+.newsletter .actionBgPane {
+.newsletter:hover {
+⋮----
+.instagram .actionBgPane {
+.instagram:hover {
+⋮----
+.email .actionBgPane {
+.email:hover {
+⋮----
+.links {
+</file>
+
+<file path="components/PageSocial.tsx">
+import cs from 'classnames'
+⋮----
+import { FaFacebook } from '@react-icons/all-files/fa/FaFacebook'
+import { FaInstagram } from '@react-icons/all-files/fa/FaInstagram'
+⋮----
+import styles from './PageSocial.module.css'
+⋮----
+interface SocialLink {
+  name: string
+  title: string
+  icon: React.ReactNode
+  href?: string
+}
+⋮----
+className=
+</file>
+
+<file path="components/FontSettingsPanel.jsx">
+// components/FontSettingsPanel.jsx
+⋮----
+const FontSettingsPanel = () => {
+const [settings, setSettings] = useState(defaultSettings);
+const [activeTab, setActiveTab] = useState('title');
+const [showPreview, setShowPreview] = useState(false);
+const [saved, setSaved] = useState(false);
+const [fontList, setFontList] = useState([
+⋮----
+const [presets, setPresets] = useState([]);
+const [presetName, setPresetName] = useState('');
+⋮----
+// ユーザーの変更を設定に適用
+const handleChange = (property, value) => {
+setSettings({
+⋮----
+// フォントファミリーが変更された場合、対応するimportも更新
+const selectedFont = fontList.find(font => font.name === value.replace(/'/g, '').replace(/,.+$/, ''));
+⋮----
+setSaved(false);
+⋮----
+// 設定を保存（サーバーとローカルストレージの両方に）
+const saveSettings = async () => {
+⋮----
+// APIを使ってサーバーに保存
+const response = await fetch('/api/font-settings', {
+⋮----
+body: JSON.stringify(settings),
+⋮----
+// ローカルストレージにも保存
+saveFontSettingsToLocalStorage(settings);
+⋮----
+setSaved(true);
+setTimeout(() => setSaved(false), 3000);
+⋮----
+console.warn('サーバーへの保存に失敗しましたが、ローカルには保存されました');
+⋮----
+console.error('設定の保存に失敗しました', error);
+// サーバー保存に失敗してもローカルには保存できるかもしれない
+const localSaved = saveFontSettingsToLocalStorage(settings);
+⋮----
+console.log('ローカルストレージには保存されました');
+⋮----
+alert('設定の保存に失敗しました');
+⋮----
+// 初期設定に戻す
+const resetToDefault = () => {
+if (confirm('本当に初期設定に戻しますか？')) {
+setSettings(defaultSettings);
+⋮----
+// プレセットを保存
+const saveAsPreset = () => {
+⋮----
+alert('プリセット名を入力してください');
+⋮----
+setPresets(updatedPresets);
+localStorage.setItem('fontPresets', JSON.stringify(updatedPresets));
+setPresetName('');
+⋮----
+alert(`プリセット "${presetName}" が保存されました`);
+⋮----
+// プリセットを読み込む
+const loadPreset = (index) => {
+if (confirm('現在の設定を破棄して、プリセットを読み込みますか？')) {
+setSettings({ ...presets[index].settings });
+⋮----
+// プリセットを削除
+const deletePreset = (index) => {
+if (confirm('このプリセットを削除しますか？')) {
+⋮----
+updatedPresets.splice(index, 1);
+⋮----
+// プレビュー用のスタイル
+⋮----
+// プレビューテキストを取得
+const getPreviewText = () => {
+⋮----
+// 設定とプリセットを読み込む
+useEffect(() => {
+// サーバーから設定を読み込む
+const fetchSettings = async () => {
+⋮----
+const response = await fetch('/api/font-settings');
+⋮----
+const data = await response.json();
+setSettings(data);
+⋮----
+console.error('設定の読み込みに失敗しました', error);
+⋮----
+// ローカルストレージからプリセットを読み込む
+const loadPresets = () => {
+const savedPresets = localStorage.getItem('fontPresets');
+⋮----
+setPresets(JSON.parse(savedPresets));
+⋮----
+console.error('プリセットの読み込みに失敗しました', e);
+⋮----
+fetchSettings();
+loadPresets();
+⋮----
+{/* タブナビゲーション */}
+⋮----
+{Object.keys(settings).map(tabName => (
+⋮----
+onClick={() => setActiveTab(tabName)}
+⋮----
+{/* フォントファミリー */}
+⋮----
+value={settings[activeTab].fontFamily.replace(/'/g, '').replace(/,.+$/, '')}
+onChange={(e) => handleChange('fontFamily', e.target.value)}
+⋮----
+{fontList.map(font => (
+⋮----
+{/* 文字色 */}
+⋮----
+onChange={(e) => handleChange('color', e.target.value)}
+⋮----
+{/* フォントサイズ */}
+⋮----
+onChange={(e) => handleChange('fontSize', e.target.value)}
+⋮----
+{/* フォント太さ */}
+⋮----
+onChange={(e) => handleChange('fontWeight', e.target.value)}
+⋮----
+{/* 背景色 */}
+⋮----
+onChange={(e) => handleChange('backgroundColor', e.target.value)}
+⋮----
+onClick={() => handleChange('backgroundColor', 'transparent')}
+⋮----
+{/* テキスト配置 */}
+⋮----
+onClick={() => handleChange('textAlign', 'left')}
+⋮----
+onClick={() => handleChange('textAlign', 'center')}
+⋮----
+onClick={() => handleChange('textAlign', 'right')}
+⋮----
+{/* 字間 */}
+⋮----
+onChange={(e) => handleChange('letterSpacing', e.target.value)}
+⋮----
+{/* 行間 */}
+⋮----
+onChange={(e) => handleChange('lineHeight', e.target.value)}
+⋮----
+{/* プレビュートグル */}
+⋮----
+onChange={() => setShowPreview(!showPreview)}
+⋮----
+{/* プレビュー領域 */}
+⋮----
+{getPreviewText()}
+⋮----
+{/* プリセット管理 */}
+⋮----
+{/* プリセット保存フォーム */}
+⋮----
+onChange={(e) => setPresetName(e.target.value)}
+⋮----
+{/* プリセット一覧 */}
+⋮----
+{presets.map((preset, index) => (
+⋮----
+onClick={() => loadPreset(index)}
+⋮----
+onClick={() => deletePreset(index)}
+⋮----
+{/* 保存ボタン */}
+⋮----
+{/* 保存成功メッセージ */}
+⋮----
+{/* 設定をコピーするボタン */}
+⋮----
+const settingsJson = JSON.stringify(settings, null, 2);
+navigator.clipboard.writeText(settingsJson);
+alert('設定JSONがクリップボードにコピーされました。');
+⋮----
+{/* 高度な設定 */}
+⋮----
+value={JSON.stringify(settings, null, 2)}
+⋮----
+const newSettings = JSON.parse(e.target.value);
+setSettings(newSettings);
+⋮----
+console.error('JSONの解析に失敗しました', error);
+// エラー時は何もしない
+</file>
+
+<file path="components/FontStyler.jsx">
+// components/FontStyler.jsx
+⋮----
+export const FontStyler = () => {
+const [settings, setSettings] = useState(defaultSettings);
+⋮----
+useEffect(() => {
+// サーバーサイドレンダリング時には実行しない
+⋮----
+// 設定を読み込む関数
+const loadSettings = async () => {
+⋮----
+// 最初にAPIから設定を読み込もうとする
+const response = await fetch('/api/font-settings');
+⋮----
+const data = await response.json();
+setSettings(data);
+⋮----
+// APIが失敗したらローカルストレージから読み込む
+const loadedSettings = loadFontSettingsFromLocalStorage();
+⋮----
+setSettings(loadedSettings);
+⋮----
+console.warn('設定の読み込みに失敗しました', error);
+// エラー時はローカルストレージを試す
+⋮----
+console.error('ローカルストレージからの読み込みに失敗しました', e);
+⋮----
+loadSettings();
+⋮----
+// 既存のスタイルタグを探す
+let styleTag = document.getElementById('custom-font-styles');
+⋮----
+// なければ作成
+⋮----
+styleTag = document.createElement('style');
+⋮----
+document.head.appendChild(styleTag);
+⋮----
+// CSSを生成して適用
+const css = generateFontCSS(settings);
+⋮----
+return null; // このコンポーネントはUIを持たない
+</file>
+
+<file path="components/PageAside.tsx">
+import { type Block, type ExtendedRecordMap } from 'notion-types'
+⋮----
+import { getPageTweet } from '@/lib/get-page-tweet'
+⋮----
+import { PageActions } from './PageActions'
+import { PageSocial } from './PageSocial'
+⋮----
+export function PageAside({
+  block,
+  recordMap,
+  isBlogPost
+}: {
+  block: Block
+  recordMap: ExtendedRecordMap
+  isBlogPost: boolean
+})
+⋮----
+// only display comments and page actions on blog post pages
+</file>
+
+<file path="components/SimplifiedSearch.module.css">
+/* SimplifiedSearch.module.css */
+.searchOverlay {
+⋮----
+.visible {
+⋮----
+.hidden {
+⋮----
+.searchContainer {
+⋮----
+.searchHeader {
+⋮----
+.searchTitle {
+⋮----
+.closeButton {
+⋮----
+.closeButton:hover {
+⋮----
+.searchInputContainer {
+⋮----
+.searchInput {
+⋮----
+.searchInput:focus {
+⋮----
+.categorySelector {
+⋮----
+.categoryButton {
+⋮----
+.categoryButton:hover {
+⋮----
+.activeCategory {
+⋮----
+.activeCategory:hover {
+⋮----
+.resultsContainer {
+⋮----
+.resultsList {
+⋮----
+.resultItem {
+⋮----
+.resultLink {
+⋮----
+.resultLink:hover {
+⋮----
+.resultTitle {
+⋮----
+.resultCategory {
+⋮----
+.noResults {
+⋮----
+/* ダークモード対応 */
+:global(.dark-mode) .searchOverlay {
+⋮----
+:global(.dark-mode) .searchContainer {
+⋮----
+:global(.dark-mode) .searchTitle {
+⋮----
+:global(.dark-mode) .searchInput {
+⋮----
+:global(.dark-mode) .searchInput:focus {
+⋮----
+:global(.dark-mode) .closeButton {
+⋮----
+:global(.dark-mode) .closeButton:hover {
+⋮----
+:global(.dark-mode) .categoryButton {
+⋮----
+:global(.dark-mode) .categoryButton:hover {
+⋮----
+:global(.dark-mode) .activeCategory {
+⋮----
+:global(.dark-mode) .activeCategory:hover {
+⋮----
+:global(.dark-mode) .resultsContainer {
+⋮----
+:global(.dark-mode) .resultLink {
+⋮----
+:global(.dark-mode) .resultLink:hover {
+⋮----
+:global(.dark-mode) .resultCategory {
+⋮----
+/* レスポンシブ対応 */
+</file>
+
+<file path="components/SimplifiedSearch.tsx">
+// SimplifiedSearch.tsx - 簡易検索ナビゲーション
+import React, { useState } from 'react';
+import Link from 'next/link';
+import { IoSearchOutline } from '@react-icons/all-files/io5/IoSearchOutline';
+import { IoClose } from '@react-icons/all-files/io5/IoClose';
+import cs from 'classnames';
+⋮----
+import styles from './SimplifiedSearch.module.css';
+⋮----
+// サイト内のページデータ（静的に設定）
+⋮----
+// カテゴリはここを修正して更新してください
+⋮----
+// カテゴリーリスト（重複なし）
+⋮----
+interface SimplifiedSearchProps {
+  isVisible: boolean;
+  onClose: () => void;
+}
+⋮----
+// 検索テキストとカテゴリでフィルター
+⋮----
+// カテゴリーフィルター
+⋮----
+// テキストフィルター（空の場合はすべて表示）
+⋮----
+// タイトルに検索テキストが含まれるかどうか
+⋮----
+onChange=
+⋮----
+className=
+</file>
+
+<file path="lib/font-customizer/font-utils.js">
+// lib/font-customizer/font-utils.js
+⋮----
+// フォント設定からCSSを生成する関数
+export function generateFontCSS(settings = defaultSettings) {
+⋮----
+let fontImports = new Set();
+⋮----
+// フォントのインポート部分を抽出
+Object.values(settings).forEach(setting => {
+⋮----
+fontImports.add(setting.fontImport);
+⋮----
+// フォントインポートをCSSに追加
+fontImports.forEach(importUrl => {
+⋮----
+// 各要素のスタイルを生成
+css += generateElementCSS('.notion-page-title-text', settings.title);
+css += generateElementCSS('.notion-h1', settings.heading1);
+css += generateElementCSS('.notion-h2', settings.heading2);
+css += generateElementCSS('.notion-h3', settings.heading3);
+css += generateElementCSS('.notion-text', settings.text);
+css += generateElementCSS('.notion-toggle', settings.toggle);
+css += generateElementCSS('.notion-toggle.notion-h1', settings.toggleHeading1);
+css += generateElementCSS('.notion-toggle.notion-h2', settings.toggleHeading2);
+css += generateElementCSS('.notion-toggle.notion-h3', settings.toggleHeading3);
+⋮----
+// 要素ごとのCSS生成ヘルパー関数
+function generateElementCSS(selector, styles) {
+⋮----
+// ローカルストレージからフォント設定を読み込む関数
+export function loadFontSettingsFromLocalStorage() {
+⋮----
+const savedSettings = localStorage.getItem('fontSettings');
+⋮----
+return JSON.parse(savedSettings);
+⋮----
+console.error('フォント設定の読み込みに失敗しました:', error);
+⋮----
+// ローカルストレージにフォント設定を保存する関数
+export function saveFontSettingsToLocalStorage(settings) {
+⋮----
+localStorage.setItem('fontSettings', JSON.stringify(settings));
+⋮----
+console.error('フォント設定の保存に失敗しました:', error);
+</file>
+
+<file path="components/HamburgerMenu.module.css">
+.hamburgerMenu {
+⋮----
+/* デスクトップメニュー */
+.desktopMenu {
+⋮----
+scrollbar-width: none; /* Firefox用 */
+⋮----
+.desktopMenu::-webkit-scrollbar {
+⋮----
+display: none; /* Chrome, Safari用 */
+⋮----
+.menuItem {
+⋮----
+.menuItem:hover {
+⋮----
+.menuItem.active {
+⋮----
+/* ハンバーガーボタン */
+.hamburgerButton {
+⋮----
+.hamburgerIcon {
+⋮----
+.hamburgerButton.open .hamburgerIcon:nth-child(1) {
+⋮----
+.hamburgerButton.open .hamburgerIcon:nth-child(2) {
+⋮----
+.hamburgerButton.open .hamburgerIcon:nth-child(3) {
+⋮----
+/* モバイルメニュー */
+.mobileMenu {
+⋮----
+.mobileMenu.open {
+⋮----
+.mobileMenu .menuItem {
+⋮----
+.mobileMenu .menuItem.active {
+⋮----
+/* レスポンシブ設定 */
+⋮----
+/* PCとタブレットでもハンバーガーメニューを表示するため、このメディアクエリは削除 */
+</file>
+
+<file path="components/HamburgerMenu.tsx">
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import styles from './HamburgerMenu.module.css';
+⋮----
+type MenuItem = {
+  id: string;
+  title: string;
+  url: string;
+  isActive?: boolean;
+};
+⋮----
+// 仮のメニュー項目（後でNotion DBから取得する内容に置き換え）
+⋮----
+type HamburgerMenuProps = {
+  menuItems?: MenuItem[];
+  currentPath?: string;
+};
+⋮----
+// アクティブなメニュー項目を設定
+⋮----
+// ウィンドウサイズによるモバイル判定
+⋮----
+const checkIfMobile = () =>
+⋮----
+// 初期チェック
+⋮----
+// リサイズイベント
+⋮----
+// メニュー開閉の切り替え
+const toggleMenu = () =>
+⋮----
+// モバイルメニューが開いているときにページ外クリックで閉じる
+⋮----
+const handleClickOutside = (event: MouseEvent) =>
+</file>
+
+<file path="components/HeaderMenu.module.css">
+.headerNav {
+⋮----
+/* デスクトップメニュー */
+.desktopMenu {
+⋮----
+.menuList {
+⋮----
+.menuItem {
+⋮----
+.menuLink {
+⋮----
+.menuLink:hover {
+⋮----
+.menuLink.active {
+⋮----
+.menuLink.active::after {
+⋮----
+/* モバイルメニュー */
+.hamburgerButton {
+⋮----
+.hamburgerIcon {
+⋮----
+.hamburgerIcon span {
+⋮----
+.hamburgerIcon span:nth-child(1) {
+⋮----
+.hamburgerIcon span:nth-child(2) {
+⋮----
+.hamburgerIcon span:nth-child(3) {
+⋮----
+.hamburgerIcon.open span:nth-child(1) {
+⋮----
+.hamburgerIcon.open span:nth-child(2) {
+⋮----
+.hamburgerIcon.open span:nth-child(3) {
+⋮----
+.mobileMenu {
+⋮----
+.mobileMenu.open {
+⋮----
+.mobileMenu .menuList {
+⋮----
+.mobileMenu .menuItem {
+⋮----
+.mobileMenu .menuLink {
+⋮----
+/* メディアクエリ */
+</file>
+
+<file path="components/HeaderMenu.tsx">
+import React, { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
+import styles from './HeaderMenu.module.css'
+⋮----
+type MenuItem = {
+  id: string
+  title: string
+  url: string
+}
+⋮----
+type HeaderMenuProps = {
+  menuItems: MenuItem[]
+}
+⋮----
+// 現在のページに基づいてアクティブなメニュー項目を判断
+const isActive = (url: string) =>
+⋮----
+// ウィンドウサイズの変更を監視してモバイル表示を判断
+⋮----
+const checkIsMobile = () =>
+⋮----
+// 初期チェック
+⋮----
+// リサイズイベントリスナーを設定
+⋮----
+// クリーンアップ
+⋮----
+// メニューの開閉を切り替える
+const toggleMenu = () =>
+⋮----
+// メニュー項目をクリックした時の処理
+const handleMenuItemClick = () =>
+⋮----
+// モバイル表示の場合はメニューを閉じる
+⋮----
+{/* モバイル用ハンバーガーボタン */}
+⋮----
+{/* デスクトップメニューまたはモバイルオープン時のメニュー */}
+</file>
+
+<file path="lib/font-customizer/font-settings.js">
+// lib/font-customizer/font-settings.js
+// デフォルトのフォント設定を定義
+⋮----
+// タイトル
+⋮----
+// 見出し1
+⋮----
+// 見出し2
+⋮----
+// 見出し3
+⋮----
+// テキスト
+⋮----
+// トグル
+⋮----
+// トグル見出し1
+⋮----
+// トグル見出し2
+⋮----
+// トグル見出し3
+</file>
+
+<file path="lib/use-dark-mode.ts">
+import useDarkModeImpl from '@fisch0920/use-dark-mode'
+⋮----
+export function useDarkMode()
+</file>
+
+<file path="styles/prism-theme.css">
+/* prism theme adjustments */
+⋮----
+.notion-code {
+⋮----
+/* コードブロックの右上に言語名を表示 */
+.notion-code::before {
+⋮----
+/* ホバー時の効果 */
+.notion-code:hover {
+⋮----
+.dark-mode .notion-code {
+⋮----
+/* ダークモード時のコードブロック言語表示 */
+.dark-mode .notion-code::before {
+⋮----
+/* ダークモード時のホバー効果 */
+.dark-mode .notion-code:hover {
+.notion code {
+.dark-mode .notion code {
+⋮----
+.dark-mode .notion .notion-inline-code {
+⋮----
+.notion .notion-inline-code {
+⋮----
+.token.cdata,
+.token.comment {
+.dark-mode .token.cdata,
+.token.punctuation {
+.dark-mode .token.punctuation {
+.token.boolean,
+.token.attr-name,
+.language-css .token.string,
+.token.atrule,
+.token.class-name,
+.token.important,
+code[class*='language-'],
+.dark-mode code[class*='language-'],
+pre::-webkit-scrollbar {
+pre {
+.token.operator,
+⋮----
+pre[class*='language-'] > code {
+⋮----
+pre[class*='language-']:before,
+</file>
+
+<file path="styles/global.css">
+* {
+⋮----
+a {
+⋮----
+body,
+⋮----
+body {
+⋮----
+.static-tweet blockquote {
+⋮----
+.static-tweet-emoji {
+⋮----
+.searchInput {
+⋮----
+::-webkit-scrollbar
+⋮----
+::-webkit-scrollbar-thumb
+⋮----
+::-webkit-scrollbar-track {
+</file>
+
+<file path="components/NotionViewTabs.module.css">
+.notionViewTabs {
+⋮----
+/* これは最小限のスタイルで、実際のスタイルは使用しないため */
+</file>
+
+<file path="components/NotionViewTabs.tsx">
+import React from 'react';
+import Link from 'next/link';
+⋮----
+// タブのインターフェース定義
+export interface ViewTab {
+  id: string;
+  name: string;
+  path: string;
+  pageId: string;
+}
+⋮----
+interface NotionViewTabsProps {
+  tabs?: ViewTab[];
+  activeTab?: string;
+}
+⋮----
+const NotionViewTabs: React.FC<NotionViewTabsProps> = ({ 
+  tabs = [], 
+  activeTab = 'all'
+}) =>
+⋮----
+{/* タブのコンテンツ（このコンポーネントは実際には使用しないため最小限に） */}
+</file>
+
+<file path="components/styles.module.css">
+.container {
+⋮----
+/* ヘッダーがfixedなのでコンテンツにMarginを追加 */
+.notionPageContainer {
+⋮----
+margin-top: 60px; /* ヘッダーの高さに合わせる */
+⋮----
+/* モバイル対応 */
+⋮----
+.loadingIcon {
+⋮----
+.main {
+⋮----
+.errorImage {
+⋮----
+.footer {
+⋮----
+.copyright {
+⋮----
+.settings,
+⋮----
+.settings a,
+⋮----
+.settings a:last-of-type,
+⋮----
+.settings a:hover,
+⋮----
+.toggleDarkMode:hover {
+⋮----
+.twitter:hover {
+⋮----
+.mastodon:hover {
+⋮----
+.zhihu:hover {
+⋮----
+.github:hover {
+⋮----
+.youtube:hover {
+⋮----
+.linkedin:hover {
+⋮----
+.newsletter:hover {
+⋮----
+.comments {
+⋮----
+.footer>div {
+⋮----
+.footer .settings {
+⋮----
+.footer .social {
+⋮----
+.footer .copyright {
+⋮----
+.pageActions {
+⋮----
+.pageActions a {
+⋮----
+.pageActions a:last-of-type {
+⋮----
+.pageActions a:hover {
+⋮----
+.likeTweet:hover {
+⋮----
+.retweet:hover {
+⋮----
+.githubCorner {
+⋮----
+.githubCorner:hover .octoArm {
+⋮----
+.githubCorner .octoArm {
+⋮----
+.hidden {
+⋮----
+/* ========================================== */
+/* ✅ PageSocial（右側縦並び）のスタイル限定 */
+⋮----
+/* 汎用クラスに対応したスタイル（クラス名が変わっても効く！） */
+⋮----
+/* Instagram */
+a.instagram:hover .bgPane {
+a.instagram:hover {
+⋮----
+/* Facebook */
+a.facebook:hover .bgPane {
+a.facebook:hover {
+⋮----
+/* ✅ Footer（下部）のスタイル限定 */
+⋮----
+/* Instagram（下部） */
+.social .instagram:hover {
+.social a.instagram svg {
+⋮----
+/* Facebook（下部） */
+.social .facebook:hover {
+.social a.facebook svg {
+</file>
+
+<file path="components/Header.module.css">
+/* Header Styles */
+.header {
+⋮----
+height: 60px; /* ヘッダー高さ増加 */
+⋮----
+z-index: 9999; /* 最大のz-indexを設定して確実に最前面に表示 */
+⋮----
+.headerScrolled {
+⋮----
+height: 50px; /* スクロール時のヘッダー高さ */
+⋮----
+.darkHeader {
+⋮----
+.headerContent {
+⋮----
+justify-content: space-between; /* 左・中央・右で均等配置 */
+⋮----
+/* ヘッダー左側（ロゴ） */
+.headerLeft {
+⋮----
+.logo {
+⋮----
+.logo:hover {
+⋮----
+.logoText {
+⋮----
+/* デスクトップナビゲーション - 現在は空の置き場所として使用 */
+.desktopNav {
+⋮----
+.navList {
+⋮----
+.navItem {
+⋮----
+.navLink {
+⋮----
+.navLink:hover {
+⋮----
+.activeLink {
+⋮----
+.activeLink::after {
+⋮----
+.darkHeader .navLink {
+⋮----
+.darkHeader .navLink:hover,
+⋮----
+/* Header Right Side */
+.headerRight {
+⋮----
+.iconButton {
+⋮----
+.iconButton:hover {
+⋮----
+.darkHeader .iconButton:hover {
+⋮----
+/* Instagram Button */
+.instagramButton:hover {
+⋮----
+/* Facebook Button */
+.facebookButton:hover {
+⋮----
+/* 検索オーバーレイ */
+.searchOverlay {
+⋮----
+top: 60px; /* ヘッダーの高さに合わせる */
+⋮----
+.darkHeader + .searchOverlay {
+⋮----
+.headerScrolled + .searchOverlay {
+⋮----
+top: 50px; /* スクロール時のヘッダー高さに合わせる */
+⋮----
+.searchVisible {
+⋮----
+.searchHidden {
+⋮----
+.searchContainer {
+⋮----
+/* 検索フォーム */
+.searchForm {
+⋮----
+.searchInput {
+⋮----
+.searchInput:focus {
+⋮----
+.searchButton {
+⋮----
+.searchButton:hover {
+⋮----
+.searchButton:disabled {
+⋮----
+/* 検索結果 */
+.searchResults {
+⋮----
+.searchResultsTitle {
+⋮----
+.searchResultsList {
+⋮----
+.searchResultItem {
+⋮----
+.searchResultItem:last-child {
+⋮----
+.searchResultLink {
+⋮----
+.searchResultLink:hover {
+⋮----
+.searchResultTitle {
+⋮----
+.searchResultDescription {
+⋮----
+.noResults {
+⋮----
+/* ダークモード */
+.darkHeader + .searchOverlay .searchInput {
+⋮----
+.darkHeader + .searchOverlay .searchInput:focus {
+⋮----
+.darkHeader + .searchOverlay .searchResults {
+⋮----
+.darkHeader + .searchOverlay .searchResultsTitle {
+⋮----
+.darkHeader + .searchOverlay .searchResultItem {
+⋮----
+.darkHeader + .searchOverlay .searchResultDescription {
+⋮----
+.darkHeader + .searchOverlay .searchResultLink:hover {
+⋮----
+.darkHeader + .searchOverlay .noResults {
+⋮----
+/* Mobile Menu Button */
+.mobileMenuButton {
+⋮----
+/* Hamburger Icon */
+.hamburgerIcon {
+⋮----
+.hamburgerIcon span {
+⋮----
+.hamburgerIcon span:nth-child(1) {
+⋮----
+.hamburgerIcon span:nth-child(2) {
+⋮----
+.hamburgerIcon span:nth-child(3) {
+⋮----
+.hamburgerIcon.open span:nth-child(1) {
+⋮----
+.hamburgerIcon.open span:nth-child(2) {
+⋮----
+.hamburgerIcon.open span:nth-child(3) {
+⋮----
+/* Mobile Menu */
+.mobileMenu {
+⋮----
+.darkHeader + .mobileMenu {
+⋮----
+.headerScrolled + .mobileMenu {
+⋮----
+.mobileMenuOpen {
+⋮----
+.mobileMenuClosed {
+⋮----
+.mobileNav {
+⋮----
+.mobileNavList {
+⋮----
+.mobileNavItem {
+⋮----
+.mobileNavLink {
+⋮----
+/* メニュー項目のエモジ */
+.menuItemEmoji {
+⋮----
+.mobileNavLink:hover {
+⋮----
+.darkHeader + .mobileMenu .mobileNavLink:hover {
+⋮----
+.activeMobileLink {
+⋮----
+.darkHeader + .mobileMenu .activeMobileLink {
+⋮----
+/* レスポンシブ調整 */
+⋮----
+/* スマホサイズではデスクトップナビゲーションを非表示 */
+</file>
+
+<file path="lib/menu-utils.ts">
+import { notion } from './notion-api'
+⋮----
+// プロパティ値を取得する独自関数
+function getPropertyValue(block: any, propertyName: string, recordMap: any): any
+⋮----
+// タイトルの場合は特別な処理
+⋮----
+// 通常のプロパティ
+⋮----
+// メニュー項目の型定義
+export type MenuItem = {
+  id: string
+  title: string
+  url: string
+  icon?: string
+  emoji?: string
+  isActive?: boolean
+}
+⋮----
+// フォールバック用のハードコードされたメニュー項目
+⋮----
+// Notionデータベースからメニュー項目を取得する関数
+export async function getMenuItems(): Promise<MenuItem[]>
+⋮----
+// rootNotionPageIdを取得
+⋮----
+// NotionデータベースのページデータをAPI経由で取得
+⋮----
+// ブロックデータからデータベースのブロックを見つける
+⋮----
+// データベースのブロックを見つける
+⋮----
+block.value?.collection_id // collection_idプロパティが存在するブロックのみをフィルタリング
+⋮----
+// 各コレクションブロックからレコードを取得
+⋮----
+// 各コレクションブロックを処理
+⋮----
+// 型アサーションを使用してTypeScriptのエラーを回避
+// collection_idが存在することがすでにフィルタリングされている
+⋮----
+// コレクションのスキーマからMenuプロパティを探す
+⋮----
+// このコレクションのすべてのページを取得
+⋮----
+// ページごとにMenuプロパティをチェック
+⋮----
+// Menuプロパティの値を取得
+⋮----
+// Menuプロパティがtrueの場合のみ処理
+⋮----
+// ページタイトルを取得
+⋮----
+// タイトルが空の場合はスキップ
+⋮----
+// ページIDからURLを生成（IDをそのまま使用するシンプルな方法）
+⋮----
+// メニュー項目を追加
+⋮----
+// 少なくとも「ホーム」は常に表示
+⋮----
+// サーバーサイドでメニュー項目を取得するためのヘルパー関数
+export async function getMenuItemsForStaticProps()
+</file>
+
+<file path="components/Header.tsx">
+import React, { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
+import { FaGithub } from '@react-icons/all-files/fa/FaGithub'
+import { FaInstagram } from '@react-icons/all-files/fa/FaInstagram'
+import { FaFacebook } from '@react-icons/all-files/fa/FaFacebook'
+import { IoMoonSharp } from '@react-icons/all-files/io5/IoMoonSharp'
+import { IoSunnyOutline } from '@react-icons/all-files/io5/IoSunnyOutline'
+import { IoSearchOutline } from '@react-icons/all-files/io5/IoSearchOutline'
+import cs from 'classnames'
+⋮----
+import { useDarkMode } from '@/lib/use-dark-mode'
+import styles from './Header.module.css'
+import { MenuItem } from '@/lib/menu-utils'
+import { notionViews } from '@/lib/notion-views'
+import HamburgerMenu from './HamburgerMenu'
+⋮----
+// notionViewsからフォールバック用メニュー項目を生成
+⋮----
+type HeaderProps = {
+  menuItems?: MenuItem[]
+}
+⋮----
+// menuItemsがundefinedの場合はDEFAULT_MENU_ITEMSを使用する
+⋮----
+// マウント状態の確認
+⋮----
+// 画面サイズのチェック
+const checkIsMobile = () =>
+⋮----
+// 初期チェック
+⋮----
+// リサイズイベントリスナーを設定
+⋮----
+// 検索実行関数
+const handleSearch = async (e) =>
+⋮----
+// 公式Notion APIを使用した検索エンドポイントを使用する
+⋮----
+// results.resultsが配列であることを確認
+⋮----
+// Enterキーで検索実行
+const handleKeyDown = (e) =>
+⋮----
+// スクロール検出用のイベントリスナー
+⋮----
+const handleScroll = () =>
+⋮----
+// ダークモード切り替え
+⋮----
+// 現在のページに基づいてアクティブなメニュー項目を判断
+const isActive = (url: string) =>
+⋮----
+// メニューの開閉を切り替える
+const toggleMenu = () =>
+⋮----
+// メニューを開くときは検索を閉じる
+⋮----
+// 検索の表示/非表示を切り替える
+const toggleSearch = () =>
+⋮----
+// 検索を開くときはメニューを閉じる
+⋮----
+// メニュー項目をクリックした時の処理
+const handleMenuItemClick = () =>
+⋮----
+// メニューを閉じる
+⋮----
+// ロゴコンポーネント
+const Logo = ()
+⋮----
+{/* ロゴ */}
+⋮----
+{/* デスクトップ用ナビゲーション - メニュー項目はハンバーガーメニューにのみ表示 */}
+⋮----
+{/* ここは空にして、メニュー項目はハンバーガーメニューにのみ表示する */}
+⋮----
+{/* ヘッダー右側の要素 */}
+⋮----
+{/* 検索ボタン */}
+⋮----
+{/* ダークモード切り替えボタン */}
+⋮----
+{/* SNSリンク */}
+⋮----
+href={`https://instagram.com/${config.instagram}`}
+⋮----
+className=
+⋮----
+href={`https://facebook.com/${config.facebook}`}
+⋮----
+{/* ハンバーガーメニューボタン（常に表示） */}
+⋮----
+{/* 検索オーバーレイ */}
+⋮----
+{/* 検索結果 */}
+⋮----
+// Notion APIの結果からデータを抽出
+⋮----
+// 公式APIのページオブジェクトからタイトルを取得する
+⋮----
+// 公式APIの構造の場合
+⋮----
+// ページのタイトル取得試行
+⋮----
+// ページの親がデータベースの場合
+⋮----
+// このページには他の方法でタイトルを取得する必要がある
+title = '無題のページ'; // デフォルト
+⋮----
+// 旧APIや他の形式の互換性
+⋮----
+// 最終的にタイトルの安全確保
+⋮----
+// 結果と一緒に提供されるURLを使用する
+⋮----
+{/* 検索結果がない場合のメッセージ */}
+⋮----
+{/* モバイルメニュー（常に表示） */}
+{/* <div className={cs(
+        styles.mobileMenu,
+        menuOpen ? styles.mobileMenuOpen : styles.mobileMenuClosed
+      )}>
+        <nav className={styles.mobileNav}>
+          <ul className={styles.mobileNavList}>
+            {items.map((item) => (
+              <li key={item.id} className={styles.mobileNavItem}>
+                <Link 
+                  href={item.url} 
+                  className={cs(
+                    styles.mobileNavLink,
+                    isActive(item.url) && styles.activeMobileLink
+                  )}
+                  onClick={handleMenuItemClick}
+                >
+                  {item.emoji && (
+                    <span className={styles.menuItemEmoji}>{item.emoji}</span>
+                  )}
+                  {item.title}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div> */}
+</file>
+
+<file path="styles/notion.css">
+/**
+ * This file contains site-specifc style overrides for Notion elements from
+ * react-notion-x.
+ *
+ * react-notion-x's goal is to match styling as close as possible to Notion,
+ * whereas our goal with this site is to adjust Notion's styling in a few key
+ * places to add some flare.
+ */
+⋮----
+.notion {
+⋮----
+.notion-frame {
+⋮----
+.notion-page {
+⋮----
+.index-page {
+⋮----
+.notion-text {
+⋮----
+.notion-asset-caption {
+⋮----
+.notion-asset-wrapper {
+⋮----
+.notion-asset-wrapper-video > div,
+⋮----
+.notion-header .notion-nav-header {
+⋮----
+.notion-nav-header-rhs {
+⋮----
+.notion-gallery-grid {
+⋮----
+.notion-gallery-grid .notion-page-icon-inline {
+⋮----
+.notion-gallery-grid .notion-page-title-text {
+⋮----
+.notion-gallery-grid .notion-collection-card-property {
+⋮----
+.notion-gallery-grid .notion-property-text {
+⋮----
+.notion-collection-card {
+⋮----
+.notion-collection-card-cover img {
+⋮----
+object-fit: cover; /* 画像のアスペクト比を維持しながら領域いっぱいに表示 */
+⋮----
+.notion-collection-card-cover {
+⋮----
+/* 高さは各メディアクエリで設定するため、ここでは切り替えの基本値のみ設定 */
+⋮----
+.notion-collection-card:hover .notion-collection-card-cover {
+⋮----
+.notion-collection-card-body {
+⋮----
+/* only target safari */
+⋮----
+_::-webkit-full-page-media,
+⋮----
+.notion-quote {
+⋮----
+.notion-h1,
+⋮----
+.notion-callout {
+⋮----
+.notion-hr {
+⋮----
+.index-page.notion-page {
+⋮----
+.notion-search-button {
+⋮----
+.notion .notion-page-icon-cover {
+⋮----
+.notion-title {
+⋮----
+/* タイトルフォント設定の強制適用 */
+.notion-page-title-text {
+⋮----
+/* Googleフォントの直接インポート */
+⋮----
+.notion-collection-row {
+⋮----
+.notion-collection-page-properties .notion-collection-column-title {
+⋮----
+.notion-collection-row-property .notion-property {
+⋮----
+.notion-collection-row-value {
+⋮----
+.notion-page-cover-wrapper,
+⋮----
+.notion-page-cover-wrapper {
+⋮----
+.notion-block-ab9a258d6cf444f3bb40dc2600feae91 .notion-page-link {
+⋮----
+.notion-code {
+⋮----
+.notion-link {
+⋮----
+.notion-link:focus,
+⋮----
+.notion-red_background,
+⋮----
+/* light yellow */
+⋮----
+.notion-purple_background,
+⋮----
+/* light pink */
+⋮----
+.notion-blue_background,
+⋮----
+/* light blue */
+⋮----
+/* light red */
+⋮----
+.notion-teal_background {
+⋮----
+/* light green */
+⋮----
+.notion-brown_background {
+⋮----
+/* dark blue */
+⋮----
+/* disable highlighting in dark mode */
+.dark-mode .notion-red_background,
+⋮----
+/* if you don't want rounded page icon images, remove this */
+.notion-page-icon-hero.notion-page-icon-image {
+.notion-page-icon-hero.notion-page-icon-image span,
+⋮----
+.notion-header {
+⋮----
+.dark-mode .notion-header {
+⋮----
+/* Workaround for Firefox not supporting backdrop-filter yet */
+@-moz-document url-prefix() {
+⋮----
+.notion-bookmark:hover {
+⋮----
+.notion-block-ab9a258d6cf444f3bb40dc2600feae91 .notion-column {
+⋮----
+.notion-block-260baa77f1e1428b97fb14ac99c7c385 {
+⋮----
+.notion-search .searchBar {
+⋮----
+.notion-search .noResults {
+⋮----
+.notion-search .noResultsDetail {
+⋮----
+.notion-equation.notion-equation-block {
+⋮----
+.dark-mode .notion-equation.notion-equation-block {
+⋮----
+/* インライン数式のスタイル改善 */
+.notion-equation.notion-equation-inline {
+⋮----
+/* ホバー時の効果 */
+.notion-equation.notion-equation-block:hover {
+⋮----
+.dark-mode .notion-equation.notion-equation-block:hover {
+⋮----
+/* PDFビューアーの改善スタイル */
+.notion-pdf {
+⋮----
+/* PDFビューアーにホバー効果を追加 */
+.notion-pdf:hover {
+⋮----
+/* PDF上部にPDFを示すバッジを追加 */
+.notion-pdf::before {
+⋮----
+/* ダークモード対応 */
+.dark-mode .notion-pdf {
+⋮----
+.dark-mode .notion-pdf:hover {
+⋮----
+/* モバイル端末の場合はPDFビューアーの高さを調整 */
+⋮----
+/* モバイルでは変形効果を抑える */
+⋮----
+/* コレクションビュー改善スタイル */
+.notion-collection-view-tabs {
+⋮----
+scrollbar-width: none; /* Firefox */
+-ms-overflow-style: none; /* IE/Edge */
+⋮----
+.notion-collection-view-tabs::-webkit-scrollbar {
+⋮----
+display: none; /* Chrome/Safari/Opera */
+⋮----
+.notion-collection-view-tabs-content {
+⋮----
+.notion-collection-view-tabs-content button {
+⋮----
+.notion-collection-view-tabs-content button:hover {
+⋮----
+.notion-collection-view-tabs-content button.active {
+⋮----
+.dark-mode .notion-collection-view-tabs {
+⋮----
+.dark-mode .notion-collection-view-tabs-content button:hover {
+⋮----
+.dark-mode .notion-collection-view-tabs-content button.active {
+⋮----
+/* テーブルビューの改善 */
+.notion-table {
+⋮----
+.notion-table-view {
+⋮----
+.notion-table-header {
+⋮----
+.dark-mode .notion-table-header {
+⋮----
+.notion-table-header-cell {
+⋮----
+.notion-table-cell {
+⋮----
+.notion-table-row {
+⋮----
+.notion-table-row:last-child {
+⋮----
+.notion-table-row:hover {
+⋮----
+.dark-mode .notion-table-row:hover {
+⋮----
+/* デバイス別のメディアクエリ設定 */
+/* PC標準 (1025px〜1439px) */
+⋮----
+grid-template-columns: repeat(3, 1fr); /* 3カラム固定 */
+⋮----
+height: 240px; /* 少し小さめにして3つ並べても見やすくする */
+⋮----
+/* 大型PC (1440px以上) */
+⋮----
+grid-template-columns: repeat(4, 1fr); /* 4カラム固定 */
+⋮----
+height: 220px; /* さらに少し小さめに */
+⋮----
+/* タブレット (768px〜1024px) */
+⋮----
+height: 320px; /* タブレット用の高さ調整 */
+⋮----
+/* スマートフォン (767px以下) */
+⋮----
+height: 280px; /* スマートフォン用の高さ調整 */
+⋮----
+font-size: 1.5em; /* スマートフォン用のフォントサイズ縮小 */
+</file>
+
+<file path="components/NotionPage.tsx">
+import cs from 'classnames'
+import dynamic from 'next/dynamic'
+import Image from 'next/legacy/image'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
+import { type PageBlock } from 'notion-types'
+import { formatDate, getBlockTitle, getPageProperty } from 'notion-utils'
+⋮----
+import BodyClassName from 'react-body-classname'
+import {
+  type NotionComponents,
+  NotionRenderer,
+  useNotionContext
+} from 'react-notion-x'
+import { EmbeddedTweet, TweetNotFound, TweetSkeleton } from 'react-tweet'
+import { useSearchParam } from 'react-use'
+⋮----
+import { mapImageUrl } from '@/lib/map-image-url'
+import { getCanonicalPageUrl, mapPageUrl } from '@/lib/map-page-url'
+import { searchNotion } from '@/lib/search-notion'
+import { useDarkMode } from '@/lib/use-dark-mode'
+⋮----
+import { Footer } from './Footer'
+import { GitHubShareButton } from './GitHubShareButton'
+import { Loading } from './Loading'
+import { NotionPageHeader } from './NotionPageHeader'
+import { Page404 } from './Page404'
+import { PageAside } from './PageAside'
+import { PageHead } from './PageHead'
+import { Header } from './Header'
+import styles from './styles.module.css'
+⋮----
+// -----------------------------------------------------------------------------
+// dynamic imports for optional components
+// -----------------------------------------------------------------------------
+⋮----
+// コードブロックコンポーネント - 改良版
+⋮----
+// add / remove any prism syntaxes here
+⋮----
+// 必須の基本言語
+⋮----
+// 人気のある言語
+⋮----
+// その他の言語も含める
+⋮----
+// HTMLテンプレート言語
+⋮----
+// データベースビューコンポーネント
+⋮----
+// 数式コンポーネント
+⋮----
+// PDFビューアーコンポーネント - SSRを無効化
+⋮----
+// モーダルコンポーネント - SSRを無効化
+⋮----
+function Tweet(
+⋮----
+const propertyLastEditedTimeValue = (
+  { block, pageHeader },
+  defaultFn: () => React.ReactNode
+) =>
+⋮----
+const propertyDateValue = (
+  { data, schema, pageHeader },
+  defaultFn: () => React.ReactNode
+) =>
+⋮----
+const propertyTextValue = (
+  { schema, pageHeader },
+  defaultFn: () => React.ReactNode
+) =>
+⋮----
+// ナビゲーションメニュー項目
+const getNavigationMenuItems = (site: types.Site) =>
+⋮----
+// デフォルトのメニュー項目
+⋮----
+menuItems // Notionデータベースからのメニューアイテムを受け取る
+⋮----
+// Notionのデフォルトヘッダーをカスタムヘッダーとして使わない
+Header: () => null, // ヘッダーを非表示にする
+⋮----
+// ボディにNoNotionTabsクラスを追加
+⋮----
+// ナビゲーションメニュー項目を取得
+⋮----
+// lite mode is for oembed
+⋮----
+// const isRootPage =
+//   parsePageId(block?.id) === parsePageId(site?.rootNotionPageId)
+⋮----
+// add important objects to the window global for easy debugging
+⋮----
+{/* Notionレンダラー - 内部のヘッダーをnullに設定したので、カスタムヘッダーを外に配置 */}
+</file>
+
+</files>

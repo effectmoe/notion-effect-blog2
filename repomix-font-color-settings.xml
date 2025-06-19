@@ -1,0 +1,1094 @@
+This file is a merged representation of a subset of the codebase, containing specifically included files and files not matching ignore patterns, combined into a single document by Repomix.
+The content has been processed where content has been compressed (code blocks are separated by ⋮---- delimiter).
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Only files matching these patterns are included: **/pages/admin/font-settings.jsx, **/pages/admin/color-settings.jsx, **/components/FontSettingsPanel.jsx, **/components/FontSettingsPanel.module.css, **/components/ColorSettingsPanel.jsx, **/components/ColorSettingsPanel.module.css, **/components/FontStyler.jsx, **/components/ColorStyler.jsx, **/lib/font-customizer/**/*, **/lib/color-settings.js, **/lib/color-presets.js, **/lib/use-dark-mode.ts, **/public/fonts/**/*.css
+- Files matching these patterns are excluded: **/node_modules/**, **/.next/**, **/dist/**, **/build/**, **/*.log, **/coverage/**, **/.git/**, **/repomix*.xml, **/*summary.md, **/temp/**
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Content has been compressed - code blocks are separated by ⋮---- delimiter
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+components/
+  ColorSettingsPanel.jsx
+  ColorSettingsPanel.module.css
+  ColorStyler.jsx
+  FontSettingsPanel.jsx
+  FontSettingsPanel.module.css
+  FontStyler.jsx
+lib/
+  font-customizer/
+    available-fonts.js
+    font-settings.js
+    font-utils.js
+pages/
+  admin/
+    color-settings.jsx
+    font-settings.jsx
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="components/ColorSettingsPanel.jsx">
+// components/ColorSettingsPanel.jsx
+⋮----
+const ColorSettingsPanel = () => {
+const [settings, setSettings] = useState(defaultSettings);
+const [activePreset, setActivePreset] = useState('default');
+const [saved, setSaved] = useState(false);
+const [loading, setLoading] = useState(false);
+const [error, setError] = useState('');
+const [showPreview, setShowPreview] = useState(true);
+const [expandedCategories, setExpandedCategories] = useState({
+⋮----
+// 設定名の日本語表示
+⋮----
+// カテゴリ分類
+⋮----
+// アイコン SVG
+⋮----
+// プリセットを適用
+const applyPreset = (presetKey) => {
+⋮----
+// デフォルト設定とマージして完全な設定を保証
+⋮----
+setSettings(mergedSettings);
+setActivePreset(presetKey);
+setSaved(false);
+⋮----
+// リアルタイム更新
+const event = new CustomEvent('colorSettingsUpdate', {
+⋮----
+window.dispatchEvent(event);
+⋮----
+// 設定を変更
+const handleColorChange = (elementKey, property, value) => {
+console.log('Changing color:', elementKey, property, value);
+⋮----
+console.log('New settings:', newSettings);
+⋮----
+setSettings(newSettings);
+⋮----
+setActivePreset('custom');
+⋮----
+// 設定を保存
+const saveSettings = async () => {
+setLoading(true);
+setError('');
+⋮----
+// まずLocalStorageに保存
+const localSaved = saveColorSettingsToLocalStorage(settings);
+⋮----
+// リアルタイムで反映
+⋮----
+// サーバーに保存を試みる
+⋮----
+const response = await fetch('/api/color-settings', {
+⋮----
+body: JSON.stringify(settings),
+⋮----
+console.error('Server save failed:', response.status);
+⋮----
+console.error('Failed to save to server:', fetchError);
+// サーバー保存に失敗してもローカル保存が成功していれば続行
+⋮----
+setSaved(true);
+setTimeout(() => setSaved(false), 3000);
+⋮----
+throw new Error('設定の保存に失敗しました');
+⋮----
+setError(error.message);
+console.error('Save error:', error);
+⋮----
+setLoading(false);
+⋮----
+// 設定をリセット
+const resetToDefaults = () => {
+if (window.confirm('すべての色設定をデフォルトに戻しますか？')) {
+setSettings(defaultSettings);
+setActivePreset('default');
+⋮----
+// キャッシュをクリア
+const clearCache = () => {
+if (window.confirm('キャッシュされた色設定をクリアしますか？\nページがリロードされます。')) {
+clearColorSettingsFromLocalStorage();
+window.location.reload();
+⋮----
+// エクスポート
+const exportSettings = () => {
+const dataStr = JSON.stringify(settings, null, 2);
+const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+⋮----
+const exportFileDefaultName = `color-settings-${new Date().toISOString().split('T')[0]}.json`;
+⋮----
+const linkElement = document.createElement('a');
+linkElement.setAttribute('href', dataUri);
+linkElement.setAttribute('download', exportFileDefaultName);
+linkElement.click();
+⋮----
+// インポート
+const importSettings = (event) => {
+⋮----
+const reader = new FileReader();
+reader.onload = (e) => {
+⋮----
+const importedSettings = JSON.parse(e.target.result);
+setSettings(importedSettings);
+⋮----
+const updateEvent = new CustomEvent('colorSettingsUpdate', {
+⋮----
+window.dispatchEvent(updateEvent);
+⋮----
+setError('無効なJSONファイルです');
+⋮----
+reader.readAsText(file);
+⋮----
+// カテゴリの展開/折りたたみ
+const toggleCategory = (category) => {
+setExpandedCategories({
+⋮----
+// 初期化
+useEffect(() => {
+const fetchSettings = async () => {
+⋮----
+// まずLocalStorageから読み込み
+const cachedSettings = loadColorSettingsFromLocalStorage();
+⋮----
+console.log('Loading from localStorage:', cachedSettings);
+// デフォルト設定とマージして、欠けているプロパティを補完
+⋮----
+Object.keys(cachedSettings).forEach(key => {
+⋮----
+// サーバーから取得
+⋮----
+const response = await fetch('/api/color-settings');
+⋮----
+const data = await response.json();
+console.log('Loading from server:', data);
+// デフォルト設定とマージ
+⋮----
+Object.keys(data).forEach(key => {
+⋮----
+// サーバーエラーの場合はデフォルト設定を使用
+console.log('Server error, using default settings');
+⋮----
+// ネットワークエラーの場合もデフォルト設定を使用
+console.log('Network error, using default settings');
+⋮----
+console.error('設定の読み込みに失敗しました', error);
+⋮----
+fetchSettings();
+⋮----
+// カラーピッカー
+const renderColorControl = (elementKey, property, label, value) => {
+⋮----
+const input = document.getElementById(`${elementKey}-${property}-picker`);
+input?.click();
+⋮----
+onChange={(e) => handleColorChange(elementKey, property, e.target.value)}
+⋮----
+onClick={() => handleColorChange(elementKey, property, 'transparent')}
+⋮----
+{/* ヘッダー */}
+⋮----
+{/* アラート */}
+⋮----
+{/* プリセット選択 */}
+⋮----
+{Object.entries(colorPresets).map(([key, preset]) => (
+⋮----
+onClick={() => applyPreset(key)}
+⋮----
+{/* 設定セクション */}
+{Object.entries(categories).map(([categoryKey, category]) => (
+⋮----
+onClick={() => toggleCategory(categoryKey)}
+⋮----
+{category.items.map(itemKey => {
+⋮----
+console.warn(`Missing settings for ${itemKey} in category ${categoryKey}`);
+⋮----
+border: itemKey.includes('property') ? `1px solid ${item.borderColor || item.backgroundColor}` : undefined,
+padding: itemKey.includes('property') ? '2px 8px' : (itemKey.includes('textBackground') ? '0.25rem 0.5rem' : '0.5rem 1rem'),
+borderRadius: itemKey.includes('property') ? '3px' : (itemKey.includes('textBackground') ? '4px' : '6px'),
+fontSize: itemKey.includes('property') ? '0.75rem' : '0.875rem',
+fontWeight: itemKey.includes('property') ? '500' : 'normal',
+lineHeight: itemKey.includes('property') ? '1.2' : '1.5'
+⋮----
+{itemKey.includes('property') ? 'タグ' : (itemKey.includes('textBackground') ? 'テキスト' : 'サンプル')}
+⋮----
+renderColorControl(itemKey, 'backgroundColor', '背景色', item.backgroundColor)
+⋮----
+renderColorControl(itemKey, 'textColor', 'テキスト色', item.textColor)
+⋮----
+renderColorControl(itemKey, 'borderColor', 'ボーダー色', item.borderColor)
+⋮----
+renderColorControl(itemKey, 'hoverBackgroundColor', 'ホバー背景色', item.hoverBackgroundColor)
+⋮----
+renderColorControl(itemKey, 'hoverColor', 'ホバー文字色', item.hoverColor)
+⋮----
+{/* ボタン */}
+⋮----
+onClick={() => setShowPreview(!showPreview)}
+⋮----
+{/* プレビュー */}
+⋮----
+const iframe = document.querySelector('iframe[title="Color Preview"]');
+</file>
+
+<file path="components/ColorSettingsPanel.module.css">
+/* ColorSettingsPanel.module.css */
+⋮----
+/* コンテナ */
+.container {
+⋮----
+/* ヘッダー */
+.header {
+⋮----
+.title {
+⋮----
+.subtitle {
+⋮----
+/* プリセット選択 */
+.presetSelector {
+⋮----
+.presetGrid {
+⋮----
+.presetCard {
+⋮----
+.presetCard:hover {
+⋮----
+.presetCardActive {
+⋮----
+.presetName {
+⋮----
+.presetDescription {
+⋮----
+/* カテゴリセクション */
+.categorySection {
+⋮----
+.categoryTitle {
+⋮----
+.categoryIcon {
+⋮----
+/* 設定グリッド */
+.settingsGrid {
+⋮----
+.settingItem {
+⋮----
+.settingHeader {
+⋮----
+.settingName {
+⋮----
+.settingInfo {
+⋮----
+.settingClass {
+⋮----
+.settingPath {
+⋮----
+.settingPreview {
+⋮----
+.colorControls {
+⋮----
+.colorControl {
+⋮----
+.colorLabel {
+⋮----
+.colorInputWrapper {
+⋮----
+.transparentButton {
+⋮----
+.transparentButton:hover {
+⋮----
+.transparentButton:active {
+⋮----
+.transparentButtonActive {
+⋮----
+.transparentButtonActive:hover {
+⋮----
+.colorSwatch {
+⋮----
+.colorSwatch:hover {
+⋮----
+.colorSwatchTransparent {
+⋮----
+.colorInput {
+⋮----
+.colorInput:focus {
+⋮----
+/* ボタン */
+.buttonGroup {
+⋮----
+.button {
+⋮----
+.buttonPrimary {
+⋮----
+.buttonPrimary:hover {
+⋮----
+.buttonSecondary {
+⋮----
+.buttonSecondary:hover {
+⋮----
+.buttonDanger {
+⋮----
+.buttonDanger:hover {
+⋮----
+/* プレビューセクション */
+.previewSection {
+⋮----
+.previewHeader {
+⋮----
+.previewTitle {
+⋮----
+.refreshButton {
+⋮----
+.refreshButton:hover {
+⋮----
+.refreshButton:active {
+⋮----
+.previewContent {
+⋮----
+.previewFrame {
+⋮----
+/* アラート */
+.alert {
+⋮----
+.alertSuccess {
+⋮----
+.alertError {
+⋮----
+/* モーダル */
+.modal {
+⋮----
+.modalContent {
+⋮----
+.modalHeader {
+⋮----
+.modalTitle {
+⋮----
+.modalClose {
+⋮----
+.modalClose:hover {
+⋮----
+/* カラーピッカー */
+.colorPicker {
+⋮----
+.colorPickerGrid {
+⋮----
+.colorPickerSwatch {
+⋮----
+.colorPickerSwatch:hover {
+⋮----
+/* ツールチップ */
+.tooltip {
+⋮----
+.tooltipIcon {
+⋮----
+.tooltipText {
+⋮----
+.tooltip:hover .tooltipText {
+⋮----
+/* ローディング */
+.loading {
+⋮----
+/* 小さい画面での調整 */
+⋮----
+/* レスポンシブ */
+⋮----
+/* アニメーション */
+⋮----
+.fadeIn {
+⋮----
+/* スクロールバー - コンテナ内のスクロールバーのみ対象 */
+.container ::-webkit-scrollbar {
+⋮----
+.container ::-webkit-scrollbar-track {
+⋮----
+.container ::-webkit-scrollbar-thumb {
+⋮----
+.container ::-webkit-scrollbar-thumb:hover {
+</file>
+
+<file path="components/ColorStyler.jsx">
+// components/ColorStyler.jsx
+⋮----
+const ColorStyler = () => {
+const [settings, setSettings] = useState(null);
+const [isLoading, setIsLoading] = useState(true);
+⋮----
+useEffect(() => {
+const loadSettings = async () => {
+⋮----
+// LocalStorageから読み込み
+const cachedSettings = loadColorSettingsFromLocalStorage();
+⋮----
+setSettings(cachedSettings);
+applyStyles(cachedSettings);
+⋮----
+// サーバーから取得
+⋮----
+const response = await fetch('/api/color-settings');
+⋮----
+const data = await response.json();
+setSettings(data);
+saveColorSettingsToLocalStorage(data);
+applyStyles(data);
+⋮----
+// デフォルト設定を使用
+setSettings(defaultSettings);
+applyStyles(defaultSettings);
+⋮----
+console.error('Failed to fetch color settings:', error);
+⋮----
+setIsLoading(false);
+⋮----
+// クライアントサイドでのみ実行
+⋮----
+loadSettings();
+⋮----
+const applyStyles = (colorSettings) => {
+// 既存のスタイルタグを削除
+const existingStyle = document.getElementById('color-styles');
+⋮----
+existingStyle.remove();
+⋮----
+// CSSを生成
+const css = generateColorCSS(colorSettings);
+⋮----
+// スタイルタグを作成して追加
+const styleTag = document.createElement('style');
+⋮----
+document.head.appendChild(styleTag);
+⋮----
+// リアルタイム更新のためのイベントリスナー
+⋮----
+const handleColorUpdate = (event) => {
+⋮----
+setSettings(event.detail.settings);
+saveColorSettingsToLocalStorage(event.detail.settings);
+applyStyles(event.detail.settings);
+⋮----
+window.addEventListener('colorSettingsUpdate', handleColorUpdate);
+⋮----
+window.removeEventListener('colorSettingsUpdate', handleColorUpdate);
+</file>
+
+<file path="components/FontSettingsPanel.jsx">
+// components/FontSettingsPanel.jsx
+⋮----
+const FontSettingsPanel = () => {
+const [settings, setSettings] = useState(defaultSettings);
+const [activeTab, setActiveTab] = useState('title');
+const [showPreview, setShowPreview] = useState(true);
+const [saved, setSaved] = useState(false);
+const [loading, setLoading] = useState(false);
+const [error, setError] = useState('');
+const [showColorPicker, setShowColorPicker] = useState({});
+⋮----
+const [fontList] = useState([
+// 日本語フォント
+⋮----
+// 英語フォント
+⋮----
+const [presets, setPresets] = useState([]);
+const [presetName, setPresetName] = useState('');
+const [showImportExport, setShowImportExport] = useState(false);
+const [showResetModal, setShowResetModal] = useState(false);
+const [showFontPreview, setShowFontPreview] = useState(false);
+const [selectedFont, setSelectedFont] = useState(null);
+⋮----
+// タブの表示名
+⋮----
+// アイコン SVG
+⋮----
+// ユーザーの変更を設定に適用
+const handleChange = (property, value) => {
+setSettings({
+⋮----
+const selectedFont = fontList.find(font => font.name === value.replace(/'/g, '').replace(/,.+$/, ''));
+⋮----
+setSaved(false);
+⋮----
+// 設定を保存
+const saveSettings = async () => {
+setLoading(true);
+setError('');
+⋮----
+const response = await fetch('/api/font-settings', {
+⋮----
+body: JSON.stringify(settings),
+⋮----
+saveFontSettingsToLocalStorage(settings);
+⋮----
+setSaved(true);
+setTimeout(() => setSaved(false), 3000);
+⋮----
+throw new Error('サーバーへの保存に失敗しました');
+⋮----
+setError(error.message);
+const localSaved = saveFontSettingsToLocalStorage(settings);
+⋮----
+setLoading(false);
+⋮----
+// プリセットを保存
+const savePreset = () => {
+if (!presetName.trim()) return;
+⋮----
+date: new Date().toISOString()
+⋮----
+setPresets(updatedPresets);
+localStorage.setItem('fontPresets', JSON.stringify(updatedPresets));
+setPresetName('');
+⋮----
+// プリセットを適用
+const applyPreset = (preset) => {
+setSettings(preset.settings);
+⋮----
+// プリセットを削除
+const deletePreset = (index) => {
+const updatedPresets = presets.filter((_, i) => i !== index);
+⋮----
+// 設定をエクスポート
+const exportSettings = () => {
+const dataStr = JSON.stringify(settings, null, 2);
+const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+⋮----
+const exportFileDefaultName = `font-settings-${new Date().toISOString().split('T')[0]}.json`;
+⋮----
+const linkElement = document.createElement('a');
+linkElement.setAttribute('href', dataUri);
+linkElement.setAttribute('download', exportFileDefaultName);
+linkElement.click();
+⋮----
+// 設定をインポート
+const importSettings = (event) => {
+⋮----
+const reader = new FileReader();
+reader.onload = (e) => {
+⋮----
+const importedSettings = JSON.parse(e.target.result);
+setSettings(importedSettings);
+⋮----
+setError('無効なJSONファイルです');
+⋮----
+reader.readAsText(file);
+⋮----
+// デフォルトに戻す
+const resetToDefaults = () => {
+setShowResetModal(true);
+⋮----
+const confirmReset = () => {
+setSettings(defaultSettings);
+⋮----
+setShowResetModal(false);
+⋮----
+setTimeout(() => {
+⋮----
+// 初期化
+useEffect(() => {
+const fetchSettings = async () => {
+⋮----
+const response = await fetch('/api/font-settings');
+⋮----
+const data = await response.json();
+setSettings(data);
+⋮----
+console.error('設定の読み込みに失敗しました', error);
+⋮----
+const loadPresets = () => {
+const savedPresets = localStorage.getItem('fontPresets');
+⋮----
+setPresets(JSON.parse(savedPresets));
+⋮----
+console.error('プリセットの読み込みに失敗しました', e);
+⋮----
+fetchSettings();
+loadPresets();
+⋮----
+// プレビュー用のスタイルを生成
+const getPreviewStyle = (elementType) => {
+⋮----
+{/* ヘッダー */}
+⋮----
+{/* アラート */}
+⋮----
+{/* タブ */}
+⋮----
+{Object.keys(settings).map(tabName => (
+⋮----
+onClick={() => setActiveTab(tabName)}
+⋮----
+{/* 設定フォーム */}
+⋮----
+{/* フォントファミリー */}
+⋮----
+value={settings[activeTab].fontFamily.replace(/'/g, '').replace(/,.+$/, '')}
+onChange={(e) => handleChange('fontFamily', e.target.value)}
+⋮----
+{fontList.map(font => (
+⋮----
+{/* フォントサイズ */}
+⋮----
+onChange={(e) => handleChange('fontSize', e.target.value)}
+⋮----
+{/* フォントウェイト */}
+⋮----
+onChange={(e) => handleChange('fontWeight', e.target.value)}
+⋮----
+{/* 文字色 */}
+⋮----
+onClick={() => setShowColorPicker({ ...showColorPicker, color: !showColorPicker.color })}
+⋮----
+onChange={(e) => handleChange('color', e.target.value)}
+⋮----
+{/* 背景色 */}
+⋮----
+onClick={() => setShowColorPicker({ ...showColorPicker, bg: !showColorPicker.bg })}
+⋮----
+onChange={(e) => handleChange('backgroundColor', e.target.value)}
+⋮----
+{/* テキスト配置 */}
+⋮----
+onChange={(e) => handleChange('textAlign', e.target.value)}
+⋮----
+{/* 文字間隔 */}
+⋮----
+onChange={(e) => handleChange('letterSpacing', e.target.value)}
+⋮----
+{/* 行間 */}
+⋮----
+onChange={(e) => handleChange('lineHeight', e.target.value)}
+⋮----
+{/* ボタン */}
+⋮----
+onClick={() => setShowPreview(!showPreview)}
+⋮----
+{/* プレビュー */}
+⋮----
+<h1 style={getPreviewStyle('title')} className={styles.previewText}>
+⋮----
+<h2 style={getPreviewStyle('heading1')} className={styles.previewText}>
+⋮----
+<h3 style={getPreviewStyle('heading2')} className={styles.previewText}>
+⋮----
+<h4 style={getPreviewStyle('heading3')} className={styles.previewText}>
+⋮----
+<p style={getPreviewStyle('text')} className={styles.previewText}>
+⋮----
+{/* プリセット管理 */}
+⋮----
+onChange={(e) => setPresetName(e.target.value)}
+⋮----
+disabled={!presetName.trim()}
+⋮----
+{presets.map((preset, index) => (
+⋮----
+onClick={() => applyPreset(preset)}
+⋮----
+onClick={() => deletePreset(index)}
+⋮----
+onClick={() => setShowImportExport(true)}
+⋮----
+{/* リセット確認モーダル */}
+⋮----
+<div className={styles.modal} onClick={() => setShowResetModal(false)}>
+<div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+⋮----
+onClick={() => setShowResetModal(false)}
+⋮----
+{/* インポート/エクスポートモーダル */}
+⋮----
+<div className={styles.modal} onClick={() => setShowImportExport(false)}>
+⋮----
+onClick={() => setShowImportExport(false)}
+⋮----
+exportSettings();
+setShowImportExport(false);
+⋮----
+importSettings(e);
+</file>
+
+<file path="components/FontSettingsPanel.module.css">
+/* FontSettingsPanel.module.css */
+⋮----
+/* コンテナ */
+.container {
+⋮----
+/* ヘッダー */
+.header {
+⋮----
+.title {
+⋮----
+.subtitle {
+⋮----
+/* タブ */
+.tabs {
+⋮----
+.tab {
+⋮----
+.tab:hover {
+⋮----
+.tabActive {
+⋮----
+/* メインコンテンツ */
+.content {
+⋮----
+/* 設定グループ */
+.settingsGroup {
+⋮----
+.settingItem {
+⋮----
+.label {
+⋮----
+/* 入力フィールド共通 */
+.input,
+⋮----
+.input:focus,
+⋮----
+/* カラーピッカー */
+.colorPickerWrapper {
+⋮----
+.colorSwatch {
+⋮----
+.colorSwatch:hover {
+⋮----
+.colorInput {
+⋮----
+/* スライダー */
+.sliderWrapper {
+⋮----
+.slider {
+⋮----
+.slider::-webkit-slider-thumb {
+⋮----
+.slider::-webkit-slider-thumb:hover {
+⋮----
+.sliderValue {
+⋮----
+/* ボタン */
+.buttonGroup {
+⋮----
+.button {
+⋮----
+.buttonPrimary {
+⋮----
+.buttonPrimary:hover {
+⋮----
+.buttonSecondary {
+⋮----
+.buttonSecondary:hover {
+⋮----
+.buttonDanger {
+⋮----
+.buttonDanger:hover {
+⋮----
+/* プリセット */
+.presetSection {
+⋮----
+.presetTitle {
+⋮----
+.presetGrid {
+⋮----
+.presetItem {
+⋮----
+.presetInput {
+⋮----
+/* プレビュー */
+.previewSection {
+⋮----
+.previewTitle {
+⋮----
+.previewContent {
+⋮----
+.previewText {
+⋮----
+/* アラート */
+.alert {
+⋮----
+.alertSuccess {
+⋮----
+.alertError {
+⋮----
+/* レスポンシブ */
+⋮----
+/* アニメーション */
+⋮----
+.fadeIn {
+⋮----
+/* ツールチップ */
+.tooltip {
+⋮----
+.tooltipIcon {
+⋮----
+.tooltipText {
+⋮----
+.tooltip:hover .tooltipText {
+⋮----
+/* ローディング */
+.loading {
+⋮----
+/* チェックボックス */
+.checkbox {
+⋮----
+.checkboxInput {
+⋮----
+/* モーダル */
+.modal {
+⋮----
+.modalContent {
+⋮----
+.modalHeader {
+⋮----
+.modalTitle {
+⋮----
+.modalClose {
+⋮----
+.modalClose:hover {
+⋮----
+/* フォント一覧のスタイル */
+.fontList {
+⋮----
+.fontItem {
+⋮----
+.fontItem:hover {
+⋮----
+.fontItemActive {
+⋮----
+.fontName {
+⋮----
+.fontCategory {
+</file>
+
+<file path="components/FontStyler.jsx">
+// components/FontStyler.jsx
+⋮----
+export const FontStyler = () => {
+// ハイドレーションエラーを防ぐため、クライアントサイドでのみ動作するようにする
+const [hasMounted, setHasMounted] = useState(false);
+⋮----
+useEffect(() => {
+setHasMounted(true);
+⋮----
+// 設定を読み込む関数
+const loadAndApplySettings = async () => {
+⋮----
+// 最初にAPIから設定を読み込もうとする
+const response = await fetch('/api/font-settings');
+⋮----
+const data = await response.json();
+⋮----
+// APIが失敗したらローカルストレージから読み込む
+const loadedSettings = loadFontSettingsFromLocalStorage();
+⋮----
+console.warn('設定の読み込みに失敗しました', error);
+// エラー時はローカルストレージを試す
+⋮----
+console.error('ローカルストレージからの読み込みに失敗しました', e);
+⋮----
+// 既存のスタイルタグを探す
+let styleTag = document.getElementById('custom-font-styles');
+⋮----
+// なければ作成
+⋮----
+styleTag = document.createElement('style');
+⋮----
+document.head.appendChild(styleTag);
+⋮----
+// CSSを生成して適用
+const css = generateFontCSS(finalSettings);
+⋮----
+loadAndApplySettings();
+⋮----
+return null; // このコンポーネントはUIを持たない
+</file>
+
+<file path="lib/font-customizer/available-fonts.js">
+// 利用可能なフォントのリスト
+⋮----
+// 日本語フォント
+⋮----
+// ここに新しい日本語フォントを追加
+⋮----
+// 英語フォント
+⋮----
+// ここに新しい英語フォントを追加
+⋮----
+// システムフォント
+⋮----
+// すべてのフォントを一つの配列にまとめる関数
+export function getAllFonts() {
+⋮----
+// カテゴリ別にフォントを取得する関数
+export function getFontsByCategory(category) {
+return getAllFonts().filter(font => font.category === category);
+⋮----
+// フォント名から情報を取得する関数
+export function getFontInfo(fontName) {
+return getAllFonts().find(font => font.name === fontName);
+</file>
+
+<file path="lib/font-customizer/font-settings.js">
+// lib/font-customizer/font-settings.js
+// デフォルトのフォント設定を定義
+⋮----
+// タイトル
+⋮----
+// 見出し1
+⋮----
+// 見出し2
+⋮----
+// 見出し3
+⋮----
+// テキスト
+⋮----
+// トグル
+⋮----
+// トグル見出し1
+⋮----
+// トグル見出し2
+⋮----
+// トグル見出し3
+</file>
+
+<file path="lib/font-customizer/font-utils.js">
+// lib/font-customizer/font-utils.js
+⋮----
+// フォント設定からCSSを生成する関数
+export function generateFontCSS(settings = defaultSettings) {
+⋮----
+let fontImports = new Set();
+⋮----
+// フォントのインポート部分を抽出
+Object.values(settings).forEach(setting => {
+⋮----
+fontImports.add(setting.fontImport);
+⋮----
+// フォントインポートをCSSに追加
+fontImports.forEach(importUrl => {
+⋮----
+// 各要素のスタイルを生成
+css += generateElementCSS('.notion-page-title-text', settings.title);
+css += generateElementCSS('.notion-h1', settings.heading1);
+css += generateElementCSS('.notion-h2', settings.heading2);
+css += generateElementCSS('.notion-h3', settings.heading3);
+css += generateElementCSS('.notion-text', settings.text);
+css += generateElementCSS('.notion-toggle', settings.toggle);
+css += generateElementCSS('.notion-toggle.notion-h1', settings.toggleHeading1);
+css += generateElementCSS('.notion-toggle.notion-h2', settings.toggleHeading2);
+css += generateElementCSS('.notion-toggle.notion-h3', settings.toggleHeading3);
+⋮----
+// 要素ごとのCSS生成ヘルパー関数
+function generateElementCSS(selector, styles) {
+⋮----
+// ローカルストレージからフォント設定を読み込む関数
+export function loadFontSettingsFromLocalStorage() {
+⋮----
+const savedSettings = localStorage.getItem('fontSettings');
+⋮----
+return JSON.parse(savedSettings);
+⋮----
+console.error('フォント設定の読み込みに失敗しました:', error);
+⋮----
+// ローカルストレージにフォント設定を保存する関数
+export function saveFontSettingsToLocalStorage(settings) {
+⋮----
+localStorage.setItem('fontSettings', JSON.stringify(settings));
+⋮----
+console.error('フォント設定の保存に失敗しました:', error);
+</file>
+
+<file path="pages/admin/color-settings.jsx">
+// pages/admin/color-settings.jsx
+⋮----
+// 管理画面の簡易認証
+const AdminColorSettings = () => {
+const [isAuthenticated, setIsAuthenticated] = useState(false);
+const [password, setPassword] = useState('');
+const [error, setError] = useState('');
+⋮----
+useEffect(() => {
+// セッションストレージから認証状態を確認
+const auth = sessionStorage.getItem('adminAuth');
+⋮----
+setIsAuthenticated(true);
+⋮----
+const handleLogin = (e) => {
+e.preventDefault();
+⋮----
+// 環境変数からパスワードを取得（デフォルト: your_admin_password）
+⋮----
+sessionStorage.setItem('adminAuth', 'true');
+setError('');
+⋮----
+setError('パスワードが正しくありません');
+⋮----
+const handleLogout = () => {
+setIsAuthenticated(false);
+sessionStorage.removeItem('adminAuth');
+⋮----
+onChange={(e) => setPassword(e.target.value)}
+</file>
+
+<file path="pages/admin/font-settings.jsx">
+// pages/admin/font-settings.jsx
+⋮----
+// 簡易的な管理画面パスワード（本番環境では.envファイルなどで管理することをお勧めします）
+⋮----
+export default function FontSettingsPage() {
+const [isAdmin, setIsAdmin] = useState(false);
+const [isLoading, setIsLoading] = useState(true);
+⋮----
+// 簡易的な管理者認証
+useEffect(() => {
+⋮----
+const adminPassword = localStorage.getItem('adminPassword');
+⋮----
+setIsAdmin(true);
+setIsLoading(false);
+⋮----
+const password = prompt('管理者パスワードを入力してください:');
+⋮----
+localStorage.setItem('adminPassword', password);
+⋮----
+alert('パスワードが正しくありません');
+⋮----
+<p>© {new Date().getFullYear()} Notion-Effect-Blog</p>
+</file>
+
+</files>

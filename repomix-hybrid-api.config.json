@@ -1,0 +1,45 @@
+{
+  "output": {
+    "filePath": "repomix-hybrid-api.xml",
+    "style": "xml",
+    "compress": true,
+    "removeComments": false,
+    "includeEmptyDirectories": false,
+    "outputShowLineNumbers": true
+  },
+  "include": [
+    "**/lib/notion-api-hybrid.ts",
+    "**/lib/cache-utils.ts",
+    "**/pages/api/test-formula.ts",
+    "**/public/inject-formula-simple.js",
+    "**/components/NotionPage.tsx",
+    "**/lib/notion.ts",
+    "**/lib/notion-api.ts",
+    "**/lib/config.ts",
+    "**/lib/site-config.ts",
+    "**/types.ts",
+    "**/lib/types.ts",
+    "**/.env.example",
+    "**/package.json",
+    "**/next.config.js",
+    "**/tsconfig.json"
+  ],
+  "ignore": {
+    "customPatterns": [
+      "**/node_modules/**",
+      "**/.next/**",
+      "**/dist/**",
+      "**/build/**",
+      "**/*.test.*",
+      "**/*.spec.*",
+      "**/coverage/**",
+      "**/.git/**",
+      "**/*.log",
+      "**/*.lock",
+      "**/repomix-structure.xml",
+      "**/repomix-notion-integration.xml",
+      "**/repomix-ui-components.xml",
+      "**/repomix*.xml"
+    ]
+  }
+}

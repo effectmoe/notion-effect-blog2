@@ -1,0 +1,96 @@
+{
+  "pageId": "1ceb802cb0c680f29369dba86095fb38",
+  "timestamp": "2025-06-15T05:16:48.807Z",
+  "faqRelatedBlocks": [
+    {
+      "id": "212b802c-b0c6-80ea-b7ed-ef4459f38819",
+      "type": "collection_view",
+      "properties": {
+        "collection_id": "212b802c-b0c6-8046-b4ee-000b2833619c",
+        "view_ids": [
+          "212b802c-b0c6-8026-8290-000cee82ffad",
+          "212b802c-b0c6-8085-a531-000cd226d827"
+        ],
+        "collection_name": "FAQマスター",
+        "format_collection_pointer": {
+          "id": "212b802c-b0c6-8046-b4ee-000b2833619c",
+          "table": "collection",
+          "spaceId": "d1457284-c418-4f36-a7d3-658181f0a8f5"
+        },
+        "parent_id": "1ceb802c-b0c6-80f2-9369-dba86095fb38",
+        "parent_table": "block"
+      },
+      "faqRelated": true,
+      "reasons": [
+        "References FAQ collection",
+        "Collection name contains FAQ: \"FAQマスター\"",
+        "format.collection_pointer points to FAQ collection"
+      ]
+    },
+    {
+      "id": "212b802c-b0c6-80f4-88a2-fa7ef61f0fea",
+      "type": "text",
+      "properties": {
+        "title": "## よくある質問",
+        "parent_id": "208b802c-b0c6-80c5-9250-f1ced3f7842c",
+        "parent_table": "block"
+      },
+      "faqRelated": true,
+      "reasons": [
+        "Title contains FAQ: \"## よくある質問\""
+      ]
+    }
+  ],
+  "collections": {
+    "212b802c-b0c6-8046-b4ee-000b2833619c": {
+      "name": "FAQマスター",
+      "parent_id": "212b802c-b0c6-80ea-b7ed-ef4459f38819",
+      "schema": [
+        {
+          "id": ":M^s",
+          "name": "タグ",
+          "type": "multi_select"
+        },
+        {
+          "id": "@h}_",
+          "name": "公開",
+          "type": "checkbox"
+        },
+        {
+          "id": "Ej|r",
+          "name": "更新日",
+          "type": "last_edited_time"
+        },
+        {
+          "id": "G=Xp",
+          "name": "回答",
+          "type": "text"
+        },
+        {
+          "id": "GpOG",
+          "name": "優先度",
+          "type": "number"
+        },
+        {
+          "id": "\\y^V",
+          "name": "カテゴリ",
+          "type": "select"
+        },
+        {
+          "id": "title",
+          "name": "質問",
+          "type": "title"
+        }
+      ]
+    }
+  },
+  "collectionViews": {},
+  "summary": {
+    "totalBlocks": 162,
+    "faqRelatedBlocks": 2,
+    "hasCollection": true,
+    "collectionViews": 0,
+    "hasLinkedViewBlock": false,
+    "collectionQueryHasResults": false
+  }
+}

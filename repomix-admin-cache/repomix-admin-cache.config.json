@@ -1,0 +1,40 @@
+{
+  "output": {
+    "filePath": "repomix-admin-cache.xml",
+    "style": "xml",
+    "compress": true,
+    "removeComments": false,
+    "outputShowLineNumbers": true
+  },
+  "include": [
+    "**/pages/admin.tsx",
+    "**/pages/admin/**/*.jsx",
+    "**/components/CacheManagement.tsx",
+    "**/components/CacheManagement.module.css",
+    "**/components/Tooltip.tsx",
+    "**/hooks/useRealtimeUpdates.ts",
+    "**/pages/api/cache-*.ts",
+    "**/pages/api/test-page-list.ts",
+    "**/pages/api/debug-cache-warmup.ts",
+    "**/lib/cache.ts",
+    "**/lib/rate-limiter.ts",
+    "**/components/PageHead.tsx",
+    "**/components/Footer.tsx",
+    "**/components/styles.module.css"
+  ],
+  "ignore": {
+    "customPatterns": [
+      "**/node_modules/**",
+      "**/.next/**",
+      "**/dist/**",
+      "**/build/**",
+      "**/*.log",
+      "**/coverage/**",
+      "**/.git/**",
+      "**/repomix*.xml",
+      "**/*summary.md",
+      "**/temp/**",
+      "**/*.bak"
+    ]
+  }
+}

@@ -1,0 +1,585 @@
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem;
+  padding-top: 1rem;
+}
+
+/* プログレス表示 */
+.progressContainer {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.progressHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.progressPhase {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.progressNumbers {
+  font-size: 0.875rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.progressBar {
+  width: 100%;
+  height: 20px;
+  background: #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
+  border-radius: 10px;
+  transition: width 0.5s ease-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.progressFill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.progressStats {
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.875rem;
+}
+
+.progressSuccess {
+  color: #16a34a;
+  font-weight: 500;
+}
+
+.progressFailed {
+  color: #dc2626;
+  font-weight: 500;
+}
+
+.pageTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+/* 説明セクション */
+.introSection {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.introCard {
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+.introCard h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.125rem;
+  color: #0369a1;
+}
+
+.introCard p {
+  margin: 0;
+  color: #475569;
+  line-height: 1.6;
+}
+
+.introCard strong {
+  color: #0369a1;
+  font-weight: 600;
+}
+
+/* ステータスバー */
+.statusBar {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.statusLeft {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.statusIndicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.indicatorGreen,
+.indicatorRed {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  box-shadow: 0 0 4px currentColor;
+}
+
+.indicatorGreen {
+  background: #10b981;
+  animation: pulse 2s infinite;
+}
+
+.indicatorRed {
+  background: #ef4444;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 4px #10b981;
+  }
+  50% {
+    box-shadow: 0 0 12px #10b981;
+  }
+  100% {
+    box-shadow: 0 0 4px #10b981;
+  }
+}
+
+.statusRight {
+  font-size: 0.875rem;
+}
+
+.lastUpdate {
+  opacity: 0.9;
+}
+
+/* キャッシュ統計 */
+.statsContainer {
+  background: #fafafa;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 1rem 0;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.statCard {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1.25rem;
+}
+
+.statHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.statIcon {
+  font-size: 1.5rem;
+}
+
+.statHeader h4 {
+  margin: 0;
+  font-size: 1rem;
+  color: #374151;
+}
+
+.statDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.statRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.statRow span {
+  color: #6b7280;
+}
+
+.statRow strong {
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.hitRate {
+  color: #10b981 !important;
+}
+
+.connected {
+  color: #10b981 !important;
+}
+
+/* メイン操作セクション */
+.mainActionSection {
+  margin-bottom: 2rem;
+}
+
+.mainActionTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 1rem 0;
+  text-align: center;
+}
+
+.mainActionCard {
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.mainActionButtons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .mainActionButtons {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mainActionButton {
+  width: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 1.5rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.mainActionButton.autoButton {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.mainActionButton:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 16px -4px rgba(102, 126, 234, 0.4);
+}
+
+.mainActionButton.autoButton:hover:not(:disabled) {
+  box-shadow: 0 8px 16px -4px rgba(16, 185, 129, 0.4);
+}
+
+.mainActionButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.mainActionIcon {
+  font-size: 2rem;
+}
+
+.mainActionContent {
+  text-align: center;
+}
+
+.mainActionName {
+  font-size: 1.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.mainActionDescription {
+  font-size: 0.875rem;
+  opacity: 0.9;
+  font-weight: normal;
+}
+
+.mainActionExplain {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.mainActionExplain h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+  color: #4b5563;
+}
+
+.mainActionExplain ul {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.mainActionExplain li {
+  margin-bottom: 0.5rem;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+/* 詳細操作セクション */
+.advancedSection {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.advancedSummary {
+  padding: 1.25rem 1.5rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 500;
+  color: #4b5563;
+  user-select: none;
+}
+
+.advancedSummary:hover {
+  background: #f3f4f6;
+}
+
+.chevron {
+  transition: transform 0.2s;
+  font-size: 0.875rem;
+}
+
+details[open] .chevron {
+  transform: rotate(180deg);
+}
+
+.advancedContent {
+  padding: 0 1.5rem 1.5rem;
+}
+
+.advancedGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .advancedGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.advancedCard {
+  text-align: center;
+}
+
+.button {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #e5e7eb;
+  background: white;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.button:hover:not(:disabled) {
+  border-color: #9ca3af;
+  background: #f9fafb;
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.warmupButton:hover:not(:disabled) {
+  border-color: #60a5fa;
+  background: #eff6ff;
+}
+
+.dangerButton:hover:not(:disabled) {
+  border-color: #f87171;
+  background: #fef2f2;
+}
+
+.buttonIcon {
+  font-size: 1.125rem;
+}
+
+.buttonDescription {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+/* メッセージ表示 */
+.message {
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  margin: 1.5rem 0;
+  animation: slideInMessage 0.3s ease-out;
+}
+
+@keyframes slideInMessage {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.successMessage {
+  background: #d1fae5;
+  border: 1px solid #6ee7b7;
+  color: #065f46;
+}
+
+.errorMessage {
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  color: #991b1b;
+}
+
+.infoMessage {
+  background: #e0e7ff;
+  border: 1px solid #a5b4fc;
+  color: #3730a3;
+}
+
+/* API設定セクション */
+.apiSection {
+  background: #1f2937;
+  border: 1px solid #374151;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-top: 3rem;
+}
+
+.apiSummary {
+  padding: 1.25rem 1.5rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 500;
+  color: #e5e7eb;
+  user-select: none;
+}
+
+.apiSummary:hover {
+  background: #374151;
+}
+
+.apiContent {
+  padding: 0 1.5rem 1.5rem;
+}
+
+.codeBlock {
+  margin-bottom: 1.5rem;
+}
+
+.codeBlock:last-child {
+  margin-bottom: 0;
+}
+
+.codeHeader {
+  font-size: 0.875rem;
+  color: #9ca3af;
+  margin-bottom: 0.5rem;
+}
+
+.code {
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  padding: 1rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #e2e8f0;
+  overflow-x: auto;
+}

@@ -1,0 +1,72 @@
+/* FAQ Master specific styling */
+.notion-block-212b802cb0c680b3b04afec4203ee8d7 .notion-collection-group {
+  margin-bottom: 24px;
+}
+
+.notion-block-212b802cb0c680b3b04afec4203ee8d7 .notion-collection-group-title {
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+  font-weight: 600;
+  color: var(--fg-color);
+  border-bottom: 1px solid var(--bg-color-1);
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+
+.notion-block-212b802cb0c680b3b04afec4203ee8d7 .notion-collection-group-title:hover {
+  background: var(--bg-color-0);
+}
+
+.notion-block-212b802cb0c680b3b04afec4203ee8d7 .notion-list-item {
+  padding: 6px 0;
+  border-radius: 3px;
+  transition: background 20ms ease-in 0s;
+}
+
+.notion-block-212b802cb0c680b3b04afec4203ee8d7 .notion-list-item:hover {
+  background: var(--bg-color-0);
+}
+
+.notion-block-212b802cb0c680b3b04afec4203ee8d7 .notion-page-icon {
+  margin-right: 6px;
+  font-size: 1.1em;
+}
+
+/* FAQ Master view tabs styling */
+.notion-block-212b802cb0c680b3b04afec4203ee8d7 .notion-collection-view-tabs-content {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--bg-color-1);
+  padding-bottom: 8px;
+}
+
+.notion-block-212b802cb0c680b3b04afec4203ee8d7 .notion-collection-view-tabs-content-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: 3px;
+  cursor: pointer;
+  color: var(--fg-color-3);
+  transition: all 0.2s ease;
+}
+
+.notion-block-212b802cb0c680b3b04afec4203ee8d7 .notion-collection-view-tabs-content-item:hover {
+  background: var(--bg-color-0);
+  color: var(--fg-color);
+}
+
+.notion-block-212b802cb0c680b3b04afec4203ee8d7 .notion-collection-view-tabs-content-item.notion-selected-nav-header {
+  background: var(--bg-color-0);
+  color: var(--fg-color);
+  font-weight: 500;
+}
+
+.notion-block-212b802cb0c680b3b04afec4203ee8d7 .notion-collection-view-type-icon {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+  flex-shrink: 0;
+}

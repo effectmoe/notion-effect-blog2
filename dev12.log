@@ -1,0 +1,11 @@
+
+> nextjs-notion-starter-kit@2.0.0 dev
+> next dev
+
+   ▲ Next.js 15.3.3
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.1.6:3000
+   - Environments: .env.local, .env
+
+ ✓ Starting...
+ ✓ Ready in 963ms

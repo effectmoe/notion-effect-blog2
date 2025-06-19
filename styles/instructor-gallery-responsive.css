@@ -1,0 +1,98 @@
+/* 公認インストラクター＆ナビゲーター専用のレスポンシブCSS */
+/* ギャラリービュー（カードプレビューなし）のみに適用 */
+
+/* 特定のコレクションを識別（タイトルに基づく） */
+.notion-collection:has(.notion-collection-header-title:contains("公認インストラクター")),
+.notion-collection:has(.notion-collection-header-title:contains("ナビゲーター")) {
+  /* コレクション固有のスタイルを適用するためのマーカー */
+}
+
+/* ギャラリービューかつカードプレビューなしの場合のみ適用 */
+.notion-collection:has(.notion-collection-header-title:contains("公認インストラクター")) .notion-collection-gallery:not(:has(.notion-collection-card-cover)),
+.notion-collection:has(.notion-collection-header-title:contains("ナビゲーター")) .notion-collection-gallery:not(:has(.notion-collection-card-cover)) {
+  /* レスポンシブグリッドレイアウト */
+  display: grid !important;
+  gap: 12px !important;
+  padding: 16px !important;
+  
+  /* デスクトップ: 自動的に最適なカラム数 */
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important;
+}
+
+/* カード自体のスタイル（このコレクションのみ） */
+.notion-collection:has(.notion-collection-header-title:contains("公認インストラクター")) .notion-collection-gallery:not(:has(.notion-collection-card-cover)) .notion-collection-card,
+.notion-collection:has(.notion-collection-header-title:contains("ナビゲーター")) .notion-collection-gallery:not(:has(.notion-collection-card-cover)) .notion-collection-card {
+  min-height: 60px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 12px !important;
+}
+
+/* タブレット対応 (768px - 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .notion-collection:has(.notion-collection-header-title:contains("公認インストラクター")) .notion-collection-gallery:not(:has(.notion-collection-card-cover)),
+  .notion-collection:has(.notion-collection-header-title:contains("ナビゲーター")) .notion-collection-gallery:not(:has(.notion-collection-card-cover)) {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
+    gap: 10px !important;
+    padding: 12px !important;
+  }
+}
+
+/* 小型タブレット・大型スマホ (480px - 768px) */
+@media (min-width: 480px) and (max-width: 768px) {
+  .notion-collection:has(.notion-collection-header-title:contains("公認インストラクター")) .notion-collection-gallery:not(:has(.notion-collection-card-cover)),
+  .notion-collection:has(.notion-collection-header-title:contains("ナビゲーター")) .notion-collection-gallery:not(:has(.notion-collection-card-cover)) {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)) !important;
+    gap: 8px !important;
+    padding: 10px !important;
+  }
+  
+  .notion-collection:has(.notion-collection-header-title:contains("公認インストラクター")) .notion-collection-gallery:not(:has(.notion-collection-card-cover)) .notion-collection-card,
+  .notion-collection:has(.notion-collection-header-title:contains("ナビゲーター")) .notion-collection-gallery:not(:has(.notion-collection-card-cover)) .notion-collection-card {
+    min-height: 50px !important;
+    font-size: 0.9rem !important;
+  }
+}
+
+/* スマートフォン (480px以下) */
+@media (max-width: 480px) {
+  .notion-collection:has(.notion-collection-header-title:contains("公認インストラクター")) .notion-collection-gallery:not(:has(.notion-collection-card-cover)),
+  .notion-collection:has(.notion-collection-header-title:contains("ナビゲーター")) .notion-collection-gallery:not(:has(.notion-collection-card-cover)) {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)) !important;
+    gap: 6px !important;
+    padding: 8px !important;
+  }
+  
+  .notion-collection:has(.notion-collection-header-title:contains("公認インストラクター")) .notion-collection-gallery:not(:has(.notion-collection-card-cover)) .notion-collection-card,
+  .notion-collection:has(.notion-collection-header-title:contains("ナビゲーター")) .notion-collection-gallery:not(:has(.notion-collection-card-cover)) .notion-collection-card {
+    min-height: 45px !important;
+    font-size: 0.85rem !important;
+    padding: 8px !important;
+  }
+}
+
+/* 超小型デバイス (360px以下) */
+@media (max-width: 360px) {
+  .notion-collection:has(.notion-collection-header-title:contains("公認インストラクター")) .notion-collection-gallery:not(:has(.notion-collection-card-cover)),
+  .notion-collection:has(.notion-collection-header-title:contains("ナビゲーター")) .notion-collection-gallery:not(:has(.notion-collection-card-cover)) {
+    grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)) !important;
+    gap: 4px !important;
+    padding: 6px !important;
+  }
+  
+  .notion-collection:has(.notion-collection-header-title:contains("公認インストラクター")) .notion-collection-gallery:not(:has(.notion-collection-card-cover)) .notion-collection-card,
+  .notion-collection:has(.notion-collection-header-title:contains("ナビゲーター")) .notion-collection-gallery:not(:has(.notion-collection-card-cover)) .notion-collection-card {
+    min-height: 40px !important;
+    font-size: 0.8rem !important;
+    padding: 6px !important;
+  }
+}
+
+/* 横向きモバイル対応 */
+@media (max-width: 768px) and (orientation: landscape) {
+  .notion-collection:has(.notion-collection-header-title:contains("公認インストラクター")) .notion-collection-gallery:not(:has(.notion-collection-card-cover)),
+  .notion-collection:has(.notion-collection-header-title:contains("ナビゲーター")) .notion-collection-gallery:not(:has(.notion-collection-card-cover)) {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
+  }
+}

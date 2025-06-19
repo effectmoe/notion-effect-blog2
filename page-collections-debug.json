@@ -1,0 +1,179 @@
+{
+  "pageId": "1ceb802cb0c680f29369dba86095fb38",
+  "collections": [
+    {
+      "id": "212b802c-b0c6-8046-b4ee-000b2833619c",
+      "name": "FAQマスター",
+      "parentId": "212b802c-b0c6-80ea-b7ed-ef4459f38819"
+    },
+    {
+      "id": "212b802c-b0c6-813f-913b-000b02bbab01",
+      "name": "FAQマスター (1)",
+      "parentId": "212b802c-b0c6-805a-b873-d9b44705e49b"
+    },
+    {
+      "id": "212b802c-b0c6-8014-9263-000b71bd252e",
+      "name": "テスト",
+      "parentId": "212b802c-b0c6-80b3-b04a-fec4203ee8d7"
+    },
+    {
+      "id": "1ceb802c-b0c6-81e8-a45e-000ba000bfe2",
+      "name": "カフェキネシコンテンツ",
+      "parentId": "1ceb802c-b0c6-814a-b43e-ddb38e80f2e0"
+    },
+    {
+      "id": "20db802c-b0c6-80b4-aa12-000b61277830",
+      "name": "公認インストラクター＆ナビゲーター",
+      "parentId": "20db802c-b0c6-80e2-93d4-fc46bf2dd823"
+    }
+  ],
+  "collectionViews": [
+    {
+      "id": "20fb802c-b0c6-80b2-a9ff-000cb1533162",
+      "type": "gallery"
+    },
+    {
+      "id": "212b802c-b0c6-8026-8290-000cee82ffad",
+      "type": "gallery"
+    },
+    {
+      "id": "212b802c-b0c6-8085-a531-000cd226d827",
+      "type": "gallery"
+    },
+    {
+      "id": "212b802c-b0c6-81cd-b01a-000c9f4be8b1",
+      "type": "gallery"
+    },
+    {
+      "id": "212b802c-b0c6-81f3-af1c-000c1ed57185",
+      "type": "gallery"
+    },
+    {
+      "id": "212b802c-b0c6-8030-bef5-000c8449757e",
+      "type": "gallery"
+    },
+    {
+      "id": "1ceb802c-b0c6-811c-86ef-000c4141e47c",
+      "type": "gallery"
+    },
+    {
+      "id": "1ceb802c-b0c6-81bb-b35b-000ce79c6306",
+      "type": "table"
+    },
+    {
+      "id": "208b802c-b0c6-808a-a63b-000c472afd7e",
+      "type": "list"
+    },
+    {
+      "id": "208b802c-b0c6-80ff-8664-000c822da019",
+      "type": "calendar"
+    },
+    {
+      "id": "1d3b802c-b0c6-80cd-b5af-000ca05b7763",
+      "type": "page"
+    },
+    {
+      "id": "20fb802c-b0c6-80e4-a576-000c5cc975b8",
+      "type": "gallery"
+    },
+    {
+      "id": "20db802c-b0c6-8066-846e-000cd27e4a85",
+      "type": "list"
+    },
+    {
+      "id": "20db802c-b0c6-80b0-9446-000c7ec37b88",
+      "type": "table"
+    }
+  ],
+  "linkedDatabases": [
+    {
+      "blockId": "20fb802c-b0c6-8057-a57d-caa1e1172c0c",
+      "viewIds": [
+        "20fb802c-b0c6-80b2-a9ff-000cb1533162"
+      ]
+    },
+    {
+      "blockId": "212b802c-b0c6-80ea-b7ed-ef4459f38819",
+      "collectionId": "212b802c-b0c6-8046-b4ee-000b2833619c",
+      "viewIds": [
+        "212b802c-b0c6-8026-8290-000cee82ffad",
+        "212b802c-b0c6-8085-a531-000cd226d827"
+      ]
+    },
+    {
+      "blockId": "212b802c-b0c6-805a-b873-d9b44705e49b",
+      "collectionId": "212b802c-b0c6-813f-913b-000b02bbab01",
+      "viewIds": [
+        "212b802c-b0c6-81cd-b01a-000c9f4be8b1",
+        "212b802c-b0c6-81f3-af1c-000c1ed57185"
+      ]
+    },
+    {
+      "blockId": "212b802c-b0c6-80b3-b04a-fec4203ee8d7",
+      "collectionId": "212b802c-b0c6-8014-9263-000b71bd252e",
+      "viewIds": [
+        "212b802c-b0c6-8030-bef5-000c8449757e"
+      ]
+    },
+    {
+      "blockId": "1ceb802c-b0c6-814a-b43e-ddb38e80f2e0",
+      "collectionId": "1ceb802c-b0c6-81e8-a45e-000ba000bfe2",
+      "viewIds": [
+        "1ceb802c-b0c6-811c-86ef-000c4141e47c",
+        "1ceb802c-b0c6-81bb-b35b-000ce79c6306",
+        "208b802c-b0c6-808a-a63b-000c472afd7e",
+        "208b802c-b0c6-80ff-8664-000c822da019"
+      ]
+    },
+    {
+      "blockId": "1d3b802c-b0c6-8013-a7f0-fee562275398",
+      "viewIds": [
+        "1d3b802c-b0c6-80cd-b5af-000ca05b7763"
+      ]
+    },
+    {
+      "blockId": "20fb802c-b0c6-8027-945b-eabe5f521e5a",
+      "viewIds": [
+        "20fb802c-b0c6-80e4-a576-000c5cc975b8"
+      ]
+    },
+    {
+      "blockId": "20db802c-b0c6-80e2-93d4-fc46bf2dd823",
+      "collectionId": "20db802c-b0c6-80b4-aa12-000b61277830",
+      "viewIds": [
+        "20db802c-b0c6-8066-846e-000cd27e4a85",
+        "20db802c-b0c6-80b0-9446-000c7ec37b88"
+      ]
+    },
+    {
+      "blockId": "20cb802c-b0c6-8004-b2b1-d6984bf8bf5b",
+      "viewIds": [
+        "20cb802c-b0c6-8088-a9b6-000cac2c7066"
+      ]
+    },
+    {
+      "blockId": "1d3b802c-b0c6-8009-94ea-eabc7c4ad9ae",
+      "collectionId": "1d3b802c-b0c6-80bb-a091-000b519833bf",
+      "viewIds": [
+        "1d3b802c-b0c6-8019-b4e1-000ce2db240e",
+        "1d3b802c-b0c6-80ea-be29-000cd6b7b1d7"
+      ]
+    },
+    {
+      "blockId": "1d3b802c-b0c6-8091-8cb1-d0a0795f2f28",
+      "collectionId": "1d3b802c-b0c6-802e-b43c-000bb7953bb2",
+      "viewIds": [
+        "1d3b802c-b0c6-80e3-8991-000cb20915d6",
+        "1d3b802c-b0c6-8048-88dc-000c4183c1f3"
+      ]
+    },
+    {
+      "blockId": "1d4b802c-b0c6-80ee-afc4-edf9066a23fc",
+      "collectionId": "1d4b802c-b0c6-8178-9bd0-000bdaa07af6",
+      "viewIds": [
+        "1d4b802c-b0c6-8122-8f2e-000c16bb46b2",
+        "1d4b802c-b0c6-813a-8aaf-000c0bc00e05"
+      ]
+    }
+  ]
+}

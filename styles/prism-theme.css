@@ -1,0 +1,164 @@
+/* prism theme adjustments */
+
+.notion-code {
+  background-color: rgba(249, 250, 251, 1);
+  border: 1px solid rgba(229, 231, 235, 1);
+  border-radius: 0.5rem;
+  padding: 1.5em !important;
+  margin: 1.5em 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+/* コードブロックの右上に言語名を表示 */
+.notion-code::before {
+  content: attr(data-language);
+  position: absolute;
+  top: 0;
+  right: 0;
+  color: rgba(156, 163, 175, 1);
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: rgba(229, 231, 235, 0.5);
+  padding: 0.25rem 0.5rem;
+  border-bottom-left-radius: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+/* ホバー時の効果 */
+.notion-code:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.dark-mode .notion-code {
+  background-color: rgba(17, 24, 39, 1);
+  border-color: rgba(55, 65, 81, 1);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* ダークモード時のコードブロック言語表示 */
+.dark-mode .notion-code::before {
+  background: rgba(55, 65, 81, 0.7);
+  color: rgba(209, 213, 219, 1);
+}
+
+/* ダークモード時のホバー効果 */
+.dark-mode .notion-code:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+.notion code {
+  color: rgba(31, 41, 55, 1);
+  border: 0 none !important;
+  box-shadow: none !important;
+  background: none !important;
+  padding: 0 !important;
+}
+.dark-mode .notion code {
+  color: rgba(229, 231, 235, 1);
+}
+
+.dark-mode .notion .notion-inline-code {
+  background: rgb(71, 76, 80) !important;
+  color: #ff4081;
+  padding: 0.2em 0.4em !important;
+}
+
+.notion .notion-inline-code {
+  color: #ff4081;
+  background: rgba(127, 122, 107, 0.1) !important;
+  padding: 0.2em 0.4em !important;
+}
+
+.token.cdata,
+.token.doctype,
+.token.prolog {
+  color: rgba(55, 65, 81, 1);
+}
+.token.comment {
+  color: #5b9b4c;
+}
+.dark-mode .token.cdata,
+.dark-mode .token.doctype,
+.dark-mode .token.prolog {
+  color: rgba(209, 213, 219, 1);
+}
+.token.punctuation {
+  color: rgba(55, 65, 81, 1);
+}
+.dark-mode .token.punctuation {
+  color: rgba(209, 213, 219, 1);
+}
+.token.boolean,
+.token.constant,
+.token.deleted,
+.token.number,
+.token.property,
+.token.symbol,
+.token.tag {
+  color: rgba(16, 185, 129, 1);
+}
+.token.attr-name,
+.token.builtin,
+.token.char,
+.token.inserted,
+.token.selector,
+.token.string {
+  color: rgba(139, 92, 246, 1);
+}
+.language-css .token.string,
+.style .token.string,
+.token.entity,
+.token.operator,
+.token.url {
+  color: rgba(245, 158, 11, 1);
+}
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+  color: rgba(59, 130, 246, 1);
+}
+.token.class-name,
+.token.function {
+  color: rgba(236, 72, 153, 1);
+}
+.token.important,
+.token.regex,
+.token.variable {
+  color: rgba(245, 158, 11, 1);
+}
+code[class*='language-'],
+pre[class*='language-'] {
+  color: rgba(31, 41, 55, 1);
+}
+.dark-mode code[class*='language-'],
+.dark-mode pre[class*='language-'] {
+  color: rgba(249, 250, 251, 1);
+}
+pre::-webkit-scrollbar {
+  display: none;
+}
+pre {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.token.operator,
+.token.entity,
+.token.url,
+.token.variable {
+  background: none;
+}
+
+pre[class*='language-'] > code {
+  border-left: 0 none !important;
+  box-shadow: none !important;
+  background: none !important;
+}
+
+pre[class*='language-']:before,
+pre[class*='language-']:after {
+  display: none !important;
+}

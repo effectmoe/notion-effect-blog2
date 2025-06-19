@@ -1,0 +1,27 @@
+
+> nextjs-notion-starter-kit@2.0.0 build
+> next build
+
+ ⚠ You are using a non-standard "NODE_ENV" value in your environment. This creates inconsistencies in the project and is strongly advised against. Read more: https://nextjs.org/docs/messages/non-standard-node-env
+   ▲ Next.js 15.3.3
+   - Environments: .env.local, .env.production, .env
+
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./lib/get-site-map.ts:23:11
+Type error: Conversion of type '{ site: types.Site; canonicalPageMap: { [config.rootNotionPageId]: string; }; pageMap: { [config.rootNotionPageId]: { pageId: string; recordMap: null; }; }; }' to type 'SiteMap' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Types of property 'pageMap' are incompatible.
+    Type '{ [config.rootNotionPageId]: { pageId: string; recordMap: null; }; }' is not comparable to type 'PageMap'.
+      'string' index signatures are incompatible.
+        Object literal may only specify known properties, and 'pageId' does not exist in type 'ExtendedRecordMap'.
+
+[0m [90m 21 |[39m       pageMap[33m:[39m {[0m
+[0m [90m 22 |[39m         [config[33m.[39mrootNotionPageId][33m:[39m {[0m
+[0m[31m[1m>[22m[39m[90m 23 |[39m           pageId[33m:[39m config[33m.[39mrootNotionPageId[33m,[39m[0m
+[0m [90m    |[39m           [31m[1m^[22m[39m[0m
+[0m [90m 24 |[39m           recordMap[33m:[39m [36mnull[39m[0m
+[0m [90m 25 |[39m         }[0m
+[0m [90m 26 |[39m       }[0m
+Next.js build worker exited with code: 1 and signal: null

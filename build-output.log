@@ -1,0 +1,64 @@
+
+> nextjs-notion-starter-kit@2.0.0 build
+> next build && npm run build:sw
+
+ ⚠ You are using a non-standard "NODE_ENV" value in your environment. This creates inconsistencies in the project and is strongly advised against. Read more: https://nextjs.org/docs/messages/non-standard-node-env
+   ▲ Next.js 15.3.3
+   - Environments: .env.local, .env
+
+   Skipping linting
+   Checking validity of types ...
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 1000ms
+   Collecting page data ...
+Notion API設定状況:
+- NOTION_API_BASE_URL: 未設定（デフォルト使用）
+- NOTION_API_SECRET: 設定済み
+Notion API設定状況:
+- NOTION_API_BASE_URL: 未設定（デフォルト使用）
+- NOTION_API_SECRET: 設定済み
+Notion API設定状況:
+- NOTION_API_BASE_URL: 未設定（デフォルト使用）
+- NOTION_API_SECRET: 設定済み
+Notion API設定状況:
+- NOTION_API_BASE_URL: 未設定（デフォルト使用）
+- NOTION_API_SECRET: 設定済み
+Notion API設定状況:
+- NOTION_API_BASE_URL: 未設定（デフォルト使用）
+- NOTION_API_SECRET: 設定済み
+Notion API設定状況:
+- NOTION_API_BASE_URL: 未設定（デフォルト使用）
+- NOTION_API_SECRET: 設定済み
+Notion API設定状況:
+- NOTION_API_BASE_URL: 未設定（デフォルト使用）
+- NOTION_API_SECRET: 設定済み
+Notion API設定状況:
+- NOTION_API_BASE_URL: 未設定（デフォルト使用）
+- NOTION_API_SECRET: 設定済み
+Notion API設定状況:
+- NOTION_API_BASE_URL: 未設定（デフォルト使用）
+- NOTION_API_SECRET: 設定済み
+Notion API設定状況:
+- NOTION_API_BASE_URL: 未設定（デフォルト使用）
+- NOTION_API_SECRET: 設定済み
+Notion API設定状況:
+- NOTION_API_BASE_URL: 未設定（デフォルト使用）
+- NOTION_API_SECRET: 設定済み
+Notion API設定状況:
+- NOTION_API_BASE_URL: 未設定（デフォルト使用）
+Notion API設定状況:
+- NOTION_API_BASE_URL: 未設定（デフォルト使用）
+- NOTION_API_SECRET: 設定済み
+- NOTION_API_SECRET: 設定済み
+Notion API設定状況:
+- NOTION_API_BASE_URL: 未設定（デフォルト使用）
+- NOTION_API_SECRET: 設定済み
+Notion API設定状況:
+- NOTION_API_BASE_URL: 未設定（デフォルト使用）
+- NOTION_API_SECRET: 設定済み
+Notion Hybrid API: 公式APIクライアントを初期化中...
+Notion Hybrid API: 公式APIクライアントを初期化中...
+[Redis] No REDIS_URL configured. Using memory cache only.
+
+notion getPage 1ceb802cb0c680f29369dba86095fb38
+[Redis] No REDIS_URL configured. Using memory cache only.

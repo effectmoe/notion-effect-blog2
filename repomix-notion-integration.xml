@@ -1,0 +1,551 @@
+This file is a merged representation of a subset of the codebase, containing specifically included files and files not matching ignore patterns, combined into a single document by Repomix.
+The content has been processed where content has been compressed (code blocks are separated by ⋮---- delimiter).
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Only files matching these patterns are included: **/lib/notion*.ts, **/lib/resolve-notion-page.ts, **/lib/get-site-map.ts, **/lib/map-page-url.ts, **/lib/acl.ts, **/lib/db.ts, **/components/Notion*.tsx, **/pages/[pageId].tsx, **/pages/api/**/*.ts
+- Files matching these patterns are excluded: **/node_modules/**, **/.next/**, **/dist/**, **/build/**, **/*.log, **/coverage/**, **/.git/**, **/repomix*.xml, **/*summary.md, **/temp/**
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Content has been compressed - code blocks are separated by ⋮---- delimiter
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+components/
+  NotionPage.tsx
+  NotionPageHeader.tsx
+  NotionViewTabs.tsx
+lib/
+  acl.ts
+  db.ts
+  get-site-map.ts
+  map-page-url.ts
+  notion-api.ts
+  notion-direct-search.ts
+  notion-views.ts
+  notion.ts
+  resolve-notion-page.ts
+pages/
+  api/
+    direct-search.ts
+    fallback-search.ts
+    search-notion.ts
+    test-notion-connection.ts
+    test-search.ts
+  [pageId].tsx
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="components/NotionPageHeader.tsx">
+import { IoMoonSharp } from '@react-icons/all-files/io5/IoMoonSharp'
+import { IoSunnyOutline } from '@react-icons/all-files/io5/IoSunnyOutline'
+import cs from 'classnames'
+⋮----
+import { Breadcrumbs, Header, Search, useNotionContext } from 'react-notion-x'
+⋮----
+import { isSearchEnabled, navigationLinks, navigationStyle } from '@/lib/config'
+import { useDarkMode } from '@/lib/use-dark-mode'
+⋮----
+import styles from './styles.module.css'
+</file>
+
+<file path="lib/notion-direct-search.ts">
+// 検索専用のシンプルなNotionクライアント実装
+// Next.jsではグローバルなfetchが使用可能
+⋮----
+// 簡易版Notion APIクライアント（検索専用）
+export async function searchNotion(query: string)
+⋮----
+// 環境変数からの設定読み込み
+⋮----
+// 認証トークンがない場合はエラー
+⋮----
+// Notion APIのエンドポイント
+⋮----
+// リクエストボディ
+⋮----
+// 特定のページIDが指定されている場合、検索対象を制限
+⋮----
+// APIリクエスト
+⋮----
+// レスポンスのステータスコードをチェック
+⋮----
+// レスポンスをJSONとしてパース
+⋮----
+// 検索結果を返す（最初の2件のみ詳細をログに出力）
+</file>
+
+<file path="pages/api/direct-search.ts">
+// このファイルはNotion公式APIを使った検索エンドポイント
+import { type NextApiRequest, type NextApiResponse } from 'next'
+import { searchNotion } from '@/lib/notion-direct-search'
+⋮----
+export default async function directSearch(
+  req: NextApiRequest,
+  res: NextApiResponse
+)
+⋮----
+// CORSヘッダーを設定
+⋮----
+// OPTIONS (プリフライト) リクエストには200を返す
+⋮----
+// リクエスト内容を確認
+⋮----
+// 検索クエリ取得
+⋮----
+// 環境変数チェック
+⋮----
+// 検索実行
+⋮----
+// 結果をログに出力
+⋮----
+// 結果を返す
+</file>
+
+<file path="pages/api/fallback-search.ts">
+// ハードコードされた検索結果を提供するAPI（NotionのAPIが機能しない場合のフォールバック）
+import { type NextApiRequest, type NextApiResponse } from 'next'
+⋮----
+export default async function fallbackSearch(
+  req: NextApiRequest,
+  res: NextApiResponse
+)
+⋮----
+// 検索クエリ取得
+⋮----
+// 標準的なサンプルコンテンツ（デモ用）
+⋮----
+// 非常にシンプルな検索ロジック
+⋮----
+// 検索統計情報
+⋮----
+// Notionの検索結果形式に合わせる
+</file>
+
+<file path="pages/api/test-notion-connection.ts">
+// Notionとの接続をテストするための最もシンプルなエンドポイント
+import { type NextApiRequest, type NextApiResponse } from 'next'
+⋮----
+export default async function testNotionConnection(
+  req: NextApiRequest,
+  res: NextApiResponse
+)
+⋮----
+// CORSヘッダーを設定
+⋮----
+// 環境変数の確認
+⋮----
+// 非常にシンプルなリクエストをNotionのAPIに送信する
+⋮----
+query: '', // 空のクエリは全ての閲覧可能なページを返す
+page_size: 1 // 1つだけ結果を取得
+⋮----
+// レスポンスのステータスコードをチェック
+⋮----
+// 正常なレスポンスをパース
+⋮----
+// 簡易的なレスポンスを返す
+</file>
+
+<file path="pages/api/test-search.ts">
+// このファイルはNotion検索機能のテスト用APIです
+import { type NextApiRequest, type NextApiResponse } from 'next'
+import { NotionAPI } from 'notion-client'
+⋮----
+export default async function testSearch(
+  req: NextApiRequest,
+  res: NextApiResponse
+)
+⋮----
+// 環境変数と接続情報
+⋮----
+// Notionクライアントを初期化
+⋮----
+// シンプルな検索を実行
+⋮----
+query: 'test', // シンプルなテスト検索
+ancestorId: undefined, // rootページを指定しない
+⋮----
+// 結果を返す
+⋮----
+// サンプル結果（最初の2件のみ）
+</file>
+
+<file path="pages/[pageId].tsx">
+import { type GetStaticProps } from 'next'
+⋮----
+import { NotionPage } from '@/components/NotionPage'
+import { domain, isDev } from '@/lib/config'
+import { getSiteMap } from '@/lib/get-site-map'
+import { resolveNotionPage } from '@/lib/resolve-notion-page'
+import { getMenuItems } from '@/lib/menu-utils'
+import { type PageProps, type Params } from '@/lib/types'
+⋮----
+export const getStaticProps: GetStaticProps<PageProps, Params> = async (
+  context
+) =>
+⋮----
+// NotionデータベースからMenuがtrueの項目を取得
+⋮----
+// propsにmenuItemsを追加
+⋮----
+// we don't want to publish the error version of this page, so
+// let next.js know explicitly that incremental SSG failed
+⋮----
+export async function getStaticPaths()
+⋮----
+// paths: [],
+⋮----
+export default function NotionDomainDynamicPage(props)
+</file>
+
+<file path="lib/acl.ts">
+import { type PageProps } from './types'
+⋮----
+export async function pageAcl({
+  site,
+  recordMap,
+  pageId
+}: PageProps): Promise<PageProps>
+</file>
+
+<file path="lib/db.ts">
+import Keyv from '@keyvhq/core'
+import KeyvRedis from '@keyvhq/redis'
+⋮----
+import { isRedisEnabled, redisNamespace, redisUrl } from './config'
+</file>
+
+<file path="lib/get-site-map.ts">
+import { getAllPagesInSpace, getPageProperty, uuidToId } from 'notion-utils'
+import pMemoize from 'p-memoize'
+⋮----
+import { includeNotionIdInUrls } from './config'
+import { getCanonicalPageId } from './get-canonical-page-id'
+import { notion } from './notion-api'
+⋮----
+export async function getSiteMap(): Promise<types.SiteMap>
+⋮----
+const getPage = async (pageId: string, ...args) =>
+⋮----
+async function getAllPagesImpl(
+  rootNotionPageId: string,
+  rootNotionSpaceId: string
+): Promise<Partial<types.SiteMap>>
+⋮----
+// you can have multiple pages in different collections that have the same id
+// TODO: we may want to error if neither entry is a collection page
+</file>
+
+<file path="lib/resolve-notion-page.ts">
+import { type ExtendedRecordMap } from 'notion-types'
+import { parsePageId } from 'notion-utils'
+⋮----
+import { environment, pageUrlAdditions, pageUrlOverrides, site } from './config'
+import { db } from './db'
+import { getSiteMap } from './get-site-map'
+import { getPage } from './notion'
+⋮----
+export async function resolveNotionPage(domain: string, rawPageId?: string)
+⋮----
+// check if the site configuration provides an override or a fallback for
+// the page's URI
+⋮----
+// TODO: should we use a TTL for these mappings or make them permanent?
+// const cacheTTL = 8.64e7 // one day in milliseconds
+const cacheTTL = undefined // disable cache TTL
+⋮----
+// check if the database has a cached mapping of this URI to page ID
+⋮----
+// console.log(`redis get "${cacheKey}"`, pageId)
+⋮----
+// ignore redis errors
+⋮----
+// handle mapping of user-friendly canonical page paths to Notion page IDs
+// e.g., /developer-x-entrepreneur versus /71201624b204481f862630ea25ce62fe
+⋮----
+// TODO: we're not re-using the page recordMap from siteMaps because it is
+// cached aggressively
+// recordMap = siteMap.pageMap[pageId]
+⋮----
+// update the database mapping of URI to pageId
+⋮----
+// console.log(`redis set "${cacheKey}"`, pageId, { cacheTTL })
+⋮----
+// ignore redis errors
+⋮----
+// note: we're purposefully not caching URI to pageId mappings for 404s
+</file>
+
+<file path="lib/map-page-url.ts">
+import { type ExtendedRecordMap } from 'notion-types'
+import { parsePageId, uuidToId } from 'notion-utils'
+⋮----
+import { includeNotionIdInUrls } from './config'
+import { getCanonicalPageId } from './get-canonical-page-id'
+import { type Site } from './types'
+⋮----
+// include UUIDs in page URLs during local development but not in production
+// (they're nice for debugging and speed up local dev)
+⋮----
+export const mapPageUrl =
+(site: Site, recordMap: ExtendedRecordMap, searchParams: URLSearchParams)
+⋮----
+export const getCanonicalPageUrl =
+(site: Site, recordMap: ExtendedRecordMap)
+⋮----
+function createUrl(path: string, searchParams: URLSearchParams)
+</file>
+
+<file path="components/NotionViewTabs.tsx">
+import React from 'react';
+import Link from 'next/link';
+⋮----
+// タブのインターフェース定義
+export interface ViewTab {
+  id: string;
+  name: string;
+  path: string;
+  pageId: string;
+}
+⋮----
+interface NotionViewTabsProps {
+  tabs?: ViewTab[];
+  activeTab?: string;
+}
+⋮----
+const NotionViewTabs: React.FC<NotionViewTabsProps> = ({ 
+  tabs = [], 
+  activeTab = 'all'
+}) =>
+⋮----
+{/* タブのコンテンツ（このコンポーネントは実際には使用しないため最小限に） */}
+</file>
+
+<file path="lib/notion-api.ts">
+import { NotionAPI } from 'notion-client'
+⋮----
+// 認証情報のログ出力（実際の値は表示されません）
+⋮----
+authToken: process.env.NOTION_API_SECRET,  // 認証トークンを追加
+⋮----
+userTimeZone: 'Asia/Tokyo' // タイムゾーンを設定
+</file>
+
+<file path="lib/notion-views.ts">
+import { ViewTab } from '../components/NotionViewTabs';
+⋮----
+// Notionのメインデータベースビュー設定
+// 注意: 実際のNotionビューIDとページIDに置き換えてください
+⋮----
+// メインページID（site.config.tsのrootNotionPageIdと同じ）
+⋮----
+// ブログカテゴリのビューID（Notionで作成したビューのID）
+pageId: '1ceb802cb0c680f29369dba86095fb38?v=xxxxxxxxxxxx' // 実際のビューIDに置き換え
+⋮----
+pageId: '1ceb802cb0c680f29369dba86095fb38?v=xxxxxxxxxxxx' // 実際のビューIDに置き換え
+⋮----
+pageId: '1ceb802cb0c680f29369dba86095fb38?v=xxxxxxxxxxxx' // 実際のビューIDに置き換え
+⋮----
+pageId: '1ceb802cb0c680f29369dba86095fb38?v=xxxxxxxxxxxx' // 実際のビューIDに置き換え
+⋮----
+// 各ビューIDとページIDのマッピング
+</file>
+
+<file path="pages/api/search-notion.ts">
+import { type NextApiRequest, type NextApiResponse } from 'next'
+⋮----
+import { search } from '@/lib/notion'
+⋮----
+export default async function searchNotion(
+  req: NextApiRequest,
+  res: NextApiResponse
+)
+⋮----
+// リクエストの詳細をログに出力
+⋮----
+// rootNotionPageIdの確認
+⋮----
+// 検索結果のサンプルをログに出力（最初の2件のみ）
+</file>
+
+<file path="lib/notion.ts">
+import {
+  type ExtendedRecordMap,
+  type SearchParams,
+  type SearchResults
+} from 'notion-types'
+import { mergeRecordMaps } from 'notion-utils'
+import pMap from 'p-map'
+import pMemoize from 'p-memoize'
+⋮----
+import {
+  isPreviewImageSupportEnabled,
+  navigationLinks,
+  navigationStyle
+} from './config'
+import { getTweetsMap } from './get-tweets'
+import { notion } from './notion-api'
+import { getPreviewImageMap } from './preview-images'
+⋮----
+export async function getPage(pageId: string): Promise<ExtendedRecordMap>
+⋮----
+// ensure that any pages linked to in the custom navigation header have
+// their block info fully resolved in the page record map so we know
+// the page title, slug, etc.
+⋮----
+export async function search(params: SearchParams |
+⋮----
+// 環境変数の確認
+⋮----
+// 検索パラメータの設定
+// ancestorIdは必ず文字列を渡すようにする
+⋮----
+isNavigableOnly: false,    // falseに変更して検索範囲を広げる
+⋮----
+// ancestorIdsは検索範囲を広げるため一時的にコメントアウト
+// ancestorIds: rootId ? [rootId] : undefined
+⋮----
+limit: 100 // 検索結果を増やす
+⋮----
+// クエリがない場合や短すぎる場合は空の結果を返す
+⋮----
+// クエリをトリム
+⋮----
+// ancestorIdを外して再検索
+</file>
+
+<file path="components/NotionPage.tsx">
+import cs from 'classnames'
+import dynamic from 'next/dynamic'
+import Image from 'next/legacy/image'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
+import { type PageBlock } from 'notion-types'
+import { formatDate, getBlockTitle, getPageProperty } from 'notion-utils'
+⋮----
+import BodyClassName from 'react-body-classname'
+import {
+  type NotionComponents,
+  NotionRenderer,
+  useNotionContext
+} from 'react-notion-x'
+import { EmbeddedTweet, TweetNotFound, TweetSkeleton } from 'react-tweet'
+import { useSearchParam } from 'react-use'
+⋮----
+import { mapImageUrl } from '@/lib/map-image-url'
+import { getCanonicalPageUrl, mapPageUrl } from '@/lib/map-page-url'
+import { searchNotion } from '@/lib/search-notion'
+import { useDarkMode } from '@/lib/use-dark-mode'
+⋮----
+import { Footer } from './Footer'
+import { GitHubShareButton } from './GitHubShareButton'
+import { Loading } from './Loading'
+import { NotionPageHeader } from './NotionPageHeader'
+import { Page404 } from './Page404'
+import { PageAside } from './PageAside'
+import { PageHead } from './PageHead'
+import { Header } from './Header'
+import styles from './styles.module.css'
+⋮----
+// -----------------------------------------------------------------------------
+// dynamic imports for optional components
+// -----------------------------------------------------------------------------
+⋮----
+// コードブロックコンポーネント - 改良版
+⋮----
+// add / remove any prism syntaxes here
+⋮----
+// 必須の基本言語
+⋮----
+// 人気のある言語
+⋮----
+// その他の言語も含める
+⋮----
+// HTMLテンプレート言語
+⋮----
+// データベースビューコンポーネント
+⋮----
+// 数式コンポーネント
+⋮----
+// PDFビューアーコンポーネント - SSRを無効化
+⋮----
+// モーダルコンポーネント - SSRを無効化
+⋮----
+function Tweet(
+⋮----
+const propertyLastEditedTimeValue = (
+  { block, pageHeader },
+  defaultFn: () => React.ReactNode
+) =>
+⋮----
+const propertyDateValue = (
+  { data, schema, pageHeader },
+  defaultFn: () => React.ReactNode
+) =>
+⋮----
+const propertyTextValue = (
+  { schema, pageHeader },
+  defaultFn: () => React.ReactNode
+) =>
+⋮----
+// ナビゲーションメニュー項目
+const getNavigationMenuItems = (site: types.Site) =>
+⋮----
+// デフォルトのメニュー項目
+⋮----
+menuItems // Notionデータベースからのメニューアイテムを受け取る
+⋮----
+// Notionのデフォルトヘッダーをカスタムヘッダーとして使わない
+Header: () => null, // ヘッダーを非表示にする
+⋮----
+// ボディにNoNotionTabsクラスを追加
+⋮----
+// ナビゲーションメニュー項目を取得
+⋮----
+// lite mode is for oembed
+⋮----
+// const isRootPage =
+//   parsePageId(block?.id) === parsePageId(site?.rootNotionPageId)
+⋮----
+// add important objects to the window global for easy debugging
+⋮----
+{/* Notionレンダラー - 内部のヘッダーをnullに設定したので、カスタムヘッダーを外に配置 */}
+</file>
+
+</files>

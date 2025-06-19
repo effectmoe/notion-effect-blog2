@@ -1,0 +1,23 @@
+
+> nextjs-notion-starter-kit@2.0.0 build
+> next build && npm run build:sw
+
+ ⚠ You are using a non-standard "NODE_ENV" value in your environment. This creates inconsistencies in the project and is strongly advised against. Read more: https://nextjs.org/docs/messages/non-standard-node-env
+   ▲ Next.js 15.3.3
+   - Environments: .env.local, .env
+
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./lib/notion-api-enhanced.ts:69:19
+Type error: Type '{ collection_group_results: { type: string; blockIds: string[]; hasMore: boolean; }; }' is missing the following properties from type 'CollectionQueryResult': type, total, blockIds, aggregationResults
+
+[0m [90m 67 |[39m                     recordMap[33m.[39mcollection_query[collectionId] [33m=[39m {}[0m
+[0m [90m 68 |[39m                   }[0m
+[0m[31m[1m>[22m[39m[90m 69 |[39m                   recordMap[33m.[39mcollection_query[collectionId][viewId] [33m=[39m collectionData[33m.[39mresult[33m.[39mreducerResults[0m
+[0m [90m    |[39m                   [31m[1m^[22m[39m[0m
+[0m [90m 70 |[39m                   console[33m.[39mlog([32m`Added collection_query data for ${collectionId}/${viewId}`[39m)[0m
+[0m [90m 71 |[39m                 }[0m
+[0m [90m 72 |[39m               } [36mcatch[39m (error) {[0m
+Next.js build worker exited with code: 1 and signal: null

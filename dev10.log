@@ -1,0 +1,523 @@
+
+> nextjs-notion-starter-kit@2.0.0 dev
+> next dev
+
+   ▲ Next.js 15.3.3
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.1.6:3000
+   - Environments: .env.local, .env
+
+ ✓ Starting...
+ ✓ Ready in 1035ms
+ ✓ Compiled /middleware in 198ms (107 modules)
+ ✓ Compiled /api/test-page-list in 417ms (192 modules)
+Notion API設定状況:
+- NOTION_API_BASE_URL: 未設定（デフォルト使用）
+- NOTION_API_SECRET: 設定済み
+[TestPageList] Starting test...
+[TestPageList] Environment: {
+  NOTION_ROOT_PAGE_ID: 'NOT SET',
+  NOTION_ROOT_SPACE_ID: 'NOT SET',
+  NOTION_API_KEY: 'NOT SET',
+  NOTION_TOKEN: 'NOT SET'
+}
+[TestPageList] Trying getSiteMap...
+
+notion getPage 1ceb802cb0c680f29369dba86095fb38
+
+notion getPage 212b802cb0c68051accccaa61f27c8cd
+
+notion getPage 212b802cb0c6808887ebf9ab5017eb6b
+
+notion getPage 213b802cb0c6808fba84d668cf155624
+
+notion getPage 213b802cb0c680b9bd4dd1be176f5e44
+
+notion getPage 213b802cb0c680c6b6e4d70d789f56e3
+
+notion getPage 213b802cb0c680e985d0f62dd6704d0c
+
+notion getPage 213b802cb0c6802ba013c65200e3a916
+
+notion getPage 213b802cb0c680629d29f676e7785dff
+
+notion getPage 213b802cb0c6809c9ebee3df8e557c6e
+
+notion getPage 213b802cb0c680b4a1fddbd5b9ea7664
+
+notion getPage 213b802cb0c680bfa237df08bf444c11
+[TestPageList] getSiteMap returned 12 pages
+[TestPageList] Trying getAllPageIds...
+[Page List] Getting all page IDs...
+[Page List] Root page ID: undefined
+[Page List] Root space ID: undefined
+[Page List] ⚠️ Duplicate pages found for title "❓ カフェキネシとは何ですか？": [
+  '212b802c-b0c6-8088-87eb-f9ab5017eb6b',
+  '213b802c-b0c6-802b-a013-c65200e3a916'
+]
+[Page List] ⚠️ Duplicate pages found for title "💰 講座料金はいくらですか？": [
+  '212b802c-b0c6-8051-accc-caa61f27c8cd',
+  '213b802c-b0c6-80b4-a1fd-dbd5b9ea7664'
+]
+[Page List] ⚠️ Duplicate pages found for title "🎓 資格の有効期限は？": [
+  '213b802c-b0c6-808f-ba84-d668cf155624',
+  '213b802c-b0c6-8062-9d29-f676e7785dff'
+]
+[Page List] ⚠️ Duplicate pages found for title "⏰ 講座の所要時間は？": [
+  '213b802c-b0c6-80b9-bd4d-d1be176f5e44',
+  '213b802c-b0c6-809c-9ebe-e3df8e557c6e'
+]
+[Page List] ⚠️ Duplicate pages found for title "💻 オンライン受講は可能ですか？": [
+  '213b802c-b0c6-80e9-85d0-f62dd6704d0c',
+  '213b802c-b0c6-80bf-a237-df08bf444c11'
+]
+[Page List] ✅ Total pages in map: 12
+[Page List] ✅ Unique pages: 7
+[Page List] ⚠️ Duplicate pages excluded: 5
+[Page List] Excluded duplicate page IDs: [
+  '213b802c-b0c6-802b-a013-c65200e3a916',
+  '213b802c-b0c6-80b4-a1fd-dbd5b9ea7664',
+  '213b802c-b0c6-8062-9d29-f676e7785dff',
+  '213b802c-b0c6-809c-9ebe-e3df8e557c6e',
+  '213b802c-b0c6-80bf-a237-df08bf444c11'
+]
+[TestPageList] getAllPageIds returned 7 pages
+[TestPageList] Test complete: {
+  success: true,
+  environment: {
+    NOTION_ROOT_PAGE_ID: 'NOT SET',
+    NOTION_ROOT_SPACE_ID: 'NOT SET',
+    NOTION_API_KEY: 'NOT SET',
+    NOTION_TOKEN: 'NOT SET'
+  },
+  results: {
+    siteMap: { count: 12, sample: [Array], method: 'getSiteMap()', error: null },
+    allPageIds: {
+      count: 7,
+      sample: [Array],
+      method: 'getAllPageIds()',
+      error: null
+    }
+  },
+  recommendation: 'Use getAllPageIds',
+  troubleshooting: {
+    noPages: 'If no pages found, check:',
+    steps: [
+      '1. NOTION_ROOT_PAGE_ID is correct',
+      '2. NOTION_TOKEN or NOTION_API_KEY is set',
+      '3. The Notion integration has access to the pages',
+      '4. The root page has child pages'
+    ]
+  }
+}
+ GET /api/test-page-list 200 in 2795ms
+ ✓ Compiled /api/cache-warmup-simple in 59ms (194 modules)
+Notion API設定状況:
+- NOTION_API_BASE_URL: 未設定（デフォルト使用）
+- NOTION_API_SECRET: 設定済み
+[Warmup] Starting cache warmup...
+[Warmup] Environment check: {
+  NOTION_ROOT_PAGE_ID: 'Not set',
+  NOTION_ROOT_SPACE_ID: 'Not set',
+  NEXT_PUBLIC_HOST: undefined
+}
+[Warmup] Trying getSiteMap...
+
+notion getPage 1ceb802cb0c680f29369dba86095fb38
+
+notion getPage 212b802cb0c68051accccaa61f27c8cd
+
+notion getPage 212b802cb0c6808887ebf9ab5017eb6b
+
+notion getPage 213b802cb0c6808fba84d668cf155624
+
+notion getPage 213b802cb0c680b9bd4dd1be176f5e44
+
+notion getPage 213b802cb0c680c6b6e4d70d789f56e3
+
+notion getPage 213b802cb0c680e985d0f62dd6704d0c
+
+notion getPage 213b802cb0c6802ba013c65200e3a916
+
+notion getPage 213b802cb0c680629d29f676e7785dff
+
+notion getPage 213b802cb0c6809c9ebee3df8e557c6e
+
+notion getPage 213b802cb0c680b4a1fddbd5b9ea7664
+
+notion getPage 213b802cb0c680bfa237df08bf444c11
+[Warmup] Got 12 pages from site map
+[Warmup] Found 12 pages to process
+[Warmup] First few page IDs: [
+  'cafekinesi-1ceb802cb0c680f29369dba86095fb38',
+  '資格の有効期限は-213b802cb0c6808fba84d668cf155624',
+  'カフェキネシとは何ですか-212b802cb0c6808887ebf9ab5017eb6b',
+  '講座の所要時間は-213b802cb0c680b9bd4dd1be176f5e44',
+  '講座料金はいくらですか-212b802cb0c68051accccaa61f27c8cd'
+]
+[Warmup] Processing batch 1/3
+ POST /api/cache-warmup-simple 200 in 1936ms
+ ○ Compiling /[pageId] ...
+ ✓ Compiled /[pageId] in 1425ms (1132 modules)
+Notion API設定状況:
+- NOTION_API_BASE_URL: 未設定（デフォルト使用）
+- NOTION_API_SECRET: 設定済み
+[Redis] No REDIS_URL configured. Using memory cache only.
+Notion API設定状況:
+- NOTION_API_BASE_URL: 未設定（デフォルト使用）
+- NOTION_API_SECRET: 設定済み
+[Redis] No REDIS_URL configured. Using memory cache only.
+ GET /%E8%B3%87%E6%A0%BC%E3%81%AE%E6%9C%89%E5%8A%B9%E6%9C%9F%E9%99%90%E3%81%AF-213b802cb0c6808fba84d668cf155624 200 in 3646ms
+ GET /%E3%82%AB%E3%83%95%E3%82%A7%E3%82%AD%E3%83%8D%E3%82%B7%E3%81%A8%E3%81%AF%E4%BD%95%E3%81%A7%E3%81%99%E3%81%8B-212b802cb0c6808887ebf9ab5017eb6b 200 in 3716ms
+ GET /%E8%AC%9B%E5%BA%A7%E3%81%AE%E6%89%80%E8%A6%81%E6%99%82%E9%96%93%E3%81%AF-213b802cb0c680b9bd4dd1be176f5e44 200 in 3914ms
+ GET /%E8%AC%9B%E5%BA%A7%E6%96%99%E9%87%91%E3%81%AF%E3%81%84%E3%81%8F%E3%82%89%E3%81%A7%E3%81%99%E3%81%8B-212b802cb0c68051accccaa61f27c8cd 200 in 3926ms
+ GET /cafekinesi-1ceb802cb0c680f29369dba86095fb38 200 in 4081ms
+[Warmup] Processing batch 2/3
+Notion API設定状況:
+- NOTION_API_BASE_URL: 未設定（デフォルト使用）
+- NOTION_API_SECRET: 設定済み
+[Redis] No REDIS_URL configured. Using memory cache only.
+ GET /%E8%B3%87%E6%A0%BC%E3%81%AE%E6%9C%89%E5%8A%B9%E6%9C%9F%E9%99%90%E3%81%AF-213b802cb0c680629d29f676e7785dff 200 in 1247ms
+ GET /%E3%82%AA%E3%83%B3%E3%83%A9%E3%82%A4%E3%83%B3%E5%8F%97%E8%AC%9B%E3%81%AF%E5%8F%AF%E8%83%BD%E3%81%A7%E3%81%99%E3%81%8B-213b802cb0c680e985d0f62dd6704d0c 200 in 1269ms
+ GET /213b802cb0c680c6b6e4d70d789f56e3 200 in 1299ms
+ GET /%E8%AC%9B%E5%BA%A7%E3%81%AE%E6%89%80%E8%A6%81%E6%99%82%E9%96%93%E3%81%AF-213b802cb0c6809c9ebee3df8e557c6e 200 in 1451ms
+Notion API設定状況:
+- NOTION_API_BASE_URL: 未設定（デフォルト使用）
+- NOTION_API_SECRET: 設定済み
+ GET /api/cache-warmup-simple 200 in 4ms
+ GET /%E3%82%AB%E3%83%95%E3%82%A7%E3%82%AD%E3%83%8D%E3%82%B7%E3%81%A8%E3%81%AF%E4%BD%95%E3%81%A7%E3%81%99%E3%81%8B-213b802cb0c6802ba013c65200e3a916 200 in 2866ms
+[Warmup] Processing batch 3/3
+Notion API設定状況:
+- NOTION_API_BASE_URL: 未設定（デフォルト使用）
+- NOTION_API_SECRET: 設定済み
+[Redis] No REDIS_URL configured. Using memory cache only.
+ GET /%E3%82%AA%E3%83%B3%E3%83%A9%E3%82%A4%E3%83%B3%E5%8F%97%E8%AC%9B%E3%81%AF%E5%8F%AF%E8%83%BD%E3%81%A7%E3%81%99%E3%81%8B-213b802cb0c680bfa237df08bf444c11 200 in 1258ms
+ GET /%E8%AC%9B%E5%BA%A7%E6%96%99%E9%87%91%E3%81%AF%E3%81%84%E3%81%8F%E3%82%89%E3%81%A7%E3%81%99%E3%81%8B-213b802cb0c680b4a1fddbd5b9ea7664 200 in 1469ms
+[Warmup] Completed
+ GET /api/cache-warmup-simple 200 in 1ms
+[Warmup] Starting cache warmup...
+[Warmup] Environment check: {
+  NOTION_ROOT_PAGE_ID: 'Not set',
+  NOTION_ROOT_SPACE_ID: 'Not set',
+  NEXT_PUBLIC_HOST: undefined
+}
+[Warmup] Trying getSiteMap...
+
+notion getPage 1ceb802cb0c680f29369dba86095fb38
+
+notion getPage 212b802cb0c68051accccaa61f27c8cd
+
+notion getPage 212b802cb0c6808887ebf9ab5017eb6b
+
+notion getPage 213b802cb0c6808fba84d668cf155624
+
+notion getPage 213b802cb0c680b9bd4dd1be176f5e44
+
+notion getPage 213b802cb0c680c6b6e4d70d789f56e3
+
+notion getPage 213b802cb0c680e985d0f62dd6704d0c
+
+notion getPage 213b802cb0c6802ba013c65200e3a916
+
+notion getPage 213b802cb0c680629d29f676e7785dff
+
+notion getPage 213b802cb0c6809c9ebee3df8e557c6e
+
+notion getPage 213b802cb0c680b4a1fddbd5b9ea7664
+
+notion getPage 213b802cb0c680bfa237df08bf444c11
+[Warmup] Got 12 pages from site map
+[Warmup] Found 12 pages to process
+[Warmup] First few page IDs: [
+  'cafekinesi-1ceb802cb0c680f29369dba86095fb38',
+  'カフェキネシとは何ですか-212b802cb0c6808887ebf9ab5017eb6b',
+  '講座の所要時間は-213b802cb0c680b9bd4dd1be176f5e44',
+  '講座料金はいくらですか-212b802cb0c68051accccaa61f27c8cd',
+  '213b802cb0c680c6b6e4d70d789f56e3'
+]
+[Warmup] Processing batch 1/3
+ POST /api/cache-warmup-simple 200 in 2439ms
+Notion API設定状況:
+- NOTION_API_BASE_URL: 未設定（デフォルト使用）
+- NOTION_API_SECRET: 設定済み
+[Redis] No REDIS_URL configured. Using memory cache only.
+ GET /%E8%AC%9B%E5%BA%A7%E3%81%AE%E6%89%80%E8%A6%81%E6%99%82%E9%96%93%E3%81%AF-213b802cb0c680b9bd4dd1be176f5e44 200 in 1346ms
+ GET /cafekinesi-1ceb802cb0c680f29369dba86095fb38 200 in 1444ms
+ GET /%E8%AC%9B%E5%BA%A7%E6%96%99%E9%87%91%E3%81%AF%E3%81%84%E3%81%8F%E3%82%89%E3%81%A7%E3%81%99%E3%81%8B-212b802cb0c68051accccaa61f27c8cd 200 in 1476ms
+ GET /%E3%82%AB%E3%83%95%E3%82%A7%E3%82%AD%E3%83%8D%E3%82%B7%E3%81%A8%E3%81%AF%E4%BD%95%E3%81%A7%E3%81%99%E3%81%8B-212b802cb0c6808887ebf9ab5017eb6b 200 in 1581ms
+ GET /213b802cb0c680c6b6e4d70d789f56e3 200 in 1800ms
+ GET /api/cache-warmup-simple 200 in 2ms
+[Warmup] Processing batch 2/3
+Notion API設定状況:
+- NOTION_API_BASE_URL: 未設定（デフォルト使用）
+- NOTION_API_SECRET: 設定済み
+[Redis] No REDIS_URL configured. Using memory cache only.
+ GET /%E8%B3%87%E6%A0%BC%E3%81%AE%E6%9C%89%E5%8A%B9%E6%9C%9F%E9%99%90%E3%81%AF-213b802cb0c6808fba84d668cf155624 200 in 1332ms
+ GET /%E3%82%AA%E3%83%B3%E3%83%A9%E3%82%A4%E3%83%B3%E5%8F%97%E8%AC%9B%E3%81%AF%E5%8F%AF%E8%83%BD%E3%81%A7%E3%81%99%E3%81%8B-213b802cb0c680e985d0f62dd6704d0c 200 in 1416ms
+ GET /%E3%82%AB%E3%83%95%E3%82%A7%E3%82%AD%E3%83%8D%E3%82%B7%E3%81%A8%E3%81%AF%E4%BD%95%E3%81%A7%E3%81%99%E3%81%8B-213b802cb0c6802ba013c65200e3a916 200 in 1425ms
+ GET /%E8%AC%9B%E5%BA%A7%E3%81%AE%E6%89%80%E8%A6%81%E6%99%82%E9%96%93%E3%81%AF-213b802cb0c6809c9ebee3df8e557c6e 200 in 1479ms
+ GET /%E8%AC%9B%E5%BA%A7%E6%96%99%E9%87%91%E3%81%AF%E3%81%84%E3%81%8F%E3%82%89%E3%81%A7%E3%81%99%E3%81%8B-213b802cb0c680b4a1fddbd5b9ea7664 200 in 1484ms
+[Warmup] Processing batch 3/3
+Notion API設定状況:
+- NOTION_API_BASE_URL: 未設定（デフォルト使用）
+- NOTION_API_SECRET: 設定済み
+[Redis] No REDIS_URL configured. Using memory cache only.
+ GET /%E3%82%AA%E3%83%B3%E3%83%A9%E3%82%A4%E3%83%B3%E5%8F%97%E8%AC%9B%E3%81%AF%E5%8F%AF%E8%83%BD%E3%81%A7%E3%81%99%E3%81%8B-213b802cb0c680bfa237df08bf444c11 200 in 1489ms
+ GET /%E8%B3%87%E6%A0%BC%E3%81%AE%E6%9C%89%E5%8A%B9%E6%9C%9F%E9%99%90%E3%81%AF-213b802cb0c680629d29f676e7785dff 200 in 1493ms
+[Warmup] Completed
+ GET /api/cache-warmup-simple 200 in 1ms
+ ✓ Compiled in 44ms (411 modules)
+Notion API設定状況:
+- NOTION_API_BASE_URL: 未設定（デフォルト使用）
+- NOTION_API_SECRET: 設定済み
+[Warmup] Starting cache warmup...
+[Warmup] Environment check: {
+  NOTION_ROOT_PAGE_ID: 'Not set',
+  NOTION_ROOT_SPACE_ID: 'Not set',
+  NEXT_PUBLIC_HOST: undefined
+}
+[Warmup] Trying getSiteMap...
+
+notion getPage 1ceb802cb0c680f29369dba86095fb38
+
+notion getPage 212b802cb0c68051accccaa61f27c8cd
+
+notion getPage 212b802cb0c6808887ebf9ab5017eb6b
+
+notion getPage 213b802cb0c6808fba84d668cf155624
+
+notion getPage 213b802cb0c680b9bd4dd1be176f5e44
+
+notion getPage 213b802cb0c680c6b6e4d70d789f56e3
+
+notion getPage 213b802cb0c680e985d0f62dd6704d0c
+
+notion getPage 213b802cb0c6802ba013c65200e3a916
+
+notion getPage 213b802cb0c680629d29f676e7785dff
+
+notion getPage 213b802cb0c6809c9ebee3df8e557c6e
+
+notion getPage 213b802cb0c680b4a1fddbd5b9ea7664
+
+notion getPage 213b802cb0c680bfa237df08bf444c11
+[Warmup] Got 12 pages from site map
+[Warmup] Found 12 pages to process
+[Warmup] First few page IDs: [
+  'cafekinesi-1ceb802cb0c680f29369dba86095fb38',
+  '講座料金はいくらですか-212b802cb0c68051accccaa61f27c8cd',
+  '資格の有効期限は-213b802cb0c6808fba84d668cf155624',
+  '講座の所要時間は-213b802cb0c680b9bd4dd1be176f5e44',
+  'カフェキネシとは何ですか-212b802cb0c6808887ebf9ab5017eb6b'
+]
+[Warmup] Processing batch 1/3
+ POST /api/cache-warmup-simple 200 in 1797ms
+Notion API設定状況:
+- NOTION_API_BASE_URL: 未設定（デフォルト使用）
+- NOTION_API_SECRET: 設定済み
+[Redis] No REDIS_URL configured. Using memory cache only.
+Notion API設定状況:
+- NOTION_API_BASE_URL: 未設定（デフォルト使用）
+- NOTION_API_SECRET: 設定済み
+[Redis] No REDIS_URL configured. Using memory cache only.
+ GET /cafekinesi-1ceb802cb0c680f29369dba86095fb38 200 in 1435ms
+ GET /%E3%82%AB%E3%83%95%E3%82%A7%E3%82%AD%E3%83%8D%E3%82%B7%E3%81%A8%E3%81%AF%E4%BD%95%E3%81%A7%E3%81%99%E3%81%8B-212b802cb0c6808887ebf9ab5017eb6b 200 in 1513ms
+ GET /%E8%AC%9B%E5%BA%A7%E6%96%99%E9%87%91%E3%81%AF%E3%81%84%E3%81%8F%E3%82%89%E3%81%A7%E3%81%99%E3%81%8B-212b802cb0c68051accccaa61f27c8cd 200 in 1541ms
+ GET /%E8%AC%9B%E5%BA%A7%E3%81%AE%E6%89%80%E8%A6%81%E6%99%82%E9%96%93%E3%81%AF-213b802cb0c680b9bd4dd1be176f5e44 200 in 1635ms
+ GET /%E8%B3%87%E6%A0%BC%E3%81%AE%E6%9C%89%E5%8A%B9%E6%9C%9F%E9%99%90%E3%81%AF-213b802cb0c6808fba84d668cf155624 200 in 2221ms
+[Warmup] Processing batch 2/3
+Notion API設定状況:
+- NOTION_API_BASE_URL: 未設定（デフォルト使用）
+- NOTION_API_SECRET: 設定済み
+[Redis] No REDIS_URL configured. Using memory cache only.
+ GET /%E8%AC%9B%E5%BA%A7%E3%81%AE%E6%89%80%E8%A6%81%E6%99%82%E9%96%93%E3%81%AF-213b802cb0c6809c9ebee3df8e557c6e 200 in 2077ms
+ GET /213b802cb0c680c6b6e4d70d789f56e3 200 in 2353ms
+ GET /%E8%B3%87%E6%A0%BC%E3%81%AE%E6%9C%89%E5%8A%B9%E6%9C%9F%E9%99%90%E3%81%AF-213b802cb0c680629d29f676e7785dff 200 in 2541ms
+ GET /%E3%82%AB%E3%83%95%E3%82%A7%E3%82%AD%E3%83%8D%E3%82%B7%E3%81%A8%E3%81%AF%E4%BD%95%E3%81%A7%E3%81%99%E3%81%8B-213b802cb0c6802ba013c65200e3a916 200 in 2614ms
+ GET /%E3%82%AA%E3%83%B3%E3%83%A9%E3%82%A4%E3%83%B3%E5%8F%97%E8%AC%9B%E3%81%AF%E5%8F%AF%E8%83%BD%E3%81%A7%E3%81%99%E3%81%8B-213b802cb0c680e985d0f62dd6704d0c 200 in 2726ms
+[Warmup] Processing batch 3/3
+Notion API設定状況:
+- NOTION_API_BASE_URL: 未設定（デフォルト使用）
+- NOTION_API_SECRET: 設定済み
+[Redis] No REDIS_URL configured. Using memory cache only.
+ GET /%E8%AC%9B%E5%BA%A7%E6%96%99%E9%87%91%E3%81%AF%E3%81%84%E3%81%8F%E3%82%89%E3%81%A7%E3%81%99%E3%81%8B-213b802cb0c680b4a1fddbd5b9ea7664 200 in 1902ms
+ GET /%E3%82%AA%E3%83%B3%E3%83%A9%E3%82%A4%E3%83%B3%E5%8F%97%E8%AC%9B%E3%81%AF%E5%8F%AF%E8%83%BD%E3%81%A7%E3%81%99%E3%81%8B-213b802cb0c680bfa237df08bf444c11 200 in 2038ms
+[Warmup] Completed
+ GET /api/cache-warmup-simple 200 in 2ms
+ ✓ Compiled in 71ms (168 modules)
+ ✓ Compiled /api/cache-warmup-simple in 23ms (192 modules)
+ ⨯ Error: Cannot find module './chunks/vendor-chunks/next.js'
+Require stack:
+- /Users/tonychustudio/Documents/notion-effect-blog2/.next/server/webpack-api-runtime.js
+- /Users/tonychustudio/Documents/notion-effect-blog2/.next/server/pages/api/cache-warmup-simple.js
+- /Users/tonychustudio/Documents/notion-effect-blog2/node_modules/next/dist/server/lib/module-loader/node-module-loader.js
+- /Users/tonychustudio/Documents/notion-effect-blog2/node_modules/next/dist/server/lib/module-loader/route-module-loader.js
+- /Users/tonychustudio/Documents/notion-effect-blog2/node_modules/next/dist/server/next-server.js
+- /Users/tonychustudio/Documents/notion-effect-blog2/node_modules/next/dist/server/dev/next-dev-server.js
+- /Users/tonychustudio/Documents/notion-effect-blog2/node_modules/next/dist/server/next.js
+- /Users/tonychustudio/Documents/notion-effect-blog2/node_modules/next/dist/server/lib/start-server.js
+    at o.f.require (.next/server/webpack-api-runtime.js:1:1890)
+    at <unknown> (.next/server/webpack-api-runtime.js:1:1361)
+    at Array.reduce (<anonymous>)
+    at o.e (.next/server/webpack-api-runtime.js:1:1340)
+    at Array.map (<anonymous>) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array]
+}
+ ✓ Compiled /_error in 74ms (611 modules)
+Notion API設定状況:
+- NOTION_API_BASE_URL: 未設定（デフォルト使用）
+- NOTION_API_SECRET: 設定済み
+ ⨯ Error: Cannot find module './6089.js'
+Require stack:
+- /Users/tonychustudio/Documents/notion-effect-blog2/.next/server/webpack-runtime.js
+- /Users/tonychustudio/Documents/notion-effect-blog2/.next/server/pages/_document.js
+- /Users/tonychustudio/Documents/notion-effect-blog2/node_modules/next/dist/server/require.js
+- /Users/tonychustudio/Documents/notion-effect-blog2/node_modules/next/dist/server/load-components.js
+- /Users/tonychustudio/Documents/notion-effect-blog2/node_modules/next/dist/build/utils.js
+- /Users/tonychustudio/Documents/notion-effect-blog2/node_modules/next/dist/build/swc/options.js
+- /Users/tonychustudio/Documents/notion-effect-blog2/node_modules/next/dist/build/swc/index.js
+- /Users/tonychustudio/Documents/notion-effect-blog2/node_modules/next/dist/build/analysis/parse-module.js
+- /Users/tonychustudio/Documents/notion-effect-blog2/node_modules/next/dist/build/analysis/get-page-static-info.js
+- /Users/tonychustudio/Documents/notion-effect-blog2/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /Users/tonychustudio/Documents/notion-effect-blog2/node_modules/next/dist/server/lib/router-server.js
+- /Users/tonychustudio/Documents/notion-effect-blog2/node_modules/next/dist/server/lib/start-server.js
+    at __webpack_require__.f.require (.next/server/webpack-runtime.js:220:28)
+    at <unknown> (.next/server/webpack-runtime.js:147:40)
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (.next/server/webpack-runtime.js:146:67)
+    at Array.map (<anonymous>) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array]
+}
+ POST /api/cache-warmup-simple 500 in 538ms
+[Error: ENOENT: no such file or directory, stat '/Users/tonychustudio/Documents/notion-effect-blog2/.next/cache/webpack/client-development/1.pack.gz'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'stat',
+  path: '/Users/tonychustudio/Documents/notion-effect-blog2/.next/cache/webpack/client-development/1.pack.gz'
+}
+ ⨯ unhandledRejection: [Error: ENOENT: no such file or directory, stat '/Users/tonychustudio/Documents/notion-effect-blog2/.next/cache/webpack/client-development/1.pack.gz'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'stat',
+  path: '/Users/tonychustudio/Documents/notion-effect-blog2/.next/cache/webpack/client-development/1.pack.gz'
+}
+ ⨯ unhandledRejection:  [Error: ENOENT: no such file or directory, stat '/Users/tonychustudio/Documents/notion-effect-blog2/.next/cache/webpack/client-development/1.pack.gz'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'stat',
+  path: '/Users/tonychustudio/Documents/notion-effect-blog2/.next/cache/webpack/client-development/1.pack.gz'
+}
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, stat '/Users/tonychustudio/Documents/notion-effect-blog2/.next/cache/webpack/client-development/1.pack.gz'
+[Error: ENOENT: no such file or directory, stat '/Users/tonychustudio/Documents/notion-effect-blog2/.next/cache/webpack/server-development/3.pack.gz'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'stat',
+  path: '/Users/tonychustudio/Documents/notion-effect-blog2/.next/cache/webpack/server-development/3.pack.gz'
+}
+ ⨯ unhandledRejection: [Error: ENOENT: no such file or directory, stat '/Users/tonychustudio/Documents/notion-effect-blog2/.next/cache/webpack/server-development/3.pack.gz'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'stat',
+  path: '/Users/tonychustudio/Documents/notion-effect-blog2/.next/cache/webpack/server-development/3.pack.gz'
+}
+ ⨯ unhandledRejection:  [Error: ENOENT: no such file or directory, stat '/Users/tonychustudio/Documents/notion-effect-blog2/.next/cache/webpack/server-development/3.pack.gz'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'stat',
+  path: '/Users/tonychustudio/Documents/notion-effect-blog2/.next/cache/webpack/server-development/3.pack.gz'
+}
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, stat '/Users/tonychustudio/Documents/notion-effect-blog2/.next/cache/webpack/server-development/3.pack.gz'
+ ✓ Compiled /[pageId] in 86ms (1107 modules)
+Notion API設定状況:
+- NOTION_API_BASE_URL: 未設定（デフォルト使用）
+- NOTION_API_SECRET: 設定済み
+[Redis] No REDIS_URL configured. Using memory cache only.
+Notion API設定状況:
+- NOTION_API_BASE_URL: 未設定（デフォルト使用）
+- NOTION_API_SECRET: 設定済み
+[Redis] No REDIS_URL configured. Using memory cache only.
+ GET /%E3%82%AB%E3%83%95%E3%82%A7%E3%82%AD%E3%83%8D%E3%82%B7%E3%81%A8%E3%81%AF%E4%BD%95%E3%81%A7%E3%81%99%E3%81%8B-212b802cb0c6808887ebf9ab5017eb6b 200 in 1636ms
+ GET /cafekinesi-1ceb802cb0c680f29369dba86095fb38 200 in 1661ms
+ GET /%E8%B3%87%E6%A0%BC%E3%81%AE%E6%9C%89%E5%8A%B9%E6%9C%9F%E9%99%90%E3%81%AF-213b802cb0c6808fba84d668cf155624 200 in 1753ms
+Notion API設定状況:
+- NOTION_API_BASE_URL: 未設定（デフォルト使用）
+- NOTION_API_SECRET: 設定済み
+[Redis] No REDIS_URL configured. Using memory cache only.
+ GET /%E8%AC%9B%E5%BA%A7%E3%81%AE%E6%89%80%E8%A6%81%E6%99%82%E9%96%93%E3%81%AF-213b802cb0c680b9bd4dd1be176f5e44 200 in 1932ms
+ GET /%E8%AC%9B%E5%BA%A7%E6%96%99%E9%87%91%E3%81%AF%E3%81%84%E3%81%8F%E3%82%89%E3%81%A7%E3%81%99%E3%81%8B-212b802cb0c68051accccaa61f27c8cd 200 in 1983ms
+ GET /213b802cb0c680c6b6e4d70d789f56e3 200 in 2468ms
+Notion API設定状況:
+- NOTION_API_BASE_URL: 未設定（デフォルト使用）
+- NOTION_API_SECRET: 設定済み
+[Redis] No REDIS_URL configured. Using memory cache only.
+ GET /%E3%82%AA%E3%83%B3%E3%83%A9%E3%82%A4%E3%83%B3%E5%8F%97%E8%AC%9B%E3%81%AF%E5%8F%AF%E8%83%BD%E3%81%A7%E3%81%99%E3%81%8B-213b802cb0c680e985d0f62dd6704d0c 200 in 1532ms
+ GET /%E3%82%AB%E3%83%95%E3%82%A7%E3%82%AD%E3%83%8D%E3%82%B7%E3%81%A8%E3%81%AF%E4%BD%95%E3%81%A7%E3%81%99%E3%81%8B-213b802cb0c6802ba013c65200e3a916 200 in 1547ms
+ GET /%E8%B3%87%E6%A0%BC%E3%81%AE%E6%9C%89%E5%8A%B9%E6%9C%9F%E9%99%90%E3%81%AF-213b802cb0c680629d29f676e7785dff 200 in 1719ms
+Notion API設定状況:
+- NOTION_API_BASE_URL: 未設定（デフォルト使用）
+- NOTION_API_SECRET: 設定済み
+[Redis] No REDIS_URL configured. Using memory cache only.
+ GET /%E3%82%AA%E3%83%B3%E3%83%A9%E3%82%A4%E3%83%B3%E5%8F%97%E8%AC%9B%E3%81%AF%E5%8F%AF%E8%83%BD%E3%81%A7%E3%81%99%E3%81%8B-213b802cb0c680bfa237df08bf444c11 200 in 1627ms
+ GET /%E8%AC%9B%E5%BA%A7%E3%81%AE%E6%89%80%E8%A6%81%E6%99%82%E9%96%93%E3%81%AF-213b802cb0c6809c9ebee3df8e557c6e 200 in 1627ms
+ GET /%E8%AC%9B%E5%BA%A7%E6%96%99%E9%87%91%E3%81%AF%E3%81%84%E3%81%8F%E3%82%89%E3%81%A7%E3%81%99%E3%81%8B-213b802cb0c680b4a1fddbd5b9ea7664 200 in 1987ms
+ ✓ Compiled in 65ms (168 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename '/Users/tonychustudio/Documents/notion-effect-blog2/.next/cache/webpack/server-development/0.pack.gz_' -> '/Users/tonychustudio/Documents/notion-effect-blog2/.next/cache/webpack/server-development/0.pack.gz'
+ ✓ Compiled in 52ms (419 modules)
+ ✓ Compiled /api/test-page-list in 53ms (192 modules)
+ ⨯ Error: Cannot find module './chunks/vendor-chunks/next.js'
+Require stack:
+- /Users/tonychustudio/Documents/notion-effect-blog2/.next/server/webpack-api-runtime.js
+- /Users/tonychustudio/Documents/notion-effect-blog2/.next/server/pages/api/test-page-list.js
+- /Users/tonychustudio/Documents/notion-effect-blog2/node_modules/next/dist/server/lib/module-loader/node-module-loader.js
+- /Users/tonychustudio/Documents/notion-effect-blog2/node_modules/next/dist/server/lib/module-loader/route-module-loader.js
+- /Users/tonychustudio/Documents/notion-effect-blog2/node_modules/next/dist/server/next-server.js
+- /Users/tonychustudio/Documents/notion-effect-blog2/node_modules/next/dist/server/dev/next-dev-server.js
+- /Users/tonychustudio/Documents/notion-effect-blog2/node_modules/next/dist/server/next.js
+- /Users/tonychustudio/Documents/notion-effect-blog2/node_modules/next/dist/server/lib/start-server.js
+    at o.f.require (.next/server/webpack-api-runtime.js:1:1890)
+    at <unknown> (.next/server/webpack-api-runtime.js:1:1361)
+    at Array.reduce (<anonymous>)
+    at o.e (.next/server/webpack-api-runtime.js:1:1340)
+    at Array.map (<anonymous>) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array]
+}
+ ✓ Compiled /_error in 42ms (611 modules)
+Notion API設定状況:
+- NOTION_API_BASE_URL: 未設定（デフォルト使用）
+- NOTION_API_SECRET: 設定済み
+ ⨯ Error: Cannot find module './chunks/vendor-chunks/next.js'
+Require stack:
+- /Users/tonychustudio/Documents/notion-effect-blog2/.next/server/webpack-runtime.js
+- /Users/tonychustudio/Documents/notion-effect-blog2/.next/server/pages/_document.js
+- /Users/tonychustudio/Documents/notion-effect-blog2/node_modules/next/dist/server/require.js
+- /Users/tonychustudio/Documents/notion-effect-blog2/node_modules/next/dist/server/load-components.js
+- /Users/tonychustudio/Documents/notion-effect-blog2/node_modules/next/dist/build/utils.js
+- /Users/tonychustudio/Documents/notion-effect-blog2/node_modules/next/dist/build/swc/options.js
+- /Users/tonychustudio/Documents/notion-effect-blog2/node_modules/next/dist/build/swc/index.js
+- /Users/tonychustudio/Documents/notion-effect-blog2/node_modules/next/dist/build/analysis/parse-module.js
+- /Users/tonychustudio/Documents/notion-effect-blog2/node_modules/next/dist/build/analysis/get-page-static-info.js
+- /Users/tonychustudio/Documents/notion-effect-blog2/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /Users/tonychustudio/Documents/notion-effect-blog2/node_modules/next/dist/server/lib/router-server.js
+- /Users/tonychustudio/Documents/notion-effect-blog2/node_modules/next/dist/server/lib/start-server.js
+    at t.f.require (.next/server/webpack-runtime.js:1:2322)
+    at <unknown> (.next/server/webpack-runtime.js:1:1793)
+    at Array.reduce (<anonymous>)
+    at t.e (.next/server/webpack-runtime.js:1:1772)
+    at Array.map (<anonymous>) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array]
+}
+ GET /api/test-page-list 500 in 127ms
+ ✓ Compiled /404 in 100ms (617 modules)
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/tonychustudio/Documents/notion-effect-blog2/.next/server/pages/_document.js'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/tonychustudio/Documents/notion-effect-blog2/.next/server/pages/_document.js'
+}
+ ✓ Compiled /_error in 34ms (617 modules)
+ GET /api/test-page-list 500 in 149ms
+[?25h

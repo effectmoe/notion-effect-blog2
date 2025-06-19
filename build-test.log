@@ -1,0 +1,24 @@
+
+> nextjs-notion-starter-kit@2.0.0 build
+> next build && npm run build:sw
+
+ ⚠ You are using a non-standard "NODE_ENV" value in your environment. This creates inconsistencies in the project and is strongly advised against. Read more: https://nextjs.org/docs/messages/non-standard-node-env
+   ▲ Next.js 15.3.3
+   - Environments: .env.local, .env
+
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./lib/notion-enhanced-fetch.ts:61:45
+Type error: Property 'collection_pointer' does not exist on type '{ table_wrap: boolean; table_properties: { property: string; visible: boolean; width: number; }[]; } | { list_properties: { property: string; visible: boolean; }[]; }'.
+  Property 'collection_pointer' does not exist on type '{ table_wrap: boolean; table_properties: { property: string; visible: boolean; width: number; }[]; }'.
+
+[0m [90m 59 |[39m           [0m
+[0m [90m 60 |[39m           [90m// リンクされたデータベースの場合、view自体のcollection_pointerも確認[39m[0m
+[0m[31m[1m>[22m[39m[90m 61 |[39m           [36mif[39m ([33m![39mcollectionId [33m&&[39m view[33m.[39mformat[33m?[39m[33m.[39mcollection_pointer[33m?[39m[33m.[39mid) {[0m
+[0m [90m    |[39m                                             [31m[1m^[22m[39m[0m
+[0m [90m 62 |[39m             collectionId [33m=[39m view[33m.[39mformat[33m.[39mcollection_pointer[33m.[39mid[0m
+[0m [90m 63 |[39m             console[33m.[39mlog([32m`[enhanceCollectionViews] Found collection_id in view format: ${collectionId}`[39m)[0m
+[0m [90m 64 |[39m           }[0m
+Next.js build worker exited with code: 1 and signal: null

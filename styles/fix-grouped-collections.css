@@ -1,0 +1,83 @@
+/* グループ化されたコレクションビューの表示を修正 */
+
+/* 全てのグループを強制表示 */
+.notion-collection-group,
+.notion-list-view-group {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  margin-bottom: 1rem !important;
+}
+
+/* グループタイトルを正しく表示 */
+.notion-collection-group-title,
+.notion-list-view-group-title {
+  display: list-item !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  list-style: none !important;
+  padding: 0.5rem 0 !important;
+  cursor: pointer !important;
+  font-weight: 600 !important;
+}
+
+/* グループタイトル内のコンテンツ */
+.notion-collection-group-title > div,
+.notion-list-view-group-title > div {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+}
+
+/* グループ内のコレクション */
+.notion-collection-group .notion-list-collection,
+.notion-list-view-group .notion-list-collection {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  padding-left: 1.5rem !important;
+}
+
+/* リストアイテム */
+.notion-list-item {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* コレクションビュー全体 */
+.notion-collection-view {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* リストビュー */
+.notion-list-view {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* ビュータイプ */
+.notion-collection-view-type-list {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* ギャラリービューでグループ化されている場合の対策 */
+.notion-gallery-view + .notion-collection-group,
+.notion-gallery-view + .notion-list-view-group {
+  display: block !important;
+}
+
+/* react-notion-xが隠す可能性のある要素を強制表示 */
+[style*="display: none"] .notion-collection-group,
+[style*="display: none"] .notion-list-view-group,
+[style*="visibility: hidden"] .notion-collection-group,
+[style*="visibility: hidden"] .notion-list-view-group {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
