@@ -1,32 +1,15 @@
-import { NotionPage } from '@/components/NotionPage'
-import { domain } from '@/lib/config'
-import { resolveNotionPage } from '@/lib/resolve-notion-page'
-import { getMenuItems } from '@/lib/menu-utils'
-
-export const getStaticProps = async () => {
-  try {
-    const props = await resolveNotionPage(domain)
-    
-    // NotionデータベースからMenuがtrueの項目を取得
-    const menuItems = await getMenuItems()
-    
-    // propsにmenuItemsを追加
-    return { 
-      props: {
-        ...props,
-        menuItems
-      }, 
-      revalidate: 10 
-    }
-  } catch (err) {
-    console.error('page error', domain, err)
-
-    // we don't want to publish the error version of this page, so
-    // let next.js know explicitly that incremental SSG failed
-    throw err
-  }
-}
-
-export default function NotionDomainPage(props) {
-  return <NotionPage {...props} />
+export default function Home() {
+  return (
+    <div style={{ padding: '40px', fontFamily: 'sans-serif' }}>
+      <h1>CafeKinesi</h1>
+      <p>サイトは正常に動作しています。</p>
+      <div style={{ marginTop: '40px' }}>
+        <h2>コンテンツ</h2>
+        <ul>
+          <li><a href="/212b802c-b0c6-80ea-b7ed-ef4459f38819">FAQマスター</a></li>
+          <li><a href="/212b802c-b0c6-8019-948d-fb893e963bc2">カフェキネシコンテンツ</a></li>
+        </ul>
+      </div>
+    </div>
+  )
 }

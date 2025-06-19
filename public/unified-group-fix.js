@@ -70,6 +70,7 @@
         }
       }
       
+
       // 6. FAQマスターとカフェキネシコンテンツの特別処理
       const normalizedBlockId = blockId.replace(/-/g, '');
       const targetDatabases = {
@@ -79,6 +80,7 @@
       
       if (targetDatabases[normalizedBlockId]) {
         console.log(`  🎯 ${targetDatabases[normalizedBlockId]} detected, applying special handling`);
+
         
         // ビューが空の場合、recordMapからデータを再構築
         if (!view.querySelector('.notion-list-item') && window.recordMap) {

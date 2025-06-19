@@ -27,7 +27,7 @@ type HeaderProps = {
 export function HeaderImpl({ menuItems = DEFAULT_MENU_ITEMS }: HeaderProps) {
   // menuItemsがundefinedの場合はDEFAULT_MENU_ITEMSを使用する
   const items = menuItems?.length ? menuItems : DEFAULT_MENU_ITEMS;
-  const router = useRouter()
+  const router = typeof window !== 'undefined' ? useRouter() : null
   const [menuOpen, setMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [isSearchVisible, setIsSearchVisible] = useState(false)
@@ -98,10 +98,10 @@ export function HeaderImpl({ menuItems = DEFAULT_MENU_ITEMS }: HeaderProps) {
 
   // 現在のページに基づいてアクティブなメニュー項目を判断
   const isActive = (url: string) => {
-    if (url === '/' && router.pathname === '/') {
+    if (url === '/' && router?.pathname === '/') {
       return true
     }
-    return router.pathname.startsWith(url) && url !== '/'
+    return router?.pathname?.startsWith(url) && url !== '/'
   }
 
   // メニューの開閉を切り替える
@@ -191,7 +191,7 @@ export function HeaderImpl({ menuItems = DEFAULT_MENU_ITEMS }: HeaderProps) {
           )}
 
           {/* ハンバーガーメニューボタン（常に表示） */}
-          <HamburgerMenu menuItems={items} currentPath={router.pathname} />
+          <HamburgerMenu menuItems={items} currentPath={router?.pathname || '/'} />
         </div>
       </div>
 

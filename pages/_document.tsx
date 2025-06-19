@@ -119,6 +119,29 @@ export default class MyDocument extends Document {
                   document.body.appendChild(script3);
                 }, 1500);
                 
+                // 統合データベース修正スクリプト v2（構文エラー修正版）
+                setTimeout(function() {
+                  const unifiedScript = document.createElement('script');
+                  unifiedScript.src = '/unified-database-fix-v2.js';
+                  document.body.appendChild(unifiedScript);
+                }, 500);
+                
+                // 強制グループレンダリング
+                setTimeout(function() {
+                  const forceGroupScript = document.createElement('script');
+                  forceGroupScript.src = '/force-group-rendering.js';
+                  document.body.appendChild(forceGroupScript);
+                }, 1500);
+                
+                // Unified group fix - 都道府県DBの成功要因を全DBに適用
+                setTimeout(function() {
+                  const unifiedFixScript = document.createElement('script');
+                  unifiedFixScript.src = '/unified-group-fix.js';
+                  document.body.appendChild(unifiedFixScript);
+                }, 1000);
+                
+                // 以下の個別スクリプトは統合スクリプトに含まれているため無効化
+                /*
                 // Comprehensive database rendering fix
                 setTimeout(function() {
                   const fixDbScript = document.createElement('script');
@@ -148,11 +171,13 @@ export default class MyDocument extends Document {
                   document.body.appendChild(universalGroupFixScript);
                 }, 1000); // タイミングを少し遅らせる
                 
+
                 // 既存のグループ化関連スクリプトは汎用スクリプトに統合済み
                 // - unified-group-fix.js → 統合済み
                 // - ensure-group-rendering.js → 統合済み
                 // - fix-faq-master-final.js → 統合済み
                 // - client-side-grouping.js → 統合済み
+
                 
                 // 都道府県データベースの分析（開発環境のみ）
                 if (window.location.hostname === 'localhost') {
@@ -205,6 +230,13 @@ export default class MyDocument extends Document {
                     groupedListDebug.src = '/debug-grouped-lists.js';
                     document.body.appendChild(groupedListDebug);
                   }, 3000);
+                  
+                  // FAQマスター Block ID Debugger
+                  setTimeout(function() {
+                    const faqIdDebug = document.createElement('script');
+                    faqIdDebug.src = '/debug-faq-master-id.js';
+                    document.body.appendChild(faqIdDebug);
+                  }, 3500);
                 }
                 
               });

@@ -1,6 +1,5 @@
 import React from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/router'
 
 // Custom PageLink component to fix hydration error caused by div-in-anchor nesting
 export const CustomPageLink: React.FC<{
@@ -8,8 +7,6 @@ export const CustomPageLink: React.FC<{
   className?: string
   children: React.ReactNode
 }> = ({ href, className, children }) => {
-  const router = useRouter()
-  
   // Handle click programmatically to avoid div-in-anchor issue
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -18,7 +15,8 @@ export const CustomPageLink: React.FC<{
     if (href.startsWith('http://') || href.startsWith('https://')) {
       window.open(href, '_blank', 'noopener,noreferrer')
     } else {
-      router.push(href)
+      // Use window.location for navigation to avoid router issues during SSG
+      window.location.href = href
     }
   }
   

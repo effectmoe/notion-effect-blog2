@@ -38,6 +38,7 @@ export async function handleCollectionWithHybridAPI(
     }
   }
   
+
   // FAQマスターとカフェキネシコンテンツの特別処理
   const isTargetDatabase = (
     blockId === '215b802c-b0c6-804a-8858-d72d4df6f128' || 
@@ -48,6 +49,9 @@ export async function handleCollectionWithHybridAPI(
   
   if (isTargetDatabase) {
     console.log(`[HybridCollectionHandler] Grouped database detected, using official API`)
+
+
+
     
     try {
       // グループ化プロパティを決定

@@ -14,7 +14,7 @@ interface SearchModalProps {
 }
 
 export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
-  const router = useRouter()
+  const router = typeof window !== 'undefined' ? useRouter() : null
   const searchInputRef = useRef<HTMLInputElement>(null)
   
   const [query, setQuery] = useState('')
@@ -140,7 +140,11 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => 
   
   // 検索結果のクリック処理
   const handleResultClick = (result: SearchResult) => {
-    router.push(result.url)
+    if (router) {
+      router.push(result.url)
+    } else {
+      window.location.href = result.url
+    }
     onClose()
     
     // 検索履歴に追加（ローカルストレージ）

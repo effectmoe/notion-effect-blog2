@@ -19,11 +19,12 @@ import { findMissingBlocks } from './fetch-missing-blocks'
 import { CachedNotionAPI } from './cache'
 import { enhanceCollectionViews } from './notion-enhanced-fetch'
 import { handleCollectionWithHybridAPI } from './hybrid-collection-handler'
+import { generateGroupedHTML, injectGroupedHTML } from './server-side-group-renderer'
 
 // キャッシュ付きAPIインスタンスを作成
 const cachedNotion = new CachedNotionAPI({
   authToken: process.env.NOTION_TOKEN,
-  defaultTTL: 3600 // 1時間
+  defaultTTL: 1800 // 30分に統一
 })
 
 const getNavigationLinkPages = pMemoize(
@@ -43,7 +44,7 @@ const getNavigationLinkPages = pMemoize(
             signFileUrls: false
           }),
         {
-          concurrency: 4
+          concurrency: 2 // Reduced from 4 to avoid rate limiting
         }
       )
     }
@@ -112,7 +113,7 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
             return null
           }
         },
-        { concurrency: 3 }
+        { concurrency: 1 } // Reduced from 3 to avoid rate limiting
       )
       
       // Merge all fetched data
@@ -158,6 +159,7 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
   // Enhance collection views with group_by data for FAQ Master
   recordMap = await enhanceCollectionViews(recordMap, notion)
   
+
   // グループ化されたコレクションのcollection_queryデータを手動で生成
   if (recordMap.collection_view) {
     // FAQマスターの処理
@@ -195,7 +197,9 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
           blockIds: [],
           total: 0
         }
+
       } as any
+
       
       // FAQマスターのアイテムを各グループに振り分け
       Object.entries(recordMap.block).forEach(([blockId, blockData]) => {
@@ -211,12 +215,15 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
           
           const groupKey = categoryValue === 'uncategorized' ? 'results:uncategorized' : `results:select:${categoryValue}`
           
+
           if ((recordMap.collection_query[faqCollectionId][faqViewId] as any)[groupKey]) {
             (recordMap.collection_query[faqCollectionId][faqViewId] as any)[groupKey].blockIds.push(blockId);
             (recordMap.collection_query[faqCollectionId][faqViewId] as any)[groupKey].total++
           } else {
             // グループが存在しない場合は新規作成
             (recordMap.collection_query[faqCollectionId][faqViewId] as any)[groupKey] = {
+
+
               type: 'results',
               blockIds: [blockId],
               total: 1
@@ -273,7 +280,9 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
           blockIds: [],
           total: 0
         }
+
       } as any
+
       
       // コレクション内のアイテムを各グループに振り分け
       const collection = recordMap.collection?.[cafeCollectionId]
@@ -292,12 +301,14 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
             
             const groupKey = tagValue === 'uncategorized' ? 'results:uncategorized' : `results:multi_select:${tagValue}`
             
+
             if ((recordMap.collection_query[cafeCollectionId][cafeViewId] as any)[groupKey]) {
               (recordMap.collection_query[cafeCollectionId][cafeViewId] as any)[groupKey].blockIds.push(blockId);
               (recordMap.collection_query[cafeCollectionId][cafeViewId] as any)[groupKey].total++
             } else {
               // グループが存在しない場合は新規作成
               (recordMap.collection_query[cafeCollectionId][cafeViewId] as any)[groupKey] = {
+
                 type: 'results',
                 blockIds: [blockId],
                 total: 1
@@ -321,6 +332,7 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
   } catch (error) {
     console.error('[getPage] Error processing FAQ Master with hybrid API:', error)
     // エラーが発生しても処理を継続
+
   }
 
   return recordMap

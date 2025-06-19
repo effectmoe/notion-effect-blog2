@@ -2,6 +2,11 @@ import { useEffect, useState } from 'react';
 import { PageHead } from '@/components/PageHead';
 import styles from './cache-monitor.module.css';
 
+// Disable static generation for this page
+export const getServerSideProps = () => {
+  return { props: {} }
+}
+
 interface CacheStats {
   timestamp: string;
   environment: string;

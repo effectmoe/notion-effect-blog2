@@ -5,8 +5,13 @@ import { PageHead } from '@/components/PageHead';
 import { Footer } from '@/components/Footer';
 import styles from '@/components/styles.module.css';
 
+// Disable static generation for this page
+export const getServerSideProps = () => {
+  return { props: {} }
+}
+
 export default function AdminPage() {
-  const router = useRouter();
+  const router = typeof window !== 'undefined' ? useRouter() : null;
   const [isAuthenticated, setIsAuthenticated] = React.useState(false);
   const [password, setPassword] = React.useState('');
   const [error, setError] = React.useState('');
@@ -38,7 +43,11 @@ export default function AdminPage() {
   const handleLogout = () => {
     setIsAuthenticated(false);
     sessionStorage.removeItem('adminAuth');
-    router.push('/');
+    if (router) {
+      router.push('/');
+    } else {
+      window.location.href = '/';
+    }
   };
 
   // ヘルプセクションのコンポーネント
