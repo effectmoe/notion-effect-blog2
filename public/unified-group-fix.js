@@ -70,21 +70,26 @@
         }
       }
       
-      // 6. FAQマスター特別処理
-      if (blockId === '212b802cb0c680b3b04afec4203ee8d7' || 
-          blockId === '212b802c-b0c6-80b3-b04a-fec4203ee8d7') {
-        console.log('  🎯 FAQ Master detected, applying special handling');
+      // 6. FAQマスターとカフェキネシコンテンツの特別処理
+      const normalizedBlockId = blockId.replace(/-/g, '');
+      const targetDatabases = {
+        '215b802cb0c6804a8858d72d4df6f128': 'FAQマスター',
+        '216b802cb0c6808fac1ddbf03d973fec': 'カフェキネシコンテンツ２'
+      };
+      
+      if (targetDatabases[normalizedBlockId]) {
+        console.log(`  🎯 ${targetDatabases[normalizedBlockId]} detected, applying special handling`);
         
         // ビューが空の場合、recordMapからデータを再構築
         if (!view.querySelector('.notion-list-item') && window.recordMap) {
-          reconstructFAQMaster(view, blockId);
+          reconstructDatabase(view, blockId, targetDatabases[normalizedBlockId]);
         }
       }
     });
   }
   
-  // FAQマスターを再構築
-  function reconstructFAQMaster(viewElement, blockId) {
+  // データベースを再構築
+  function reconstructDatabase(viewElement, blockId, dbName) {
     if (!window.recordMap) return;
     
     const cleanBlockId = blockId.replace(/-/g, '');
@@ -93,7 +98,7 @@
     
     if (!block || !block.collection_id) return;
     
-    console.log('  🔨 Reconstructing FAQ Master from recordMap');
+    console.log(`  🔨 Reconstructing ${dbName} from recordMap`);
     
     // コレクションデータを探す
     const collection = window.recordMap.collection[block.collection_id]?.value;
@@ -113,22 +118,31 @@
     
     console.log(`  📝 Found ${pages.length} FAQ items`);
     
-    // カテゴリでグループ化
+    // グループ化プロパティを決定
+    let groupPropertyId = 'oa:|'; // FAQマスターのデフォルト
+    let groupPropertyName = 'カテゴリ';
+    
+    if (dbName === 'カフェキネシコンテンツ２') {
+      groupPropertyId = 'status';
+      groupPropertyName = 'Status';
+    }
+    
+    // プロパティでグループ化
     const groups = {};
     pages.forEach(page => {
       const properties = page.properties || {};
-      let category = 'その他';
+      let groupValue = 'その他';
       
-      // カテゴリプロパティを探す
+      // グループ化プロパティを探す
       for (const [propId, propValue] of Object.entries(properties)) {
-        if (propValue?.[0]?.[0] === 'カテゴリ' || propId === 'oa:|') {
-          category = propValue?.[0]?.[0] || 'その他';
+        if (propValue?.[0]?.[0] === groupPropertyName || propId === groupPropertyId) {
+          groupValue = propValue?.[0]?.[0] || 'その他';
           break;
         }
       }
       
-      if (!groups[category]) groups[category] = [];
-      groups[category].push(page);
+      if (!groups[groupValue]) groups[groupValue] = [];
+      groups[groupValue].push(page);
     });
     
     // DOMを構築
@@ -185,7 +199,7 @@
     viewElement.innerHTML = '';
     viewElement.appendChild(container);
     
-    console.log('  ✅ FAQ Master reconstructed successfully');
+    console.log(`  ✅ ${dbName} reconstructed successfully`);
   }
   
   // 実行タイミングの最適化
@@ -193,7 +207,8 @@
     fixAllGroupedDatabases();
     
     // 複数回実行して、遅延読み込みされるコンテンツもキャッチ
-    const timings = [500, 1000, 2000, 3000, 5000];
+    // 100msを追加してより早い段階でも実行
+    const timings = [100, 500, 1000, 2000, 3000];
     timings.forEach(delay => {
       setTimeout(fixAllGroupedDatabases, delay);
     });

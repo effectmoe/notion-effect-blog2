@@ -9,6 +9,11 @@
   
   console.log('[Universal Group Fix v2] 初期化開始...');
   
+  // デバッグ用：スクリプトが読み込まれたことを確認
+  if (typeof window !== 'undefined') {
+    window.__universalGroupFixV2Loaded = true;
+  }
+  
   // グローバル設定
   const CONFIG = {
     maxAttempts: 30,

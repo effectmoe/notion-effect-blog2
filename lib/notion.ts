@@ -158,15 +158,170 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
   // Enhance collection views with group_by data for FAQ Master
   recordMap = await enhanceCollectionViews(recordMap, notion)
   
-  // FAQマスターの特別処理 - ハイブリッドAPIを使用
-  // 一時的に無効化 - データベース表示の問題を修正するため
-  /*
-  const faqMasterBlockId = '212b802c-b0c6-80b3-b04a-fec4203ee8d7'
-  if (recordMap.block[faqMasterBlockId]) {
-    console.log('[getPage] Processing FAQ Master with hybrid API')
-    recordMap = await handleCollectionWithHybridAPI(faqMasterBlockId, recordMap)
+  // グループ化されたコレクションのcollection_queryデータを手動で生成
+  if (recordMap.collection_view) {
+    // FAQマスターの処理
+    const faqViewId = '215b802c-b0c6-8041-84fe-c3dcce036acf'
+    const faqCollectionId = '212b802c-b0c6-8014-9263-000b71bd252e'
+    
+    if (recordMap.collection_view[faqViewId]) {
+      // FAQマスター用のcollection_queryデータを作成
+      if (!recordMap.collection_query) recordMap.collection_query = {}
+      if (!recordMap.collection_query[faqCollectionId]) recordMap.collection_query[faqCollectionId] = {}
+      
+      recordMap.collection_query[faqCollectionId][faqViewId] = {
+        'results:select:ユーザー管理': {
+          type: 'results',
+          blockIds: [],
+          total: 0
+        },
+        'results:select:API': {
+          type: 'results',
+          blockIds: [],
+          total: 0
+        },
+        'results:select:トラブルシューティング': {
+          type: 'results',
+          blockIds: [],
+          total: 0
+        },
+        'results:select:その他': {
+          type: 'results',
+          blockIds: [],
+          total: 0
+        },
+        'results:uncategorized': {
+          type: 'results',
+          blockIds: [],
+          total: 0
+        }
+      }
+      
+      // FAQマスターのアイテムを各グループに振り分け
+      Object.entries(recordMap.block).forEach(([blockId, blockData]) => {
+        const block = blockData?.value
+        if ((block as any)?.parent_id === faqCollectionId && (block as any)?.parent_table === 'collection') {
+          // oa:|プロパティ（カテゴリ）から値を取得
+          const category = (block as any)?.properties?.['oa:|']
+          let categoryValue = 'uncategorized'
+          
+          if (category && category[0] && category[0][0]) {
+            categoryValue = category[0][0]
+          }
+          
+          const groupKey = categoryValue === 'uncategorized' ? 'results:uncategorized' : `results:select:${categoryValue}`
+          
+          if (recordMap.collection_query[faqCollectionId][faqViewId][groupKey]) {
+            recordMap.collection_query[faqCollectionId][faqViewId][groupKey].blockIds.push(blockId)
+            recordMap.collection_query[faqCollectionId][faqViewId][groupKey].total++
+          } else {
+            // グループが存在しない場合は新規作成
+            recordMap.collection_query[faqCollectionId][faqViewId][groupKey] = {
+              type: 'results',
+              blockIds: [blockId],
+              total: 1
+            }
+          }
+        }
+      })
+      
+      console.log('[getPage] Generated collection_query for FAQマスター')
+    }
+    
+    // カフェキネシコンテンツ２の処理
+    const cafeViewId = '216b802c-b0c6-8175-9f84-000c46171b61'
+    const cafeCollectionId = '216b802c-b0c6-81c0-a940-000b2f6a23b3'
+    
+    if (recordMap.collection_view[cafeViewId]) {
+      // ダミーのcollection_queryデータを作成（タグベースのグループ）
+      if (!recordMap.collection_query) recordMap.collection_query = {}
+      if (!recordMap.collection_query[cafeCollectionId]) recordMap.collection_query[cafeCollectionId] = {}
+      
+      recordMap.collection_query[cafeCollectionId][cafeViewId] = {
+        'results:multi_select:インストラクター': {
+          type: 'results',
+          blockIds: [],
+          total: 0
+        },
+        'results:multi_select:ショッピング': {
+          type: 'results',
+          blockIds: [],
+          total: 0
+        },
+        'results:multi_select:ブログ': {
+          type: 'results',
+          blockIds: [],
+          total: 0
+        },
+        'results:multi_select:代表者': {
+          type: 'results',
+          blockIds: [],
+          total: 0
+        },
+        'results:multi_select:会員ページ': {
+          type: 'results',
+          blockIds: [],
+          total: 0
+        },
+        'results:multi_select:講座': {
+          type: 'results',
+          blockIds: [],
+          total: 0
+        },
+        'results:uncategorized': {
+          type: 'results',
+          blockIds: [],
+          total: 0
+        }
+      }
+      
+      // コレクション内のアイテムを各グループに振り分け
+      const collection = recordMap.collection?.[cafeCollectionId]
+      if (collection) {
+        Object.entries(recordMap.block).forEach(([blockId, blockData]) => {
+          const block = blockData?.value
+          if ((block as any)?.parent_id === cafeCollectionId && (block as any)?.parent_table === 'collection') {
+            // xaH>プロパティ（Tags）から値を取得
+            const tags = (block as any)?.properties?.['xaH>']
+            let tagValue = 'uncategorized'
+            
+            // Tagsプロパティの値を取得（multi_selectなので最初のタグを使用）
+            if (tags && tags[0] && tags[0][0]) {
+              tagValue = tags[0][0]
+            }
+            
+            const groupKey = tagValue === 'uncategorized' ? 'results:uncategorized' : `results:multi_select:${tagValue}`
+            
+            if (recordMap.collection_query[cafeCollectionId][cafeViewId][groupKey]) {
+              recordMap.collection_query[cafeCollectionId][cafeViewId][groupKey].blockIds.push(blockId)
+              recordMap.collection_query[cafeCollectionId][cafeViewId][groupKey].total++
+            } else {
+              // グループが存在しない場合は新規作成
+              recordMap.collection_query[cafeCollectionId][cafeViewId][groupKey] = {
+                type: 'results',
+                blockIds: [blockId],
+                total: 1
+              }
+            }
+          }
+        })
+      }
+      
+      console.log('[getPage] Generated collection_query for カフェキネシコンテンツ２')
+    }
   }
-  */
+  
+  // FAQマスターの特別処理 - ハイブリッドAPIを使用
+  try {
+    const faqMasterBlockId = '215b802c-b0c6-804a-8858-d72d4df6f128'
+    if (recordMap.block[faqMasterBlockId]) {
+      console.log('[getPage] Processing FAQ Master with hybrid API')
+      recordMap = await handleCollectionWithHybridAPI(faqMasterBlockId, recordMap)
+    }
+  } catch (error) {
+    console.error('[getPage] Error processing FAQ Master with hybrid API:', error)
+    // エラーが発生しても処理を継続
+  }
 
   return recordMap
   } catch (error: any) {

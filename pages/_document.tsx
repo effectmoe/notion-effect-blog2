@@ -112,12 +112,18 @@ export default class MyDocument extends Document {
                 // 汎用グループ化修正スクリプト v2
                 // すべてのグループ化されたデータベースに自動対応
                 // ========================================
+                // 汎用グループ化修正スクリプト
                 setTimeout(function() {
                   const universalGroupFixScript = document.createElement('script');
                   universalGroupFixScript.src = '/universal-group-fix-v2.js';
-                  universalGroupFixScript.defer = true;
+                  universalGroupFixScript.onload = function() {
+                    console.log('[Document] Universal Group Fix v2 スクリプト読み込み完了');
+                  };
+                  universalGroupFixScript.onerror = function() {
+                    console.error('[Document] Universal Group Fix v2 スクリプトの読み込みに失敗');
+                  };
                   document.body.appendChild(universalGroupFixScript);
-                }, 600);
+                }, 1000); // タイミングを少し遅らせる
                 
                 // 既存のグループ化関連スクリプトは汎用スクリプトに統合済み
                 // - unified-group-fix.js → 統合済み
