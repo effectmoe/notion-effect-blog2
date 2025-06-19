@@ -59,14 +59,23 @@ export class EnhancedNotionAPI extends NotionAPI {
                 }
                 
                 // IMPORTANT: Also merge collection_query data
-                if (collectionData?.result?.reducerResults) {
+                if (collectionData?.result) {
                   if (!recordMap.collection_query) {
                     recordMap.collection_query = {}
                   }
                   if (!recordMap.collection_query[collectionId]) {
                     recordMap.collection_query[collectionId] = {}
                   }
-                  recordMap.collection_query[collectionId][viewId] = collectionData.result.reducerResults
+                  // Ensure the result has the correct structure for CollectionQueryResult
+                  const queryResult = {
+                    type: collectionData.result.type || 'results',
+                    total: collectionData.result.total || 0,
+                    blockIds: collectionData.result.blockIds || [],
+                    aggregationResults: collectionData.result.aggregationResults || [],
+                    // Keep any additional properties like reducerResults
+                    ...(collectionData.result.reducerResults && { reducerResults: collectionData.result.reducerResults })
+                  }
+                  recordMap.collection_query[collectionId][viewId] = queryResult as any
                   console.log(`Added collection_query data for ${collectionId}/${viewId}`)
                 }
               } catch (error) {

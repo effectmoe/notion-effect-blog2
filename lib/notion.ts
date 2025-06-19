@@ -195,7 +195,7 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
           blockIds: [],
           total: 0
         }
-      }
+      } as any
       
       // FAQマスターのアイテムを各グループに振り分け
       Object.entries(recordMap.block).forEach(([blockId, blockData]) => {
@@ -211,12 +211,12 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
           
           const groupKey = categoryValue === 'uncategorized' ? 'results:uncategorized' : `results:select:${categoryValue}`
           
-          if (recordMap.collection_query[faqCollectionId][faqViewId][groupKey]) {
-            recordMap.collection_query[faqCollectionId][faqViewId][groupKey].blockIds.push(blockId)
-            recordMap.collection_query[faqCollectionId][faqViewId][groupKey].total++
+          if ((recordMap.collection_query[faqCollectionId][faqViewId] as any)[groupKey]) {
+            (recordMap.collection_query[faqCollectionId][faqViewId] as any)[groupKey].blockIds.push(blockId);
+            (recordMap.collection_query[faqCollectionId][faqViewId] as any)[groupKey].total++
           } else {
             // グループが存在しない場合は新規作成
-            recordMap.collection_query[faqCollectionId][faqViewId][groupKey] = {
+            (recordMap.collection_query[faqCollectionId][faqViewId] as any)[groupKey] = {
               type: 'results',
               blockIds: [blockId],
               total: 1
@@ -273,7 +273,7 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
           blockIds: [],
           total: 0
         }
-      }
+      } as any
       
       // コレクション内のアイテムを各グループに振り分け
       const collection = recordMap.collection?.[cafeCollectionId]
@@ -292,12 +292,12 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
             
             const groupKey = tagValue === 'uncategorized' ? 'results:uncategorized' : `results:multi_select:${tagValue}`
             
-            if (recordMap.collection_query[cafeCollectionId][cafeViewId][groupKey]) {
-              recordMap.collection_query[cafeCollectionId][cafeViewId][groupKey].blockIds.push(blockId)
-              recordMap.collection_query[cafeCollectionId][cafeViewId][groupKey].total++
+            if ((recordMap.collection_query[cafeCollectionId][cafeViewId] as any)[groupKey]) {
+              (recordMap.collection_query[cafeCollectionId][cafeViewId] as any)[groupKey].blockIds.push(blockId);
+              (recordMap.collection_query[cafeCollectionId][cafeViewId] as any)[groupKey].total++
             } else {
               // グループが存在しない場合は新規作成
-              recordMap.collection_query[cafeCollectionId][cafeViewId][groupKey] = {
+              (recordMap.collection_query[cafeCollectionId][cafeViewId] as any)[groupKey] = {
                 type: 'results',
                 blockIds: [blockId],
                 total: 1
