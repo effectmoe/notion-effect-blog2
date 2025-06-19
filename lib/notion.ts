@@ -170,10 +170,6 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
       if (!recordMap.collection_query[faqCollectionId]) recordMap.collection_query[faqCollectionId] = {}
       
       recordMap.collection_query[faqCollectionId][faqViewId] = {
-        type: 'table',
-        total: 0,
-        blockIds: [],
-        aggregationResults: [],
         'results:select:ユーザー管理': {
           type: 'results',
           blockIds: [],
@@ -199,7 +195,7 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
           blockIds: [],
           total: 0
         }
-      } as any
+      }
       
       // FAQマスターのアイテムを各グループに振り分け
       Object.entries(recordMap.block).forEach(([blockId, blockData]) => {
@@ -242,10 +238,6 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
       if (!recordMap.collection_query[cafeCollectionId]) recordMap.collection_query[cafeCollectionId] = {}
       
       recordMap.collection_query[cafeCollectionId][cafeViewId] = {
-        type: 'table',
-        total: 0,
-        blockIds: [],
-        aggregationResults: [],
         'results:multi_select:インストラクター': {
           type: 'results',
           blockIds: [],
@@ -281,7 +273,7 @@ export async function getPage(pageId: string): Promise<ExtendedRecordMap> {
           blockIds: [],
           total: 0
         }
-      } as any
+      }
       
       // コレクション内のアイテムを各グループに振り分け
       const collection = recordMap.collection?.[cafeCollectionId]
