@@ -52,8 +52,31 @@ export default class MyDocument extends Document {
               }
             ` }} />
             
-            {/* グループ化コレクション修正CSS */}
-            <link rel='stylesheet' href='/styles/fix-grouped-collections.css' />
+            {/* グループ化コレクション修正CSS - インラインで追加 */}
+            <style dangerouslySetInnerHTML={{ __html: `
+              /* グループ要素の強制表示 */
+              .notion-collection-group,
+              .notion-list-view-group {
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+              }
+              
+              .notion-collection-group-title {
+                cursor: pointer;
+                user-select: none;
+              }
+              
+              .notion-collection-group-title:hover {
+                background-color: var(--bg-color-1, rgba(0, 0, 0, 0.03));
+              }
+              
+              [style*="display: none"] .notion-collection-group {
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+              }
+            ` }} />
           </Head>
 
           <body>
